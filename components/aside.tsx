@@ -17,7 +17,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./logo";
 
-function NavLink({ href, icon: Icon, label }) {
+interface NavLinkProps {
+  href: string;
+  icon?: React.ComponentType<{ className?: string; stroke?: number }>;
+  label: string;
+}
+
+function NavLink({ href, icon: Icon, label }: NavLinkProps) {
   const pathname = usePathname();
 
   return (
