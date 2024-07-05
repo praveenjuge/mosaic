@@ -8,6 +8,7 @@ function Logo() {
         height="20"
         viewBox="0 0 88 20"
         fill="none"
+        className="select-none"
         xmlns="http://www.w3.org/2000/svg"
       >
         <path
