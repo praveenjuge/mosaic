@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
-  Cog,
+  CogTwo,
   Copyright,
   FileText,
   Globe,
@@ -20,7 +20,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./logo";
 
-function NavLink({
+const NavLink = ({
   href,
   icon: Icon,
   label,
@@ -28,56 +28,58 @@ function NavLink({
   href: string;
   icon?: React.ComponentType<{ className?: string; stroke?: number }>;
   label: string;
-}) {
+}) => {
   const pathname = usePathname();
+  const isActive = pathname === href;
 
   return (
     <Link
       href={href}
       className={cn(
-        "flex items-center gap-2",
-        pathname === href ? "text-emerald-600 [&_svg]:text-emerald-600" : "",
+        "relative flex items-center gap-2 py-1",
+        isActive && "text-emerald-600 [&_svg]:text-emerald-600",
       )}
     >
+      {isActive && (
+        <span className="absolute -left-4 h-full w-1 rounded-r-full bg-emerald-600"></span>
+      )}
       {Icon && <Icon className="size-5 text-slate-500" stroke={2} />}
       <span>{label}</span>
     </Link>
   );
-}
+};
 
-function AsideContent() {
-  return (
-    <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-6 border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
-      <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <Logo />
-          <SignedIn>
-            <div className="size-6 shrink-0 rounded-full bg-slate-200 [&_.cl-avatarBox]:size-6 [&_button]:size-6">
-              <UserButton />
-            </div>
-          </SignedIn>
-        </div>
-        <nav className="flex flex-col gap-4">
-          <NavLink href="/" icon={Home} label="Home" />
-          <NavLink href="/websites" icon={Globe} label="Websites" />
-          <NavLink href="/analytics" icon={Lightning} label="Analytics" />
-          <NavLink
-            href="/subscription"
-            icon={ShootingStar}
-            label="Subscription"
-          />
-          <NavLink href="/settings" icon={Cog} label="Settings" />
-        </nav>
+const AsideContent = () => (
+  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-6 border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <Logo />
+        <SignedIn>
+          <div className="size-6 shrink-0 rounded-full bg-slate-200 [&_.cl-avatarBox]:size-6 [&_button]:size-6">
+            <UserButton />
+          </div>
+        </SignedIn>
       </div>
-      <nav className="flex flex-col gap-4">
-        <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
-        <NavLink href="/resources" icon={FileText} label="Resources" />
-        <NavLink href="/help" icon={Support} label="Help & Support" />
-        <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
+      <nav className="flex flex-col gap-2">
+        <NavLink href="/" icon={Home} label="Home" />
+        <NavLink href="/websites" icon={Globe} label="Websites" />
+        <NavLink href="/analytics" icon={Lightning} label="Analytics" />
+        <NavLink
+          href="/subscription"
+          icon={ShootingStar}
+          label="Subscription"
+        />
+        <NavLink href="/settings" icon={CogTwo} label="Settings" />
       </nav>
-    </aside>
-  );
-}
+    </div>
+    <nav className="flex flex-col gap-2">
+      <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
+      <NavLink href="/resources" icon={FileText} label="Resources" />
+      <NavLink href="/help" icon={Support} label="Help & Support" />
+      <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
+    </nav>
+  </aside>
+);
 
 export default function Aside() {
   return (
@@ -85,7 +87,6 @@ export default function Aside() {
       <div className="hidden md:block">
         <AsideContent />
       </div>
-
       <Sheet>
         <SheetTrigger asChild>
           <Button
