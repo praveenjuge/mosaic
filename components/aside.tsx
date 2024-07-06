@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
@@ -10,6 +12,7 @@ import {
   Home,
   Lightning,
   ListCheck,
+  Menu,
   ShootingStar,
   Support,
 } from "@mynaui/icons-react";
@@ -17,13 +20,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import Logo from "./logo";
 
-interface NavLinkProps {
+function NavLink({
+  href,
+  icon: Icon,
+  label,
+}: {
   href: string;
   icon?: React.ComponentType<{ className?: string; stroke?: number }>;
   label: string;
-}
-
-function NavLink({ href, icon: Icon, label }: NavLinkProps) {
+}) {
   const pathname = usePathname();
 
   return (
@@ -40,9 +45,9 @@ function NavLink({ href, icon: Icon, label }: NavLinkProps) {
   );
 }
 
-export default function Aside() {
+function AsideContent() {
   return (
-    <aside className="flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-6 border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
+    <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-6 border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between">
           <Logo />
@@ -52,7 +57,7 @@ export default function Aside() {
             </div>
           </SignedIn>
         </div>
-        <nav className="flex flex-col gap-3">
+        <nav className="flex flex-col gap-4">
           <NavLink href="/" icon={Home} label="Home" />
           <NavLink href="/websites" icon={Globe} label="Websites" />
           <NavLink href="/analytics" icon={Lightning} label="Analytics" />
@@ -64,12 +69,38 @@ export default function Aside() {
           <NavLink href="/settings" icon={Cog} label="Settings" />
         </nav>
       </div>
-      <nav className="flex flex-col gap-3">
+      <nav className="flex flex-col gap-4">
         <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
         <NavLink href="/resources" icon={FileText} label="Resources" />
         <NavLink href="/help" icon={Support} label="Help & Support" />
         <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
       </nav>
     </aside>
+  );
+}
+
+export default function Aside() {
+  return (
+    <>
+      <div className="hidden md:block">
+        <AsideContent />
+      </div>
+
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button
+            size="icon"
+            variant="outline"
+            className="fixed left-3 top-3 shrink-0 rounded-full md:hidden"
+          >
+            <Menu className="size-5" />
+            <span className="sr-only">Toggle navigation menu</span>
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="left" className="w-auto p-0">
+          <AsideContent />
+        </SheetContent>
+      </Sheet>
+    </>
   );
 }

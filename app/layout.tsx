@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 
-export const viewport: Viewport = { themeColor: "#000000" };
+export const viewport: Viewport = { themeColor: "#059669" };
 
 export const metadata: Metadata = {
   title: "Mosaic",
@@ -24,7 +24,9 @@ export default function RootLayout({
       >
         <body className="flex text-sm">
           <Aside />
-          <main className="flex w-full flex-col gap-6 p-6">{children}</main>
+          <main className="flex w-full flex-col gap-6 p-6 pt-16 md:pt-6">
+            {children}
+          </main>
         </body>
       </html>
     </ClerkProvider>
