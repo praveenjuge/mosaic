@@ -22,10 +22,10 @@ export default function Home() {
         <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-4 text-center">
           <Logo />
           <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tighter">
+            <h1 className="text-balance text-3xl font-semibold tracking-tighter">
               Simplify Your Open Graph Image Creation.
             </h1>
-            <p className="text-base text-slate-500">
+            <p className="text-pretty text-base text-slate-500">
               Transform your website into a stunning Open Graph image with our
               web app. Simply input your URL, and get a high-quality snapshot
               ready for social media.

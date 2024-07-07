@@ -83,7 +83,7 @@ export default function Page() {
           <CardHeader>
             <CardTitle>Success Rate</CardTitle>
             <CardDescription>
-              Visualize the trend of screenshot success rate over time.
+              Trend of screenshot success rate over time.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -121,45 +121,35 @@ export default function Page() {
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    <Link href="#" className="font-medium" prefetch={false}>
-                      example.com
-                    </Link>
+                    <Link href="#">example.com</Link>
                   </TableCell>
                   <TableCell>2,345</TableCell>
                   <TableCell>98%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    <Link href="#" className="font-medium" prefetch={false}>
-                      acme.com
-                    </Link>
+                    <Link href="#">acme.com</Link>
                   </TableCell>
                   <TableCell>1,876</TableCell>
                   <TableCell>92%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    <Link href="#" className="font-medium" prefetch={false}>
-                      widgets.com
-                    </Link>
+                    <Link href="#">widgets.com</Link>
                   </TableCell>
                   <TableCell>1,543</TableCell>
                   <TableCell>89%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    <Link href="#" className="font-medium" prefetch={false}>
-                      blog.com
-                    </Link>
+                    <Link href="#">blog.com</Link>
                   </TableCell>
                   <TableCell>1,234</TableCell>
                   <TableCell>85%</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell>
-                    <Link href="#" className="font-medium" prefetch={false}>
-                      news.com
-                    </Link>
+                    <Link href="#">news.com</Link>
                   </TableCell>
                   <TableCell>987</TableCell>
                   <TableCell>92%</TableCell>
