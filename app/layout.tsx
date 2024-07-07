@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
+    <ClerkProvider telemetry={false}>
       <html
         lang="en"
         className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
