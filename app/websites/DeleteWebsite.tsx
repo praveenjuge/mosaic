@@ -33,7 +33,7 @@ export async function DeleteWebsite({ websiteId }: { websiteId: string }) {
           <span className="sr-only">Delete Website</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Delete Website</DialogTitle>
           <DialogDescription>
@@ -41,16 +41,14 @@ export async function DeleteWebsite({ websiteId }: { websiteId: string }) {
             undone.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4">
-          <form className="grid gap-4" action={handleDelete}>
-            <Button type="submit" className="w-full" variant="destructive">
+        <div className="flex gap-4">
+          <form action={handleDelete}>
+            <Button type="submit" variant="destructive">
               Yes, Delete
             </Button>
           </form>
           <DialogTrigger asChild>
-            <Button variant="secondary" className="w-full">
-              Cancel
-            </Button>
+            <Button variant="secondary">Cancel</Button>
           </DialogTrigger>
         </div>
       </DialogContent>

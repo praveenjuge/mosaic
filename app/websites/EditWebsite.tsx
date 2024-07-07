@@ -45,7 +45,7 @@ export async function EditWebsite({
           <span className="sr-only">Edit Website</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Website</DialogTitle>
           <DialogDescription>

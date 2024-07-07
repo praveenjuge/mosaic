@@ -20,9 +20,9 @@ export default function RootLayout({
     <ClerkProvider telemetry={false}>
       <html
         lang="en"
-        className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
+        className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02",_"ss03",_"ss04",_"ss07",_"ss08",_"ss09"] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
       >
-        <body className="relative flex text-sm">
+        <body className="relative flex bg-slate-50 text-sm">
           <div className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-emerald-50 blur-3xl"></div>
           <Aside />
           <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto p-4 pt-16 md:p-6 md:pt-6">

@@ -32,9 +32,9 @@ export async function AddWebsite() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Add Website</Button>
+        <Button size="sm">Add Website</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>Add Website</DialogTitle>
           <DialogDescription>

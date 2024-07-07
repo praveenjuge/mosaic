@@ -25,7 +25,7 @@ export default function Page() {
           TODO: Manage all your settings in one place
         </CardDescription>
       </CardHeader>
-      <div className="mx-auto grid w-full max-w-3xl gap-8 pb-4">
+      <div className="grid w-full max-w-2xl gap-8 pb-4">
         <Card>
           <CardHeader>
             <CardTitle>Appearance</CardTitle>
@@ -36,8 +36,8 @@ export default function Page() {
           <CardContent>
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Moon className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <Moon className="size-4" stroke={2} />
                   <span>Dark Mode</span>
                 </div>
                 <Switch id="dark-mode" />
@@ -55,22 +55,22 @@ export default function Page() {
           <CardContent>
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <EnvelopeOpen className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <EnvelopeOpen className="size-4" stroke={2} />
                   <span>Email Notifications</span>
                 </div>
                 <Switch id="email-notifications" defaultChecked />
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Paperclip className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <Paperclip className="size-4" stroke={2} />
                   <span>Newsletter Subscription</span>
                 </div>
                 <Switch id="newsletter-subscriptions" defaultChecked />
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Envelope className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <Envelope className="size-4" stroke={2} />
                   <span>Marketing Emails</span>
                 </div>
                 <Switch id="marketing-emails" />
@@ -88,18 +88,22 @@ export default function Page() {
           <CardContent>
             <div className="grid gap-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <Key className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <Key className="size-4" stroke={2} />
                   <span>API Keys</span>
                 </div>
-                <Button variant="outline">Manage</Button>
+                <Button variant="outline" size="sm">
+                  Manage
+                </Button>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
-                  <ChartGraph className="h-5 w-5" />
+                <div className="flex items-center space-x-2 font-medium">
+                  <ChartGraph className="size-4" stroke={2} />
                   <span>Usage Statistics</span>
                 </div>
-                <Button variant="outline">View</Button>
+                <Button variant="outline" size="sm">
+                  View
+                </Button>
               </div>
             </div>
           </CardContent>
