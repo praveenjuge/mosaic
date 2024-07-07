@@ -24,7 +24,7 @@ export default function RootLayout({
       >
         <body className="flex text-sm">
           <Aside />
-          <main className="flex w-full flex-col gap-6 p-6 pt-16 md:pt-6">
+          <main className="flex w-full flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
             {children}
           </main>
         </body>

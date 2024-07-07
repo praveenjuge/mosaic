@@ -43,7 +43,7 @@ const NavLink = ({
       {isActive && (
         <span className="absolute -left-4 h-full w-1 rounded-r-full bg-emerald-600"></span>
       )}
-      {Icon && <Icon className="size-5 text-slate-500" stroke={2} />}
+      {Icon && <Icon className="size-5 text-slate-500" stroke={1.75} />}
       <span>{label}</span>
     </Link>
   );
