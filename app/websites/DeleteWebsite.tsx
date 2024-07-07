@@ -8,6 +8,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { createClient } from "@/lib/server";
+import { Trash } from "@mynaui/icons-react";
 
 export async function DeleteWebsite({ websiteId }: { websiteId: string }) {
   const handleDelete = async () => {
@@ -27,7 +28,10 @@ export async function DeleteWebsite({ websiteId }: { websiteId: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="destructive">Delete Website</Button>
+        <Button variant="outline" size="icon" color="red">
+          <Trash className="size-5" />
+          <span className="sr-only">Delete Website</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

@@ -12,7 +12,11 @@ import { Check } from "@mynaui/icons-react";
 export default function Page() {
   return (
     <>
-      <div className="mx-auto grid w-full max-w-5xl grid-cols-1 gap-6 md:grid-cols-3">
+      <CardHeader className="p-0">
+        <CardTitle>Subscription</CardTitle>
+        <CardDescription>TODO: Manage billing and pricing.</CardDescription>
+      </CardHeader>
+      <div className="grid w-full grid-cols-1 gap-6 pb-4 md:grid-cols-3">
         <Card>
           <CardHeader className="border-b">
             <CardTitle>Pro</CardTitle>

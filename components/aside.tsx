@@ -7,7 +7,6 @@ import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   Config,
   Copyright,
-  FileText,
   Globe,
   Home,
   Lightning,
@@ -74,7 +73,7 @@ const AsideContent = () => (
     </div>
     <nav className="flex flex-col gap-2">
       <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
-      <NavLink href="/resources" icon={FileText} label="Resources" />
+      {/* <NavLink href="/resources" icon={FileText} label="Resources" /> */}
       <NavLink href="/help" icon={Support} label="Help & Support" />
       <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
     </nav>

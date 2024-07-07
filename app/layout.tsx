@@ -22,9 +22,10 @@ export default function RootLayout({
         lang="en"
         className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
       >
-        <body className="flex text-sm">
+        <body className="relative flex text-sm">
+          <div className="pointer-events-none fixed -top-48 right-0 size-96 select-none bg-emerald-50 blur-3xl"></div>
           <Aside />
-          <main className="flex w-full flex-col gap-6 p-4 pt-16 md:p-6 md:pt-6">
+          <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto p-4 pt-16 md:p-6 md:pt-6">
             {children}
           </main>
         </body>

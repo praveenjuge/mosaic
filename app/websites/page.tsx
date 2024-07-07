@@ -1,4 +1,20 @@
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { createClient } from "@/lib/server";
+import { Eye, Globe, Pen, Trash } from "@mynaui/icons-react";
 import { AddWebsite } from "./AddWebsite";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -14,19 +30,181 @@ export default async function Page() {
   return (
     <>
       <div className="flex justify-between">
-        <h1>Websites</h1>
+        <CardHeader className="p-0">
+          <CardTitle>Websites</CardTitle>
+          <CardDescription>TODO: Manage your websites.</CardDescription>
+        </CardHeader>
         <AddWebsite />
       </div>
-      {websites.map((website) => (
-        <li key={website.id}>
-          {website.website_url}
-          <EditWebsite
-            websiteId={website.id}
-            currentUrl={website.website_url}
-          />
-          <DeleteWebsite websiteId={website.id} />
-        </li>
-      ))}
+      <Card>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Website</TableHead>
+              <TableHead>URL</TableHead>
+              <TableHead>Images</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {websites.map((website) => (
+              <TableRow key={website.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Globe className="size-5" />
+                    <span className="font-medium">{website.website_url}</span>
+                  </div>
+                </TableCell>
+                <TableCell>{website.website_url}</TableCell>
+                <TableCell>12</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" size="icon">
+                      <Eye className="size-5" />
+                      <span className="sr-only">View</span>
+                    </Button>
+                    <EditWebsite
+                      websiteId={website.id}
+                      currentUrl={website.website_url}
+                    />
+                    <DeleteWebsite websiteId={website.id} />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ))}
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  <span className="font-medium">Globex Corporation</span>
+                </div>
+              </TableCell>
+              <TableCell>globex.com</TableCell>
+              <TableCell>8</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Eye className="size-5" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Pen className="size-5" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="outline" size="icon" color="red">
+                    <Trash className="size-5" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  <span className="font-medium">Stark Industries</span>
+                </div>
+              </TableCell>
+              <TableCell>stark.com</TableCell>
+              <TableCell>20</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Eye className="size-5" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Pen className="size-5" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="outline" size="icon" color="red">
+                    <Trash className="size-5" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  <span className="font-medium">Wayne Enterprises</span>
+                </div>
+              </TableCell>
+              <TableCell>wayne.com</TableCell>
+              <TableCell>15</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Eye className="size-5" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Pen className="size-5" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="outline" size="icon" color="red">
+                    <Trash className="size-5" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  <span className="font-medium">Stark Industries</span>
+                </div>
+              </TableCell>
+              <TableCell>stark.com</TableCell>
+              <TableCell>20</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Eye className="size-5" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Pen className="size-5" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="outline" size="icon" color="red">
+                    <Trash className="size-5" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Globe className="size-5" />
+                  <span className="font-medium">Wayne Enterprises</span>
+                </div>
+              </TableCell>
+              <TableCell>wayne.com</TableCell>
+              <TableCell>15</TableCell>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="icon">
+                    <Eye className="size-5" />
+                    <span className="sr-only">View</span>
+                  </Button>
+                  <Button variant="outline" size="icon">
+                    <Pen className="size-5" />
+                    <span className="sr-only">Edit</span>
+                  </Button>
+                  <Button variant="outline" size="icon" color="red">
+                    <Trash className="size-5" />
+                    <span className="sr-only">Delete</span>
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </Card>
     </>
   );
 }

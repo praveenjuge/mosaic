@@ -10,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/server";
+import { Pen } from "@mynaui/icons-react";
 
 export async function EditWebsite({
   websiteId,
@@ -39,7 +40,10 @@ export async function EditWebsite({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Edit Website</Button>
+        <Button variant="outline" size="icon">
+          <Pen className="size-5" />
+          <span className="sr-only">Edit Website</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
