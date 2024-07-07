@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
-  CogTwo,
+  Config,
   Copyright,
   FileText,
   Globe,
@@ -50,7 +50,7 @@ const NavLink = ({
 };
 
 const AsideContent = () => (
-  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-6 border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
+  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto border-r-[0.5px] border-slate-300 bg-white p-4 font-medium">
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <Logo />
@@ -69,7 +69,7 @@ const AsideContent = () => (
           icon={ShootingStar}
           label="Subscription"
         />
-        <NavLink href="/settings" icon={CogTwo} label="Settings" />
+        <NavLink href="/settings" icon={Config} label="Settings" />
       </nav>
     </div>
     <nav className="flex flex-col gap-2">
