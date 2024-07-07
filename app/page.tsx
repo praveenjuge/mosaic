@@ -52,7 +52,7 @@ export default function Home() {
         </div>
       </SignedOut>
       <SignedIn>
-        <div className="space-y-8">
+        <div className="space-y-8 py-4 md:py-0">
           <div>
             <CardHeader className="mb-4 p-0">
               <CardTitle>Overview</CardTitle>

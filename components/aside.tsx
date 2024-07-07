@@ -54,7 +54,7 @@ const AsideContent = () => (
       <div className="flex items-center justify-between">
         <Logo />
         <SignedIn>
-          <div className="size-6 shrink-0 rounded-full bg-slate-200 [&_.cl-avatarBox]:size-6 [&_button]:size-6">
+          <div className="hidden size-6 shrink-0 rounded-full bg-slate-200 md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
             <UserButton />
           </div>
         </SignedIn>
@@ -86,12 +86,17 @@ export default function Aside() {
       <div className="hidden md:block">
         <AsideContent />
       </div>
+      <SignedIn>
+        <div className="fixed right-4 top-4 z-10 size-10 shrink-0 rounded-full bg-slate-200 md:hidden [&_.cl-avatarBox]:size-10 [&_button]:size-10">
+          <UserButton />
+        </div>
+      </SignedIn>
       <Sheet>
         <SheetTrigger asChild>
           <Button
             size="icon"
             variant="outline"
-            className="fixed left-3 top-3 shrink-0 rounded-full md:hidden"
+            className="fixed left-4 top-4 z-10 shrink-0 rounded-full md:hidden"
           >
             <Menu className="size-5" />
             <span className="sr-only">Toggle navigation menu</span>
