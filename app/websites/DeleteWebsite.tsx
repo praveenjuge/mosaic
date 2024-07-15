@@ -7,7 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { createClient } from "@/lib/server";
+import { createClient } from "@/lib/supabase/server";
 import { Trash } from "@mynaui/icons-react";
 
 export async function DeleteWebsite({ websiteId }: { websiteId: string }) {

@@ -44,9 +44,7 @@ export default function Page() {
               </li>
             </ul>
           </CardContent>
-          <CardFooter>
-            <Button className="w-full">Get Started</Button>
-          </CardFooter>
+          <CardFooter>coming soon</CardFooter>
         </Card>
         <Card>
           <CardHeader className="border-b-[0.5px] border-slate-300">
@@ -119,6 +117,18 @@ export default function Page() {
           </CardFooter>
         </Card>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>You are a Pro User! 🎉</CardTitle>
+          <CardDescription>Enjoy your benefits.</CardDescription>
+        </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>You are not subscribed yet.</CardTitle>
+          <CardDescription>Subscribe to get more benefits.</CardDescription>
+        </CardHeader>
+      </Card>
     </>
   );
 }

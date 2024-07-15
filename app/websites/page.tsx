@@ -13,7 +13,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createClient } from "@/lib/server";
+import { createClient } from "@/lib/supabase/server";
 import { SignedIn } from "@clerk/nextjs";
 import { Eye, Globe, Pen, Trash } from "@mynaui/icons-react";
 import { AddWebsite } from "./AddWebsite";
@@ -53,8 +53,14 @@ export default async function Page() {
                 <TableRow key={website.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Globe className="size-5" />
-                      <span className="font-medium">{website.website_url}</span>
+                      {website.favicon_url ? (
+                        <img src={website.favicon_url} className="size-5" />
+                      ) : (
+                        <Globe className="size-5" />
+                      )}
+                      <span className="max-w-xs truncate font-medium">
+                        {website.title ? website.title : website.website_url}
+                      </span>
                     </div>
                   </TableCell>
                   <TableCell>{website.website_url}</TableCell>

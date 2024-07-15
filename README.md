@@ -12,7 +12,7 @@ bun install
 bun dev
 ```
 
-## .env file
+## Create an .env file
 
 ```sh
 # Clerk

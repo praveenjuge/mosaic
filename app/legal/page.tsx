@@ -88,8 +88,8 @@ export default function Page() {
         <CardContent>
           <div className="space-y-4">
             <p>
-              Welcome to Mosaic! These Terms of Service govern your use of our
-              services and products.
+              These Terms of Service govern your use of our services and
+              products.
             </p>
             <h3 className="text-xl font-semibold">User Accounts</h3>
             <p>
@@ -137,6 +137,100 @@ export default function Page() {
               We reserve the right to terminate or suspend your access to our
               services at any time, without notice, for any reason, including
               but not limited to a violation of these Terms of Service.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle id="refund-policy">Refund Policy</CardTitle>
+          <CardDescription>Last updated: June 7, 2024</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <h3 className="text-xl font-semibold">Refunds</h3>
+            <p>
+              At Mosaic, we strive to provide the best possible service to our
+              users. However, we understand that sometimes things don't go as
+              planned. This Refund Policy outlines the conditions under which
+              refunds may be granted for our SaaS (Software as a Service)
+              products and services.
+            </p>
+
+            <h3 className="text-xl font-semibold">Eligibility for Refunds</h3>
+            <p>Refunds may be issued in the following cases:</p>
+            <ul>
+              <li>
+                <strong>Service Disruption:</strong> If our services are
+                unavailable or significantly disrupted due to technical issues
+                on our end for an extended period.
+              </li>
+              <li>
+                <strong>Billing Errors:</strong> If you have been charged
+                incorrectly or for services you did not use.
+              </li>
+              <li>
+                <strong>Unsatisfactory Service:</strong> If you are unsatisfied
+                with our services within the first 30 days of your subscription.
+              </li>
+            </ul>
+
+            <h3 className="text-xl font-semibold">Requesting a Refund</h3>
+            <p>
+              To request a refund, please contact our support team at{" "}
+              <a href="mailto:hello@praveenjuge.com">hello@praveenjuge.com</a>{" "}
+              with the following information:
+            </p>
+            <ul className="list-disc pl-5">
+              <li>
+                <strong>Account Details:</strong> Your account username or email
+                address associated with your Mosaic account.
+              </li>
+              <li>
+                <strong>Reason for Refund:</strong> A brief description of the
+                reason for the refund request.
+              </li>
+              <li>
+                <strong>Transaction Information:</strong> Details of the
+                transaction for which you are requesting a refund, including the
+                date and amount charged.
+              </li>
+            </ul>
+
+            <h3 className="text-xl font-semibold">Processing Refunds</h3>
+            <p>
+              Upon receiving your refund request, our support team will review
+              it and respond within 5-7 business days. If your refund request is
+              approved, the refund will be processed to the original payment
+              method within 10-15 business days.
+            </p>
+            <p>
+              Please note that processing times may vary depending on your
+              financial institution.
+            </p>
+
+            <h3 className="text-xl font-semibold">Non-Refundable Situations</h3>
+            <p>Refunds will not be issued in the following cases:</p>
+            <ul className="list-disc pl-5">
+              <li>
+                <strong>Usage Beyond 30 Days:</strong> If more than 30 days have
+                passed since your subscription started.
+              </li>
+              <li>
+                <strong>Violation of Terms:</strong> If your account has been
+                terminated due to a violation of our Terms of Service.
+              </li>
+              <li>
+                <strong>Change of Mind:</strong> If you simply change your mind
+                after the subscription or purchase.
+              </li>
+            </ul>
+
+            <h3 className="text-xl font-semibold">Contact Us</h3>
+            <p>
+              If you have any questions or concerns about our Refund Policy,
+              please do not hesitate to contact us at{" "}
+              <a href="mailto:hello@praveenjuge.com">hello@praveenjuge.com</a>.
             </p>
           </div>
         </CardContent>
