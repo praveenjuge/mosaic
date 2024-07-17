@@ -11,6 +11,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 
+export const dynamic = "force-static";
+
 function getData(slug: string) {
   const changelog = getDocumentBySlug("changelog", slug, [
     "title",
