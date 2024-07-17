@@ -1,0 +1,79 @@
+{
+  "commit": "88d2fa32c61499afecde66c7eca53108c6ecc065",
+  "generated": "Wed, 17 Jul 2024 17:17:28 GMT",
+  "metadata": [
+    {
+      "__outstatic": {
+        "commit": "a6d8e4270411d50cf7355cfe1f725d194bfada0a",
+        "hash": "764830996",
+        "path": "content/changelog/initial-commit.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-17T17:40:16.898Z",
+      "slug": "initial-commit",
+      "status": "published",
+      "title": "Initial Commit ✨"
+    },
+    {
+      "__outstatic": {
+        "commit": "c6826fadba230019d6eea7c8a434b9315a08774b",
+        "hash": "547973760",
+        "path": "content/changelog/added-changelog-help.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-17T17:41:59.213Z",
+      "slug": "added-changelog-help",
+      "status": "published",
+      "title": "Added Changelog & Help"
+    },
+    {
+      "__outstatic": {
+        "commit": "71b1ff5c8b45cc2f885f9144e848fdcc6e06ebed",
+        "hash": "1189961668",
+        "path": "content/changelog/websites.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-17T17:43:01.810Z",
+      "slug": "websites",
+      "status": "published",
+      "title": "Websites"
+    },
+    {
+      "__outstatic": {
+        "commit": "49c0c6aa5267074877ed0367713fe77bde0b9ce1",
+        "hash": "3962007132",
+        "path": "content/help/accessing-technical-support.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Troubleshooting",
+      "collection": "help",
+      "coverImage": "",
+      "description": "How to contact Mosaic technical support for assistance.",
+      "publishedAt": "2024-07-17T16:48:02.393Z",
+      "slug": "accessing-technical-support",
+      "status": "published",
+      "title": "Accessing Technical Support"
+    }
+  ]
+}
