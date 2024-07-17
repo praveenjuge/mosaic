@@ -26,7 +26,7 @@ const allChangelogs = await (await load())
 
 export default function Page() {
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-8 py-4 md:py-10">
+    <div className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <CardHeader className="p-0">
         <CardTitle>Changelog</CardTitle>
         <CardDescription>
@@ -34,19 +34,27 @@ export default function Page() {
         </CardDescription>
       </CardHeader>
       {allChangelogs.map((item) => (
-        <Card key={item.slug}>
-          <CardHeader>
-            <CardTitle>
-              <Link href={`/changelog/${item.slug}`}>{item.title}</Link>
-            </CardTitle>
-            <CardDescription>{item.publishedAt}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm prose-slate">
-              {markdownToHtml(item.content)}
-            </div>
-          </CardContent>
-        </Card>
+        <Link key={item.slug} href={`/changelog/${item.slug}`}>
+          <Card>
+            <CardHeader className="pb-0">
+              <CardTitle>{item.title}</CardTitle>
+              <CardDescription>
+                {new Date(item.publishedAt).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="prose prose-sm prose-slate pb-2">
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: markdownToHtml(item.content),
+                }}
+              ></div>
+            </CardContent>
+          </Card>
+        </Link>
       ))}
     </div>
   );
