@@ -7,7 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check } from "@mynaui/icons-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Check, ChevronDown } from "@mynaui/icons-react";
 
 export default function Page() {
   return (
@@ -128,6 +133,127 @@ export default function Page() {
           <CardTitle>You are not subscribed yet.</CardTitle>
           <CardDescription>Subscribe to get more benefits.</CardDescription>
         </CardHeader>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Frequently Asked Questions</CardTitle>
+          <CardDescription>
+            If you can't find the answer you're looking for, please don't
+            hesitate to reach out to our support team.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-2">
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+                <h4 className="text-sm font-medium">
+                  How do I reset my password?
+                </h4>
+                <Button variant="ghost" size="icon">
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
+              <p>To reset your password, follow these steps:</p>
+              <ol className="list-inside list-decimal">
+                <li>
+                  Click on your profile avatar in the top-right corner and
+                  select "Settings".
+                </li>
+                <li>In the "Account" section, click on "Change Password".</li>
+                <li>
+                  Enter your current password and a new password, then confirm
+                  the new password.
+                </li>
+                <li>Click "Save Changes" to update your password.</li>
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+                <h4 className="text-sm font-medium">
+                  How do I upgrade my plan?
+                </h4>
+                <Button variant="ghost" size="icon">
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
+              <p>To upgrade your plan, follow these steps:</p>
+              <ol className="list-inside list-decimal">
+                <li>
+                  Click on the "Billing" tab in the left-hand navigation menu.
+                </li>
+                <li>Under "Your Plan", click on the "Upgrade" button.</li>
+                <li>
+                  Select the new plan you want to upgrade to and follow the
+                  prompts to complete the upgrade process.
+                </li>
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+                <h4 className="text-sm font-medium">
+                  How do I cancel my subscription?
+                </h4>
+                <Button variant="ghost" size="icon">
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
+              <p>To cancel your subscription, follow these steps:</p>
+              <ol className="list-inside list-decimal">
+                <li>
+                  Click on the "Billing" tab in the left-hand navigation menu.
+                </li>
+                <li>
+                  Under "Your Plan", click on the "Cancel Subscription" button.
+                </li>
+                <li>Follow the prompts to confirm the cancellation.</li>
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+          <Collapsible>
+            <CollapsibleTrigger asChild>
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+                <h4 className="text-sm font-medium">
+                  How do I add a team member?
+                </h4>
+                <Button variant="ghost" size="icon">
+                  <ChevronDown className="h-4 w-4" />
+                  <span className="sr-only">Toggle</span>
+                </Button>
+              </div>
+            </CollapsibleTrigger>
+            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
+              <p>To add a team member, follow these steps:</p>
+              <ol className="list-inside list-decimal">
+                <li>
+                  Click on the "Team" tab in the left-hand navigation menu.
+                </li>
+                <li>Click on the "Add Member" button.</li>
+                <li>
+                  Enter the email address of the team member you want to add.
+                </li>
+                <li>
+                  Select the role and permissions for the new team member.
+                </li>
+                <li>
+                  Click "Invite" to send an invitation to the team member.
+                </li>
+              </ol>
+            </CollapsibleContent>
+          </Collapsible>
+        </CardContent>
       </Card>
     </>
   );
