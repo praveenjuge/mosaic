@@ -25,7 +25,7 @@ export default function RootLayout({
         <body className="relative flex bg-slate-50 text-sm">
           <div className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-emerald-50 blur-3xl"></div>
           <Aside />
-          <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto p-4 pt-16 md:p-6 md:pt-6">
+          <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto border-l-[0.5px] bg-white p-4 pt-16 md:p-6 md:pt-6">
             {children}
           </main>
         </body>
