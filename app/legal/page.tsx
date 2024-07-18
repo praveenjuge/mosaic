@@ -28,7 +28,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-sm prose-slate">
+          <div className="prose prose-sm prose-zinc dark:prose-invert">
             <p>
               At Mosaic, we take your privacy seriously. This Privacy Policy
               explains how we collect, use, and protect your personal
@@ -93,7 +93,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-sm prose-slate">
+          <div className="prose prose-sm prose-zinc dark:prose-invert">
             <p>
               These Terms of Service govern your use of our services and
               products.
@@ -154,7 +154,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-sm prose-slate">
+          <div className="prose prose-sm prose-zinc dark:prose-invert">
             <h3>Refunds</h3>
             <p>
               At Mosaic, we strive to provide the best possible service to our

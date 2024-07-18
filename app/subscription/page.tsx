@@ -23,7 +23,7 @@ export default function Page() {
       </CardHeader>
       <div className="grid w-full grid-cols-1 gap-6 pb-4 md:grid-cols-3">
         <Card>
-          <CardHeader className="border-b-[0.5px] border-slate-300">
+          <CardHeader className="border-b-[0.5px]">
             <CardTitle>Pro</CardTitle>
             <CardDescription>For individual use</CardDescription>
           </CardHeader>
@@ -52,7 +52,7 @@ export default function Page() {
           <CardFooter>coming soon</CardFooter>
         </Card>
         <Card>
-          <CardHeader className="border-b-[0.5px] border-slate-300">
+          <CardHeader className="border-b-[0.5px]">
             <CardTitle>Teams</CardTitle>
             <CardDescription>For small to medium teams</CardDescription>
           </CardHeader>
@@ -85,7 +85,7 @@ export default function Page() {
           </CardFooter>
         </Card>
         <Card>
-          <CardHeader className="border-b-[0.5px] border-slate-300">
+          <CardHeader className="border-b-[0.5px]">
             <CardTitle>Enterprise</CardTitle>
             <CardDescription>For large organizations</CardDescription>
           </CardHeader>

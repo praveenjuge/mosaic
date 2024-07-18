@@ -25,7 +25,7 @@ export default function Home() {
             <h1 className="text-balance text-3xl font-semibold tracking-tighter">
               Simplify Your Open Graph Image Creation.
             </h1>
-            <p className="text-pretty text-base text-slate-500">
+            <p className="text-pretty text-base text-muted-foreground">
               Transform your website into a stunning Open Graph image with our
               web app. Simply input your URL, and get a high-quality snapshot
               ready for social media.

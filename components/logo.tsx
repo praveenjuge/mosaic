@@ -13,7 +13,9 @@ function Logo({ colorMode = "default" }: LogoProps) {
         viewBox="0 0 110 20"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
-        className={colorMode === "default" ? "text-emerald-900" : ""}
+        className={
+          colorMode === "default" ? "text-emerald-900 dark:text-emerald-50" : ""
+        }
       >
         <path
           d="M0.198975 2C0.198975 0.895431 1.09441 0 2.19897 0L6.19897 0V20H2.19897C1.09441 20 0.198975 19.1046 0.198975 18L0.198975 2Z"
