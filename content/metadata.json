@@ -1,6 +1,6 @@
 {
-  "commit": "88d2fa32c61499afecde66c7eca53108c6ecc065",
-  "generated": "Wed, 17 Jul 2024 17:17:28 GMT",
+  "commit": "7dab2ca3dc4e60c1dcb9b99c26a866df9152225a",
+  "generated": "2024-07-18T13:40:38.628Z",
   "metadata": [
     {
       "__outstatic": {
@@ -74,6 +74,25 @@
       "slug": "accessing-technical-support",
       "status": "published",
       "title": "Accessing Technical Support"
+    },
+    {
+      "__outstatic": {
+        "commit": "7dab2ca3dc4e60c1dcb9b99c26a866df9152225a",
+        "hash": "2481718272",
+        "path": "content/help/create-a-new-account.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Getting Started",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:09:12.600Z",
+      "slug": "create-a-new-account",
+      "status": "published",
+      "title": "Create a new Account"
     }
   ]
 }
