@@ -5,6 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Metadata } from "next";
+
+export const dynamic = "force-static";
+
+export const metadata: Metadata = {
+  title: "Legal",
+};
 
 export default function Page() {
   return (
@@ -21,7 +28,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-slate prose-sm">
+          <div className="prose prose-sm prose-slate">
             <p>
               At Mosaic, we take your privacy seriously. This Privacy Policy
               explains how we collect, use, and protect your personal
@@ -86,7 +93,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-slate prose-sm">
+          <div className="prose prose-sm prose-slate">
             <p>
               These Terms of Service govern your use of our services and
               products.
@@ -147,7 +154,7 @@ export default function Page() {
           <CardDescription>Last updated: June 7, 2024</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="prose prose-slate prose-sm">
+          <div className="prose prose-sm prose-slate">
             <h3>Refunds</h3>
             <p>
               At Mosaic, we strive to provide the best possible service to our
