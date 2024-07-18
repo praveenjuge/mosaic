@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "Changelogs",
 };
 
-const allChangelogs = await (await load())
+const allPosts = await (await load())
   .find({ collection: "changelog" }, [
     "title",
     "slug",
@@ -35,7 +35,7 @@ export default function Page() {
           See what's new in the latest version of our app.
         </CardDescription>
       </CardHeader>
-      {allChangelogs.map((item) => (
+      {allPosts.map((item) => (
         <Link key={item.slug} href={`/changelog/${item.slug}`}>
           <Card>
             <CardHeader className="pb-0">
