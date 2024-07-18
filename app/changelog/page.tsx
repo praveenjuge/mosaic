@@ -13,7 +13,7 @@ import { load } from "outstatic/server";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Changelogs",
+  title: "Changelog",
 };
 
 const allPosts = await (await load())
