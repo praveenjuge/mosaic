@@ -1,6 +1,6 @@
 {
-  "commit": "7dab2ca3dc4e60c1dcb9b99c26a866df9152225a",
-  "generated": "2024-07-18T13:40:38.628Z",
+  "commit": "a6ae30fcbf24eb38dbd1fb2aa3e22b22c2fe0dce",
+  "generated": "2024-07-18T13:41:50.515Z",
   "metadata": [
     {
       "__outstatic": {
@@ -93,6 +93,25 @@
       "slug": "create-a-new-account",
       "status": "published",
       "title": "Create a new Account"
+    },
+    {
+      "__outstatic": {
+        "commit": "a6ae30fcbf24eb38dbd1fb2aa3e22b22c2fe0dce",
+        "hash": "366269397",
+        "path": "content/help/log-in-to-your-account.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Getting Started",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:14:32.336Z",
+      "slug": "log-in-to-your-account",
+      "status": "published",
+      "title": "Log In to Your Account"
     }
   ]
 }
