@@ -57,7 +57,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>{category}</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col text-primary">
+            <CardContent className="flex flex-col gap-2 text-primary">
               {posts.map((post) => (
                 <Link key={post.slug} href={`/help/${post.slug}`}>
                   {post.title}
