@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Card,
   CardContent,
@@ -7,11 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
 import {
   Table,
   TableBody,
@@ -21,17 +14,22 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { InfoCircle, InfoTriangle, TrendingUp } from "@mynaui/icons-react";
+import { Metadata } from "next";
 import Link from "next/link";
-import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis } from "recharts";
+
+export const metadata: Metadata = {
+  title: "Analytics",
+  description: "View your logs and analytics here.",
+};
 
 export default function Page() {
   return (
     <>
       <CardHeader className="p-0">
-        <CardTitle>Anaytics</CardTitle>
-        <CardDescription>TODO: View all logs and analytics</CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <div className="grid w-full gap-6 pb-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle>Screenshot Volume</CardTitle>
@@ -75,9 +73,7 @@ export default function Page() {
               Visualize the trend of screenshot volume over time.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <LinechartChart />
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
         <Card>
           <CardHeader>
@@ -86,9 +82,7 @@ export default function Page() {
               Trend of screenshot success rate over time.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <BarchartChart />
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
         <Card>
           <CardHeader>
@@ -97,9 +91,7 @@ export default function Page() {
               Visualize the trend of user engagement over time.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <LinechartChart />
-          </CardContent>
+          <CardContent></CardContent>
         </Card>
         <Card>
           <CardHeader>
@@ -271,97 +263,5 @@ export default function Page() {
         </Card>
       </div>
     </>
-  );
-}
-
-function BarchartChart() {
-  return (
-    <div>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <BarChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            tickMargin={10}
-            axisLine={false}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Bar dataKey="desktop" fill="var(--color-desktop)" radius={8} />
-        </BarChart>
-      </ChartContainer>
-    </div>
-  );
-}
-
-function LinechartChart() {
-  return (
-    <div>
-      <ChartContainer
-        config={{
-          desktop: {
-            label: "Desktop",
-            color: "hsl(var(--chart-1))",
-          },
-        }}
-      >
-        <LineChart
-          accessibilityLayer
-          data={[
-            { month: "January", desktop: 186 },
-            { month: "February", desktop: 305 },
-            { month: "March", desktop: 237 },
-            { month: "April", desktop: 73 },
-            { month: "May", desktop: 209 },
-            { month: "June", desktop: 214 },
-          ]}
-          margin={{
-            left: 12,
-            right: 12,
-          }}
-        >
-          <CartesianGrid vertical={false} />
-          <XAxis
-            dataKey="month"
-            tickLine={false}
-            axisLine={false}
-            tickMargin={8}
-            tickFormatter={(value) => value.slice(0, 3)}
-          />
-          <ChartTooltip
-            cursor={false}
-            content={<ChartTooltipContent hideLabel />}
-          />
-          <Line
-            dataKey="desktop"
-            type="natural"
-            stroke="var(--color-desktop)"
-            strokeWidth={2}
-            dot={false}
-          />
-        </LineChart>
-      </ChartContainer>
-    </div>
   );
 }

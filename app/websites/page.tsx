@@ -16,9 +16,15 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { SignedIn } from "@clerk/nextjs";
 import { Eye, Globe, Pen, Trash } from "@mynaui/icons-react";
+import { Metadata } from "next";
 import { AddWebsite } from "./AddWebsite";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
+
+export const metadata: Metadata = {
+  title: "Websites",
+  description: "Add, edit or remove websites here.",
+};
 
 export default async function Page() {
   const client = await createClient();
@@ -32,8 +38,8 @@ export default async function Page() {
     <>
       <div className="flex justify-between">
         <CardHeader className="p-0">
-          <CardTitle>Websites</CardTitle>
-          <CardDescription>TODO: Manage your websites.</CardDescription>
+          <CardTitle>{metadata.title as string}</CardTitle>
+          <CardDescription>{metadata.description}</CardDescription>
         </CardHeader>
         <AddWebsite />
       </div>

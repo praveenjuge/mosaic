@@ -7,7 +7,7 @@ import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   Config,
   Copyright,
-  Globe,
+  Earth,
   Home,
   Lightning,
   ListCheck,
@@ -42,7 +42,9 @@ const NavLink = ({
       {isActive && (
         <span className="absolute -left-4 h-full w-1 rounded-r-full bg-primary"></span>
       )}
-      {Icon && <Icon className="size-5 text-muted-foreground" stroke={1.75} />}
+      {Icon && (
+        <Icon className="size-[1.125rem] text-muted-foreground" stroke={2} />
+      )}
       <span>{label}</span>
     </Link>
   );
@@ -61,7 +63,7 @@ const AsideContent = () => (
       </div>
       <nav className="flex flex-col gap-2">
         <NavLink href="/" icon={Home} label="Home" />
-        <NavLink href="/websites" icon={Globe} label="Websites" />
+        <NavLink href="/websites" icon={Earth} label="Websites" />
         <NavLink href="/analytics" icon={Lightning} label="Analytics" />
         <NavLink
           href="/subscription"

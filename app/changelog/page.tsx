@@ -14,6 +14,7 @@ export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Changelog",
+  description: "See what's new in the latest version of mosaic.",
 };
 
 const allPosts = await (await load())
@@ -30,11 +31,10 @@ export default function Page() {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <CardHeader className="p-0">
-        <CardTitle>Changelog</CardTitle>
-        <CardDescription>
-          See what's new in the latest version of our app.
-        </CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
+
       {allPosts.map((item) => (
         <Link key={item.slug} href={`/changelog/${item.slug}`}>
           <Card>
