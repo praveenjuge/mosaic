@@ -14,7 +14,7 @@ import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 export const dynamic = "force-static";
 
 function getData(slug: string) {
-  const changelog = getDocumentBySlug("changelog", slug, [
+  const help = getDocumentBySlug("help", slug, [
     "title",
     "publishedAt",
     "description",
@@ -22,9 +22,9 @@ function getData(slug: string) {
     "content",
   ]);
 
-  if (!changelog) notFound();
+  if (!help) notFound();
 
-  return { ...changelog, content: markdownToHtml(changelog.content) };
+  return { ...help, content: markdownToHtml(help.content) };
 }
 
 export async function generateMetadata({
@@ -32,34 +32,32 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const changelog = getData(params.slug);
+  const help = getData(params.slug);
 
   return {
-    title: changelog.title,
+    title: help.title,
   };
 }
 
 export default function Page({ params }: { params: { slug: string } }) {
-  const changelog = getData(params.slug);
+  const help = getData(params.slug);
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <CardHeader className="p-0">
-        <CardTitle className="flex items-center gap-2">
-          <Link href="/changelog" className="text-primary">
-            Changelogs
+        <CardTitle>
+          <Link href="/help" className="text-primary">
+            Help & Support
           </Link>
-          <span>→</span>
-          <span>{changelog.title}</span>
         </CardTitle>
         <CardDescription>
-          See what's new in the latest version of our app.
+          Find solutions to common issues and get help with troubleshooting.
         </CardDescription>
       </CardHeader>
       <Card>
         <CardHeader className="pb-0">
-          <CardTitle>{changelog.title}</CardTitle>
+          <CardTitle>{help.title}</CardTitle>
           <CardDescription>
-            {new Date(changelog.publishedAt).toLocaleDateString("en-US", {
+            {new Date(help.publishedAt).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -69,7 +67,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <CardContent className="prose prose-sm prose-slate max-w-none pb-2">
           <div
             dangerouslySetInnerHTML={{
-              __html: markdownToHtml(changelog.content),
+              __html: markdownToHtml(help.content),
             }}
           ></div>
         </CardContent>
@@ -79,5 +77,5 @@ export default function Page({ params }: { params: { slug: string } }) {
 }
 
 export function generateStaticParams() {
-  return getDocumentSlugs("changelog").map((slug) => ({ slug }));
+  return getDocumentSlugs("help").map((slug) => ({ slug }));
 }
