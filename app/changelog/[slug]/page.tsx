@@ -66,7 +66,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             })}
           </CardDescription>
         </CardHeader>
-        <CardContent className="prose prose-sm prose-slate max-w-none pb-2">
+        <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
           <div
             dangerouslySetInnerHTML={{
               __html: markdownToHtml(changelog.content),

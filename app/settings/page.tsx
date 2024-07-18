@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { ModeToggle } from "@/components/theme-toggler";
 import {
   Card,
   CardContent,
@@ -7,103 +7,52 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  ChartGraph,
-  Envelope,
-  EnvelopeOpen,
-  Key,
-  Moon,
-  Paperclip,
-} from "@mynaui/icons-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Settings",
+  description:
+    "You can customize your experience and configure various aspects our service here.",
+};
 
 export default function Page() {
   return (
     <>
       <CardHeader className="p-0">
-        <CardTitle>Settings</CardTitle>
-        <CardDescription>
-          TODO: Manage all your settings in one place
-        </CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
       <div className="grid w-full max-w-2xl gap-8 pb-4">
         <Card>
           <CardHeader>
-            <CardTitle>Appearance</CardTitle>
-            <CardDescription>
-              Choose your preferred theme and other appearance settings.
-            </CardDescription>
+            <CardTitle>Theme</CardTitle>
+            <CardDescription>Choose your preferred theme</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <Moon className="size-4" stroke={2} />
-                  <span>Dark Mode</span>
-                </div>
-                <Switch id="dark-mode" />
-              </div>
-            </div>
+            <ModeToggle />
           </CardContent>
         </Card>
+        {/* TODO */}
         <Card>
           <CardHeader>
-            <CardTitle>Email Preferences</CardTitle>
+            <CardTitle>Email Preferences (Coming Soon)</CardTitle>
             <CardDescription>
               Manage your email notification settings.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4">
+            <div className="grid gap-4 font-medium">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <EnvelopeOpen className="size-4" stroke={2} />
-                  <span>Email Notifications</span>
-                </div>
-                <Switch id="email-notifications" defaultChecked />
+                <span>75% of usage used</span>
+                <Switch id="75-usage" disabled />
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <Paperclip className="size-4" stroke={2} />
-                  <span>Newsletter Subscription</span>
-                </div>
-                <Switch id="newsletter-subscriptions" defaultChecked />
+                <span>100% of usage used</span>
+                <Switch id="100-usage" disabled />
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <Envelope className="size-4" stroke={2} />
-                  <span>Marketing Emails</span>
-                </div>
-                <Switch id="marketing-emails" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>API Access</CardTitle>
-            <CardDescription>
-              Manage your API keys and view usage statistics.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <Key className="size-4" stroke={2} />
-                  <span>API Keys</span>
-                </div>
-                <Button variant="outline" size="sm">
-                  Manage
-                </Button>
-              </div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2 font-medium">
-                  <ChartGraph className="size-4" stroke={2} />
-                  <span>Usage Statistics</span>
-                </div>
-                <Button variant="outline" size="sm">
-                  View
-                </Button>
+                <span>New features announcements</span>
+                <Switch id="newsletter" disabled />
               </div>
             </div>
           </CardContent>

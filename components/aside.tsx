@@ -36,25 +36,25 @@ const NavLink = ({
       href={href}
       className={cn(
         "relative flex items-center gap-2 py-1",
-        isActive && "font-semibold text-emerald-600 [&_svg]:text-emerald-600",
+        isActive && "font-semibold text-primary [&_svg]:text-primary",
       )}
     >
       {isActive && (
-        <span className="absolute -left-4 h-full w-1 rounded-r-full bg-emerald-600"></span>
+        <span className="absolute -left-4 h-full w-1 rounded-r-full bg-primary"></span>
       )}
-      {Icon && <Icon className="size-5 text-slate-500" stroke={1.75} />}
+      {Icon && <Icon className="size-5 text-muted-foreground" stroke={1.75} />}
       <span>{label}</span>
     </Link>
   );
 };
 
 const AsideContent = () => (
-  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto bg-slate-50 p-4 font-medium">
+  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto bg-primary-foreground p-4 font-medium">
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <Logo />
         <SignedIn>
-          <div className="hidden size-6 shrink-0 rounded-full bg-slate-200 md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
+          <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
             <UserButton />
           </div>
         </SignedIn>
@@ -86,7 +86,7 @@ export default function Aside() {
         <AsideContent />
       </div>
       <SignedIn>
-        <div className="fixed right-4 top-4 z-10 size-10 shrink-0 rounded-full bg-slate-200 md:hidden [&_.cl-avatarBox]:size-10 [&_button]:size-10">
+        <div className="fixed right-4 top-4 z-10 size-10 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-10 [&_button]:size-10">
           <UserButton />
         </div>
       </SignedIn>
