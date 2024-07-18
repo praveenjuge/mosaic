@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,16 +12,23 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 import { Check, ChevronDown } from "@mynaui/icons-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Subscription",
+  description: "Manage your billing and invoices here.",
+};
 
 export default function Page() {
   return (
     <>
       <CardHeader className="p-0">
-        <CardTitle>Subscription</CardTitle>
-        <CardDescription>TODO: Manage billing and pricing.</CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <div className="grid w-full grid-cols-1 gap-6 pb-4 md:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="border-b-[0.5px]">
             <CardTitle>Pro</CardTitle>
@@ -49,7 +56,11 @@ export default function Page() {
               </li>
             </ul>
           </CardContent>
-          <CardFooter>coming soon</CardFooter>
+          <CardFooter>
+            <Button className="w-full" disabled>
+              Coming Soon
+            </Button>
+          </CardFooter>
         </Card>
         <Card>
           <CardHeader className="border-b-[0.5px]">
@@ -80,7 +91,7 @@ export default function Page() {
           </CardContent>
           <CardFooter>
             <Button className="w-full" disabled>
-              Get Started
+              Coming Soon
             </Button>
           </CardFooter>
         </Card>
@@ -116,9 +127,12 @@ export default function Page() {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" variant="outline">
+            <a
+              href="mailto:hello@praveenjuge.com"
+              className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+            >
               Contact Sales
-            </Button>
+            </a>
           </CardFooter>
         </Card>
       </div>
@@ -145,35 +159,7 @@ export default function Page() {
         <CardContent className="grid gap-2">
           <Collapsible>
             <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
-                <h4 className="text-sm font-medium">
-                  How do I reset my password?
-                </h4>
-                <Button variant="ghost" size="icon">
-                  <ChevronDown className="h-4 w-4" />
-                  <span className="sr-only">Toggle</span>
-                </Button>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
-              <p>To reset your password, follow these steps:</p>
-              <ol className="list-inside list-decimal">
-                <li>
-                  Click on your profile avatar in the top-right corner and
-                  select "Settings".
-                </li>
-                <li>In the "Account" section, click on "Change Password".</li>
-                <li>
-                  Enter your current password and a new password, then confirm
-                  the new password.
-                </li>
-                <li>Click "Save Changes" to update your password.</li>
-              </ol>
-            </CollapsibleContent>
-          </Collapsible>
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
                 <h4 className="text-sm font-medium">
                   How do I upgrade my plan?
                 </h4>
@@ -187,7 +173,8 @@ export default function Page() {
               <p>To upgrade your plan, follow these steps:</p>
               <ol className="list-inside list-decimal">
                 <li>
-                  Click on the "Billing" tab in the left-hand navigation menu.
+                  Click on the "Subscription" tab in the left-hand navigation
+                  menu.
                 </li>
                 <li>Under "Your Plan", click on the "Upgrade" button.</li>
                 <li>
@@ -199,7 +186,7 @@ export default function Page() {
           </Collapsible>
           <Collapsible>
             <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
                 <h4 className="text-sm font-medium">
                   How do I cancel my subscription?
                 </h4>
@@ -213,7 +200,8 @@ export default function Page() {
               <p>To cancel your subscription, follow these steps:</p>
               <ol className="list-inside list-decimal">
                 <li>
-                  Click on the "Billing" tab in the left-hand navigation menu.
+                  Click on the "Subscription" tab in the left-hand navigation
+                  menu.
                 </li>
                 <li>
                   Under "Your Plan", click on the "Cancel Subscription" button.
@@ -224,7 +212,7 @@ export default function Page() {
           </Collapsible>
           <Collapsible>
             <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border pl-4">
+              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
                 <h4 className="text-sm font-medium">
                   How do I add a team member?
                 </h4>

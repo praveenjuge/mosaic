@@ -15,6 +15,8 @@ export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: "Help & Support",
+  description:
+    "Find solutions to common issues and get help with troubleshooting..",
 };
 
 // Define the type for the posts
@@ -45,10 +47,8 @@ export default function Page() {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-8 py-4 md:py-10">
       <CardHeader className="p-0">
-        <CardTitle>Help & Support</CardTitle>
-        <CardDescription>
-          Find solutions to common issues and get help with troubleshooting.
-        </CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">

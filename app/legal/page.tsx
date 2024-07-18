@@ -10,17 +10,16 @@ import { Metadata } from "next";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Legal",
+  title: "Legal Information",
+  description: "We take your privacy and data seriously.",
 };
 
 export default function Page() {
   return (
     <div className="mx-auto grid w-full max-w-3xl gap-8 py-4 md:py-10">
       <CardHeader className="p-0">
-        <CardTitle>Privacy & Terms</CardTitle>
-        <CardDescription>
-          We take your privacy and data seriously.
-        </CardDescription>
+        <CardTitle>{metadata.title as string}</CardTitle>
+        <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
       <Card>
         <CardHeader>
