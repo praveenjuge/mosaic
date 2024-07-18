@@ -48,7 +48,7 @@ export default function Page() {
                 })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="prose prose-sm prose-slate pb-2">
+            <CardContent className="prose prose-sm prose-slate max-w-none pb-2">
               <div
                 dangerouslySetInnerHTML={{
                   __html: markdownToHtml(item.content),
