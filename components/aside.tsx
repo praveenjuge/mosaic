@@ -36,7 +36,7 @@ const NavLink = ({
       href={href}
       className={cn(
         "relative flex items-center gap-2 py-1",
-        isActive && "text-emerald-600 [&_svg]:text-emerald-600",
+        isActive && "font-semibold text-emerald-600 [&_svg]:text-emerald-600",
       )}
     >
       {isActive && (
