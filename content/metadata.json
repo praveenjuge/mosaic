@@ -1,6 +1,6 @@
 {
-  "commit": "a6ae30fcbf24eb38dbd1fb2aa3e22b22c2fe0dce",
-  "generated": "2024-07-18T13:41:50.515Z",
+  "commit": "b4293d7205ae4b9707d4723f96c950f4a17e8330",
+  "generated": "2024-07-18T13:53:14.566Z",
   "metadata": [
     {
       "__outstatic": {
@@ -112,6 +112,25 @@
       "slug": "log-in-to-your-account",
       "status": "published",
       "title": "Log In to Your Account"
+    },
+    {
+      "__outstatic": {
+        "commit": "b4293d7205ae4b9707d4723f96c950f4a17e8330",
+        "hash": "3541149141",
+        "path": "content/help/add-your-website-to-mosaic.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Getting Started",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:25:38.421Z",
+      "slug": "add-your-website-to-mosaic",
+      "status": "published",
+      "title": "Add Your Website to Mosaic"
     }
   ]
 }
