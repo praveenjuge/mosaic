@@ -51,7 +51,7 @@ const NavLink = ({
 };
 
 const AsideContent = () => (
-  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto bg-primary-foreground p-4 font-medium">
+  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:border-r-[0.5px]">
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <Logo />
@@ -88,7 +88,7 @@ export default function Aside() {
         <AsideContent />
       </div>
       <SignedIn>
-        <div className="fixed right-4 top-4 z-10 size-10 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-10 [&_button]:size-10">
+        <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-8 [&_button]:size-8">
           <UserButton />
         </div>
       </SignedIn>
@@ -97,7 +97,7 @@ export default function Aside() {
           <Button
             size="icon"
             variant="outline"
-            className="fixed left-4 top-4 z-10 shrink-0 rounded-full md:hidden"
+            className="fixed left-3 top-3 z-10 shrink-0 rounded-full md:hidden"
           >
             <Menu className="size-5" />
             <span className="sr-only">Toggle navigation menu</span>

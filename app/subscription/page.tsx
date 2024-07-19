@@ -13,6 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
+import { SignedIn } from "@clerk/nextjs";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
 
@@ -28,7 +29,40 @@ export default function Page() {
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-4">
+        <Card>
+          <CardHeader className="border-b-[0.5px]">
+            <CardTitle>Free</CardTitle>
+            <CardDescription>For trying out</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center py-8">
+            <div className="mb-1 text-4xl font-bold tracking-tight">$0</div>
+            <div className="text-sm text-muted-foreground">per month</div>
+            <ul className="mt-8 grid w-full gap-2">
+              <li className="flex items-center gap-2">
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>250 images</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>Unlimited websites</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>2 GB storage</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>No support</span>
+              </li>
+            </ul>
+          </CardContent>
+          <CardFooter>
+            <Button className="w-full" disabled>
+              Coming Soon
+            </Button>
+          </CardFooter>
+        </Card>
         <Card>
           <CardHeader className="border-b-[0.5px]">
             <CardTitle>Pro</CardTitle>
@@ -37,21 +71,21 @@ export default function Page() {
           <CardContent className="flex flex-col items-center py-8">
             <div className="mb-1 text-4xl font-bold tracking-tight">$19</div>
             <div className="text-sm text-muted-foreground">per month</div>
-            <ul className="mt-8 grid w-full gap-3">
+            <ul className="mt-8 grid w-full gap-2">
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
-                <span>500 images</span>
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>5000 images</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited websites</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
-                <span>2 GB storage</span>
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>20 GB storage</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Email support</span>
               </li>
             </ul>
@@ -68,23 +102,23 @@ export default function Page() {
             <CardDescription>For small to medium teams</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-1 text-4xl font-bold tracking-tight">$59</div>
+            <div className="mb-1 text-4xl font-bold tracking-tight">$99</div>
             <div className="text-sm text-muted-foreground">per month</div>
-            <ul className="mt-8 grid w-full gap-3">
+            <ul className="mt-8 grid w-full gap-2">
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited images</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited websites</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
-                <span>20 GB storage</span>
+                <Check className="size-5 text-primary" stroke={2} />
+                <span>100 GB storage</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Priority email support</span>
               </li>
             </ul>
@@ -107,21 +141,21 @@ export default function Page() {
             <div className="text-sm text-muted-foreground">
               Custom pricing and features
             </div>
-            <ul className="mt-8 grid w-full gap-3">
+            <ul className="mt-8 grid w-full gap-2">
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited images</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited websites</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Unlimited storage</span>
               </li>
               <li className="flex items-center gap-2">
-                <Check className="size-5" stroke={2} />
+                <Check className="size-5 text-primary" stroke={2} />
                 <span>Dedicated account manager</span>
               </li>
             </ul>
@@ -136,18 +170,20 @@ export default function Page() {
           </CardFooter>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>You are a Pro User! 🎉</CardTitle>
-          <CardDescription>Enjoy your benefits.</CardDescription>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>You are not subscribed yet.</CardTitle>
-          <CardDescription>Subscribe to get more benefits.</CardDescription>
-        </CardHeader>
-      </Card>
+      <SignedIn>
+        <Card>
+          <CardHeader>
+            <CardTitle>You are a Pro User! 🎉</CardTitle>
+            <CardDescription>Enjoy your benefits.</CardDescription>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>You are not subscribed yet.</CardTitle>
+            <CardDescription>Subscribe to get more benefits.</CardDescription>
+          </CardHeader>
+        </Card>
+      </SignedIn>
       <Card>
         <CardHeader>
           <CardTitle>Frequently Asked Questions</CardTitle>

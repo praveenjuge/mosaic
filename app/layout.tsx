@@ -31,9 +31,12 @@ export default function RootLayout({
             defaultTheme="light"
             disableTransitionOnChange
           >
-            <div className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-primary opacity-15 blur-3xl"></div>
+            <div
+              className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-primary opacity-15 blur-3xl"
+              aria-hidden="true"
+            ></div>
             <Aside />
-            <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto border-l-[0.5px] px-4 py-16 md:px-10 md:py-6">
+            <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto px-4 py-20 md:px-10 md:py-6">
               {children}
             </main>
           </ThemeProvider>
