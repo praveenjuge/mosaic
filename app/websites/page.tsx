@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Earth, Globe } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import Link from "next/link";
 import { AddWebsite } from "./AddWebsite";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -66,7 +67,7 @@ export default async function Page() {
                 <TableHead>Website</TableHead>
                 <TableHead>URL</TableHead>
                 <TableHead>Images</TableHead>
-                <TableHead>Cache Time</TableHead>
+                <TableHead>Cache</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -81,12 +82,17 @@ export default async function Page() {
                         ) : (
                           <Globe className="size-4" />
                         )}
-                        <span className="max-w-xs truncate font-medium">
+                        <Link
+                          href={`/websites/${website.id}`}
+                          className="max-w-xs truncate font-medium"
+                        >
                           {website.title ? website.title : website.website_url}
-                        </span>
+                        </Link>
                       </div>
                     </TableCell>
-                    <TableCell>{website.website_url}</TableCell>
+                    <TableCell className="max-w-xs truncate font-medium">
+                      {website.cleaned_website_url}
+                    </TableCell>
                     <TableCell>{website.total_count}</TableCell>
                     <TableCell>
                       {/* TODO */}
