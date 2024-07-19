@@ -1,4 +1,6 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { SubmitButton } from "@/components/forms/submit-button";
 import {
   Dialog,
   DialogContent,
@@ -9,42 +11,22 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/server";
-import { Pen } from "@mynaui/icons-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { handleEdit } from "./actions";
 
-export async function EditWebsite({
+export function EditWebsite({
   websiteId,
   currentUrl,
 }: {
   websiteId: string;
   currentUrl?: string;
 }) {
-  const handleSubmit = async (formData: FormData) => {
-    "use server";
-
-    const url = formData.get("website")?.toString() || "";
-    const client = await createClient();
-    const { data, error } = await client
-      .from("websites")
-      .update({ website_url: url })
-      .eq("id", websiteId)
-      .select();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  };
+  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Pen className="size-5" />
-          <span className="sr-only">Edit Website</span>
-        </Button>
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger>Edit</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit Website</DialogTitle>
@@ -52,7 +34,15 @@ export async function EditWebsite({
             Enter the new URL for the website.
           </DialogDescription>
         </DialogHeader>
-        <form className="grid gap-4" action={handleSubmit}>
+
+        <form
+          className="grid gap-4"
+          action={async (formData) => {
+            await handleEdit(formData, websiteId);
+            setOpen(false);
+            toast.success("Updated website.");
+          }}
+        >
           <div className="grid gap-2">
             <Label htmlFor="website">Website</Label>
             <Input
@@ -64,9 +54,7 @@ export async function EditWebsite({
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Submit
-          </Button>
+          <SubmitButton text="Save" />
         </form>
       </DialogContent>
     </Dialog>

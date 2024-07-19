@@ -1,3 +1,6 @@
+"use client";
+
+import { SubmitButton } from "@/components/forms/submit-button";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,28 +12,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/server";
+import { useState } from "react";
+import { toast } from "sonner";
+import { handleAdd } from "./actions";
 
-export async function AddWebsite() {
-  const handleSubmit = async (formData: FormData) => {
-    "use server";
-
-    const url = formData.get("website")?.toString() || "";
-    const client = await createClient();
-    const { data, error } = await client
-      .from("websites")
-      .insert([{ website_url: url }])
-      .select();
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
-    return data;
-  };
+export function AddWebsite() {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button size="sm">Add Website</Button>
       </DialogTrigger>
@@ -41,7 +31,14 @@ export async function AddWebsite() {
             Enter the URL of the website you want to add.
           </DialogDescription>
         </DialogHeader>
-        <form className="grid gap-4" action={handleSubmit}>
+        <form
+          className="grid gap-4"
+          action={async (formData) => {
+            await handleAdd(formData);
+            setOpen(false);
+            toast.success("Added your website!");
+          }}
+        >
           <div className="grid gap-2">
             <Label htmlFor="website">Website</Label>
             <Input
@@ -52,9 +49,7 @@ export async function AddWebsite() {
               required
             />
           </div>
-          <Button type="submit" className="w-full">
-            Submit
-          </Button>
+          <SubmitButton text="Add" />
         </form>
       </DialogContent>
     </Dialog>
