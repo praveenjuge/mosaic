@@ -45,15 +45,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <CardHeader className="p-0">
-          <CardDescription>
-            <Link href="/websites">← Back</Link>
-          </CardDescription>
-          <CardTitle>{websites[0].cleaned_website_url}</CardTitle>
-        </CardHeader>
-        <Button variant="outline">Edit</Button>
-      </div>
+      <CardHeader className="p-0">
+        <CardDescription>
+          <Link href="/websites">← Back</Link>
+        </CardDescription>
+        <CardTitle>{websites[0].cleaned_website_url}</CardTitle>
+      </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
