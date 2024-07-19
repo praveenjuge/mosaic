@@ -1,10 +1,13 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 import {
   Table,
   TableBody,
@@ -13,9 +16,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { InfoCircle, InfoTriangle, TrendingUp } from "@mynaui/icons-react";
 import { Metadata } from "next";
-import Link from "next/link";
+import { ImagesChart } from "./imageschart";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -32,236 +34,140 @@ export default function Page() {
       <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>Screenshot Volume</CardTitle>
-            <CardDescription>
-              Total number of screenshots captured.
-            </CardDescription>
+            <CardTitle>59,623</CardTitle>
+            <CardDescription>Images Generated</CardDescription>
+            <Progress className="h-2" value={33} />
           </CardHeader>
-          <CardContent>
-            <h3 className="text-4xl font-semibold tracking-tight">12,345</h3>
-            <p className="mt-1 text-muted-foreground">+15% from last month</p>
-          </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>Success Rate</CardTitle>
-            <CardDescription>
-              Percentage of screenshots successfully captured.
-            </CardDescription>
+            <CardTitle>18 GB/20 GB</CardTitle>
+            <CardDescription>Storage Used</CardDescription>
+            <Progress className="h-2" value={66} />
           </CardHeader>
-          <CardContent>
-            <h3 className="text-4xl font-semibold tracking-tight">92%</h3>
-            <p className="mt-1 text-muted-foreground">+3% from last month</p>
-          </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>User Engagement</CardTitle>
-            <CardDescription>
-              Total number of users interacting with the platform.
-            </CardDescription>
+            <CardTitle>114,431</CardTitle>
+            <CardDescription>Times Viewed</CardDescription>
+            <Progress className="h-2" value={77} />
           </CardHeader>
-          <CardContent>
-            <h3 className="text-4xl font-semibold tracking-tight">8,765</h3>
-            <p className="mt-1 text-muted-foreground">+10% from last month</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Screenshot Volume</CardTitle>
-            <CardDescription>
-              Visualize the trend of screenshot volume over time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent></CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Success Rate</CardTitle>
-            <CardDescription>
-              Trend of screenshot success rate over time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent></CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>User Engagement</CardTitle>
-            <CardDescription>
-              Visualize the trend of user engagement over time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent></CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Top Websites</CardTitle>
-            <CardDescription>
-              List of websites with the highest screenshot volume and success
-              rate.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Website</TableHead>
-                  <TableHead>Screenshots</TableHead>
-                  <TableHead>Success Rate</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <Link href="#">example.com</Link>
-                  </TableCell>
-                  <TableCell>2,345</TableCell>
-                  <TableCell>98%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Link href="#">acme.com</Link>
-                  </TableCell>
-                  <TableCell>1,876</TableCell>
-                  <TableCell>92%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Link href="#">widgets.com</Link>
-                  </TableCell>
-                  <TableCell>1,543</TableCell>
-                  <TableCell>89%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Link href="#">blog.com</Link>
-                  </TableCell>
-                  <TableCell>1,234</TableCell>
-                  <TableCell>85%</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <Link href="#">news.com</Link>
-                  </TableCell>
-                  <TableCell>987</TableCell>
-                  <TableCell>92%</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Errors</CardTitle>
-            <CardDescription>
-              List of errors encountered during screenshot capture, along with
-              their occurrences and last seen time.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Error</TableHead>
-                  <TableHead>Occurrences</TableHead>
-                  <TableHead>Last Seen</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <InfoTriangle className="size-5 text-red-500" />
-                      <span className="font-medium">Timeout</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>345</TableCell>
-                  <TableCell>2 hours ago</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <InfoCircle className="size-5 text-yellow-500" />
-                      <span className="font-medium">Network Error</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>234</TableCell>
-                  <TableCell>4 hours ago</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <InfoTriangle className="size-5 text-red-500" />
-                      <span className="font-medium">Rendering Error</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>167</TableCell>
-                  <TableCell>6 hours ago</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <InfoCircle className="size-5 text-yellow-500" />
-                      <span className="font-medium">Unsupported Browser</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>89</TableCell>
-                  <TableCell>8 hours ago</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <InfoTriangle className="size-5 text-red-500" />
-                      <span className="font-medium">Unauthorized Access</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>45</TableCell>
-                  <TableCell>12 hours ago</TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Insights</CardTitle>
-            <CardDescription>
-              Highlights and insights related to screenshot volume, success
-              rate, and user engagement.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="grid gap-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="size-5 text-green-500" />
-              <div>
-                <p className="font-medium">Screenshot Volume Increased</p>
-                <p className="text-muted-foreground">
-                  Screenshot volume increased by 15% compared to last month.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="size-5 text-green-500" />
-              <div>
-                <p className="font-medium">Success Rate Improved</p>
-                <p className="text-muted-foreground">
-                  Screenshot success rate increased by 3% compared to last
-                  month.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="size-5 text-green-500" />
-              <div>
-                <p className="font-medium">User Engagement Grew</p>
-                <p className="text-muted-foreground">
-                  User engagement increased by 10% compared to last month.
-                </p>
-              </div>
-            </div>
-          </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Images Generated</CardTitle>
+          <CardDescription>
+            Showing total images generated last 30 days
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ImagesChart />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>New Screenshots History</CardTitle>
+          <CardDescription>
+            {/* TODO */}
+            Condimentum nulla pellentesque eget feugiat sit blandit vitae
+            pellentesque nulla. Tempor hendrerit tincidunt nunc arcu
+            pellentesque.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Image</TableHead>
+                <TableHead>Website</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Time to Render</TableHead>
+                <TableHead>Size</TableHead>
+                <TableHead>Date & Time</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell>
+                  <img
+                    src="/placeholder.svg"
+                    alt="Screenshot"
+                    className="h-10 w-10"
+                  />
+                </TableCell>
+                <TableCell>harvard.edu</TableCell>
+                <TableCell>Success</TableCell>
+                <TableCell>546 ms</TableCell>
+                <TableCell>3 Mb</TableCell>
+                <TableCell>Dec 4, 2019 21:42</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <img
+                    src="/placeholder.svg"
+                    alt="Screenshot"
+                    className="h-10 w-10"
+                  />
+                </TableCell>
+                <TableCell>usp.br</TableCell>
+                <TableCell>Success</TableCell>
+                <TableCell>54 ms</TableCell>
+                <TableCell>180 kb</TableCell>
+                <TableCell>Mar 20, 2019 23:14</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <img
+                    src="/placeholder.svg"
+                    alt="Screenshot"
+                    className="h-10 w-10"
+                  />
+                </TableCell>
+                <TableCell>u-tokyo.ac.jp</TableCell>
+                <TableCell>Success</TableCell>
+                <TableCell>457 ms</TableCell>
+                <TableCell>18 Mb</TableCell>
+                <TableCell>Dec 30, 2019 07:52</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <img
+                    src="/placeholder.svg"
+                    alt="Screenshot"
+                    className="h-10 w-10"
+                  />
+                </TableCell>
+                <TableCell>stanford.edu</TableCell>
+                <TableCell>Failed</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>-</TableCell>
+                <TableCell>Feb 2, 2019 19:28</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <img
+                    src="/placeholder.svg"
+                    alt="Screenshot"
+                    className="h-10 w-10"
+                  />
+                </TableCell>
+                <TableCell>du.ac.in</TableCell>
+                <TableCell>Success</TableCell>
+                <TableCell>457 ms</TableCell>
+                <TableCell>19 Kb</TableCell>
+                <TableCell>Dec 30, 2019 05:18</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="flex justify-between">
+          <Button variant="outline">Previous</Button>
+          <Button variant="outline">Next</Button>
+        </CardFooter>
+      </Card>
     </>
   );
 }

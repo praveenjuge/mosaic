@@ -53,7 +53,7 @@ export default async function Home() {
   return (
     <>
       <SignedOut>
-        <div className="mx-auto flex max-w-xl flex-col items-center gap-6 py-4 text-center">
+        <div className="mx-auto flex max-w-xl flex-col items-center gap-6 text-center">
           <Logo />
           <div className="space-y-2">
             <h1 className="text-balance text-3xl font-semibold tracking-tighter">
@@ -86,7 +86,7 @@ export default async function Home() {
         </div>
       </SignedOut>
       <SignedIn>
-        <div className="space-y-8 py-4 md:py-0">
+        <div className="space-y-8 md:py-0">
           <div>
             <CardHeader className="mb-4 p-0">
               <CardTitle>Overview</CardTitle>
