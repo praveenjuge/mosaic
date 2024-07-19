@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -15,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
 import { SignedIn } from "@clerk/nextjs";
-import { Eye, Globe, Pen, Trash } from "@mynaui/icons-react";
+import { Globe } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { AddWebsite } from "./AddWebsite";
 import { DeleteWebsite } from "./DeleteWebsite";
@@ -51,6 +50,7 @@ export default async function Page() {
                 <TableHead>Website</TableHead>
                 <TableHead>URL</TableHead>
                 <TableHead>Images</TableHead>
+                <TableHead>Cache Time</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -72,150 +72,21 @@ export default async function Page() {
                   <TableCell>{website.website_url}</TableCell>
                   <TableCell>{website.total_count}</TableCell>
                   <TableCell>
+                    {/* TODO */}
+                    30 Days
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="icon">
-                        <Eye className="size-5" />
-                        <span className="sr-only">View</span>
-                      </Button>
                       <EditWebsite
                         websiteId={website.id}
                         currentUrl={website.website_url}
                       />
+                      <span>•</span>
                       <DeleteWebsite websiteId={website.id} />
                     </div>
                   </TableCell>
                 </TableRow>
               ))}
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    <span className="font-medium">Globex Corporation</span>
-                  </div>
-                </TableCell>
-                <TableCell>globex.com</TableCell>
-                <TableCell>8</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="size-5" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Pen className="size-5" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="icon" color="red">
-                      <Trash className="size-5" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    <span className="font-medium">Stark Industries</span>
-                  </div>
-                </TableCell>
-                <TableCell>stark.com</TableCell>
-                <TableCell>20</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="size-5" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Pen className="size-5" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="icon" color="red">
-                      <Trash className="size-5" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    <span className="font-medium">Wayne Enterprises</span>
-                  </div>
-                </TableCell>
-                <TableCell>wayne.com</TableCell>
-                <TableCell>15</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="size-5" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Pen className="size-5" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="icon" color="red">
-                      <Trash className="size-5" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    <span className="font-medium">Stark Industries</span>
-                  </div>
-                </TableCell>
-                <TableCell>stark.com</TableCell>
-                <TableCell>20</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="size-5" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Pen className="size-5" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="icon" color="red">
-                      <Trash className="size-5" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Globe className="size-5" />
-                    <span className="font-medium">Wayne Enterprises</span>
-                  </div>
-                </TableCell>
-                <TableCell>wayne.com</TableCell>
-                <TableCell>15</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="icon">
-                      <Eye className="size-5" />
-                      <span className="sr-only">View</span>
-                    </Button>
-                    <Button variant="outline" size="icon">
-                      <Pen className="size-5" />
-                      <span className="sr-only">Edit</span>
-                    </Button>
-                    <Button variant="outline" size="icon" color="red">
-                      <Trash className="size-5" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
             </TableBody>
           </Table>
         </Card>

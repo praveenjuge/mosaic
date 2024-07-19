@@ -1,57 +1,47 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import { SubmitButton } from "@/components/forms/submit-button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { createClient } from "@/lib/supabase/server";
-import { Trash } from "@mynaui/icons-react";
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useState } from "react";
+import { toast } from "sonner";
+import { handleDelete } from "./actions";
 
-export async function DeleteWebsite({ websiteId }: { websiteId: string }) {
-  const handleDelete = async () => {
-    "use server";
-
-    const client = await createClient();
-    const { error } = await client
-      .from("websites")
-      .delete()
-      .eq("id", websiteId);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  };
+export function DeleteWebsite({ websiteId }: { websiteId: string }) {
+  const [open, setOpen] = useState(false);
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="icon" color="red">
-          <Trash className="size-5" />
-          <span className="sr-only">Delete Website</span>
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Delete Website</DialogTitle>
-          <DialogDescription>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger>Delete</AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete Website</AlertDialogTitle>
+          <AlertDialogDescription>
             Are you sure you want to delete this website? This action cannot be
             undone.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex gap-4">
-          <form action={handleDelete}>
-            <Button type="submit" variant="destructive">
-              Yes, Delete
-            </Button>
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <form
+            action={async () => {
+              await handleDelete(websiteId);
+              setOpen(false);
+              toast.success("Your website has been deleted.");
+            }}
+          >
+            <SubmitButton text="Yes, Delete" variant="destructive" />
           </form>
-          <DialogTrigger asChild>
-            <Button variant="secondary">Cancel</Button>
-          </DialogTrigger>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
