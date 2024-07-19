@@ -70,7 +70,7 @@ export default async function Page() {
                     </div>
                   </TableCell>
                   <TableCell>{website.website_url}</TableCell>
-                  <TableCell>12</TableCell>
+                  <TableCell>{website.total_count}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Button variant="outline" size="icon">

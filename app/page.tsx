@@ -6,6 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
 import {
   ClerkLoading,
   SignedIn,
@@ -15,7 +17,39 @@ import {
 } from "@clerk/nextjs";
 import { Dots, Globe } from "@mynaui/icons-react";
 
-export default function Home() {
+async function fetchLatestImages(token: string) {
+  const url = "https://get.mosaicimg.com/api/websites/latest_images";
+
+  const response = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+
+
+export default async function Home() {
+  const client = await createClient();
+  let latestImages = []
+  try {
+    const { getToken } = auth();
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      const response = await fetchLatestImages(token);
+      latestImages = response.images;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+
   return (
     <>
       <SignedOut>
@@ -144,34 +178,17 @@ export default function Home() {
               <CardTitle>Latest Cached Images</CardTitle>
             </CardHeader>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-              <Card>
-                <img
-                  src="https://generated.vusercontent.net/placeholder.svg"
-                  alt="Cached Image 1"
-                  className="h-auto w-full rounded-lg"
-                />
-              </Card>
-              <Card>
-                <img
-                  src="https://generated.vusercontent.net/placeholder.svg"
-                  alt="Cached Image 2"
-                  className="h-auto w-full rounded-lg"
-                />
-              </Card>
-              <Card>
-                <img
-                  src="https://generated.vusercontent.net/placeholder.svg"
-                  alt="Cached Image 3"
-                  className="h-auto w-full rounded-lg"
-                />
-              </Card>
-              <Card>
-                <img
-                  src="https://generated.vusercontent.net/placeholder.svg"
-                  alt="Cached Image 4"
-                  className="h-auto w-full rounded-lg"
-                />
-              </Card>
+              {latestImages.map((image: any) => (
+                <div className="aspect-[1200/630] w-full">
+                  <Card className="h-full">
+                    <img
+                      src={image.image_url}
+                      alt={image.title}
+                      className="h-full w-full object-cover rounded-lg"
+                    />
+                  </Card>
+                </div>
+              ))}
             </div>
           </div>
         </div>
