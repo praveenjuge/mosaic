@@ -92,11 +92,7 @@ export default function Page() {
             <TableBody>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
                 </TableCell>
                 <TableCell>harvard.edu</TableCell>
                 <TableCell>Success</TableCell>
@@ -106,11 +102,7 @@ export default function Page() {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
                 </TableCell>
                 <TableCell>usp.br</TableCell>
                 <TableCell>Success</TableCell>
@@ -120,11 +112,7 @@ export default function Page() {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
                 </TableCell>
                 <TableCell>u-tokyo.ac.jp</TableCell>
                 <TableCell>Success</TableCell>
@@ -134,11 +122,7 @@ export default function Page() {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
                 </TableCell>
                 <TableCell>stanford.edu</TableCell>
                 <TableCell>Failed</TableCell>
@@ -148,11 +132,7 @@ export default function Page() {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
                 </TableCell>
                 <TableCell>du.ac.in</TableCell>
                 <TableCell>Success</TableCell>

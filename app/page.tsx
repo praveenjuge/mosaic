@@ -132,7 +132,7 @@ export default async function Home() {
           </CardHeader>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
             {latestImages.map((image: any) => (
-              <div className="aspect-[1200/630] w-full">
+              <div className="aspect-[1200/630] w-full" key={image.image_url}>
                 <Card className="h-full">
                   <img
                     src={image.image_url}

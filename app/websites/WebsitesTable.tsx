@@ -46,7 +46,7 @@ export default async function WebsitesTable() {
                     )}
                     <Link
                       href={`/websites/${website.id}`}
-                      className="max-w-xs truncate font-medium"
+                      className="max-w-xs truncate font-medium text-primary"
                     >
                       {website.title ? website.title : website.website_url}
                     </Link>

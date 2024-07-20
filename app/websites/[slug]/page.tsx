@@ -37,8 +37,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
     .select("*")
     .eq("id", params.slug);
 
-  console.log(websites);
-
   if (error || websites.length === 0) {
     notFound();
   }
@@ -96,11 +94,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             <TableBody>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="size-8" />
                 </TableCell>
                 <TableCell>https://praveenjuge.com/bL...</TableCell>
                 <TableCell>Success</TableCell>
@@ -110,11 +104,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="size-8" />
                 </TableCell>
                 <TableCell>https://praveenjuge.com/bL...</TableCell>
                 <TableCell>Success</TableCell>
@@ -124,11 +114,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="size-8" />
                 </TableCell>
                 <TableCell>https://praveenjuge.com/bL...</TableCell>
                 <TableCell>Success</TableCell>
@@ -138,11 +124,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="size-8" />
                 </TableCell>
                 <TableCell>https://praveenjuge.com/bL...</TableCell>
                 <TableCell>Failed</TableCell>
@@ -152,11 +134,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
               </TableRow>
               <TableRow>
                 <TableCell>
-                  <img
-                    src="/placeholder.svg"
-                    alt="Screenshot"
-                    className="h-10 w-10"
-                  />
+                  <img src="#" alt="Screenshot" className="size-8" />
                 </TableCell>
                 <TableCell>https://praveenjuge.com/bL...</TableCell>
                 <TableCell>Success</TableCell>
