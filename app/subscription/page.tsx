@@ -45,7 +45,7 @@ export default function Page() {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited websites</span>
+                <span>1 website</span>
               </li>
               <li className="flex items-center gap-2">
                 <Check className="size-5 text-primary" stroke={2} />

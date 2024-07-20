@@ -1,6 +1,5 @@
 "use client";
 
-import { SubmitButton } from "@/components/forms/submit-button";
 import {
   Dialog,
   DialogContent,
@@ -14,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { toast } from "sonner";
 import { handleEdit } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export function EditWebsite({
   websiteId,

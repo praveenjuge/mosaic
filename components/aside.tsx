@@ -51,7 +51,7 @@ const NavLink = ({
 };
 
 const AsideContent = () => (
-  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col justify-between gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:border-r-[0.5px]">
+  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]">
     <div className="flex flex-col gap-6">
       <div className="flex h-[18px] items-center justify-between">
         <Logo />

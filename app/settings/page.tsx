@@ -51,7 +51,7 @@ export default function Page() {
                 <Switch id="100-usage" disabled />
               </div>
               <div className="flex items-center justify-between">
-                <span>New features announcements</span>
+                <span>New feature announcements</span>
                 <Switch id="newsletter" disabled />
               </div>
             </div>

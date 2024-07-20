@@ -1,6 +1,5 @@
 "use client";
 
-import { SubmitButton } from "@/components/forms/submit-button";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -14,6 +13,7 @@ import {
 import { useState } from "react";
 import { toast } from "sonner";
 import { handleDelete } from "./actions";
+import { SubmitButton } from "./submit-button";
 
 export function DeleteWebsite({ websiteId }: { websiteId: string }) {
   const [open, setOpen] = useState(false);

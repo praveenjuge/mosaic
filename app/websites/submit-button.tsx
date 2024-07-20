@@ -1,7 +1,8 @@
 "use client";
 
+import { LoadingSpinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
-import { Button } from "../ui/button";
 
 interface SubmitButtonProps {
   text?: string;
@@ -22,7 +23,7 @@ export function SubmitButton({
       disabled={pending}
       aria-disabled={pending}
     >
-      {pending ? "Loading..." : text}
+      {pending ? <LoadingSpinner /> : text}
     </Button>
   );
 }
