@@ -68,7 +68,10 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>{data.cleaned_website_url}</CardTitle>
+        <CardTitle>
+          {data.cleaned_website_url}
+
+        </CardTitle>
       </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
