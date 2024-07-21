@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { auth } from "@clerk/nextjs/server";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -18,13 +19,45 @@ import {
 } from "@/components/ui/table";
 import { Metadata } from "next";
 import { ImagesChart } from "./imageschart";
+import { notFound } from "next/navigation";
+import { formatBytes } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Analytics",
   description: "View your logs and analytics here.",
 };
 
-export default function Page() {
+async function fetchAnalyticsData(token: string) {
+  const url = "https://get.mosaicimg.com/api/analytics/"
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+export default async function Page() {
+  let data: any = {};
+  try {
+    const { getToken } = auth();
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      const response = await fetchAnalyticsData(token);
+      data = response;
+    }
+  } catch (error) {
+    console.log(error);
+    notFound();
+  }
+
   return (
     <>
       <CardHeader className="p-0">
@@ -34,16 +67,16 @@ export default function Page() {
       <div className="grid w-full gap-6 sm:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>59,623</CardTitle>
+            <CardTitle>{data.total_count}</CardTitle>
             <CardDescription>Images Generated</CardDescription>
-            <Progress className="h-2" value={33} />
+            <Progress className="h-2" value={data.total_count * 100 / 500} />
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>18 GB/20 GB</CardTitle>
+            <CardTitle>{formatBytes(data.total_bytes)}/50 MB</CardTitle>
             <CardDescription>Storage Used</CardDescription>
-            <Progress className="h-2" value={66} />
+            <Progress className="h-2" value={(data.total_bytes * 100) / (1048576 * 50)} />
           </CardHeader>
         </Card>
         <Card>
@@ -81,65 +114,31 @@ export default function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Image</TableHead>
+                <TableHead>Logo</TableHead>
                 <TableHead>Website</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Time to Render</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Size</TableHead>
                 <TableHead>Date & Time</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
-                </TableCell>
-                <TableCell>harvard.edu</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>546 ms</TableCell>
-                <TableCell>3 Mb</TableCell>
-                <TableCell>Dec 4, 2019 21:42</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
-                </TableCell>
-                <TableCell>usp.br</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>54 ms</TableCell>
-                <TableCell>180 kb</TableCell>
-                <TableCell>Mar 20, 2019 23:14</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
-                </TableCell>
-                <TableCell>u-tokyo.ac.jp</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>457 ms</TableCell>
-                <TableCell>18 Mb</TableCell>
-                <TableCell>Dec 30, 2019 07:52</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
-                </TableCell>
-                <TableCell>stanford.edu</TableCell>
-                <TableCell>Failed</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>Feb 2, 2019 19:28</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="h-6 w-10 rounded" />
-                </TableCell>
-                <TableCell>du.ac.in</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>457 ms</TableCell>
-                <TableCell>19 Kb</TableCell>
-                <TableCell>Dec 30, 2019 05:18</TableCell>
-              </TableRow>
+              {data.website_pages.map((website_page: any) => (
+                <TableRow key={website_page.id}>
+                  <TableCell>
+                    <img
+                      src={website_page.favicon_url}
+                      alt={website_page.title}
+                      className="size-8"
+                    />
+                  </TableCell>
+                  <TableCell>{website_page.page_url}</TableCell>
+                  <TableCell>{website_page.title}</TableCell>
+                  <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
+                  <TableCell>
+                    {new Date(website_page.updated_at).toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
