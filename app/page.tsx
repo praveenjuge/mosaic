@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { createClient } from "@/lib/supabase/server";
 import {
   ClerkLoading,
   SignedIn,
@@ -36,7 +35,6 @@ async function fetchLatestImages(token: string) {
 }
 
 export default async function Home() {
-  const client = await createClient();
   let latestImages = [];
   try {
     const { getToken } = auth();

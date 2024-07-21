@@ -15,7 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { createClient } from "@/lib/supabase/server";
+import { formatBytes } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,14 +31,35 @@ export async function generateMetadata({
   };
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const client = await createClient();
-  const { data: websites, error } = await client
-    .from("websites")
-    .select("*")
-    .eq("id", params.slug);
 
-  if (error || websites.length === 0) {
+async function fetchWebsiteData(token: string, websiteId: string) {
+  const url = "https://get.mosaicimg.com/api/websites/" + websiteId;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+export default async function Page({ params }: { params: { slug: string } }) {
+  let data: any = {};
+  try {
+    const { getToken } = auth();
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      const response = await fetchWebsiteData(token, params.slug);
+      data = response;
+    }
+  } catch (error) {
+    console.log(error);
     notFound();
   }
 
@@ -47,13 +69,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>{websites[0].cleaned_website_url}</CardTitle>
+        <CardTitle>{data.cleaned_website_url}</CardTitle>
       </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{websites[0].total_count}</CardTitle>
+            <CardTitle>{data.total_count}</CardTitle>
             <CardDescription>Images</CardDescription>
           </CardHeader>
         </Card>
@@ -65,7 +87,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>2 GB</CardTitle>
+            <CardTitle>{formatBytes(data.total_bytes)}</CardTitle>
             <CardDescription>Storage Used</CardDescription>
           </CardHeader>
         </Card>
@@ -83,65 +105,31 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Image</TableHead>
+                {/* <TableHead>Image</TableHead> */}
                 <TableHead>URL</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Time to Render</TableHead>
+                <TableHead>Title</TableHead>
                 <TableHead>Size</TableHead>
-                <TableHead>Date & Time</TableHead>
+                <TableHead>Last refreshed at</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="size-8" />
-                </TableCell>
-                <TableCell>https://praveenjuge.com/bL...</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>546 ms</TableCell>
-                <TableCell>3 Mb</TableCell>
-                <TableCell>Dec 4, 2019 21:42</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="size-8" />
-                </TableCell>
-                <TableCell>https://praveenjuge.com/bL...</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>54 ms</TableCell>
-                <TableCell>180 kb</TableCell>
-                <TableCell>Mar 20, 2019 23:14</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="size-8" />
-                </TableCell>
-                <TableCell>https://praveenjuge.com/bL...</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>457 ms</TableCell>
-                <TableCell>18 Mb</TableCell>
-                <TableCell>Dec 30, 2019 07:52</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="size-8" />
-                </TableCell>
-                <TableCell>https://praveenjuge.com/bL...</TableCell>
-                <TableCell>Failed</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>-</TableCell>
-                <TableCell>Feb 2, 2019 19:28</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <img src="#" alt="Screenshot" className="size-8" />
-                </TableCell>
-                <TableCell>https://praveenjuge.com/bL...</TableCell>
-                <TableCell>Success</TableCell>
-                <TableCell>457 ms</TableCell>
-                <TableCell>19 Kb</TableCell>
-                <TableCell>Dec 30, 2019 05:18</TableCell>
-              </TableRow>
+              {data.website_pages.map((website_page: any) => (
+                <TableRow key={website_page.id}>
+                  {/* <TableCell>
+                    <img
+                      src={website_page.image_url}
+                      alt={website_page.title}
+                      className="size-8"
+                    />
+                  </TableCell> */}
+                  <TableCell>{website_page.page_url}</TableCell>
+                  <TableCell>{website_page.title}</TableCell>
+                  <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
+                  <TableCell>
+                    {new Date(website_page.updated_at).toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </CardContent>
