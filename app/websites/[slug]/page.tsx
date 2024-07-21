@@ -31,7 +31,6 @@ export async function generateMetadata({
   };
 }
 
-
 async function fetchWebsiteData(token: string, websiteId: string) {
   const url = "https://get.mosaicimg.com/api/websites/" + websiteId;
 
