@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/table";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
+import { ExternalLink } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -119,12 +120,25 @@ export default async function Page({ params }: { params: { slug: string } }) {
                 <TableRow key={website_page.id}>
                   {/* <TableCell>
                     <img
-                      src={website_page.image_url}
+                      src={"https://ddvbpf2rl5x5r.cloudfront.net/" + website_page.image_key}
                       alt={website_page.title}
-                      className="size-8"
+                      className="size-16"
                     />
                   </TableCell> */}
-                  <TableCell>{website_page.page_url}</TableCell>
+                  <TableCell>
+
+
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={"https://ddvbpf2rl5x5r.cloudfront.net/" + website_page.image_key}
+                        className="max-w-xs truncate font-medium text-primary"
+                      >
+                        <ExternalLink className="h-4 w-4"></ExternalLink>
+                      </Link>
+                      {website_page.title ? website_page.title : website_page.website_page_url}
+                    </div>
+                  </TableCell>
+                  {/* <TableCell>{website_page.page_url}</TableCell> */}
                   <TableCell>{website_page.title}</TableCell>
                   <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
                   <TableCell>
