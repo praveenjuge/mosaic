@@ -133,7 +133,7 @@ export default async function Home() {
               <div className="aspect-[1200/630] w-full" key={image.image_url}>
                 <Card className="h-full">
                   <img
-                    src={image.image_url}
+                    src={"https://ddvbpf2rl5x5r.cloudfront.net/" + image.image_key}
                     alt={image.title}
                     className="h-full w-full rounded-lg object-cover"
                   />
