@@ -8,7 +8,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
-import { InfoTriangle, Globe, CheckCircleOne } from "@mynaui/icons-react";
+import { CheckCircle, Globe, InfoTriangle } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -55,10 +55,10 @@ export default async function WebsitesTable() {
                 <TableCell className="max-w-xs truncate font-medium">
                   <div className="flex items-center gap-2">
                     {website.is_duplicate ? (
-                      <InfoTriangle className=""></InfoTriangle>) : (
-                      <CheckCircleOne className="text-primary"></CheckCircleOne>
-                    )
-                    }
+                      <InfoTriangle className="size-4"></InfoTriangle>
+                    ) : (
+                      <CheckCircle className="size-4"></CheckCircle>
+                    )}
                     {website.cleaned_website_url}
                   </div>
                 </TableCell>

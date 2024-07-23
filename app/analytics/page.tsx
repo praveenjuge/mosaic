@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { auth } from "@clerk/nextjs/server";
 import { Progress } from "@/components/ui/progress";
 import {
   Table,
@@ -17,10 +16,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Metadata } from "next";
-import { ImagesChart } from "./imageschart";
-import { notFound } from "next/navigation";
 import { formatBytes } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { ImagesChart } from "./imageschart";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -28,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 async function fetchAnalyticsData(token: string) {
-  const url = "https://get.mosaicimg.com/api/analytics/"
+  const url = "https://get.mosaicimg.com/api/analytics/";
 
   const response = await fetch(url, {
     method: "GET",
@@ -69,14 +69,17 @@ export default async function Page() {
           <CardHeader>
             <CardTitle>{data.total_count}</CardTitle>
             <CardDescription>Images Generated</CardDescription>
-            <Progress className="h-2" value={data.total_count * 100 / 500} />
+            <Progress className="h-2" value={(data.total_count * 100) / 500} />
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
             <CardTitle>{formatBytes(data.total_bytes)}/50 MB</CardTitle>
             <CardDescription>Storage Used</CardDescription>
-            <Progress className="h-2" value={(data.total_bytes * 100) / (1048576 * 50)} />
+            <Progress
+              className="h-2"
+              value={(data.total_bytes * 100) / (1048576 * 50)}
+            />
           </CardHeader>
         </Card>
         <Card>
@@ -114,7 +117,6 @@ export default async function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Logo</TableHead>
                 <TableHead>Website</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Size</TableHead>
@@ -124,16 +126,18 @@ export default async function Page() {
             <TableBody>
               {data.website_pages.map((website_page: any) => (
                 <TableRow key={website_page.id}>
-                  <TableCell>
+                  <TableCell className="flex items-center gap-2">
                     <img
                       src={website_page.favicon_url}
                       alt={website_page.title}
-                      className="size-8"
+                      className="size-4"
                     />
+                    {website_page.page_url}
                   </TableCell>
-                  <TableCell>{website_page.page_url}</TableCell>
                   <TableCell>{website_page.title}</TableCell>
-                  <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
+                  <TableCell>
+                    {formatBytes(website_page.size_in_bytes)}
+                  </TableCell>
                   <TableCell>
                     {new Date(website_page.updated_at).toLocaleString()}
                   </TableCell>
@@ -142,6 +146,7 @@ export default async function Page() {
             </TableBody>
           </Table>
         </CardContent>
+        {/* TODO */}
         <CardFooter className="flex justify-between">
           <Button variant="outline">Previous</Button>
           <Button variant="outline">Next</Button>
