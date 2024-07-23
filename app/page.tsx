@@ -64,23 +64,23 @@ export default async function Home() {
           </div>
           <div className="flex gap-2">
             <ClerkLoading>
+              <Button size="lg" disabled>
+                Start for Free
+              </Button>
               <Button variant="outline" size="lg" disabled>
                 Sign In
               </Button>
-              <Button size="lg" disabled>
-                Sign Up
-              </Button>
             </ClerkLoading>
+            <SignUpButton mode="modal">
+              <Button size="lg">Start for Free</Button>
+            </SignUpButton>
             <SignInButton mode="modal">
               <Button variant="outline" size="lg">
                 Sign In
               </Button>
             </SignInButton>
-            <SignUpButton mode="modal">
-              <Button size="lg">Sign Up</Button>
-            </SignUpButton>
           </div>
-          <div className="flex items-center gap-4 text-muted-foreground">
+          <div className="flex flex-col items-center gap-4 text-muted-foreground md:flex-row">
             <div className="flex items-center gap-2">
               <CheckHexagon />
               <span>No Code Required</span>
@@ -88,6 +88,10 @@ export default async function Home() {
             <div className="flex items-center gap-2">
               <CheckHexagon />
               <span>Fully Automated</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckHexagon />
+              <span>No Credit Card Required</span>
             </div>
           </div>
         </div>
@@ -133,7 +137,9 @@ export default async function Home() {
               <div className="aspect-[1200/630] w-full" key={image.image_url}>
                 <Card className="h-full">
                   <img
-                    src={"https://ddvbpf2rl5x5r.cloudfront.net/" + image.image_key}
+                    src={
+                      "https://ddvbpf2rl5x5r.cloudfront.net/" + image.image_key
+                    }
                     alt={image.title}
                     className="h-full w-full rounded-lg object-cover"
                   />

@@ -69,10 +69,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>
-          {data.cleaned_website_url}
-
-        </CardTitle>
+        <CardTitle>{data.cleaned_website_url}</CardTitle>
       </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -126,21 +123,26 @@ export default async function Page({ params }: { params: { slug: string } }) {
                     />
                   </TableCell> */}
                   <TableCell>
-
-
                     <div className="flex items-center gap-2">
                       <Link
-                        href={"https://ddvbpf2rl5x5r.cloudfront.net/" + website_page.image_key}
+                        href={
+                          "https://ddvbpf2rl5x5r.cloudfront.net/" +
+                          website_page.image_key
+                        }
                         className="max-w-xs truncate font-medium text-primary"
                       >
                         <ExternalLink className="h-4 w-4"></ExternalLink>
                       </Link>
-                      {website_page.title ? website_page.title : website_page.website_page_url}
+                      {website_page.title
+                        ? website_page.title
+                        : website_page.website_page_url}
                     </div>
                   </TableCell>
                   {/* <TableCell>{website_page.page_url}</TableCell> */}
                   <TableCell>{website_page.title}</TableCell>
-                  <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
+                  <TableCell>
+                    {formatBytes(website_page.size_in_bytes)}
+                  </TableCell>
                   <TableCell>
                     {new Date(website_page.updated_at).toLocaleString()}
                   </TableCell>
@@ -149,6 +151,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
             </TableBody>
           </Table>
         </CardContent>
+        {/* TODO */}
         <CardFooter className="flex justify-between">
           <Button variant="outline">Previous</Button>
           <Button variant="outline">Next</Button>
