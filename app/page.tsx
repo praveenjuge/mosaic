@@ -130,22 +130,34 @@ export default async function Home() {
         </div>
         <div>
           <CardHeader className="mb-4 p-0">
-            <CardTitle>Latest Cached Images</CardTitle>
+            <CardTitle>Latest Images</CardTitle>
           </CardHeader>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-            {latestImages.map((image: any) => (
-              <div className="aspect-[1200/630] w-full" key={image.image_url}>
-                <Card className="h-full">
-                  <img
-                    src={
-                      "https://ddvbpf2rl5x5r.cloudfront.net/" + image.image_key
-                    }
-                    alt={image.title}
-                    className="h-full w-full rounded-lg object-cover"
-                  />
-                </Card>
-              </div>
-            ))}
+            {latestImages.length > 0 ? (
+              latestImages.map((image: any) => (
+                <div className="aspect-[1200/630] w-full" key={image.image_url}>
+                  <Card className="h-full">
+                    <img
+                      src={
+                        "https://ddvbpf2rl5x5r.cloudfront.net/" +
+                        image.image_key
+                      }
+                      alt={image.title}
+                      className="h-full w-full rounded-lg object-cover"
+                    />
+                  </Card>
+                </div>
+              ))
+            ) : (
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle>No images yet</CardTitle>
+                  <CardDescription>
+                    Your latest generated images will appear here.
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            )}
           </div>
         </div>
       </SignedIn>

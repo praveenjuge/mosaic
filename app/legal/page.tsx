@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 
 export const dynamic = "force-static";
@@ -12,6 +13,9 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "Legal Information",
   description: "We take your privacy and data seriously.",
+  openGraph: {
+    images: [getOgImageUrl("legal")],
+  },
 };
 
 export default function Page() {

@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import { ModeToggle } from "./theme-toggler";
 
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
   title: "Settings",
   description:
     "You can customize your experience and configure various aspects our service here.",
+  openGraph: {
+    images: [getOgImageUrl("settings")],
+  },
 };
 
 export default function Page() {

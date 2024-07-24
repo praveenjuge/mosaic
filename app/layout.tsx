@@ -2,6 +2,7 @@ import "@/app/globals.css";
 import Aside from "@/components/aside";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
@@ -11,6 +12,9 @@ export const viewport: Viewport = { themeColor: "#059669" };
 export const metadata: Metadata = {
   title: "Mosaic",
   description: "Simplify Your Open Graph Image Creation.",
+  openGraph: {
+    images: [getOgImageUrl("")],
+  },
 };
 
 export default function RootLayout({
@@ -37,7 +41,10 @@ export default function RootLayout({
               aria-hidden="true"
             ></div>
             <Aside />
-            <main className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto px-4 py-20 md:px-10 md:py-6">
+            <main
+              id="main"
+              className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto px-4 py-20 md:px-10 md:py-6"
+            >
               {children}
             </main>
             <Toaster richColors />

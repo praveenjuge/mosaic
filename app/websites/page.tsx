@@ -1,4 +1,5 @@
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Earth } from "@mynaui/icons-react";
 import { Metadata } from "next";
@@ -8,6 +9,9 @@ import WebsitesTable from "./WebsitesTable";
 export const metadata: Metadata = {
   title: "Websites",
   description: "Add, edit or remove websites here.",
+  openGraph: {
+    images: [getOgImageUrl("websites")],
+  },
 };
 
 export default async function Page() {

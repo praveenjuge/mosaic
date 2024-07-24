@@ -6,7 +6,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Envelope } from "@mynaui/icons-react";
+import { getOgImageUrl } from "@/lib/utils";
+import { BrandX, Envelope } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { load } from "outstatic/server";
@@ -16,7 +17,10 @@ export const dynamic = "force-static";
 export const metadata: Metadata = {
   title: "Help & Support",
   description:
-    "Find solutions to common issues and get help with troubleshooting..",
+    "Find solutions to common issues and get help with troubleshooting.",
+  openGraph: {
+    images: [getOgImageUrl("help")],
+  },
 };
 
 // Define the type for the posts
@@ -77,10 +81,21 @@ export default function Page() {
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row">
-          <a href="mailto:hello@praveenjuge.com" className={buttonVariants()}>
+          <Link
+            href="mailto:hello@praveenjuge.com"
+            className={buttonVariants()}
+          >
             <Envelope className="mr-2 size-4" />
             Email Support
-          </a>
+          </Link>
+          <Link
+            href="https://x.com/mosaicimg"
+            target="_blank"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <BrandX className="mr-2 size-4" />
+            Send a DM on X
+          </Link>
           {/* TODO */}
           {/* <a href="#" className={buttonVariants({ variant: "outline" })}>
             <Ticket className="mr-2 size-4" />
