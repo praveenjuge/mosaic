@@ -1,6 +1,6 @@
 {
-  "commit": "d69eea81faf6ea484517f8b5b2167291bbc9a41a",
-  "generated": "Wed, 24 Jul 2024 13:51:44 GMT",
+  "commit": "b5413806177dd50f087ba2df2814d171a5a654f5",
+  "generated": "2024-07-24T13:56:38.979Z",
   "metadata": [
     {
       "__outstatic": {
@@ -131,6 +131,24 @@
       "slug": "log-in-to-your-account",
       "status": "published",
       "title": "Log In to Your Account"
+    },
+    {
+      "__outstatic": {
+        "commit": "b5413806177dd50f087ba2df2814d171a5a654f5",
+        "hash": "1051075096",
+        "path": "content/blog/hello-world.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "blog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-24T14:29:29.402Z",
+      "slug": "hello-world",
+      "status": "published",
+      "title": "Hello World!"
     }
   ]
 }
