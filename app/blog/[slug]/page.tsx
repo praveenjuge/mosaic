@@ -55,16 +55,11 @@ export default function Page({ params }: { params: { slug: string } }) {
     <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <meta itemProp="image" content={getOgImageUrl("blog/" + params.slug)} />
       <CardHeader className="p-0">
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle>
           <Link href="/blog" className="text-primary">
-            blogs
+            ← Blog
           </Link>
-          <span>→</span>
-          <span>{blog.title}</span>
         </CardTitle>
-        <CardDescription>
-          See what's new in the latest version of our app.
-        </CardDescription>
       </CardHeader>
       <Card>
         <CardHeader className="pb-0">
