@@ -1,4 +1,9 @@
-import { Card } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -23,19 +28,19 @@ export default async function WebsitesTable() {
 
   return (
     <Card>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Website</TableHead>
-            <TableHead>URL</TableHead>
-            <TableHead>Images</TableHead>
-            <TableHead>Cache</TableHead>
-            <TableHead>Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {websites.length > 0 ? (
-            websites.map((website) => (
+      {websites.length > 0 ? (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Website</TableHead>
+              <TableHead>URL</TableHead>
+              <TableHead>Images</TableHead>
+              <TableHead>Cache</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {websites.map((website) => (
               <TableRow key={website.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -78,16 +83,15 @@ export default async function WebsitesTable() {
                   </div>
                 </TableCell>
               </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={5} className="text-center">
-                No websites found. Add a new website to get started.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+            ))}
+          </TableBody>
+        </Table>
+      ) : (
+        <CardHeader>
+          <CardTitle>No websites yet</CardTitle>
+          <CardDescription>Add a new website to get started.</CardDescription>
+        </CardHeader>
+      )}
     </Card>
   );
 }

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Plus } from "@mynaui/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { handleAdd } from "./actions";
@@ -22,7 +23,10 @@ export function AddWebsite() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Add Website</Button>
+        <Button size="sm">
+          <Plus className="mr-1 size-4" stroke={2} />
+          Add Website
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

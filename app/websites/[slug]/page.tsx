@@ -104,9 +104,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardHeader>
           <CardTitle>Latest Screenshots</CardTitle>
           <CardDescription>
-            Condimentum nulla pellentesque eget feugiat sit blandit vitae
-            pellentesque nulla. Tempor hendrerit tincidunt nunc arcu
-            pellentesque.
+            Some of the latest Open Graph (OG) images generated.
           </CardDescription>
         </CardHeader>
         <CardContent>

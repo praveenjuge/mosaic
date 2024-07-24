@@ -108,12 +108,9 @@ export default async function Page() {
 
       <Card>
         <CardHeader>
-          <CardTitle>New Screenshots History</CardTitle>
+          <CardTitle>Latest Screenshots</CardTitle>
           <CardDescription>
-            {/* TODO */}
-            Condimentum nulla pellentesque eget feugiat sit blandit vitae
-            pellentesque nulla. Tempor hendrerit tincidunt nunc arcu
-            pellentesque.
+            Some of the latest Open Graph (OG) images generated.
           </CardDescription>
         </CardHeader>
         <CardContent>

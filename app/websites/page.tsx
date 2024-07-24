@@ -1,7 +1,8 @@
+import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOgImageUrl } from "@/lib/utils";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { Earth } from "@mynaui/icons-react";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Earth, Plus } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
@@ -25,6 +26,14 @@ export default async function Page() {
         <SignedIn>
           <AddWebsite />
         </SignedIn>
+        <SignedOut>
+          <SignInButton mode="modal">
+            <Button size="sm">
+              <Plus className="mr-1 size-4" stroke={2} />
+              Add Website
+            </Button>
+          </SignInButton>
+        </SignedOut>
       </div>
       <SignedOut>
         <div className="flex w-full flex-col items-center justify-center rounded border-[0.5px] bg-primary-foreground px-4 py-20 text-center">
