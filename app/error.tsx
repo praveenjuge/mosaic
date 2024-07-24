@@ -1,5 +1,6 @@
-"use client"; // Error components must be Client Components
+"use client";
 
+import { buttonVariants } from "@/components/ui/button";
 import { useEffect } from "react";
 
 export default function Error({
@@ -10,18 +11,16 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to an error reporting service
+    // TODO, Add Sentry
     console.error(error);
   }, [error]);
 
   return (
-    <div>
-      <h2>Something went wrong!</h2>
+    <div className="flex flex-col items-center justify-center gap-4">
+      <h2 className="fone-semibold">Something went wrong!</h2>
       <button
-        onClick={
-          // Attempt to recover by trying to re-render the segment
-          () => reset()
-        }
+        onClick={() => reset()}
+        className={buttonVariants({ variant: "outline", size: "sm" })}
       >
         Try again
       </button>

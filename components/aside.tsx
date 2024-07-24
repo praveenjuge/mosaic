@@ -38,12 +38,20 @@ const NavLink = ({
         "relative flex items-center gap-2 py-1",
         isActive && "font-semibold text-primary [&_svg]:text-primary",
       )}
+      aria-current={isActive ? "page" : undefined}
     >
       {isActive && (
-        <span className="absolute -left-4 h-full w-1 rounded-r-full bg-primary"></span>
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -left-4 h-full w-1 select-none rounded-r-full bg-primary"
+        ></span>
       )}
       {Icon && (
-        <Icon className="size-[1.125rem] text-muted-foreground" stroke={2} />
+        <Icon
+          stroke={2}
+          aria-hidden="true"
+          className="size-[1.125rem] text-muted-foreground"
+        />
       )}
       <span>{label}</span>
     </Link>
@@ -51,7 +59,10 @@ const NavLink = ({
 };
 
 const AsideContent = () => (
-  <aside className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]">
+  <aside
+    aria-label="Main navigation"
+    className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]"
+  >
     <div className="flex flex-col gap-6">
       <div className="flex h-[18px] items-center justify-between">
         <Logo />
@@ -61,7 +72,7 @@ const AsideContent = () => (
           </div>
         </SignedIn>
       </div>
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-2" aria-label="Primary navigation">
         <NavLink href="/" icon={Home} label="Home" />
         <NavLink href="/websites" icon={Earth} label="Websites" />
         <NavLink href="/analytics" icon={Lightning} label="Analytics" />
@@ -73,7 +84,7 @@ const AsideContent = () => (
         <NavLink href="/settings" icon={Config} label="Settings" />
       </nav>
     </div>
-    <nav className="flex flex-col gap-2">
+    <nav className="flex flex-col gap-2" aria-label="Secondary navigation">
       <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
       <NavLink href="/help" icon={Support} label="Help & Support" />
       <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
@@ -97,10 +108,10 @@ export default function Aside() {
           <Button
             size="icon"
             variant="outline"
+            aria-label="Toggle navigation menu"
             className="fixed left-3 top-3 z-10 shrink-0 rounded-full md:hidden"
           >
             <Menu className="size-5" />
-            <span className="sr-only">Toggle navigation menu</span>
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-auto p-0">

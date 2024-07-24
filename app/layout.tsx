@@ -25,7 +25,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02",_"ss03",_"ss04",_"ss07",_"ss08",_"ss09"] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
       >
-        <body className="relative flex bg-background text-sm">
+        <body className="relative flex text-sm">
           <ThemeProvider
             enableSystem
             attribute="class"

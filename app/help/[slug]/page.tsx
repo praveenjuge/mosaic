@@ -42,7 +42,7 @@ export async function generateMetadata({
 export default function Page({ params }: { params: { slug: string } }) {
   const help = getData(params.slug);
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
+    <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <CardHeader className="p-0">
         <CardTitle>
           <Link href="/help" className="text-primary">
@@ -72,7 +72,7 @@ export default function Page({ params }: { params: { slug: string } }) {
           ></div>
         </CardContent>
       </Card>
-    </div>
+    </article>
   );
 }
 

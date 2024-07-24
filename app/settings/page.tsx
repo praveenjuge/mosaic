@@ -1,4 +1,3 @@
-import { ModeToggle } from "@/components/theme-toggler";
 import {
   Card,
   CardContent,
@@ -8,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Metadata } from "next";
+import { ModeToggle } from "./theme-toggler";
 
 export const metadata: Metadata = {
   title: "Settings",
