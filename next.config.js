@@ -4,7 +4,7 @@ module.exports = {
       {
         source: '/use',
         destination: 'https://get.mosaicimg.com/image/get_image',
-        permanent: true,
+        permanent: false,
       },
     ]
   },
