@@ -1,6 +1,6 @@
 {
-  "commit": "b5413806177dd50f087ba2df2814d171a5a654f5",
-  "generated": "2024-07-24T13:56:38.979Z",
+  "commit": "1b999bc95e10501afcb0c48f23fba455a00aca45",
+  "generated": "2024-07-24T13:56:47.565Z",
   "metadata": [
     {
       "__outstatic": {
@@ -134,8 +134,8 @@
     },
     {
       "__outstatic": {
-        "commit": "b5413806177dd50f087ba2df2814d171a5a654f5",
-        "hash": "1051075096",
+        "commit": "1b999bc95e10501afcb0c48f23fba455a00aca45",
+        "hash": "1300962945",
         "path": "content/blog/hello-world.md"
       },
       "author": {
@@ -144,7 +144,7 @@
       },
       "collection": "blog",
       "coverImage": "",
-      "description": "",
+      "description": "Welcome to our first blog post on Mosaic!",
       "publishedAt": "2024-07-24T14:29:29.402Z",
       "slug": "hello-world",
       "status": "published",

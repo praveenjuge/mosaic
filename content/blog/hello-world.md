@@ -5,7 +5,7 @@ author:
   name: 'Praveen Juge'
   picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
 slug: 'hello-world'
-description: ''
+description: 'Welcome to our first blog post on Mosaic!'
 coverImage: ''
 publishedAt: '2024-07-24T14:29:29.402Z'
 ---
