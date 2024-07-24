@@ -8,6 +8,7 @@ import {
   Config,
   Copyright,
   Earth,
+  FileText,
   Home,
   Lightning,
   ListCheck,
@@ -86,6 +87,7 @@ const AsideContent = () => (
     </div>
     <nav className="flex flex-col gap-2" aria-label="Secondary navigation">
       <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
+      <NavLink href="/blog" icon={FileText} label="Blog & Guides" />
       <NavLink href="/help" icon={Support} label="Help & Support" />
       <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
     </nav>

@@ -15,9 +15,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
-import { ExternalLink } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -29,6 +28,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: params.slug,
+    openGraph: {
+      type: "article",
+      url: "./",
+      locale: "en_US",
+      images: {
+        url: getOgImageUrl("websites/" + params.slug),
+        alt: params.slug,
+      },
+    },
   };
 }
 
@@ -130,12 +138,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
                           website_page.image_key
                         }
                         className="max-w-xs truncate font-medium text-primary"
+                        target="_blank"
                       >
-                        <ExternalLink className="h-4 w-4"></ExternalLink>
+                        {website_page.title
+                          ? website_page.title
+                          : website_page.website_page_url}
                       </Link>
-                      {website_page.title
-                        ? website_page.title
-                        : website_page.website_page_url}
                     </div>
                   </TableCell>
                   {/* <TableCell>{website_page.page_url}</TableCell> */}

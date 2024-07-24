@@ -16,7 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatBytes } from "@/lib/utils";
+import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -25,6 +25,9 @@ import { ImagesChart } from "./imageschart";
 export const metadata: Metadata = {
   title: "Analytics",
   description: "View your logs and analytics here.",
+  openGraph: {
+    images: [getOgImageUrl("analytics")],
+  },
 };
 
 async function fetchAnalyticsData(token: string) {

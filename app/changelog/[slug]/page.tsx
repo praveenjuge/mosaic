@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import markdownToHtml from "@/lib/markdownToHtml";
+import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -36,13 +37,26 @@ export async function generateMetadata({
 
   return {
     title: changelog.title,
+    openGraph: {
+      type: "article",
+      url: "./",
+      locale: "en_US",
+      images: {
+        url: getOgImageUrl("changelog/" + params.slug),
+        alt: changelog.title,
+      },
+    },
   };
 }
 
 export default function Page({ params }: { params: { slug: string } }) {
   const changelog = getData(params.slug);
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
+    <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
+      <meta
+        itemProp="image"
+        content={getOgImageUrl("changelog/" + params.slug)}
+      />
       <CardHeader className="p-0">
         <CardTitle className="flex items-center gap-2">
           <Link href="/changelog" className="text-primary">
@@ -74,7 +88,7 @@ export default function Page({ params }: { params: { slug: string } }) {
           ></div>
         </CardContent>
       </Card>
-    </div>
+    </article>
   );
 }
 

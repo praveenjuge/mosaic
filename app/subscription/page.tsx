@@ -12,7 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { cn } from "@/lib/utils";
+import { cn, getOgImageUrl } from "@/lib/utils";
 import { SignedIn } from "@clerk/nextjs";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
@@ -20,6 +20,9 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Subscription",
   description: "Manage your billing and invoices here.",
+  openGraph: {
+    images: [getOgImageUrl("subscription")],
+  },
 };
 
 export default function Page() {

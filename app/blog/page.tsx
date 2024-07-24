@@ -14,20 +14,15 @@ import { load } from "outstatic/server";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: "Changelog",
-  description: "See what's new in the latest version of mosaic.",
+  title: "Blog",
+  description: "Our thoughts and ideas about everything. Mostly OG Images.",
   openGraph: {
-    images: [getOgImageUrl("changelog")],
+    images: [getOgImageUrl("blog")],
   },
 };
 
 const allPosts = await (await load())
-  .find({ collection: "changelog" }, [
-    "title",
-    "slug",
-    "publishedAt",
-    "content",
-  ])
+  .find({ collection: "blog" }, ["title", "slug", "publishedAt", "content"])
   .sort({ publishedAt: -1 })
   .toArray();
 
@@ -40,7 +35,7 @@ export default function Page() {
       </CardHeader>
 
       {allPosts.map((item) => (
-        <Link key={item.slug} href={`/changelog/${item.slug}`}>
+        <Link key={item.slug} href={`/blog/${item.slug}`}>
           <Card>
             <CardHeader className="pb-0">
               <CardTitle>{item.title}</CardTitle>

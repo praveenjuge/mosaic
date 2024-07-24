@@ -15,7 +15,7 @@ import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 export const dynamic = "force-static";
 
 function getData(slug: string) {
-  const help = getDocumentBySlug("help", slug, [
+  const blog = getDocumentBySlug("blog", slug, [
     "title",
     "publishedAt",
     "description",
@@ -23,9 +23,9 @@ function getData(slug: string) {
     "content",
   ]);
 
-  if (!help) notFound();
+  if (!blog) notFound();
 
-  return { ...help, content: markdownToHtml(help.content) };
+  return { ...blog, content: markdownToHtml(blog.content) };
 }
 
 export async function generateMetadata({
@@ -33,41 +33,44 @@ export async function generateMetadata({
 }: {
   params: { slug: string };
 }): Promise<Metadata> {
-  const help = getData(params.slug);
+  const blog = getData(params.slug);
 
   return {
-    title: help.title,
+    title: blog.title,
     openGraph: {
       type: "article",
       url: "./",
       locale: "en_US",
       images: {
-        url: getOgImageUrl("help/" + params.slug),
-        alt: help.title,
+        url: getOgImageUrl("blog/" + params.slug),
+        alt: blog.title,
       },
     },
   };
 }
 
 export default function Page({ params }: { params: { slug: string } }) {
-  const help = getData(params.slug);
+  const blog = getData(params.slug);
   return (
     <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
+      <meta itemProp="image" content={getOgImageUrl("blog/" + params.slug)} />
       <CardHeader className="p-0">
-        <CardTitle>
-          <Link href="/help" className="text-primary">
-            Help & Support
+        <CardTitle className="flex items-center gap-2">
+          <Link href="/blog" className="text-primary">
+            blogs
           </Link>
+          <span>→</span>
+          <span>{blog.title}</span>
         </CardTitle>
         <CardDescription>
-          Find solutions to common issues and get help with troubleshooting.
+          See what's new in the latest version of our app.
         </CardDescription>
       </CardHeader>
       <Card>
         <CardHeader className="pb-0">
-          <CardTitle>{help.title}</CardTitle>
+          <CardTitle>{blog.title}</CardTitle>
           <CardDescription>
-            {new Date(help.publishedAt).toLocaleDateString("en-US", {
+            {new Date(blog.publishedAt).toLocaleDateString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -77,7 +80,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
           <div
             dangerouslySetInnerHTML={{
-              __html: markdownToHtml(help.content),
+              __html: markdownToHtml(blog.content),
             }}
           ></div>
         </CardContent>
@@ -87,5 +90,5 @@ export default function Page({ params }: { params: { slug: string } }) {
 }
 
 export function generateStaticParams() {
-  return getDocumentSlugs("help").map((slug) => ({ slug }));
+  return getDocumentSlugs("blog").map((slug) => ({ slug }));
 }
