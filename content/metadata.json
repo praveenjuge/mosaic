@@ -1,25 +1,7 @@
 {
-  "commit": "6835e2245d9edd51e9be662e1be5b2ebbf15484d",
-  "generated": "2024-07-24T13:51:33.107Z",
+  "commit": "d69eea81faf6ea484517f8b5b2167291bbc9a41a",
+  "generated": "Wed, 24 Jul 2024 13:51:44 GMT",
   "metadata": [
-    {
-      "__outstatic": {
-        "commit": "a6d8e4270411d50cf7355cfe1f725d194bfada0a",
-        "hash": "764830996",
-        "path": "content/changelog/initial-commit.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "collection": "changelog",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-17T17:40:16.898Z",
-      "slug": "initial-commit",
-      "status": "published",
-      "title": "Initial Commit ✨"
-    },
     {
       "__outstatic": {
         "commit": "c6826fadba230019d6eea7c8a434b9315a08774b",
@@ -40,6 +22,43 @@
     },
     {
       "__outstatic": {
+        "commit": "fcd1fcdb0e958f9739db91db1d0f19122bece953",
+        "hash": "161099781",
+        "path": "content/changelog/initial-commit.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-17T17:40:16.898Z",
+      "slug": "initial-commit",
+      "status": "published",
+      "title": "Initial Commit ✨"
+    },
+    {
+      "__outstatic": {
+        "commit": "d6f10aaeadb52085851c452427e291f9238bdeba",
+        "hash": "2481718272",
+        "path": "content/help/create-a-new-account.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Getting Started",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:09:12.600Z",
+      "slug": "create-a-new-account",
+      "status": "published",
+      "title": "Create a new Account"
+    },
+    {
+      "__outstatic": {
         "commit": "71b1ff5c8b45cc2f885f9144e848fdcc6e06ebed",
         "hash": "1189961668",
         "path": "content/changelog/websites.md"
@@ -55,6 +74,25 @@
       "slug": "websites",
       "status": "published",
       "title": "Websites"
+    },
+    {
+      "__outstatic": {
+        "commit": "0f8f2ddd2332960bf7719a4f5ddc78e5858197c3",
+        "hash": "3541149141",
+        "path": "content/help/add-your-website-to-mosaic.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Getting Started",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:25:38.421Z",
+      "slug": "add-your-website-to-mosaic",
+      "status": "published",
+      "title": "Add Your Website to Mosaic"
     },
     {
       "__outstatic": {
@@ -77,26 +115,7 @@
     },
     {
       "__outstatic": {
-        "commit": "7dab2ca3dc4e60c1dcb9b99c26a866df9152225a",
-        "hash": "2481718272",
-        "path": "content/help/create-a-new-account.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "category": "Getting Started",
-      "collection": "help",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-18T14:09:12.600Z",
-      "slug": "create-a-new-account",
-      "status": "published",
-      "title": "Create a new Account"
-    },
-    {
-      "__outstatic": {
-        "commit": "a6ae30fcbf24eb38dbd1fb2aa3e22b22c2fe0dce",
+        "commit": "d5b879f54bbfa0ad74a2af702cb2b593aca13e59",
         "hash": "366269397",
         "path": "content/help/log-in-to-your-account.md"
       },
@@ -112,25 +131,6 @@
       "slug": "log-in-to-your-account",
       "status": "published",
       "title": "Log In to Your Account"
-    },
-    {
-      "__outstatic": {
-        "commit": "b4293d7205ae4b9707d4723f96c950f4a17e8330",
-        "hash": "3541149141",
-        "path": "content/help/add-your-website-to-mosaic.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "category": "Getting Started",
-      "collection": "help",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-18T14:25:38.421Z",
-      "slug": "add-your-website-to-mosaic",
-      "status": "published",
-      "title": "Add Your Website to Mosaic"
     }
   ]
 }
