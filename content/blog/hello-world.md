@@ -5,7 +5,7 @@ author:
   name: 'Praveen Juge'
   picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
 slug: 'hello-world'
-description: 'Discover the vision behind Mosaic, a revolutionary tool designed to transform your image creation experience. In our inaugural post, we introduce the features and benefits of Mosaic, providing insights into how it can elevate your visual content. Join us on this exciting journey as we explore innovative techniques, share expert tips, and inspire your creative projects. Stay tuned for updates, tutorials, and much more!'
+description: 'In our inaugural post, we introduce the features and benefits of Mosaic, providing insights into how it can elevate your visual content. Join us on this exciting journey as we explore innovative techniques, share expert tips, and inspire your creative projects. Stay tuned for updates, tutorials, and much more!'
 coverImage: ''
 publishedAt: '2024-07-24T14:29:29.402Z'
 ---

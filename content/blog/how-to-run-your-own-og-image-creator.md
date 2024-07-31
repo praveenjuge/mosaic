@@ -35,23 +35,15 @@ We are starting with a very simple code. Now, create a new Python file (let's ca
 from playwright.sync_api import sync_playwright
 
 def capture_og_magic(url, output_file):
-
-    with sync_playwright() as p:
-
-        browser = p.chromium.launch()
-
-        page = browser.new_page(viewport={"width": 1200, "height": 630})
-
-        page.goto(url)
-
-        page.screenshot(path=output_file, full_page=False)
-
-        browser.close()
-
+  with sync_playwright() as p:
+    browser = p.chromium.launch()
+    page = browser.new_page(viewport={"width": 1200, "height": 630})
+    page.goto(url)
+    page.screenshot(path=output_file, full_page=False)
+    browser.close()
+    
 url = "<https://mosaicimg.com/>"
-
 output_file = "og_image_of_awesomeness.png"
-
 capture_og_magic(url, output_file)
 ```
 
