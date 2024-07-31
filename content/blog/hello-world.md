@@ -5,14 +5,14 @@ author:
   name: 'Praveen Juge'
   picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
 slug: 'hello-world'
-description: 'Welcome to our first blog post on Mosaic!'
+description: 'Discover the vision behind Mosaic, a revolutionary tool designed to transform your image creation experience. In our inaugural post, we introduce the features and benefits of Mosaic, providing insights into how it can elevate your visual content. Join us on this exciting journey as we explore innovative techniques, share expert tips, and inspire your creative projects. Stay tuned for updates, tutorials, and much more!'
 coverImage: ''
 publishedAt: '2024-07-24T14:29:29.402Z'
 ---
 
 Welcome to our first blog post on Mosaic!
 
-At Mosaic, we simplify the creation of Open Graph (OG) social images by automating the process with screenshots. We take the hassle out of creating an OG image for every page, allowing you to showcase the beautiful website you already have. 
+At Mosaic, we simplify the creation of Open Graph (OG) social images by automating the process with screenshots. We take the hassle out of creating an OG image for every page, allowing you to showcase the beautiful website you already have.
 
 With Mosaic, you can effortlessly generate these screenshots and integrate them into your website in under a minute, no coding skills required.
 
