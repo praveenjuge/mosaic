@@ -41,8 +41,24 @@ interface FetchWebsitePagesDataProps {
   limit?: number;
 }
 
-const FetchWebsitePagesData: React.FC<FetchWebsitePagesDataProps> = async ({ slug, websiteIds, page, limit }) => {
-  let response: any = {};
+interface WebsitePagesResponse {
+  data: any[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+  };
+}
+
+const FetchWebsitePagesData = async ({ slug, websiteIds, page, limit }: FetchWebsitePagesDataProps): Promise<WebsitePagesResponse> => {
+  let response: WebsitePagesResponse = {
+    data: [],
+    meta: {
+      total: 0,
+      page: 1,
+      limit: 10,
+    },
+  };
   if (slug) {
     websiteIds = [parseInt(slug)];
   }

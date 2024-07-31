@@ -53,7 +53,7 @@ async function fetchWebsiteData(token: string, websiteId: string) {
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  let websiteData = {}
+  let websiteData: any = {}
   let websitePagesData = []
   const response = await FetchWebsitePagesData({ slug: params.slug });
   if (!response || !response?.data) {

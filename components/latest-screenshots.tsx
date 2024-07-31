@@ -22,6 +22,7 @@ import Link from "next/link";
 
 interface LatestScreenshotsProps {
   websitePages: any[];
+  showPagination?: boolean;
 }
 
 const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, showPagination = true }) => {
