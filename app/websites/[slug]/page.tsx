@@ -7,19 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import LatestScreenshots from "@/components/latest-screenshots";
+import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 
 export async function generateMetadata({
   params,
@@ -40,6 +34,7 @@ export async function generateMetadata({
   };
 }
 
+
 async function fetchWebsiteData(token: string, websiteId: string) {
   const url = "https://get.mosaicimg.com/api/websites/" + websiteId;
 
@@ -58,13 +53,20 @@ async function fetchWebsiteData(token: string, websiteId: string) {
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  let data: any = {};
+  let websiteData = {}
+  let websitePagesData = []
+  const response = await FetchWebsitePagesData({ slug: params.slug });
+  if (!response || !response?.data) {
+    notFound();
+  } else {
+    websitePagesData = response.data;
+  }
+
   try {
     const { getToken } = auth();
     const token = await getToken({ template: "supabase" });
     if (token) {
-      const response = await fetchWebsiteData(token, params.slug);
-      data = response;
+      websiteData = await fetchWebsiteData(token, params.slug);
     }
   } catch (error) {
     console.log(error);
@@ -77,13 +79,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>{data.cleaned_website_url}</CardTitle>
+        <CardTitle>{websiteData.cleaned_website_url}</CardTitle>
       </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{data.total_count}</CardTitle>
+            <CardTitle>{websiteData.total_count}</CardTitle>
             <CardDescription>Images</CardDescription>
           </CardHeader>
         </Card>
@@ -95,74 +97,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{formatBytes(data.total_bytes)}</CardTitle>
+            <CardTitle>{formatBytes(websiteData.total_bytes)}</CardTitle>
             <CardDescription>Storage Used</CardDescription>
           </CardHeader>
         </Card>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Latest Screenshots</CardTitle>
-          <CardDescription>
-            Some of the latest Open Graph (OG) images generated.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {/* <TableHead>Image</TableHead> */}
-                <TableHead>URL</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Last refreshed at</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.website_pages.map((website_page: any) => (
-                <TableRow key={website_page.id}>
-                  {/* <TableCell>
-                    <img
-                      src={"https://ddvbpf2rl5x5r.cloudfront.net/" + website_page.image_key}
-                      alt={website_page.title}
-                      className="size-16"
-                    />
-                  </TableCell> */}
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={
-                          "https://ddvbpf2rl5x5r.cloudfront.net/" +
-                          website_page.image_key
-                        }
-                        className="max-w-xs truncate font-medium text-primary"
-                        target="_blank"
-                      >
-                        {website_page.title
-                          ? website_page.title
-                          : website_page.website_page_url}
-                      </Link>
-                    </div>
-                  </TableCell>
-                  {/* <TableCell>{website_page.page_url}</TableCell> */}
-                  <TableCell>{website_page.title}</TableCell>
-                  <TableCell>
-                    {formatBytes(website_page.size_in_bytes)}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(website_page.updated_at).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        {/* TODO */}
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">Previous</Button>
-          <Button variant="outline">Next</Button>
-        </CardFooter>
-      </Card>
+      <LatestScreenshots websitePages={websitePagesData} />
     </>
   );
 }
