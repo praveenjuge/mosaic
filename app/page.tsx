@@ -14,7 +14,7 @@ import {
   SignUpButton,
 } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { CheckHexagon } from "@mynaui/icons-react";
+import { ArrowRight, CheckHexagon } from "@mynaui/icons-react";
 import WebsitesTable from "./websites/WebsitesTable";
 
 async function fetchLatestImages(token: string) {
@@ -66,13 +66,17 @@ export default async function Home() {
             <ClerkLoading>
               <Button size="lg" disabled>
                 Start for Free
+                <ArrowRight className="ml-2 size-4" stroke={2} />
               </Button>
               <Button variant="outline" size="lg" disabled>
                 Sign In
               </Button>
             </ClerkLoading>
             <SignUpButton mode="modal">
-              <Button size="lg">Start for Free</Button>
+              <Button size="lg">
+                Start for Free
+                <ArrowRight className="ml-2 size-4" stroke={2} />
+              </Button>
             </SignUpButton>
             <SignInButton mode="modal">
               <Button variant="outline" size="lg">
