@@ -61,9 +61,12 @@ export async function POST(request: Request) {
     const webhookEventId = await storeWebhookEvent(data.meta.event_name, [
       "body",
     ]);
-
     // Non-blocking call to process the webhook event.
-    void processWebhookEvent(webhookEventId);
+    void processWebhookEvent({
+      id: webhookEventId as unknown as string,
+      eventName: data.meta.event_name,
+      body: data,
+    });
 
     return new Response("OK", { status: 200 });
   }
