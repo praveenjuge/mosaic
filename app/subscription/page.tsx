@@ -13,7 +13,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { cn, getOgImageUrl } from "@/lib/utils";
-import { SignedIn } from "@clerk/nextjs";
+import { ClerkLoading, SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
 
@@ -33,160 +33,129 @@ export default function Page() {
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
       <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-4">
-        <Card>
-          <CardHeader className="border-b-[0.5px]">
-            <CardTitle>Free</CardTitle>
-            <CardDescription>For trying out</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-1 text-4xl font-bold tracking-tight">$0</div>
-            <div className="text-sm text-muted-foreground">per month</div>
-            <ul className="mt-8 grid w-full gap-2">
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>250 images</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>1 website</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>2 GB storage</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>No support</span>
-              </li>
-            </ul>
-          </CardContent>
-          {/* TODO */}
-          <CardFooter>
-            <Button className="w-full" disabled>
-              Coming Soon
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="border-b-[0.5px]">
-            <CardTitle>Pro</CardTitle>
-            <CardDescription>For individual use</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-1 text-4xl font-bold tracking-tight">$19</div>
-            <div className="text-sm text-muted-foreground">per month</div>
-            <ul className="mt-8 grid w-full gap-2">
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>5000 images</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited websites</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>20 GB storage</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Email support</span>
-              </li>
-            </ul>
-          </CardContent>
-          {/* TODO */}
-          <CardFooter>
-            <Button className="w-full" disabled>
-              Coming Soon
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="border-b-[0.5px]">
-            <CardTitle>Teams</CardTitle>
-            <CardDescription>For small to medium teams</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-1 text-4xl font-bold tracking-tight">$99</div>
-            <div className="text-sm text-muted-foreground">per month</div>
-            <ul className="mt-8 grid w-full gap-2">
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited images</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited websites</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>100 GB storage</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Priority email support</span>
-              </li>
-            </ul>
-          </CardContent>
-          {/* TODO */}
-          <CardFooter>
-            <Button className="w-full" disabled>
-              Coming Soon
-            </Button>
-          </CardFooter>
-        </Card>
-        <Card>
-          <CardHeader className="border-b-[0.5px]">
-            <CardTitle>Enterprise</CardTitle>
-            <CardDescription>For large organizations</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center py-8">
-            <div className="mb-1 text-4xl font-bold tracking-tight">
-              Contact us
-            </div>
-            <div className="text-sm text-muted-foreground">
-              Custom pricing and features
-            </div>
-            <ul className="mt-8 grid w-full gap-2">
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited images</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited websites</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Unlimited storage</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="size-5 text-primary" stroke={2} />
-                <span>Dedicated account manager</span>
-              </li>
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <a
-              href="mailto:hello@praveenjuge.com"
-              className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-            >
-              Contact Sales
-            </a>
-          </CardFooter>
-        </Card>
+        {[
+          {
+            title: "Free",
+            description: "For trying out",
+            price: "$0",
+            features: ["250 images", "1 website", "2 GB storage", "No support"],
+            footer: (
+              <Button className="w-full" disabled>
+                Coming Soon
+              </Button>
+            ),
+          },
+          {
+            title: "Pro",
+            description: "For individual use",
+            price: "$19",
+            features: [
+              "5000 images",
+              "Unlimited websites",
+              "20 GB storage",
+              "Email support",
+            ],
+            footer: (
+              <>
+                <ClerkLoading>
+                  <Button className="w-full" disabled>
+                    Loading...
+                  </Button>
+                </ClerkLoading>
+                <SignedOut>
+                  <SignUpButton mode="modal">
+                    <Button className="w-full">Get Started →</Button>
+                  </SignUpButton>
+                </SignedOut>
+                <SignedIn>
+                  {/* <SignupButton
+                    plan={{ id: "310030", variantId: 447876 }}
+                    isChangingPlans={false}
+                    currentPlan={{ id: "" }}
+                    embed={false}
+                  /> */}
+                  <Button className="w-full" disabled>
+                    Coming Soon
+                  </Button>
+                </SignedIn>
+              </>
+            ),
+          },
+          {
+            title: "Teams",
+            description: "For small to medium teams",
+            price: "$99",
+            features: [
+              "Unlimited images",
+              "Unlimited websites",
+              "100 GB storage",
+              "Priority email support",
+            ],
+            footer: (
+              <Button className="w-full" disabled>
+                Coming Soon
+              </Button>
+            ),
+          },
+          {
+            title: "Enterprise",
+            description: "For large organizations",
+            price: "Contact us",
+            priceSubtext: "Custom pricing and features",
+            features: [
+              "Unlimited images",
+              "Unlimited websites",
+              "Unlimited storage",
+              "Dedicated account manager",
+            ],
+            footer: (
+              <a
+                href="mailto:hello@praveenjuge.com"
+                className={cn(buttonVariants({ variant: "outline" }), "w-full")}
+              >
+                Contact Sales
+              </a>
+            ),
+          },
+        ].map((plan, index) => (
+          <Card key={index}>
+            <CardHeader className="border-b-[0.5px]">
+              <CardTitle>{plan.title}</CardTitle>
+              <CardDescription>{plan.description}</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center py-8">
+              <div className="mb-1 text-4xl font-bold tracking-tight">
+                {plan.price}
+              </div>
+              <div className="text-sm text-muted-foreground">
+                {plan.priceSubtext || "per month"}
+              </div>
+              <ul className="mt-8 grid w-full gap-2">
+                {plan.features.map((feature, featureIndex) => (
+                  <li key={featureIndex} className="flex items-center gap-2">
+                    <Check className="size-5 text-primary" stroke={2} />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+            <CardFooter>{plan.footer}</CardFooter>
+          </Card>
+        ))}
       </div>
       <SignedIn>
         <Card>
-          <CardHeader>
-            <CardTitle>You are a Pro User! 🎉</CardTitle>
-            <CardDescription>Enjoy your benefits.</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>You are not subscribed yet.</CardTitle>
-            <CardDescription>Subscribe to get more benefits.</CardDescription>
+          <CardHeader className="flex justify-between gap-2 md:flex-row">
+            <div className="flex flex-col gap-2">
+              <CardTitle>Invoice History & Manage Plan</CardTitle>
+              <CardDescription>
+                Find the details of your previous invoices or to cancel your
+                current subscription. If you have any questions regarding your
+                invoices, please contact our support team.
+              </CardDescription>
+            </div>
+            {/* TODO */}
+            <Button variant="outline">Manage Plan</Button>
           </CardHeader>
         </Card>
       </SignedIn>
