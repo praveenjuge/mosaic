@@ -21,6 +21,8 @@ import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ImagesChart } from "./imageschart";
+import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
+import LatestScreenshots from "@/components/latest-screenshots";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -60,6 +62,14 @@ export default async function Page() {
   } catch (error) {
     console.log(error);
     notFound();
+  }
+
+  let websitePagesData = []
+  const response = await FetchWebsitePagesData({ page: 1, limit: 10 });
+  if (!response || !response?.data) {
+    console.log("No data");
+  } else {
+    websitePagesData = response.data;
   }
 
   return (
@@ -107,52 +117,7 @@ export default async function Page() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Latest Screenshots</CardTitle>
-          <CardDescription>
-            Some of the latest Open Graph (OG) images generated.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Website</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Size</TableHead>
-                <TableHead>Date & Time</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.website_pages.map((website_page: any) => (
-                <TableRow key={website_page.id}>
-                  <TableCell className="flex items-center gap-2">
-                    <img
-                      src={website_page.favicon_url}
-                      alt={website_page.title}
-                      className="size-4"
-                    />
-                    {website_page.page_url}
-                  </TableCell>
-                  <TableCell>{website_page.title}</TableCell>
-                  <TableCell>
-                    {formatBytes(website_page.size_in_bytes)}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(website_page.updated_at).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-        {/* TODO */}
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">Previous</Button>
-          <Button variant="outline">Next</Button>
-        </CardFooter>
-      </Card>
+      <LatestScreenshots websitePages={websitePagesData} />
     </>
   );
 }

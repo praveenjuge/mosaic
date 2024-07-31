@@ -16,35 +16,17 @@ import {
 import { auth } from "@clerk/nextjs/server";
 import { ArrowRight, CheckHexagon } from "@mynaui/icons-react";
 import WebsitesTable from "./websites/WebsitesTable";
+import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
+import LatestScreenshots from "@/components/latest-screenshots";
 
-async function fetchLatestImages(token: string) {
-  const url = "https://get.mosaicimg.com/api/websites/latest_images";
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return await response.json();
-}
 
 export default async function Home() {
-  let latestImages = [];
-  try {
-    const { getToken } = auth();
-    const token = await getToken({ template: "supabase" });
-    if (token) {
-      const response = await fetchLatestImages(token);
-      latestImages = response.images;
-    }
-  } catch (error) {
-    console.log(error);
+  let websitePagesData = []
+  const response = await FetchWebsitePagesData({ page: 1, limit: 5 });
+  if (!response || !response?.data) {
+    console.log("No data");
+  } else {
+    websitePagesData = response.data;
   }
 
   return (
@@ -133,36 +115,7 @@ export default async function Home() {
           <WebsitesTable />
         </div>
         <div>
-          <CardHeader className="mb-4 p-0">
-            <CardTitle>Latest Images</CardTitle>
-          </CardHeader>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-6">
-            {latestImages.length > 0 ? (
-              latestImages.map((image: any) => (
-                <div className="aspect-[1200/630] w-full" key={image.image_url}>
-                  <Card className="h-full">
-                    <img
-                      src={
-                        "https://ddvbpf2rl5x5r.cloudfront.net/" +
-                        image.image_key
-                      }
-                      alt={image.title}
-                      className="h-full w-full rounded-lg object-cover"
-                    />
-                  </Card>
-                </div>
-              ))
-            ) : (
-              <Card className="col-span-full">
-                <CardHeader>
-                  <CardTitle>No images yet</CardTitle>
-                  <CardDescription>
-                    Your latest generated images will appear here.
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            )}
-          </div>
+          <LatestScreenshots websitePages={websitePagesData} showPagination={false} />
         </div>
       </SignedIn>
     </>
