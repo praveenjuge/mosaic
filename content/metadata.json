@@ -1,6 +1,6 @@
 {
-  "commit": "19ca203dfbc6a256f64f12fb26ce6862594da621",
-  "generated": "2024-07-24T13:58:33.052Z",
+  "commit": "94b973e6364b1b855b08a748ee241a85e6255d28",
+  "generated": "2024-07-31T07:45:39.762Z",
   "metadata": [
     {
       "__outstatic": {
@@ -149,6 +149,24 @@
       "slug": "hello-world",
       "status": "published",
       "title": "Hello World!"
+    },
+    {
+      "__outstatic": {
+        "commit": "94b973e6364b1b855b08a748ee241a85e6255d28",
+        "hash": "452233564",
+        "path": "content/blog/how-to-run-your-own-og-image-creator.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "blog",
+      "coverImage": "",
+      "description": "Ever wondered how to create eye-catching Open Graph (OG) images without any design skills? Those captivating images that appear when you share links on social media are OG images. Here's a step-by-step guide to creating your own using Playwright and Python.",
+      "publishedAt": "2024-07-31T08:16:13.093Z",
+      "slug": "how-to-run-your-own-og-image-creator",
+      "status": "published",
+      "title": "How to run your own OG image creator?"
     }
   ]
 }
