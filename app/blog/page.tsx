@@ -1,11 +1,9 @@
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import markdownToHtml from "@/lib/markdownToHtml";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -22,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 const allPosts = await (await load())
-  .find({ collection: "blog" }, ["title", "slug", "publishedAt", "content"])
+  .find({ collection: "blog" }, ["title", "slug", "publishedAt", "description"])
   .sort({ publishedAt: -1 })
   .toArray();
 
@@ -37,7 +35,7 @@ export default function Page() {
       {allPosts.map((item) => (
         <Link key={item.slug} href={`/blog/${item.slug}`}>
           <Card>
-            <CardHeader className="pb-0">
+            <CardHeader>
               <CardTitle>{item.title}</CardTitle>
               <CardDescription>
                 {new Date(item.publishedAt).toLocaleDateString("en-US", {
@@ -46,14 +44,8 @@ export default function Page() {
                   day: "numeric",
                 })}
               </CardDescription>
+              <CardDescription>{item.description}</CardDescription>
             </CardHeader>
-            <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: markdownToHtml(item.content),
-                }}
-              ></div>
-            </CardContent>
           </Card>
         </Link>
       ))}
