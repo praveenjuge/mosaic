@@ -5,54 +5,43 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
+import { CartesianGrid, XAxis, YAxis, Bar, BarChart, Legend } from "recharts";
 
-export function ImagesChart() {
+export function ImagesChart({ page_hits }: { page_hits: any }) {
+  let data: any[] = []
+  if (page_hits) {
+    data = Object.keys(page_hits).map((date) => ({
+      time: new Date(date).toISOString(),
+      total_hits: page_hits[date],
+    }));
+  }
   return (
-    <ChartContainer
-      className="h-44 w-full"
-      config={{
-        desktop: {
-          label: "Desktop",
-          color: "hsl(var(--chart-1))",
-        },
-      }}
-    >
-      <LineChart
-        accessibilityLayer
-        data={[
-          { month: "January", desktop: 186 },
-          { month: "February", desktop: 305 },
-          { month: "March", desktop: 237 },
-          { month: "April", desktop: 73 },
-          { month: "May", desktop: 209 },
-          { month: "June", desktop: 214 },
-        ]}
-        margin={{
-          left: 12,
-          right: 12,
-        }}
+    <ChartContainer className="h-44 w-full pb-10" config={{}}>
+      <BarChart
+        data={data}
+        margin={{ left: 12, right: 12, top: 12, bottom: 12 }}
       >
         <CartesianGrid vertical={false} />
         <XAxis
-          dataKey="month"
+          dataKey="time"
+          tickFormatter={(value) => new Date(value).toLocaleDateString()}
+          // tick={{ angle: -15, textAnchor: 'end', dx: 25 }}
+          tickLine={false}
+        />
+        <YAxis
           tickLine={false}
           axisLine={false}
-          tickMargin={8}
-          tickFormatter={(value) => value.slice(0, 3)}
+          tickMargin={2}
+          allowDataOverflow={false}
         />
+        <Legend />
+
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent hideLabel />}
         />
-        <Line
-          dataKey="desktop"
-          type="natural"
-          stroke="var(--color-desktop)"
-          strokeWidth={2}
-          dot={false}
-        />
-      </LineChart>
+        <Bar dataKey="total_hits" fill="#07976a" />
+      </BarChart>
     </ChartContainer>
   );
 }

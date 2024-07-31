@@ -44,7 +44,8 @@ async function fetchAnalyticsData(token: string) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return await response.json();
+  let data = await response.json()
+  return data;
 }
 
 export default async function Page() {
@@ -101,8 +102,8 @@ export default async function Page() {
             Showing total images generated last 30 days
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <ImagesChart />
+        <CardContent >
+          <ImagesChart page_hits={data.page_hits} />
         </CardContent>
       </Card>
 
