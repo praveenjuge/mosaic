@@ -58,7 +58,9 @@ export async function POST(request: Request) {
 
   // Type guard to check if the object has a 'meta' property.
   if (webhookHasMeta(data)) {
-    const webhookEventId = await storeWebhookEvent(data.meta.event_name, data);
+    const webhookEventId = await storeWebhookEvent(data.meta.event_name, [
+      "body",
+    ]);
 
     // Non-blocking call to process the webhook event.
     void processWebhookEvent(webhookEventId);
