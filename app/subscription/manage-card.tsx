@@ -1,6 +1,4 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -9,8 +7,11 @@ import {
 } from "@/components/ui/card";
 import { getCustomerPortalUrl } from "@/lib/lemon";
 import { SignedIn } from "@clerk/nextjs";
+import { ExternalLink } from "@mynaui/icons-react";
+import Link from "next/link";
+import { Suspense } from "react";
 
-export function ManageCard() {
+export async function ManageCard() {
   return (
     <SignedIn>
       <Card>
@@ -23,17 +24,17 @@ export function ManageCard() {
               invoices, please contact our support team.
             </CardDescription>
           </div>
-          <Button
-            variant="outline"
-            onClick={async () => {
-              const url = await getCustomerPortalUrl();
-              if (typeof url === "string") {
-                window.location.href = url;
-              }
-            }}
-          >
-            Manage Plan
-          </Button>
+          <Suspense fallback={<Button variant="outline" disabled></Button>}>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline" })}
+              href={(await getCustomerPortalUrl()) as unknown as URL}
+            >
+              Manage Plan
+              <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+            </Link>
+          </Suspense>
         </CardHeader>
       </Card>
     </SignedIn>
