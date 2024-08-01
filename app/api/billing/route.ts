@@ -1,36 +1,8 @@
 import { processWebhookEvent, storeWebhookEvent } from "@/lib/lemon";
+import { webhookHasMeta } from "@/lib/utils";
 import crypto from "node:crypto";
 
-/**
- * Check if the value is an object.
- */
-function isObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
-
-/**
- * Typeguard to check if the object has a 'meta' property
- * and that the 'meta' property has the correct shape.
- */
-function webhookHasMeta(obj: unknown): obj is {
-  meta: {
-    event_name: string;
-    custom_data: {
-      user_id: string;
-    };
-  };
-} {
-  if (
-    isObject(obj) &&
-    isObject(obj.meta) &&
-    typeof obj.meta.event_name === "string" &&
-    isObject(obj.meta.custom_data) &&
-    typeof obj.meta.custom_data.user_id === "string"
-  ) {
-    return true;
-  }
-  return false;
-}
+export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   if (!process.env.LEMONSQUEEZY_WEBHOOK_SECRET) {
@@ -58,15 +30,15 @@ export async function POST(request: Request) {
 
   // Type guard to check if the object has a 'meta' property.
   if (webhookHasMeta(data)) {
-    const webhookEventId = await storeWebhookEvent(data.meta.event_name, [
-      "body",
-    ]);
+    const webhookEventData = await storeWebhookEvent(
+      data.meta.event_name,
+      data,
+    );
+
+    console.log("Webhook event stored successfully:", webhookEventData);
+
     // Non-blocking call to process the webhook event.
-    void processWebhookEvent({
-      id: webhookEventId as unknown as string,
-      eventName: data.meta.event_name,
-      body: data,
-    });
+    void processWebhookEvent(webhookEventData);
 
     return new Response("OK", { status: 200 });
   }
