@@ -1,6 +1,6 @@
 {
-  "commit": "e40b4ced2e156100476219b8b0d458075b7b5f66",
-  "generated": "2024-07-31T07:48:24.173Z",
+  "commit": "feea81f94e616cc1ba16f33f0f39d5121ecdf3cb",
+  "generated": "2024-08-01T07:21:07.593Z",
   "metadata": [
     {
       "__outstatic": {
@@ -167,6 +167,24 @@
       "slug": "hello-world",
       "status": "published",
       "title": "Hello World!"
+    },
+    {
+      "__outstatic": {
+        "commit": "feea81f94e616cc1ba16f33f0f39d5121ecdf3cb",
+        "hash": "2301639216",
+        "path": "content/blog/how-are-we-able-to-rate-limit-based-on-ip-with-caddy.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "blog",
+      "coverImage": "",
+      "description": "Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance.",
+      "publishedAt": "2024-08-01T07:51:36.232Z",
+      "slug": "how-are-we-able-to-rate-limit-based-on-ip-with-caddy",
+      "status": "published",
+      "title": "How are we able to rate limit based on IP with Caddy"
     }
   ]
 }
