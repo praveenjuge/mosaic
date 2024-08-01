@@ -114,10 +114,8 @@ export async function storeWebhookEvent(
     throw new Error("Failed to store webhook event");
   }
 
-  if (data) {
-    console.log("Webhook event stored successfully:", data);
-    return data[0].id;
-  }
+  console.log("Webhook event stored successfully:", data?.[0]);
+  return data?.[0].id;
 }
 
 /**
@@ -131,29 +129,29 @@ export async function processWebhookEvent(webhookEvent: {
   processed: boolean;
 }) {
   "use server";
-
   console.log("Processing webhook event:", webhookEvent);
 
   const client = await createClient();
   const { data: webhookFromDB, error } = await client
     .from("webhookevent")
     .select("*")
-    .eq("id", webhookEvent);
+    .eq("id", webhookEvent)
+    .single();
 
   if (error) {
     console.error("Error fetching webhook event:", error);
     throw new Error("Failed to fetch webhook event");
   }
 
-  if (webhookFromDB.length < 1) {
+  if (!webhookFromDB) {
     throw new Error(
       `Webhook event #${webhookEvent} not found in the database.`,
     );
   }
 
   let processingError = "No Error";
-  const eventBody = webhookFromDB[0].body;
-  const eventName = webhookFromDB[0].eventName;
+  const eventBody = webhookFromDB.body;
+  const eventName = webhookFromDB.eventName;
 
   if (!webhookHasMeta(eventBody)) {
     processingError = "Event body is missing the 'meta' property.";
@@ -165,17 +163,16 @@ export async function processWebhookEvent(webhookEvent: {
       console.log("Processing subscription event:", eventBody);
 
       const attributes = eventBody.data.attributes;
-
       const updateData = {
         lemonsqueezyid: eventBody.data.id,
-        orderid: attributes.order_id as number,
-        name: attributes.user_name as string,
-        email: attributes.user_email as string,
-        status: attributes.status as string,
-        statusformatted: attributes.status_formatted as string,
-        renewsat: attributes.renews_at as string,
-        endsat: attributes.ends_at as string,
-        trialendsat: attributes.trial_ends_at as string,
+        orderid: attributes.order_id,
+        name: attributes.user_name,
+        email: attributes.user_email,
+        status: attributes.status,
+        statusformatted: attributes.status_formatted,
+        renewsat: attributes.renews_at,
+        endsat: attributes.ends_at,
+        trialendsat: attributes.trial_ends_at,
         price: attributes.first_subscription_item.price_id,
         ispaused: false,
         subscriptionitemid: attributes.first_subscription_item.id,
@@ -246,5 +243,7 @@ export async function getCustomerPortalUrl() {
     },
   });
 
-  return customers.data?.data[0].attributes.urls.customer_portal;
+  return JSON.parse(
+    JSON.stringify(customers.data?.data[0].attributes.urls.customer_portal),
+  ) as URL;
 }

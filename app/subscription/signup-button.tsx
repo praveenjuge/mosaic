@@ -40,7 +40,7 @@ export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
         }}
         {...otherProps}
       >
-        Sign up →
+        Get Pro Plan {"-->"}
       </Button>
     );
   },
