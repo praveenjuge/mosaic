@@ -57,7 +57,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
                       >
                         <img
                           src={
-                            "https://ddvbpf2rl5x5r.cloudfront.net/" +
+                            "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
                             website_page.image_key
                           }
                           alt={website_page.title}
