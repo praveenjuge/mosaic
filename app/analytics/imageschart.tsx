@@ -5,12 +5,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { CartesianGrid, XAxis, YAxis, Bar, BarChart, Legend, Line, AreaChart, Area } from "recharts";
-import { curveCardinal } from 'd3-shape';
-
+import { curveCardinal } from "d3-shape";
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 export function ImagesChart({ page_hits }: { page_hits: any }) {
-  let data: any[] = []
+  let data: any[] = [];
   const cardinal = curveCardinal.tension(0.2);
   if (page_hits) {
     data = Object.keys(page_hits).map((date) => ({
@@ -20,9 +19,7 @@ export function ImagesChart({ page_hits }: { page_hits: any }) {
   }
   return (
     <ChartContainer className="h-44 w-full" config={{}}>
-      <AreaChart
-        data={data}
-      >
+      <AreaChart data={data}>
         <CartesianGrid vertical={false} />
         <XAxis
           dataKey="time"
@@ -37,13 +34,18 @@ export function ImagesChart({ page_hits }: { page_hits: any }) {
           tickMargin={2}
           allowDataOverflow={false}
         />
-        <Legend wrapperStyle={{ paddingTop: '15px' }} />
-
         <ChartTooltip
           cursor={false}
           content={<ChartTooltipContent hideLabel />}
         />
-        <Area type={cardinal} dataKey="total_hits" stroke="#07976a" fill="#07976a" fillOpacity={0.3} hide={false} />
+        <Area
+          type={cardinal}
+          dataKey="total_hits"
+          stroke="#07976a"
+          fill="#07976a"
+          fillOpacity={0.3}
+          hide={false}
+        />
       </AreaChart>
     </ChartContainer>
   );

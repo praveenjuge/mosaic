@@ -1,14 +1,5 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,22 +16,21 @@ interface LatestScreenshotsProps {
   showPagination?: boolean;
 }
 
-const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, showPagination = true }) => {
+const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
+  websitePages,
+  showPagination = true,
+}) => {
   return (
-    <Card>
-      <CardHeader>
+    <section>
+      <CardHeader className="mb-4 p-0">
         <CardTitle>Latest Screenshots</CardTitle>
-        <CardDescription>
-          Some of the latest Open Graph (OG) images generated.
-        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <Card>
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Image</TableHead>
               <TableHead>URL</TableHead>
-              <TableHead>Title</TableHead>
               <TableHead>Size</TableHead>
               <TableHead>Last refreshed at</TableHead>
             </TableRow>
@@ -48,12 +38,24 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, sho
           <TableBody>
             {websitePages.map((website_page: any) => (
               <TableRow key={website_page.id}>
-                <TableCell>
-                  <img
-                    src={"https://ddvbpf2rl5x5r.cloudfront.net/" + website_page.image_key}
-                    alt={website_page.title}
-                    className="size-16"
-                  />
+                <TableCell className="py-0">
+                  <Link
+                    href={
+                      "https://ddvbpf2rl5x5r.cloudfront.net/" +
+                      website_page.image_key
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <img
+                      src={
+                        "https://ddvbpf2rl5x5r.cloudfront.net/" +
+                        website_page.image_key
+                      }
+                      alt={website_page.title}
+                      className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center"
+                    />
+                  </Link>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
@@ -64,6 +66,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, sho
                       }
                       className="max-w-xs truncate font-medium text-primary"
                       target="_blank"
+                      rel="noopener noreferrer"
                     >
                       {website_page.title
                         ? website_page.title
@@ -72,10 +75,8 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, sho
                   </div>
                 </TableCell>
                 {/* <TableCell>{website_page.page_url}</TableCell> */}
-                <TableCell>{website_page.title}</TableCell>
-                <TableCell>
-                  {formatBytes(website_page.size_in_bytes)}
-                </TableCell>
+                {/* <TableCell>{website_page.title}</TableCell> */}
+                <TableCell>{formatBytes(website_page.size_in_bytes)}</TableCell>
                 <TableCell>
                   {new Date(website_page.updated_at).toLocaleString()}
                 </TableCell>
@@ -83,14 +84,14 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePages, sho
             ))}
           </TableBody>
         </Table>
-      </CardContent>
-      {showPagination && (
-        <CardFooter className="flex justify-between">
-          <Button variant="outline">Previous</Button>
-          <Button variant="outline">Next</Button>
-        </CardFooter>
-      )}
-    </Card>
+        {showPagination && (
+          <CardFooter className="flex justify-between">
+            <Button variant="outline">Previous</Button>
+            <Button variant="outline">Next</Button>
+          </CardFooter>
+        )}
+      </Card>
+    </section>
   );
 };
 

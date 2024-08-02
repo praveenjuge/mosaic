@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { createClient } from "@/lib/supabase/server";
-import { CheckCircle, Globe, InfoTriangle } from "@mynaui/icons-react";
+import { Globe, InfoTriangle } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -35,7 +35,8 @@ export default async function WebsitesTable() {
               <TableHead>Website</TableHead>
               <TableHead>URL</TableHead>
               <TableHead>Images</TableHead>
-              <TableHead>Cache</TableHead>
+              {/* TODO */}
+              {/* <TableHead>Cache</TableHead> */}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -49,6 +50,11 @@ export default async function WebsitesTable() {
                     ) : (
                       <Globe className="size-4" />
                     )}
+                    {website.is_duplicate ? (
+                      <InfoTriangle className="size-4"></InfoTriangle>
+                    ) : (
+                      ""
+                    )}
                     <Link
                       href={`/websites/${website.id}`}
                       className="max-w-xs truncate font-medium text-primary"
@@ -58,20 +64,9 @@ export default async function WebsitesTable() {
                   </div>
                 </TableCell>
                 <TableCell className="max-w-xs truncate font-medium">
-                  <div className="flex items-center gap-2">
-                    {website.is_duplicate ? (
-                      <InfoTriangle className="size-4"></InfoTriangle>
-                    ) : (
-                      <CheckCircle className="size-4"></CheckCircle>
-                    )}
-                    {website.cleaned_website_url}
-                  </div>
+                  {`https://mosaicimg.com/use?url=https://${website.website_url}`}
                 </TableCell>
                 <TableCell>{website.total_count}</TableCell>
-                <TableCell>
-                  {/* TODO */}
-                  30 Days
-                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <EditWebsite
