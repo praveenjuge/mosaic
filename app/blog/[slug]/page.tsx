@@ -54,13 +54,9 @@ export default function Page({ params }: { params: { slug: string } }) {
   return (
     <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
       <meta itemProp="image" content={getOgImageUrl("blog/" + params.slug)} />
-      <CardHeader className="p-0">
-        <CardTitle>
-          <Link href="/blog" className="text-primary">
-            ← Blog
-          </Link>
-        </CardTitle>
-      </CardHeader>
+      <CardDescription>
+        <Link href="/blog">← Blog</Link>
+      </CardDescription>
       <Card>
         <CardHeader className="pb-0">
           <CardTitle className="text-3xl font-semibold tracking-tighter">

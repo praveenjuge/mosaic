@@ -57,18 +57,9 @@ export default function Page({ params }: { params: { slug: string } }) {
         itemProp="image"
         content={getOgImageUrl("changelog/" + params.slug)}
       />
-      <CardHeader className="p-0">
-        <CardTitle className="flex items-center gap-2">
-          <Link href="/changelog" className="text-primary">
-            Changelogs
-          </Link>
-          <span>→</span>
-          <span>{changelog.title}</span>
-        </CardTitle>
-        <CardDescription>
-          See what's new in the latest version of our app.
-        </CardDescription>
-      </CardHeader>
+      <CardDescription>
+        <Link href="/changelog">← Changelog</Link>
+      </CardDescription>
       <Card>
         <CardHeader className="pb-0">
           <CardTitle>{changelog.title}</CardTitle>

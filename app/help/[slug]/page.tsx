@@ -53,16 +53,9 @@ export default function Page({ params }: { params: { slug: string } }) {
   const help = getData(params.slug);
   return (
     <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
-      <CardHeader className="p-0">
-        <CardTitle>
-          <Link href="/help" className="text-primary">
-            Help & Support
-          </Link>
-        </CardTitle>
-        <CardDescription>
-          Find solutions to common issues and get help with troubleshooting.
-        </CardDescription>
-      </CardHeader>
+      <CardDescription>
+        <Link href="/help">← Help</Link>
+      </CardDescription>
       <Card>
         <CardHeader className="pb-0">
           <CardTitle>{help.title}</CardTitle>

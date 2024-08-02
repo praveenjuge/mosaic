@@ -64,7 +64,7 @@ export default async function WebsitesTable() {
                   </div>
                 </TableCell>
                 <TableCell className="max-w-xs truncate font-medium">
-                  {`https://mosaicimg.com/use?url=https://${website.website_url}`}
+                  {`https://mosaicimg.com/use?url=https://${website.cleaned_website_url}`}
                 </TableCell>
                 <TableCell>{website.total_count}</TableCell>
                 <TableCell>
