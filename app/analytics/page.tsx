@@ -12,7 +12,8 @@ import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ImagesChart } from "./imageschart";
+import { MosaicAreaChart } from "./areaChart";
+import { MosaicBarChart } from "./barChart";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -96,17 +97,31 @@ export default async function Page() {
         </Card> */}
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Images Generated</CardTitle>
-          <CardDescription>
-            Showing total images generated last 30 days
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ImagesChart page_hits={data.page_hits} />
-        </CardContent>
-      </Card>
+      <div className="grid w-full gap-6 sm:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Images Served</CardTitle>
+            <CardDescription>
+              Showing total images served last 30 days
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MosaicAreaChart page_hits={data.page_hits} />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Images Generated</CardTitle>
+            <CardDescription>
+              Showing total images generated last 30 days
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MosaicBarChart page_hits={data.website_page_analytics} />
+          </CardContent>
+        </Card>
+      </div>
 
       <LatestScreenshots websitePages={websitePagesData} />
     </>
