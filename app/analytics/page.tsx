@@ -106,7 +106,7 @@ export default async function Page() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MosaicAreaChart page_hits={data.page_hits} />
+            <MosaicAreaChart datapoints={data.page_hits} datakey="Images served" />
           </CardContent>
         </Card>
 
@@ -118,7 +118,7 @@ export default async function Page() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MosaicBarChart page_hits={data.website_page_analytics} />
+            <MosaicBarChart datapoints={data.website_page_analytics} datakey="Images generated" />
           </CardContent>
         </Card>
       </div>

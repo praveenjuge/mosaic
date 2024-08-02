@@ -5,16 +5,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { curveCardinal } from "d3-shape";
 import { BarChart, CartesianGrid, XAxis, YAxis, Bar } from "recharts";
 
-export function MosaicBarChart({ page_hits }: { page_hits: any }) {
+export function MosaicBarChart({ datapoints, datakey }: { datapoints: any, datakey: string }) {
   let data: any[] = [];
-  const cardinal = curveCardinal.tension(0.2);
-  if (page_hits) {
-    data = Object.keys(page_hits).map((date) => ({
+  if (datapoints) {
+    data = Object.keys(datapoints).map((date) => ({
       time: date,
-      total_hits: page_hits[date],
+      [datakey]: datapoints[date],
     }));
   }
   return (
@@ -38,7 +36,7 @@ export function MosaicBarChart({ page_hits }: { page_hits: any }) {
           content={<ChartTooltipContent />}
         />
         <Bar
-          dataKey="total_hits"
+          dataKey={datakey}
           fill="#07976a"
           fillOpacity={0.8}
         />

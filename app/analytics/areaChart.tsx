@@ -8,13 +8,13 @@ import {
 import { curveCardinal } from "d3-shape";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export function MosaicAreaChart({ page_hits }: { page_hits: any }) {
+export function MosaicAreaChart({ datapoints, datakey }: { datapoints: any, datakey: string }) {
   let data: any[] = [];
   const cardinal = curveCardinal.tension(0.2);
-  if (page_hits) {
-    data = Object.keys(page_hits).map((date) => ({
+  if (datapoints) {
+    data = Object.keys(datapoints).map((date) => ({
       time: date,
-      total_hits: page_hits[date],
+      [datakey]: datapoints[date],
     }));
   }
   return (
@@ -40,7 +40,7 @@ export function MosaicAreaChart({ page_hits }: { page_hits: any }) {
         />
         <Area
           type={cardinal}
-          dataKey="total_hits"
+          dataKey={datakey}
           stroke="#07976a"
           fill="#07976a"
           fillOpacity={0.3}
