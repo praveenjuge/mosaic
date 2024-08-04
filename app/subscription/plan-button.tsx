@@ -8,16 +8,14 @@ import {
   SignedOut,
   SignUpButton,
 } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
-import { SignupButton } from "./signup-button";
 
 export interface PlanButtonProps {
   type: "free" | "pro" | "teams" | "enterprise";
 }
 
-async function checkUserActive() {
-  const { userId } = auth();
+async function checkUserActive(userId: string) {
   if (!userId) return false;
 
   const client = await createClient();
@@ -32,11 +30,14 @@ async function checkUserActive() {
     return false;
   }
 
-  return data?.status === "active";
+  // return data?.status === "active";
+  return false;
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
-  const isActive = await checkUserActive();
+  const { userId } = auth();
+  const user = await currentUser();
+  const isActive = await checkUserActive(userId || "");
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>
@@ -61,7 +62,19 @@ export async function PlanButton({ type }: PlanButtonProps) {
         return isActive ? (
           commonButton("You are on Pro Plan 🎉", true)
         ) : (
-          <SignupButton plan={{ id: "321693", variantId: 468280 }} />
+          <>
+            {/* <SignupButton plan={{ id: "321693", variantId: 468280 }} /> */}
+            <Link
+              href={`https://mosaicimg.gumroad.com/l/pro?email=${
+                user?.emailAddresses[0].emailAddress
+              }&user_id=${userId}&wanted=true`}
+              className={cn(buttonVariants(), "w-full")}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Get Pro Plan {"-->"}
+            </Link>
+          </>
         );
       case "teams":
         return commonButton("Coming Soon", true);
