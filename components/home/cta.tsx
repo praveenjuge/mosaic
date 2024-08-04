@@ -6,7 +6,7 @@ import { Button } from "../ui/button";
 export default function CTA() {
   return (
     <section className="pb-10">
-      <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 overflow-hidden rounded-lg border-[0.5px] border-black border-opacity-15 bg-gradient-to-r from-lime-100 via-emerald-100 to-teal-100 p-6 md:grid-cols-2 md:gap-12 md:px-10">
+      <div className="mx-auto grid max-w-5xl grid-cols-1 items-center gap-6 overflow-hidden rounded-lg border-[0.5px] border-black border-opacity-15 bg-gradient-to-r from-lime-100 via-emerald-100 to-teal-100 p-6 dark:from-lime-600/40 dark:via-emerald-600/40 dark:to-teal-600/40 md:grid-cols-2 md:gap-12 md:px-10">
         <div className="space-y-4">
           <div className="space-y-2">
             <h2 className="text-xl font-semibold tracking-tight md:text-3xl">
@@ -37,7 +37,7 @@ export default function CTA() {
             width={600}
             height={400}
             src="/images/analytics.png"
-            className="absolute left-0 top-0 h-96 max-w-none rounded-lg bg-emerald-50 object-cover object-center ring-[0.5px] ring-black ring-opacity-15"
+            className="absolute left-0 top-0 h-96 max-w-none rounded-lg bg-emerald-50 object-cover object-center ring-[0.5px] ring-black ring-opacity-15 dark:bg-emerald-950"
           />
         </div>
       </div>
