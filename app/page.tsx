@@ -123,7 +123,7 @@ export default function Home() {
                 width={600}
                 height={250}
               />
-              <div className="flex flex-col gap-1 p-4">
+              <div className="flex flex-col gap-1 bg-primary-foreground p-4">
                 <p className="font-semibold">
                   To Use or Not to Use Auto Layout in Figma
                 </p>
@@ -147,7 +147,7 @@ export default function Home() {
                 width={600}
                 height={250}
               />
-              <div className="flex flex-col gap-1 p-4">
+              <div className="flex flex-col gap-1 bg-primary-foreground p-4">
                 <p className="font-semibold">
                   To Use or Not to Use Auto Layout in Figma
                 </p>
@@ -178,7 +178,7 @@ export default function Home() {
                   <Image
                     src={content.image}
                     alt={content.title}
-                    className="w-full bg-emerald-50 object-cover"
+                    className="w-full object-cover"
                     width={500}
                     height={327}
                   />
@@ -188,7 +188,7 @@ export default function Home() {
                   <Image
                     src={content.image}
                     alt={content.title}
-                    className="w-full bg-emerald-50 object-cover"
+                    className="w-full object-cover"
                     width={500}
                     height={327}
                   />
