@@ -18,7 +18,23 @@ import {
 } from "@mynaui/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useMemo } from "react";
 import Logo from "./logo";
+
+const navItems = [
+  { href: "/", icon: Home, label: "Home" },
+  { href: "/websites", icon: Earth, label: "Websites" },
+  { href: "/analytics", icon: Lightning, label: "Analytics" },
+  { href: "/subscription", icon: ShootingStar, label: "Subscription" },
+  { href: "/settings", icon: Config, label: "Settings" },
+];
+
+const secondaryNavItems = [
+  { href: "/changelog", icon: ListCheck, label: "Changelog" },
+  { href: "/blog", icon: FileText, label: "Blog & Guides" },
+  { href: "/help", icon: Support, label: "Help & Support" },
+  { href: "/legal", icon: Copyright, label: "Privacy & Terms" },
+];
 
 const NavLink = ({
   href,
@@ -26,7 +42,7 @@ const NavLink = ({
   label,
 }: {
   href: string;
-  icon?: React.ComponentType<{ className?: string; stroke?: number }>;
+  icon: React.ComponentType<{ className?: string; stroke?: number }>;
   label: string;
 }) => {
   const pathname = usePathname();
@@ -45,7 +61,7 @@ const NavLink = ({
         <span
           aria-hidden="true"
           className="pointer-events-none absolute -left-4 h-full w-1 select-none rounded-r-full bg-primary"
-        ></span>
+        />
       )}
       {Icon && (
         <Icon
@@ -73,33 +89,26 @@ const AsideContent = () => (
           </div>
         </SignedIn>
       </div>
-      <nav className="flex flex-col gap-2" aria-label="Primary navigation">
-        <NavLink href="/" icon={Home} label="Home" />
-        <NavLink href="/websites" icon={Earth} label="Websites" />
-        <NavLink href="/analytics" icon={Lightning} label="Analytics" />
-        <NavLink
-          href="/subscription"
-          icon={ShootingStar}
-          label="Subscription"
-        />
-        <NavLink href="/settings" icon={Config} label="Settings" />
+      <nav className="flex flex-col gap-1.5" aria-label="Primary navigation">
+        {navItems.map((item) => (
+          <NavLink key={item.href} {...item} />
+        ))}
       </nav>
     </div>
-    <nav className="flex flex-col gap-2" aria-label="Secondary navigation">
-      <NavLink href="/changelog" icon={ListCheck} label="Changelog" />
-      <NavLink href="/blog" icon={FileText} label="Blog & Guides" />
-      <NavLink href="/help" icon={Support} label="Help & Support" />
-      <NavLink href="/legal" icon={Copyright} label="Privacy & Terms" />
+    <nav className="flex flex-col gap-1.5" aria-label="Secondary navigation">
+      {secondaryNavItems.map((item) => (
+        <NavLink key={item.href} {...item} />
+      ))}
     </nav>
   </aside>
 );
 
 export default function Aside() {
+  const memoizedAsideContent = useMemo(() => <AsideContent />, []);
+
   return (
     <>
-      <div className="hidden md:block">
-        <AsideContent />
-      </div>
+      <div className="hidden md:block">{memoizedAsideContent}</div>
       <SignedIn>
         <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-8 [&_button]:size-8">
           <UserButton />
@@ -117,7 +126,7 @@ export default function Aside() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-auto p-0">
-          <AsideContent />
+          {memoizedAsideContent}
         </SheetContent>
       </Sheet>
     </>
