@@ -28,20 +28,6 @@ export async function POST(request: Request) {
       },
     });
   }
-  // // Type guard to check if the object has a 'meta' property.
-  // if (webhookHasMeta(data)) {
-  //   const webhookEventData = await storeWebhookEvent(
-  //     data.meta.event_name,
-  //     data,
-  //   );
-
-  //   console.log("Webhook event stored successfully:", webhookEventData);
-
-  //   // Non-blocking call to process the webhook event.
-  //   void processWebhookEvent(webhookEventData);
-
-  //   return new Response("OK", { status: 200 });
-  // }
 
   return new Response("Data invalid", { status: 400 });
 }
