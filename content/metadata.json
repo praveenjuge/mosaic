@@ -1,6 +1,6 @@
 {
-  "commit": "feea81f94e616cc1ba16f33f0f39d5121ecdf3cb",
-  "generated": "2024-08-01T07:21:07.593Z",
+  "commit": "a915b5a139287fe7bc19018c05f2723a372a932a",
+  "generated": "2024-08-07T14:49:10.382Z",
   "metadata": [
     {
       "__outstatic": {
@@ -185,6 +185,24 @@
       "slug": "how-are-we-able-to-rate-limit-based-on-ip-with-caddy",
       "status": "published",
       "title": "How are we able to rate limit based on IP with Caddy"
+    },
+    {
+      "__outstatic": {
+        "commit": "a915b5a139287fe7bc19018c05f2723a372a932a",
+        "hash": "3418586021",
+        "path": "content/changelog/dark-mode.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-08-07T15:18:52.292Z",
+      "slug": "dark-mode",
+      "status": "published",
+      "title": "Dark Mode"
     }
   ]
 }
