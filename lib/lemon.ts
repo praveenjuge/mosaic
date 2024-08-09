@@ -184,7 +184,7 @@ export async function processWebhookEvent(webhookEvent: {
 
       // Create/update subscription in the database.
       const { data, error } = await client
-        .from("subscription")
+        .from("subscriptions")
         .upsert(updateData, {
           onConflict: "lemonsqueezyid",
         })
