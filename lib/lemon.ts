@@ -4,7 +4,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import {
   createCheckout,
   lemonSqueezySetup,
+  listCustomers,
 } from "@lemonsqueezy/lemonsqueezy.js";
+import { createClient } from "./supabase/server";
+import { webhookHasData, webhookHasMeta } from "./utils";
 
 /**
  * Ensures that required environment variables are set and sets up the Lemon
@@ -62,6 +65,11 @@ export async function getCheckoutURL(variantId: number, embed = false) {
       },
       checkoutData: {
         email: user.primaryEmailAddress?.emailAddress,
+        name: process.env.NODE_ENV === "development" ? "Praveen" : undefined,
+        billingAddress: {
+          country: process.env.NODE_ENV === "development" ? "IN" : undefined,
+          zip: process.env.NODE_ENV === "development" ? "600011" : undefined,
+        },
         custom: {
           user_id: user.id,
         },
@@ -83,24 +91,31 @@ export async function getCheckoutURL(variantId: number, embed = false) {
  * @param eventName - The name of the event.
  * @param body - The body of the event.
  */
-export async function storeWebhookEvent(eventName: string, body: ["body"]) {
-  if (!process.env.POSTGRES_URL) {
-    throw new Error("POSTGRES_URL is not set");
+export async function storeWebhookEvent(
+  eventName: string,
+  body: Record<string, unknown>,
+) {
+  "use server";
+
+  const client = await createClient();
+  const { data, error } = await client
+    .from("webhookevent")
+    .insert([
+      {
+        eventName,
+        processed: false,
+        body,
+      },
+    ])
+    .select();
+
+  if (error) {
+    console.error("Error storing webhook event:", error);
+    throw new Error("Failed to store webhook event");
   }
 
-  const id = crypto.randomUUID();
-
-  // const returnedValue = await db
-  //   .insert(webhookEvents)
-  //   .values({
-  //     id,
-  //     eventName,
-  //     processed: false,
-  //     body,
-  //   })
-  //   .returning();
-
-  return;
+  console.log("Webhook event stored successfully:", data?.[0]);
+  return data?.[0].id;
 }
 
 /**
@@ -111,108 +126,124 @@ export async function processWebhookEvent(webhookEvent: {
   id: string;
   eventName: string;
   body: any;
+  processed: boolean;
 }) {
-  configureLemonSqueezy();
+  "use server";
+  console.log("Processing webhook event:", webhookEvent);
 
-  // const dbwebhookEvent = await db
-  //   .select()
-  //   .from(webhookEvents)
-  //   .where(eq(webhookEvents.id, webhookEvent.id));
+  const client = await createClient();
+  const { data: webhookFromDB, error } = await client
+    .from("webhookevent")
+    .select("*")
+    .eq("id", webhookEvent)
+    .single();
 
-  // if (dbwebhookEvent.length < 1) {
-  //   throw new Error(
-  //     `Webhook event #${webhookEvent.id} not found in the database.`,
-  //   );
-  // }
+  if (error) {
+    console.error("Error fetching webhook event:", error);
+    throw new Error("Failed to fetch webhook event");
+  }
 
-  if (!process.env.WEBHOOK_URL) {
+  if (!webhookFromDB) {
     throw new Error(
-      "Missing required WEBHOOK_URL env variable. Please, set it in your .env file.",
+      `Webhook event #${webhookEvent} not found in the database.`,
     );
   }
 
-  let processingError = "";
-  const eventBody = webhookEvent.body;
+  let processingError = "No Error";
+  const eventBody = webhookFromDB.body;
+  const eventName = webhookFromDB.eventName;
 
-  // if (!webhookHasMeta(eventBody)) {
-  //   processingError = "Event body is missing the 'meta' property.";
-  // } else if (webhookHasData(eventBody)) {
-  //   if (webhookEvent.eventName.startsWith("subscription_payment_")) {
-  //     // Save subscription invoices; eventBody is a SubscriptionInvoice
-  //     // Not implemented.
-  //   } else if (webhookEvent.eventName.startsWith("subscription_")) {
-  //     // Save subscription events; obj is a Subscription
-  //     const attributes = eventBody.data.attributes;
-  //     const variantId = attributes.variant_id as string;
+  if (!webhookHasMeta(eventBody)) {
+    processingError = "Event body is missing the 'meta' property.";
+  } else if (webhookHasData(eventBody)) {
+    if (eventName.startsWith("subscription_payment_")) {
+      // Save subscription invoices; eventBody is a SubscriptionInvoice
+      // Not implemented.
+    } else if (eventName.startsWith("subscription_")) {
+      console.log("Processing subscription event:", eventBody);
 
-  //     // We assume that the Plan table is up to date.
-  //     const plan = await db
-  //       .select()
-  //       .from(plans)
-  //       .where(eq(plans.variantId, parseInt(variantId, 10)));
+      const attributes = eventBody.data.attributes;
+      const updateData = {
+        lemonsqueezyid: eventBody.data.id,
+        orderid: attributes.order_id,
+        name: attributes.user_name,
+        email: attributes.user_email,
+        status: attributes.status,
+        statusformatted: attributes.status_formatted,
+        renewsat: attributes.renews_at,
+        endsat: attributes.ends_at,
+        trialendsat: attributes.trial_ends_at,
+        price: attributes.first_subscription_item.price_id,
+        ispaused: false,
+        subscriptionitemid: attributes.first_subscription_item.id,
+        isusagebased: attributes.first_subscription_item.is_usage_based,
+        user_id: eventBody.meta.custom_data.user_id,
+        planid: attributes.first_subscription_item.price_id,
+      };
 
-  //     if (plan.length < 1) {
-  //       processingError = `Plan with variantId ${variantId} not found.`;
-  //     } else {
-  //       // Update the subscription in the database.
+      // Create/update subscription in the database.
+      const { data, error } = await client
+        .from("subscription")
+        .upsert(updateData, {
+          onConflict: "lemonsqueezyid",
+        })
+        .select();
 
-  //       const priceId = attributes.first_subscription_item.price_id;
+      if (data) {
+        console.log("Subscription upserted successfully:", data);
+      }
 
-  //       // Get the price data from Lemon Squeezy.
-  //       const priceData = await getPrice(priceId);
-  //       if (priceData.error) {
-  //         processingError = `Failed to get the price data for the subscription ${eventBody.data.id}.`;
-  //       }
+      if (error) {
+        processingError = `Failed to upsert webhook event #${webhookFromDB[0].id} to the database.`;
+        console.error(error);
+      }
+    } else if (eventName.startsWith("order_")) {
+      // Save orders; eventBody is a "Order"
+      /* Not implemented */
+    } else if (eventName.startsWith("license_")) {
+      // Save license keys; eventBody is a "License key"
+      /* Not implemented */
+    }
 
-  //       const isUsageBased = attributes.first_subscription_item.is_usage_based;
-  //       const price = isUsageBased
-  //         ? priceData.data?.data.attributes.unit_price_decimal
-  //         : priceData.data?.data.attributes.unit_price;
+    // Update the webhook event in the database.
+    const { data, error } = await client
+      .from("webhookevent")
+      .update({
+        processed: true,
+        processingerror: processingError,
+      })
+      .eq("id", webhookEvent)
+      .select();
 
-  //       const updateData: NewSubscription = {
-  //         lemonSqueezyId: eventBody.data.id,
-  //         orderId: attributes.order_id as number,
-  //         name: attributes.user_name as string,
-  //         email: attributes.user_email as string,
-  //         status: attributes.status as string,
-  //         statusFormatted: attributes.status_formatted as string,
-  //         renewsAt: attributes.renews_at as string,
-  //         endsAt: attributes.ends_at as string,
-  //         trialEndsAt: attributes.trial_ends_at as string,
-  //         price: price?.toString() ?? "",
-  //         isPaused: false,
-  //         subscriptionItemId: attributes.first_subscription_item.id,
-  //         isUsageBased: attributes.first_subscription_item.is_usage_based,
-  //         userId: eventBody.meta.custom_data.user_id,
-  //         planId: plan[0].id,
-  //       };
+    if (error) {
+      console.error("Error updating webhook event:", error);
+      throw new Error("Failed to update webhook event");
+    }
 
-  //       // Create/update subscription in the database.
-  //       try {
-  //         await db.insert(subscriptions).values(updateData).onConflictDoUpdate({
-  //           target: subscriptions.lemonSqueezyId,
-  //           set: updateData,
-  //         });
-  //       } catch (error) {
-  //         processingError = `Failed to upsert Subscription #${updateData.lemonSqueezyId} to the database.`;
-  //         console.error(error);
-  //       }
-  //     }
-  //   } else if (webhookEvent.eventName.startsWith("order_")) {
-  //     // Save orders; eventBody is a "Order"
-  //     /* Not implemented */
-  //   } else if (webhookEvent.eventName.startsWith("license_")) {
-  //     // Save license keys; eventBody is a "License key"
-  //     /* Not implemented */
-  //   }
+    if (data) {
+      console.log("Webhook event updated successfully:", data);
+    }
+  }
+}
 
-  //   // Update the webhook event in the database.
-  //   await db
-  //     .update(webhookEvents)
-  //     .set({
-  //       processed: true,
-  //       processingError,
-  //     })
-  //     .where(eq(webhookEvents.id, webhookEvent.id));
-  // }
+export async function getCustomerPortalUrl() {
+  configureLemonSqueezy();
+  const user = await currentUser();
+
+  if (!user) {
+    throw new Error("User is not authenticated.");
+  }
+
+  const email = user.primaryEmailAddress?.emailAddress;
+
+  const customers = await listCustomers({
+    filter: {
+      email,
+      storeId: process.env.LEMONSQUEEZY_STORE_ID,
+    },
+  });
+
+  return JSON.parse(
+    JSON.stringify(customers.data?.data[0].attributes.urls.customer_portal),
+  ) as URL;
 }

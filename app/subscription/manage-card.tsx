@@ -1,0 +1,42 @@
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { getCustomerPortalUrl } from "@/lib/lemon";
+import { SignedIn } from "@clerk/nextjs";
+import { ExternalLink } from "@mynaui/icons-react";
+import Link from "next/link";
+import { Suspense } from "react";
+
+export async function ManageCard() {
+  return (
+    <SignedIn>
+      <Card>
+        <CardHeader className="flex justify-between gap-2 md:flex-row">
+          <div className="flex max-w-3xl flex-col gap-2">
+            <CardTitle>Invoice History & Manage Plan</CardTitle>
+            <CardDescription>
+              Find the details of your previous invoices or to cancel your
+              current subscription. If you have any questions regarding your
+              invoices, please contact our support team.
+            </CardDescription>
+          </div>
+          <Suspense fallback={<Button variant="outline" disabled></Button>}>
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "outline" })}
+              href={(await getCustomerPortalUrl()) as unknown as URL}
+            >
+              Manage Plan
+              <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+            </Link>
+          </Suspense>
+        </CardHeader>
+      </Card>
+    </SignedIn>
+  );
+}
