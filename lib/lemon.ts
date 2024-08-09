@@ -52,7 +52,7 @@ export async function getCheckoutURL(variantId: number, embed = false) {
 
   if (!user) {
     console.log("User is not authenticated.");
-    return false;
+    return undefined;
   }
 
   const checkout = await createCheckout(
@@ -233,7 +233,7 @@ export async function getCustomerPortalUrl() {
 
   if (!user) {
     console.log("User is not authenticated.");
-    return false;
+    return undefined;
   }
 
   const email = user.primaryEmailAddress?.emailAddress;
