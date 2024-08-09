@@ -5,7 +5,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getCustomerPortalUrl } from "@/lib/lemon";
 import { SignedIn } from "@clerk/nextjs";
 import { ExternalLink } from "@mynaui/icons-react";
 import Link from "next/link";
@@ -29,7 +28,7 @@ export async function ManageCard() {
               target="_blank"
               rel="noopener noreferrer"
               className={buttonVariants({ variant: "outline" })}
-              href={(await getCustomerPortalUrl()) as unknown as URL}
+              href=""
             >
               Manage Plan
               <ExternalLink className="ml-2 size-4" strokeWidth={2} />
