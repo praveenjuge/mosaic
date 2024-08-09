@@ -1,5 +1,4 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { createClient } from "@/lib/supabase/server";
 import { cn } from "@/lib/utils";
 import {
   ClerkLoaded,
@@ -18,17 +17,17 @@ export interface PlanButtonProps {
 async function checkUserActive(userId: string) {
   if (!userId) return false;
 
-  const client = await createClient();
-  const { data, error } = await client
-    .from("subscriptions")
-    .select("status")
-    .eq("user_id", userId)
-    .single();
+  // const client = await createClient();
+  // const { data, error } = await client
+  //   .from("subscriptions")
+  //   .select("status")
+  //   .eq("user_id", userId)
+  //   .single();
 
-  if (error) {
-    console.error("Error fetching user subscription", error);
-    return false;
-  }
+  // if (error) {
+  //   console.error("Error fetching user subscription", error);
+  //   return false;
+  // }
 
   // return data?.status === "active";
   return false;
