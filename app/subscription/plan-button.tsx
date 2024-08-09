@@ -34,9 +34,11 @@ async function checkUserActive(userId: string) {
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
+  const userData = await auth();
+  const metaData: any = await userData?.sessionClaims?.public_metadata;
   const { userId } = auth();
   const user = await currentUser();
-  const isActive = false;
+  const isActive = Boolean(metaData?.plan?.label != "free");
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>

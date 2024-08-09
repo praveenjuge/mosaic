@@ -6,11 +6,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SignedIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { ExternalLink } from "@mynaui/icons-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
 export async function ManageCard() {
+  const userData = await auth();
+  const metaData: any = await userData?.sessionClaims?.public_metadata;
+  const subscriptionId: any = metaData?.plan?.subscription_id
+
   return (
     <SignedIn>
       <Card>
@@ -27,8 +32,8 @@ export async function ManageCard() {
             <Link
               target="_blank"
               rel="noopener noreferrer"
-              className={buttonVariants({ variant: "outline" })}
-              href=""
+              className={buttonVariants({ variant: "default" })}
+              href={subscriptionId ? `https://app.gumroad.com/subscriptions/${subscriptionId}/manage` : ""}
             >
               Manage Plan
               <ExternalLink className="ml-2 size-4" strokeWidth={2} />
