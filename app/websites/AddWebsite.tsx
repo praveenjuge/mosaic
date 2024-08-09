@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -11,13 +11,15 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus } from "@mynaui/icons-react";
+import { ExternalLink, Plus } from "@mynaui/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { handleAdd } from "./actions";
 import { SubmitButton } from "./submit-button";
+import { auth } from "@clerk/nextjs/server";
+import Link from "next/link";
 
-export function AddWebsite() {
+export function AddWebsite({ preventSubmission = false }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -53,7 +55,19 @@ export function AddWebsite() {
               required
             />
           </div>
-          <SubmitButton text="Add" />
+          {preventSubmission ? (
+            <Link
+              target="_blank"
+              rel="noopener noreferrer"
+              className={buttonVariants({ variant: "default" })}
+              href="/subscriptions"
+            >
+              Upgrade to Pro
+              <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+            </Link>
+          ) : (
+            <SubmitButton text="Add" />
+          )}
         </form>
       </DialogContent>
     </Dialog>

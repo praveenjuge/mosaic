@@ -20,7 +20,7 @@ import { EditWebsite } from "./EditWebsite";
 
 export default async function WebsitesTable() {
   const client = await createClient();
-  const { data: websites, error } = await client.from("websites").select("*");
+  let { data: websites, error } = await client.from("websites").select("*");
 
   if (error) {
     return <p>Error: {JSON.stringify(error, null, 2)}</p>;
@@ -41,7 +41,7 @@ export default async function WebsitesTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {websites.map((website) => (
+            {websites.map((website: any) => (
               <TableRow key={website.id}>
                 <TableCell>
                   <div className="flex items-center gap-2">

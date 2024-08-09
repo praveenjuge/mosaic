@@ -24,7 +24,7 @@ export default function Page() {
           <CardDescription>{metadata.description}</CardDescription>
         </CardHeader>
         <SignedIn>
-          <AddWebsite />
+          <AddWebsite preventSubmission={false} />
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
