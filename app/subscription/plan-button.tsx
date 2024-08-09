@@ -20,7 +20,7 @@ async function checkUserActive(userId: string) {
 
   const client = await createClient();
   const { data, error } = await client
-    .from("subscription")
+    .from("subscriptions")
     .select("status")
     .eq("user_id", userId)
     .single();
