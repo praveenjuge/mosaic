@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { formatBytes, getOgImageUrl } from "@/lib/utils";
+import { formatBytes, getOgImageUrl, parseBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -43,9 +43,10 @@ async function fetchAnalyticsData(token: string) {
 
 export default async function Page() {
   let data: any = {};
+  const userData = await auth();
+  const metaData: any = await userData?.sessionClaims?.public_metadata;
   try {
-    const { getToken } = auth();
-    const token = await getToken({ template: "supabase" });
+    const token = await userData.getToken({ template: "supabase" });
     if (token) {
       const response = await fetchAnalyticsData(token);
       data = response;
@@ -72,18 +73,18 @@ export default async function Page() {
       <div className="grid w-full gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>{data.total_count}</CardTitle>
+            <CardTitle>{data.total_count} out of {(metaData.plan?.limits?.images || 500)}</CardTitle>
             <CardDescription>Images Generated</CardDescription>
-            <Progress className="h-2" value={(data.total_count * 100) / 500} />
+            <Progress className="h-2" value={(data.total_count * 100) / (metaData.plan?.limits?.images || 500)} />
           </CardHeader>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{formatBytes(data.total_bytes)}/50 MB</CardTitle>
+            <CardTitle>{formatBytes(data.total_bytes)}/{metaData.plan?.limits?.storage || '50 MB'}</CardTitle>
             <CardDescription>Storage Used</CardDescription>
             <Progress
               className="h-2"
-              value={(data.total_bytes * 100) / (1048576 * 50)}
+              value={(data.total_bytes * 100) / ((parseBytes(metaData.plan?.limits?.storage)) || (1048576 * 50))}
             />
           </CardHeader>
         </Card>
