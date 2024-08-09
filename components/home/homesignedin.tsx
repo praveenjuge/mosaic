@@ -42,7 +42,7 @@ export default async function HomeSignedIn() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>{metaData['plan']['name'] || 'Free Plan'}</CardTitle>
+              <CardTitle>{metaData?.plan?.name || 'Free Plan'}</CardTitle>
               <CardDescription>Subscription</CardDescription>
             </CardHeader>
           </Card>
