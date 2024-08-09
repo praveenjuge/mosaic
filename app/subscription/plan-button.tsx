@@ -36,7 +36,7 @@ async function checkUserActive(userId: string) {
 export async function PlanButton({ type }: PlanButtonProps) {
   const { userId } = auth();
   const user = await currentUser();
-  const isActive = await checkUserActive(userId || "");
+  const isActive = false;
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>
@@ -64,8 +64,9 @@ export async function PlanButton({ type }: PlanButtonProps) {
           <>
             {/* <SignupButton plan={{ id: "321693", variantId: 468280 }} /> */}
             <Link
-              href={`https://mosaicimg.gumroad.com/l/pro?email=${user?.emailAddresses[0].emailAddress
-                }&user_id=${userId}&wanted=true`}
+              href={`https://mosaicimg.gumroad.com/l/pro?email=${
+                user?.emailAddresses[0].emailAddress
+              }&user_id=${userId}&wanted=true`}
               className={cn(buttonVariants(), "w-full")}
               target="_blank"
               rel="noopener noreferrer"
