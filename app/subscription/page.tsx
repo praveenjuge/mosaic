@@ -1,4 +1,4 @@
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -12,10 +12,11 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { cn, getOgImageUrl } from "@/lib/utils";
-import { ClerkLoading, SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
+import { getOgImageUrl } from "@/lib/utils";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import { ManageCard } from "./manage-card";
+import { PlanButton } from "./plan-button";
 
 export const metadata: Metadata = {
   title: "Subscription",
@@ -25,6 +26,104 @@ export const metadata: Metadata = {
   },
 };
 
+const plans = [
+  {
+    title: "Free",
+    description: "For trying out",
+    price: "$0",
+    features: ["250 images", "1 website", "2 GB storage", "No support"],
+    type: "free",
+  },
+  {
+    title: "Pro",
+    description: "For individual use",
+    price: "$19",
+    features: [
+      "5000 images",
+      "Unlimited websites",
+      "20 GB storage",
+      "Email support",
+    ],
+    type: "pro",
+  },
+  {
+    title: "Teams",
+    description: "For small to medium teams",
+    price: "$99",
+    features: [
+      "Unlimited images",
+      "Unlimited websites",
+      "100 GB storage",
+      "Priority email support",
+    ],
+    type: "teams",
+  },
+  {
+    title: "Enterprise",
+    description: "For large organizations",
+    price: "Contact us",
+    priceSubtext: "Custom pricing and features",
+    features: [
+      "Unlimited images",
+      "Unlimited websites",
+      "Unlimited storage",
+      "Dedicated account manager",
+    ],
+    type: "enterprise",
+  },
+];
+
+const faqs = [
+  {
+    question: "How do I upgrade my plan?",
+    answer: (
+      <>
+        <p>To upgrade your plan, follow these steps:</p>
+        <ol className="list-inside list-decimal">
+          <li>
+            Click on the "Subscription" tab in the left-hand navigation menu.
+          </li>
+          <li>Under "Your Plan", click on the "Upgrade" button.</li>
+          <li>
+            Select the new plan you want to upgrade to and follow the prompts to
+            complete the upgrade process.
+          </li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question: "How do I cancel my subscription?",
+    answer: (
+      <>
+        <p>To cancel your subscription, follow these steps:</p>
+        <ol className="list-inside list-decimal">
+          <li>
+            Click on the "Subscription" tab in the left-hand navigation menu.
+          </li>
+          <li>Under "Your Plan", click on the "Cancel Subscription" button.</li>
+          <li>Follow the prompts to confirm the cancellation.</li>
+        </ol>
+      </>
+    ),
+  },
+  {
+    question: "How do I add a team member?",
+    answer: (
+      <>
+        <p>To add a team member, follow these steps:</p>
+        <ol className="list-inside list-decimal">
+          <li>Click on the "Team" tab in the left-hand navigation menu.</li>
+          <li>Click on the "Add Member" button.</li>
+          <li>Enter the email address of the team member you want to add.</li>
+          <li>Select the role and permissions for the new team member.</li>
+          <li>Click "Invite" to send an invitation to the team member.</li>
+        </ol>
+      </>
+    ),
+  },
+];
+
 export default function Page() {
   return (
     <>
@@ -33,91 +132,7 @@ export default function Page() {
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
       <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-4">
-        {[
-          {
-            title: "Free",
-            description: "For trying out",
-            price: "$0",
-            features: ["250 images", "1 website", "2 GB storage", "No support"],
-            footer: (
-              <Button className="w-full" disabled>
-                Coming Soon
-              </Button>
-            ),
-          },
-          {
-            title: "Pro",
-            description: "For individual use",
-            price: "$19",
-            features: [
-              "5000 images",
-              "Unlimited websites",
-              "20 GB storage",
-              "Email support",
-            ],
-            footer: (
-              <>
-                <ClerkLoading>
-                  <Button className="w-full" disabled>
-                    Loading...
-                  </Button>
-                </ClerkLoading>
-                <SignedOut>
-                  <SignUpButton mode="modal">
-                    <Button className="w-full">Get Started →</Button>
-                  </SignUpButton>
-                </SignedOut>
-                <SignedIn>
-                  {/* <SignupButton
-                    plan={{ id: "310030", variantId: 447876 }}
-                    isChangingPlans={false}
-                    currentPlan={{ id: "" }}
-                    embed={false}
-                  /> */}
-                  <Button className="w-full" disabled>
-                    Coming Soon
-                  </Button>
-                </SignedIn>
-              </>
-            ),
-          },
-          {
-            title: "Teams",
-            description: "For small to medium teams",
-            price: "$99",
-            features: [
-              "Unlimited images",
-              "Unlimited websites",
-              "100 GB storage",
-              "Priority email support",
-            ],
-            footer: (
-              <Button className="w-full" disabled>
-                Coming Soon
-              </Button>
-            ),
-          },
-          {
-            title: "Enterprise",
-            description: "For large organizations",
-            price: "Contact us",
-            priceSubtext: "Custom pricing and features",
-            features: [
-              "Unlimited images",
-              "Unlimited websites",
-              "Unlimited storage",
-              "Dedicated account manager",
-            ],
-            footer: (
-              <a
-                href="mailto:hello@praveenjuge.com"
-                className={cn(buttonVariants({ variant: "outline" }), "w-full")}
-              >
-                Contact Sales
-              </a>
-            ),
-          },
-        ].map((plan, index) => (
+        {plans.map((plan, index) => (
           <Card key={index}>
             <CardHeader className="border-b-[0.5px]">
               <CardTitle>{plan.title}</CardTitle>
@@ -139,26 +154,15 @@ export default function Page() {
                 ))}
               </ul>
             </CardContent>
-            <CardFooter>{plan.footer}</CardFooter>
+            <CardFooter>
+              <PlanButton
+                type={plan.type as "free" | "pro" | "teams" | "enterprise"}
+              />
+            </CardFooter>
           </Card>
         ))}
       </div>
-      <SignedIn>
-        <Card>
-          <CardHeader className="flex justify-between gap-2 md:flex-row">
-            <div className="flex flex-col gap-2">
-              <CardTitle>Invoice History & Manage Plan</CardTitle>
-              <CardDescription>
-                Find the details of your previous invoices or to cancel your
-                current subscription. If you have any questions regarding your
-                invoices, please contact our support team.
-              </CardDescription>
-            </div>
-            {/* TODO */}
-            <Button variant="outline">Manage Plan</Button>
-          </CardHeader>
-        </Card>
-      </SignedIn>
+      <ManageCard />
       <Card>
         <CardHeader>
           <CardTitle>Frequently Asked Questions</CardTitle>
@@ -168,90 +172,22 @@ export default function Page() {
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2">
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
-                <h4 className="text-sm font-medium">
-                  How do I upgrade my plan?
-                </h4>
-                <Button variant="ghost" size="icon">
-                  <ChevronDown className="h-4 w-4" />
-                  <span className="sr-only">Toggle</span>
-                </Button>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
-              <p>To upgrade your plan, follow these steps:</p>
-              <ol className="list-inside list-decimal">
-                <li>
-                  Click on the "Subscription" tab in the left-hand navigation
-                  menu.
-                </li>
-                <li>Under "Your Plan", click on the "Upgrade" button.</li>
-                <li>
-                  Select the new plan you want to upgrade to and follow the
-                  prompts to complete the upgrade process.
-                </li>
-              </ol>
-            </CollapsibleContent>
-          </Collapsible>
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
-                <h4 className="text-sm font-medium">
-                  How do I cancel my subscription?
-                </h4>
-                <Button variant="ghost" size="icon">
-                  <ChevronDown className="h-4 w-4" />
-                  <span className="sr-only">Toggle</span>
-                </Button>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
-              <p>To cancel your subscription, follow these steps:</p>
-              <ol className="list-inside list-decimal">
-                <li>
-                  Click on the "Subscription" tab in the left-hand navigation
-                  menu.
-                </li>
-                <li>
-                  Under "Your Plan", click on the "Cancel Subscription" button.
-                </li>
-                <li>Follow the prompts to confirm the cancellation.</li>
-              </ol>
-            </CollapsibleContent>
-          </Collapsible>
-          <Collapsible>
-            <CollapsibleTrigger asChild>
-              <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
-                <h4 className="text-sm font-medium">
-                  How do I add a team member?
-                </h4>
-                <Button variant="ghost" size="icon">
-                  <ChevronDown className="h-4 w-4" />
-                  <span className="sr-only">Toggle</span>
-                </Button>
-              </div>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="px-4 py-2 text-muted-foreground">
-              <p>To add a team member, follow these steps:</p>
-              <ol className="list-inside list-decimal">
-                <li>
-                  Click on the "Team" tab in the left-hand navigation menu.
-                </li>
-                <li>Click on the "Add Member" button.</li>
-                <li>
-                  Enter the email address of the team member you want to add.
-                </li>
-                <li>
-                  Select the role and permissions for the new team member.
-                </li>
-                <li>
-                  Click "Invite" to send an invitation to the team member.
-                </li>
-              </ol>
-            </CollapsibleContent>
-          </Collapsible>
+          {faqs.map((faq, index) => (
+            <Collapsible key={index}>
+              <CollapsibleTrigger asChild>
+                <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
+                  <h4 className="text-sm font-medium">{faq.question}</h4>
+                  <Button variant="ghost" size="icon">
+                    <ChevronDown className="h-4 w-4" />
+                    <span className="sr-only">Toggle</span>
+                  </Button>
+                </div>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="px-4 py-2 text-muted-foreground">
+                {faq.answer}
+              </CollapsibleContent>
+            </Collapsible>
+          ))}
         </CardContent>
       </Card>
     </>
