@@ -8,8 +8,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { SignedIn } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function HomeSignedIn() {
+  const userData = await auth();
+  const metaData: any = await userData?.sessionClaims?.public_metadata;
   let websitePagesData = [];
   const response = await FetchWebsitePagesData({ page: 1, limit: 5 });
   if (!response || !response?.data) {
@@ -39,7 +42,7 @@ export default async function HomeSignedIn() {
           </Card>
           <Card>
             <CardHeader>
-              <CardTitle>Free Plan</CardTitle>
+              <CardTitle>{metaData['plan']['name'] || 'Free Plan'}</CardTitle>
               <CardDescription>Subscription</CardDescription>
             </CardHeader>
           </Card>
