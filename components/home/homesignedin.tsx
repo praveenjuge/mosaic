@@ -30,7 +30,7 @@ export default async function HomeSignedIn() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <Card>
             <CardHeader>
-              <CardTitle>413</CardTitle>
+              <CardTitle>{response.meta.total}</CardTitle>
               <CardDescription>Images</CardDescription>
             </CardHeader>
           </Card>
