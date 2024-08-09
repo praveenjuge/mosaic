@@ -31,7 +31,7 @@ const plans = [
     title: "Free",
     description: "For trying out",
     price: "$0",
-    features: ["250 images", "1 website", "2 GB storage", "No support"],
+    features: ["250 images", "1 website", "500 MB storage", "No support"],
     type: "free",
   },
   {
@@ -41,7 +41,7 @@ const plans = [
     features: [
       "5000 images",
       "Unlimited websites",
-      "20 GB storage",
+      "2 GB storage",
       "Email support",
     ],
     type: "pro",
