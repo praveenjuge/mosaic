@@ -52,7 +52,7 @@ export async function generateMetadata({
 export default function Page({ params }: { params: { slug: string } }) {
   const blog = getData(params.slug);
   return (
-    <article className="mx-auto grid w-full max-w-3xl gap-4 py-4 md:py-10">
+    <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
       <meta itemProp="image" content={getOgImageUrl("blog/" + params.slug)} />
       <CardDescription>
         <Link href="/blog">← Blog</Link>
@@ -70,7 +70,7 @@ export default function Page({ params }: { params: { slug: string } }) {
             })}
           </CardDescription>
         </CardHeader>
-        <CardContent className="prose prose-zinc max-w-3xl dark:prose-invert prose-pre:whitespace-pre-wrap">
+        <CardContent className="prose prose-zinc max-w-2xl dark:prose-invert prose-pre:whitespace-pre-wrap">
           <div
             dangerouslySetInnerHTML={{
               __html: markdownToHtml(blog.content),

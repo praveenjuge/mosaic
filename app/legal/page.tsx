@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-8 py-4 md:py-10">
+    <div className="mx-auto grid w-full max-w-2xl gap-8 py-4 md:py-10">
       <CardHeader className="p-0">
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>

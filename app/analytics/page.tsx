@@ -3,6 +3,7 @@ import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { ChartBar } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import { AddWebsite } from "../websites/AddWebsite";
 import AnalyticsSignedIn from "./AnalyticsSignedIn";
 
 export const metadata: Metadata = {
@@ -32,6 +33,7 @@ export default function Page() {
             When you add a website, you will be able to see detailed analytics
             about OG generation here.
           </p>
+          <AddWebsite />
         </div>
       </SignedOut>
       <SignedIn>
