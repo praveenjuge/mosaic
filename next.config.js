@@ -1,4 +1,8 @@
 module.exports = {
+  experimental: {
+    reactCompiler: true,
+    ppr: true,
+  },
   async redirects() {
     return [
       {

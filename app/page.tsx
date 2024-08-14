@@ -1,6 +1,7 @@
 import CTA from "@/components/home/cta";
 import HomeSignedIn from "@/components/home/homesignedin";
 import Logo from "@/components/logo";
+import { LoadingSpinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { getOgImageUrl } from "@/lib/utils";
 import {
@@ -207,7 +208,7 @@ export default function Home() {
         </section>
         <CTA />
       </SignedOut>
-      <Suspense>
+      <Suspense fallback={<LoadingSpinner />}>
         <HomeSignedIn />
       </Suspense>
     </>

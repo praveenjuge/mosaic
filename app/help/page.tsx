@@ -85,7 +85,7 @@ export default function Page() {
             href="mailto:hello@praveenjuge.com"
             className={buttonVariants()}
           >
-            <Envelope className="mr-2 size-4" />
+            <Envelope className="mr-2 size-4 stroke-2" />
             Email Support
           </Link>
           <Link
@@ -93,7 +93,7 @@ export default function Page() {
             target="_blank"
             className={buttonVariants({ variant: "outline" })}
           >
-            <BrandX className="mr-2 size-4" />
+            <BrandX className="mr-2 size-4 stroke-2" />
             Send a DM on X
           </Link>
           {/* TODO */}
