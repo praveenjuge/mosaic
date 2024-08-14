@@ -1,13 +1,13 @@
 ---
-title: 'How are we able to rate limit based on IP with Caddy'
-status: 'published'
+title: "How are we able to rate limit based on IP with Caddy"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'how-are-we-able-to-rate-limit-based-on-ip-with-caddy'
-description: 'Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance.'
-coverImage: ''
-publishedAt: '2024-08-01T07:51:36.232Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "how-are-we-able-to-rate-limit-based-on-ip-with-caddy"
+description: "Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance."
+coverImage: ""
+publishedAt: "2024-08-01T07:51:36.232Z"
 ---
 
 I am not starting another Caddy vs Nginx war, but I’ve decided to go with Caddy. I was impressed when I heard that I am getting HTTPS configuration and renewal parts automated out-of-the-box with Caddy. Plus, it can take advantage of all the cores of the system, which I believe should be a good thing. I am always up for using all the available resources and putting them to good use.
@@ -78,7 +78,7 @@ This will output a caddy binary which you should replace your caddy with. You ca
 
 We are not going over all the directives but focus only on the `rate_limit` one.
 
-```markdown
+```
 rate_limit {
         zone default {
                 key {remote_host}
