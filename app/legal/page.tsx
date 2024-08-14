@@ -8,8 +8,6 @@ import {
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 
-export const dynamic = "force-static";
-
 export const metadata: Metadata = {
   title: "Legal Information",
   description: "We take your privacy and data seriously.",
