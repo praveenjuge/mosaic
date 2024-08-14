@@ -17,7 +17,7 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
-      <h2 className="fone-semibold">Something went wrong!</h2>
+      <h2 className="font-semibold">Something went wrong!</h2>
       <button
         onClick={() => reset()}
         className={buttonVariants({ variant: "outline", size: "sm" })}
