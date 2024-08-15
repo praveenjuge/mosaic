@@ -44,7 +44,9 @@ export default function Page() {
                   day: "numeric",
                 })}
               </CardDescription>
-              <CardDescription>{item.description}</CardDescription>
+              <CardDescription className="line-clamp-3">
+                {item.description}
+              </CardDescription>
             </CardHeader>
           </Card>
         </Link>

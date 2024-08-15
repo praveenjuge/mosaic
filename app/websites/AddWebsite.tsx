@@ -11,7 +11,13 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ClerkLoading, SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignedIn,
+  SignedOut,
+  SignInButton,
+} from "@clerk/nextjs";
 import { ExternalLink, Plus } from "@mynaui/icons-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -31,64 +37,66 @@ export function AddWebsite({ preventSubmission = false }) {
           Add Website
         </Button>
       </ClerkLoading>
-      <SignedIn>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
+      <ClerkLoaded>
+        <SignedIn>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm">
+                <Plus className="mr-1 size-4" stroke={2} />
+                Add Website
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Add Website</DialogTitle>
+                <DialogDescription>
+                  Enter the URL of the website you want to add.
+                </DialogDescription>
+              </DialogHeader>
+              <form
+                className="grid gap-4"
+                action={async (formData) => {
+                  await handleAdd(formData);
+                  setOpen(false);
+                  toast.success("Added your website!");
+                }}
+              >
+                <div className="grid gap-2">
+                  <Label htmlFor="website">Website</Label>
+                  <Input
+                    id="website"
+                    name="website"
+                    type="url"
+                    placeholder="Enter URL"
+                    required
+                  />
+                </div>
+                {preventSubmission ? (
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonVariants({ variant: "default" })}
+                    href="/subscriptions"
+                  >
+                    Upgrade to Pro
+                    <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+                  </Link>
+                ) : (
+                  <SubmitButton text="Add" />
+                )}
+              </form>
+            </DialogContent>
+          </Dialog>
+        </SignedIn>
+        <SignedOut>
+          <SignInButton mode="modal">
             <Button size="sm">
               <Plus className="mr-1 size-4" stroke={2} />
               Add Website
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add Website</DialogTitle>
-              <DialogDescription>
-                Enter the URL of the website you want to add.
-              </DialogDescription>
-            </DialogHeader>
-            <form
-              className="grid gap-4"
-              action={async (formData) => {
-                await handleAdd(formData);
-                setOpen(false);
-                toast.success("Added your website!");
-              }}
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="website">Website</Label>
-                <Input
-                  id="website"
-                  name="website"
-                  type="url"
-                  placeholder="Enter URL"
-                  required
-                />
-              </div>
-              {preventSubmission ? (
-                <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonVariants({ variant: "default" })}
-                  href="/subscriptions"
-                >
-                  Upgrade to Pro
-                  <ExternalLink className="ml-2 size-4" strokeWidth={2} />
-                </Link>
-              ) : (
-                <SubmitButton text="Add" />
-              )}
-            </form>
-          </DialogContent>
-        </Dialog>
-      </SignedIn>
-      <SignedOut>
-        <SignInButton mode="modal">
-          <Button size="sm">
-            <Plus className="mr-1 size-4" stroke={2} />
-            Add Website
-          </Button>
-        </SignInButton>
-      </SignedOut>
+          </SignInButton>
+        </SignedOut>
+      </ClerkLoaded>
     </>
   );
 }
