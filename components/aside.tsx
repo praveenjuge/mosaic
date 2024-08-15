@@ -122,7 +122,7 @@ export default function Aside() {
             aria-label="Toggle navigation menu"
             className="fixed left-3 top-3 z-10 shrink-0 rounded-full md:hidden"
           >
-            <Menu className="size-5" />
+            <Menu className="size-6" />
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-auto p-0">

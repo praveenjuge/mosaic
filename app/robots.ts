@@ -1,3 +1,4 @@
+import { website_url } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 
 export const dynamic = "force-static";
@@ -10,7 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
       },
     ],
-    sitemap: "https://mosaicimg.com/sitemap.xml",
-    host: "https://mosaicimg.com",
+    sitemap: `${website_url}sitemap.xml`,
+    host: website_url,
   };
 }

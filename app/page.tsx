@@ -3,6 +3,7 @@ import HomeSignedIn from "@/components/home/homesignedin";
 import Logo from "@/components/logo";
 import { LoadingSpinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
+import { website_description, website_subtitle } from "@/lib/constants";
 import { getOgImageUrl } from "@/lib/utils";
 import {
   ClerkLoading,
@@ -20,9 +21,8 @@ import Image from "next/image";
 import { Suspense } from "react";
 
 export const metadata: Metadata = {
-  title: "Simplify Your Open Graph Image Creation.",
-  description:
-    "Transform your website's Open Graph (OG) social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.",
+  title: website_subtitle,
+  description: website_description,
   openGraph: { images: [getOgImageUrl("")] },
 };
 

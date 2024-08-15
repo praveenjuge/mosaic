@@ -1,9 +1,8 @@
+import { website_url } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 import { getDocumentSlugs } from "outstatic/server";
 
 export const dynamic = "force-static";
-
-const domain = "https://mosaicimg.com";
 
 export type sitemap = {
   url: string;
@@ -15,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogSlugs = getDocumentSlugs("blog");
   for (const slug of blogSlugs) {
     blogList.push({
-      url: `${domain}/blog/${slug}`,
+      url: `${website_url}blog/${slug}`,
       lastModified: new Date(),
     });
   }
@@ -24,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const changelogSlugs = getDocumentSlugs("changelog");
   for (const slug of changelogSlugs) {
     changelogList.push({
-      url: `${domain}/changelog/${slug}`,
+      url: `${website_url}changelog/${slug}`,
       lastModified: new Date(),
     });
   }
@@ -33,46 +32,46 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const helpSlugs = getDocumentSlugs("help");
   for (const slug of helpSlugs) {
     helpList.push({
-      url: `${domain}/help/${slug}`,
+      url: `${website_url}help/${slug}`,
       lastModified: new Date(),
     });
   }
 
   return [
     {
-      url: domain,
+      url: website_url,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/analytics`,
+      url: `${website_url}analytics`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/blog`,
+      url: `${website_url}blog`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/changelog`,
+      url: `${website_url}changelog`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/help`,
+      url: `${website_url}help`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/legal`,
+      url: `${website_url}legal`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/settings`,
+      url: `${website_url}settings`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/subscription`,
+      url: `${website_url}subscription`,
       lastModified: new Date(),
     },
     {
-      url: `${domain}/websites`,
+      url: `${website_url}websites`,
       lastModified: new Date(),
     },
     ...blogList,
