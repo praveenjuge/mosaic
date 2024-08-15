@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { website_url } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
 import { Globe, InfoTriangle } from "@mynaui/icons-react";
 import Link from "next/link";
@@ -64,7 +65,7 @@ export default async function WebsitesTable() {
                   </div>
                 </TableCell>
                 <TableCell className="max-w-xs truncate font-medium">
-                  {`https://mosaicimg.com/use?url=https://${website.cleaned_website_url}`}
+                  {`${website_url}use?url=https://${website.cleaned_website_url}`}
                 </TableCell>
                 <TableCell>{website.total_count}</TableCell>
                 <TableCell>

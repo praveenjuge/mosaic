@@ -2,18 +2,38 @@ import "@/app/globals.css";
 import Aside from "@/components/aside";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import {
+  website_description,
+  website_name,
+  website_subtitle,
+  website_url,
+} from "@/lib/constants";
 import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 
+export const experimental_ppr = true;
+
 export const viewport: Viewport = { themeColor: "#059669" };
 
 export const metadata: Metadata = {
-  title: "Mosaic",
-  description: "Simplify Your Open Graph Image Creation.",
+  metadataBase: new URL(website_url),
+  description: website_description,
+  applicationName: website_name,
+  title: {
+    template: `%s - ${website_name} - ${website_subtitle}`,
+    default: website_name + website_subtitle,
+  },
   openGraph: {
     images: [getOgImageUrl("")],
+  },
+  robots: {
+    follow: true,
+    index: true,
+  },
+  alternates: {
+    canonical: "./",
   },
 };
 

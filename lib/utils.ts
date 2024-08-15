@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { website_url } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -45,7 +46,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function getOgImageUrl(slug: string) {
-  return `https://mosaicimg.com/use?url=https://mosaicimg.com/${slug}`;
+  return `${website_url}use?url=https://mosaicimg.com/${slug}`;
 }
 
 /**

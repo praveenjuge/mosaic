@@ -7,7 +7,7 @@ const withBundleAnalyzer = require("@next/bundle-analyzer")({
 const nextConfig: NextConfig = {
   experimental: {
     reactCompiler: true,
-    ppr: true,
+    ppr: "incremental",
     optimizePackageImports: ["@mynaui/icons-react"],
   },
   async redirects() {
