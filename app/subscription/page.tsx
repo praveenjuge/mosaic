@@ -15,6 +15,7 @@ import {
 import { getOgImageUrl } from "@/lib/utils";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { ManageCard } from "./manage-card";
 import { PlanButton } from "./plan-button";
 
@@ -155,14 +156,24 @@ export default function Page() {
               </ul>
             </CardContent>
             <CardFooter>
-              <PlanButton
-                type={plan.type as "free" | "pro" | "teams" | "enterprise"}
-              />
+              <Suspense
+                fallback={
+                  <Button variant="outline" className="w-full" disabled>
+                    Loading...
+                  </Button>
+                }
+              >
+                <PlanButton
+                  type={plan.type as "free" | "pro" | "teams" | "enterprise"}
+                />
+              </Suspense>
             </CardFooter>
           </Card>
         ))}
       </div>
-      <ManageCard />
+      <Suspense>
+        <ManageCard />
+      </Suspense>
       <Card>
         <CardHeader>
           <CardTitle>Frequently Asked Questions</CardTitle>

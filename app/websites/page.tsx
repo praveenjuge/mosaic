@@ -1,8 +1,10 @@
+import { LoadingSpinner } from "@/components/spinner";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { Earth } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
 
@@ -39,7 +41,9 @@ export default function Page() {
         </div>
       </SignedOut>
       <SignedIn>
-        <WebsitesTable />
+        <Suspense fallback={<LoadingSpinner />}>
+          <WebsitesTable />
+        </Suspense>
       </SignedIn>
     </>
   );

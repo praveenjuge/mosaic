@@ -14,7 +14,7 @@ import { Suspense } from "react";
 export async function ManageCard() {
   const userData = await auth();
   const metaData: any = await userData?.sessionClaims?.public_metadata;
-  const subscriptionId: any = metaData?.plan?.subscription_id
+  const subscriptionId: any = metaData?.plan?.subscription_id;
 
   return (
     <SignedIn>
@@ -28,15 +28,26 @@ export async function ManageCard() {
               invoices, please contact our support team.
             </CardDescription>
           </div>
-          <Suspense fallback={<Button variant="outline" disabled></Button>}>
+          <Suspense
+            fallback={
+              <Button variant="outline" disabled>
+                Manage Plan
+                <ExternalLink className="ml-2 size-4 stroke-2" />
+              </Button>
+            }
+          >
             <Link
               target="_blank"
               rel="noopener noreferrer"
               className={buttonVariants({ variant: "default" })}
-              href={subscriptionId ? `https://app.gumroad.com/subscriptions/${subscriptionId}/manage` : ""}
+              href={
+                subscriptionId
+                  ? `https://app.gumroad.com/subscriptions/${subscriptionId}/manage`
+                  : ""
+              }
             >
               Manage Plan
-              <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+              <ExternalLink className="ml-2 size-4 stroke-2" />
             </Link>
           </Suspense>
         </CardHeader>

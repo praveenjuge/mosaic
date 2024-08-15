@@ -1,5 +1,6 @@
-import Shiki from "@shikijs/markdown-it";
+import { fromHighlighter } from "@shikijs/markdown-it/core";
 import MarkdownIt from "markdown-it";
+import { createHighlighterCore } from "shiki/core";
 
 const md = new MarkdownIt({
   html: true,
@@ -43,8 +44,18 @@ md.renderer.rules.image = (tokens, idx) => {
           </a>`;
 };
 
+const highlighter = await createHighlighterCore({
+  themes: [import("shiki/themes/github-dark.mjs")],
+  langs: [
+    import("shiki/langs/javascript.mjs"),
+    import("shiki/langs/docker.mjs"),
+    import("shiki/langs/bash.mjs"),
+    import("shiki/langs/python.mjs"),
+  ],
+  loadWasm: import("shiki/wasm"),
+});
 md.use(
-  await Shiki({
+  fromHighlighter(highlighter as any, {
     themes: {
       light: "github-dark",
     },
