@@ -122,7 +122,9 @@ export default async function AnalyticsSignedIn() {
           </CardContent>
         </Card>
       </div>
-
+      <CardHeader className="p-0">
+        <CardTitle>Latest Screenshots</CardTitle>
+      </CardHeader>
       <LatestScreenshots websitePages={websitePagesData} />
     </>
   );

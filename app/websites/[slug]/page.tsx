@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
+import LatestScreenshots from "@/components/latest-screenshots";
+import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 import {
   Card,
-  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -12,8 +11,6 @@ import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import LatestScreenshots from "@/components/latest-screenshots";
-import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 
 export async function generateMetadata({
   params,
@@ -34,7 +31,6 @@ export async function generateMetadata({
   };
 }
 
-
 async function fetchWebsiteData(token: string, websiteId: string) {
   const url = "https://get.mosaicimg.com/api/websites/" + websiteId;
 
@@ -53,8 +49,8 @@ async function fetchWebsiteData(token: string, websiteId: string) {
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
-  let websiteData: any = {}
-  let websitePagesData = []
+  let websiteData: any = {};
+  let websitePagesData = [];
   const response = await FetchWebsitePagesData({ slug: params.slug });
   if (!response || !response?.data) {
     notFound();
@@ -102,6 +98,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
           </CardHeader>
         </Card>
       </div>
+      <CardHeader className="p-0">
+        <CardTitle>Latest Screenshots</CardTitle>
+      </CardHeader>
       <LatestScreenshots websitePages={websitePagesData} />
     </>
   );

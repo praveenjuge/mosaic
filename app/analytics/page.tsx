@@ -1,12 +1,15 @@
 import { LoadingSpinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { ChartBar } from "@mynaui/icons-react";
+import { ChartBar, Plus } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "../websites/AddWebsite";
 import AnalyticsSignedIn from "./AnalyticsSignedIn";
+
+export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -35,7 +38,16 @@ export default function Page() {
             When you add a website, you will be able to see detailed analytics
             about OG generation here.
           </p>
-          <AddWebsite />
+          <Suspense
+            fallback={
+              <Button size="sm" disabled>
+                <Plus className="mr-1 size-4" stroke={2} />
+                Add Website
+              </Button>
+            }
+          >
+            <AddWebsite />
+          </Suspense>
         </div>
       </SignedOut>
       <SignedIn>

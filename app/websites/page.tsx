@@ -1,12 +1,15 @@
-import { LoadingSpinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { Earth } from "@mynaui/icons-react";
+import { Earth, Plus } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
+
+export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Websites",
@@ -24,7 +27,16 @@ export default function Page() {
           <CardTitle>{metadata.title as string}</CardTitle>
           <CardDescription>{metadata.description}</CardDescription>
         </CardHeader>
-        <AddWebsite />
+        <Suspense
+          fallback={
+            <Button size="sm" disabled>
+              <Plus className="mr-1 size-4" stroke={2} />
+              Add Website
+            </Button>
+          }
+        >
+          <AddWebsite />
+        </Suspense>
       </div>
       <SignedOut>
         <div className="flex w-full flex-col items-center justify-center rounded border-[0.5px] bg-primary-foreground px-4 py-20 text-center">
@@ -41,7 +53,7 @@ export default function Page() {
         </div>
       </SignedOut>
       <SignedIn>
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
           <WebsitesTable />
         </Suspense>
       </SignedIn>
