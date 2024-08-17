@@ -1,7 +1,13 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
@@ -18,7 +24,7 @@ import {
 } from "@mynaui/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useMemo } from "react";
+import { Suspense, useState } from "react";
 import Logo from "./logo";
 
 const navItems = [
@@ -40,10 +46,12 @@ const NavLink = ({
   href,
   icon: Icon,
   label,
+  setOpen,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string; stroke?: number }>;
   label: string;
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const pathname = usePathname();
   const isActive = pathname === href;
@@ -56,6 +64,9 @@ const NavLink = ({
         isActive && "font-semibold text-primary [&_svg]:text-primary",
       )}
       aria-current={isActive ? "page" : undefined}
+      onClick={() => {
+        setOpen(false);
+      }}
     >
       {isActive && (
         <span
@@ -75,7 +86,11 @@ const NavLink = ({
   );
 };
 
-const AsideContent = () => (
+const AsideContent = ({
+  setOpen,
+}: {
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}) => (
   <aside
     aria-label="Main navigation"
     className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]"
@@ -83,38 +98,52 @@ const AsideContent = () => (
     <div className="flex flex-col gap-6">
       <div className="flex h-[18px] items-center justify-between">
         <Logo />
-        <SignedIn>
-          <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
-            <UserButton />
-          </div>
-        </SignedIn>
+        <Suspense
+          fallback={
+            <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block"></div>
+          }
+        >
+          <SignedIn>
+            <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
+              <UserButton />
+            </div>
+          </SignedIn>
+        </Suspense>
       </div>
       <nav className="flex flex-col gap-1.5" aria-label="Primary navigation">
         {navItems.map((item) => (
-          <NavLink key={item.href} {...item} />
+          <NavLink key={item.href} {...item} setOpen={setOpen} />
         ))}
       </nav>
     </div>
     <nav className="flex flex-col gap-1.5" aria-label="Secondary navigation">
       {secondaryNavItems.map((item) => (
-        <NavLink key={item.href} {...item} />
+        <NavLink key={item.href} {...item} setOpen={setOpen} />
       ))}
     </nav>
   </aside>
 );
 
 export default function Aside() {
-  const memoizedAsideContent = useMemo(() => <AsideContent />, []);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   return (
     <>
-      <div className="hidden md:block">{memoizedAsideContent}</div>
-      <SignedIn>
-        <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-8 [&_button]:size-8">
-          <UserButton />
-        </div>
-      </SignedIn>
-      <Sheet>
+      <div className="hidden md:block">
+        <AsideContent setOpen={setSheetOpen} />
+      </div>
+      <Suspense
+        fallback={
+          <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden"></div>
+        }
+      >
+        <SignedIn>
+          <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-8 [&_button]:size-8">
+            <UserButton />
+          </div>
+        </SignedIn>
+      </Suspense>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetTrigger asChild>
           <Button
             size="icon"
@@ -126,7 +155,11 @@ export default function Aside() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left" className="w-auto p-0">
-          {memoizedAsideContent}
+          <SheetTitle className="sr-only">Main navigation</SheetTitle>
+          <SheetDescription className="sr-only">
+            Main navigation
+          </SheetDescription>
+          <AsideContent setOpen={setSheetOpen} />
         </SheetContent>
       </Sheet>
     </>

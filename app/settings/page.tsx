@@ -8,7 +8,10 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { ModeToggle } from "./theme-toggler";
+
+export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Settings",
@@ -33,7 +36,9 @@ export default function Page() {
             <CardDescription>Choose your preferred theme</CardDescription>
           </CardHeader>
           <CardContent>
-            <ModeToggle />
+            <Suspense fallback={<div className="h-[45px] w-full"></div>}>
+              <ModeToggle />
+            </Suspense>
           </CardContent>
         </Card>
         {/* TODO */}
@@ -47,8 +52,8 @@ export default function Page() {
           <CardContent>
             <div className="grid gap-4 font-medium">
               <div className="flex items-center justify-between">
-                <span>75% of usage used</span>
-                <Switch id="75-usage" disabled />
+                <span>80% of usage used</span>
+                <Switch id="80-usage" disabled />
               </div>
               <div className="flex items-center justify-between">
                 <span>100% of usage used</span>
