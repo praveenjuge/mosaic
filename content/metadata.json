@@ -1,6 +1,6 @@
 {
-  "commit": "c16cef1c803c4cf669e15e05c793974d680ca39f",
-  "generated": "2024-08-18T08:53:03.808Z",
+  "commit": "ff8d6f78fa0892ad83b89cda6e0dacea8f53f44b",
+  "generated": "2024-08-18T08:56:55.225Z",
   "metadata": [
     {
       "__outstatic": {
@@ -221,6 +221,24 @@
       "slug": "the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime",
       "status": "published",
       "title": "The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime"
+    },
+    {
+      "__outstatic": {
+        "commit": "ff8d6f78fa0892ad83b89cda6e0dacea8f53f44b",
+        "hash": "532949776",
+        "path": "content/changelog/new-landing-page.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-08-18T09:28:51.345Z",
+      "slug": "new-landing-page",
+      "status": "published",
+      "title": "New Landing Page"
     }
   ]
 }
