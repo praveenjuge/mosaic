@@ -28,13 +28,15 @@ async function fetchAnalyticsData(token: string) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  let data = await response.json();
+  const data = await response.json();
   return data;
 }
 
 export default async function AnalyticsSignedIn() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
   const userData = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metaData: any = await userData?.sessionClaims?.public_metadata;
   try {
     const token = await userData.getToken({ template: "supabase" });

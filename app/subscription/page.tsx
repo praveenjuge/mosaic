@@ -84,9 +84,13 @@ const faqs = [
         <p>To upgrade your plan, follow these steps:</p>
         <ol className="list-inside list-decimal">
           <li>
-            Click on the "Subscription" tab in the left-hand navigation menu.
+            Click on the &quot;Subscription&quot; tab in the left-hand
+            navigation menu.
           </li>
-          <li>Under "Your Plan", click on the "Upgrade" button.</li>
+          <li>
+            Under &quot;Your Plan&quot;, click on the &quot;Upgrade&quot;
+            button.
+          </li>
           <li>
             Select the new plan you want to upgrade to and follow the prompts to
             complete the upgrade process.
@@ -102,9 +106,13 @@ const faqs = [
         <p>To cancel your subscription, follow these steps:</p>
         <ol className="list-inside list-decimal">
           <li>
-            Click on the "Subscription" tab in the left-hand navigation menu.
+            Click on the &quot;Subscription&quot; tab in the left-hand
+            navigation menu.
           </li>
-          <li>Under "Your Plan", click on the "Cancel Subscription" button.</li>
+          <li>
+            Under &quot;Your Plan&quot;, click on the &quot;Cancel
+            Subscription&quot; button.
+          </li>
           <li>Follow the prompts to confirm the cancellation.</li>
         </ol>
       </>
@@ -116,11 +124,15 @@ const faqs = [
       <>
         <p>To add a team member, follow these steps:</p>
         <ol className="list-inside list-decimal">
-          <li>Click on the "Team" tab in the left-hand navigation menu.</li>
-          <li>Click on the "Add Member" button.</li>
+          <li>
+            Click on the &quot;Team&quot; tab in the left-hand navigation menu.
+          </li>
+          <li>Click on the &quot;Add Member&quot; button.</li>
           <li>Enter the email address of the team member you want to add.</li>
           <li>Select the role and permissions for the new team member.</li>
-          <li>Click "Invite" to send an invitation to the team member.</li>
+          <li>
+            Click &quot;Invite&quot; to send an invitation to the team member.
+          </li>
         </ol>
       </>
     ),
@@ -180,8 +192,8 @@ export default function Page() {
         <CardHeader>
           <CardTitle>Frequently Asked Questions</CardTitle>
           <CardDescription>
-            If you can't find the answer you're looking for, please don't
-            hesitate to reach out to our support team.
+            If you can&apos;t find the answer you&apos;re looking for, please
+            don&apos;t hesitate to reach out to our support team.
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-2">
@@ -191,7 +203,7 @@ export default function Page() {
                 <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
                   <h4 className="text-sm font-medium">{faq.question}</h4>
                   <Button variant="ghost" size="icon">
-                    <ChevronDown className="h-4 w-4" />
+                    <ChevronDown className="size-4" />
                     <span className="sr-only">Toggle</span>
                   </Button>
                 </div>

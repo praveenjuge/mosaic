@@ -5,9 +5,17 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { BarChart, CartesianGrid, XAxis, YAxis, Bar } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export function MosaicBarChart({ datapoints, datakey }: { datapoints: any, datakey: string }) {
+export function MosaicBarChart({
+  datapoints,
+  datakey,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  datapoints: any;
+  datakey: string;
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any[] = [];
   if (datapoints) {
     data = Object.keys(datapoints).map((date) => ({
@@ -31,15 +39,8 @@ export function MosaicBarChart({ datapoints, datakey }: { datapoints: any, datak
           tickMargin={2}
           allowDataOverflow={false}
         />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent />}
-        />
-        <Bar
-          dataKey={datakey}
-          fill="#07976a"
-          fillOpacity={0.8}
-        />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+        <Bar dataKey={datakey} fill="#07976a" fillOpacity={0.8} />
       </BarChart>
     </ChartContainer>
   );

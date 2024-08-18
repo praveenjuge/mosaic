@@ -6,6 +6,7 @@ import { useFormStatus } from "react-dom";
 
 interface SubmitButtonProps {
   text?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   variant?: any;
 }
 
