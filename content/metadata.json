@@ -1,6 +1,6 @@
 {
-  "commit": "ba16717c985ff53f70b88d3d1985bc7416c846e7",
-  "generated": "2024-08-18T09:19:55.855Z",
+  "commit": "971436b63d92ae1bc1f5148dea403f2da462ec95",
+  "generated": "2024-08-18T09:20:26.498Z",
   "metadata": [
     {
       "__outstatic": {
@@ -19,25 +19,6 @@
       "slug": "initial-commit",
       "status": "published",
       "title": "Initial Commit ✨"
-    },
-    {
-      "__outstatic": {
-        "commit": "d6f10aaeadb52085851c452427e291f9238bdeba",
-        "hash": "2481718272",
-        "path": "content/help/create-a-new-account.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "category": "Getting Started",
-      "collection": "help",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-18T14:09:12.600Z",
-      "slug": "create-a-new-account",
-      "status": "published",
-      "title": "Create a new Account"
     },
     {
       "__outstatic": {
@@ -258,6 +239,25 @@
       "slug": "change-your-account-password",
       "status": "published",
       "title": "Change Your Account Password"
+    },
+    {
+      "__outstatic": {
+        "commit": "971436b63d92ae1bc1f5148dea403f2da462ec95",
+        "hash": "2824620671",
+        "path": "content/help/create-a-new-account.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Authentication",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-18T14:09:12.600Z",
+      "slug": "create-a-new-account",
+      "status": "published",
+      "title": "Create a New Account"
     }
   ]
 }
