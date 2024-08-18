@@ -1,6 +1,6 @@
 {
-  "commit": "a915b5a139287fe7bc19018c05f2723a372a932a",
-  "generated": "2024-08-07T14:49:10.382Z",
+  "commit": "c16cef1c803c4cf669e15e05c793974d680ca39f",
+  "generated": "2024-08-18T08:53:03.808Z",
   "metadata": [
     {
       "__outstatic": {
@@ -203,6 +203,24 @@
       "slug": "dark-mode",
       "status": "published",
       "title": "Dark Mode"
+    },
+    {
+      "__outstatic": {
+        "commit": "c16cef1c803c4cf669e15e05c793974d680ca39f",
+        "hash": "2857711205",
+        "path": "content/blog/the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "blog",
+      "coverImage": "",
+      "description": "Discover how Mosaic HQ achieves near-zero downtime deployment with Docker and Caddy. Learn our step-by-step process to ensure smooth updates with minimal user disruption.",
+      "publishedAt": "2024-08-18T09:23:19.552Z",
+      "slug": "the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime",
+      "status": "published",
+      "title": "The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime"
     }
   ]
 }
