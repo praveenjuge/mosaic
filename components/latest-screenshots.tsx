@@ -15,7 +15,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatBytes } from "@/lib/utils";
-import Image from "next/image";
 import Link from "next/link";
 import FetchWebsitePagesData from "./server/fetch-website-pages-data";
 
@@ -65,7 +64,8 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      <Image
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
                         src={
                           "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
                           website_page.image_key
