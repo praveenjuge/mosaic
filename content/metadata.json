@@ -1,6 +1,6 @@
 {
-  "commit": "ff8d6f78fa0892ad83b89cda6e0dacea8f53f44b",
-  "generated": "2024-08-18T08:56:55.225Z",
+  "commit": "ba23fe3aecff155dab4a4d6e8d94346c38070571",
+  "generated": "2024-08-18T08:57:39.413Z",
   "metadata": [
     {
       "__outstatic": {
@@ -56,24 +56,6 @@
       "slug": "create-a-new-account",
       "status": "published",
       "title": "Create a new Account"
-    },
-    {
-      "__outstatic": {
-        "commit": "71b1ff5c8b45cc2f885f9144e848fdcc6e06ebed",
-        "hash": "1189961668",
-        "path": "content/changelog/websites.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "collection": "changelog",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-17T17:43:01.810Z",
-      "slug": "websites",
-      "status": "published",
-      "title": "Websites"
     },
     {
       "__outstatic": {
@@ -239,6 +221,24 @@
       "slug": "new-landing-page",
       "status": "published",
       "title": "New Landing Page"
+    },
+    {
+      "__outstatic": {
+        "commit": "ba23fe3aecff155dab4a4d6e8d94346c38070571",
+        "hash": "2446420015",
+        "path": "content/changelog/websites.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-08-01T17:43:01.000Z",
+      "slug": "websites",
+      "status": "published",
+      "title": "Websites"
     }
   ]
 }

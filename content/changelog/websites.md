@@ -7,7 +7,7 @@ author:
 slug: 'websites'
 description: ''
 coverImage: ''
-publishedAt: '2024-07-17T17:43:01.810Z'
+publishedAt: '2024-08-01T17:43:01.000Z'
 ---
 
 - Added ability to add, edit and delete websites
