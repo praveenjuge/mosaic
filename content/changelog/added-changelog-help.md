@@ -7,7 +7,7 @@ author:
 slug: 'added-changelog-help'
 description: ''
 coverImage: ''
-publishedAt: '2024-07-17T17:41:59.213Z'
+publishedAt: '2024-07-26T17:41:59.000Z'
 ---
 
 - Added this changelog page
