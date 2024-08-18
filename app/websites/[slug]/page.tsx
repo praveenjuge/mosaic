@@ -19,12 +19,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   return {
     title: params.slug,
+    description: "Manage your website's OG settings here.",
     openGraph: {
       type: "article",
       url: "./",
       locale: "en_US",
       images: {
-        url: getOgImageUrl("websites/" + params.slug),
+        url: getOgImageUrl(""),
         alt: params.slug,
       },
     },

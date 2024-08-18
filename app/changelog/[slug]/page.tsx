@@ -37,6 +37,7 @@ export async function generateMetadata({
 
   return {
     title: changelog.title,
+    description: markdownToHtml(changelog.content),
     openGraph: {
       type: "article",
       url: "./",
