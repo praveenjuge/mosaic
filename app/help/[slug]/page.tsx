@@ -18,7 +18,6 @@ function getData(slug: string) {
   const help = getDocumentBySlug("help", slug, [
     "title",
     "publishedAt",
-    "description",
     "slug",
     "content",
   ]);
@@ -37,6 +36,7 @@ export async function generateMetadata({
 
   return {
     title: help.title,
+    description: markdownToHtml(help.content),
     openGraph: {
       type: "article",
       url: "./",
