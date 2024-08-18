@@ -1,5 +1,3 @@
-import LatestScreenshots from "@/components/latest-screenshots";
-import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardContent,
@@ -47,14 +45,6 @@ export default async function AnalyticsSignedIn() {
   } catch (error) {
     console.log(error);
     notFound();
-  }
-
-  let websitePagesData = [];
-  const response = await FetchWebsitePagesData({ page: 1, limit: 10 });
-  if (!response || !response?.data) {
-    console.log("No data");
-  } else {
-    websitePagesData = response.data;
   }
 
   return (
@@ -124,10 +114,6 @@ export default async function AnalyticsSignedIn() {
           </CardContent>
         </Card>
       </div>
-      <CardHeader className="p-0">
-        <CardTitle>Latest Screenshots</CardTitle>
-      </CardHeader>
-      <LatestScreenshots websitePages={websitePagesData} />
     </>
   );
 }

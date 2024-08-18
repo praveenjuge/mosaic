@@ -64,7 +64,7 @@ subdomain.example.com {
 
 Caddy doesn't come with plugins installed with it, but you can build your caddy binary using `xcaddy` and give whatever power pack you want it to have and in our case rate rate-limiting option.
 
-From the HTTP`. handlers` that support rate limiting as per Caddy’s site <https://caddyserver.com/docs/modules/http.handlers.rate_limit>, we went ahead with mholt’s implementation because it was easy to understand, and gave us the simplest way to do the task we wanted to do. <https://github.com/mholt/caddy-ratelimit>
+From the HTTP`. handlers` that support rate limiting as per [Caddy’s site](https://caddyserver.com/docs/modules/http.handlers.rate_limit), we went ahead with mholt’s implementation because it was easy to understand, and gave us the simplest way to do the task we wanted to do. <https://github.com/mholt/caddy-ratelimit>
 
 You build your caddy using `xcaddy` by following the command
 

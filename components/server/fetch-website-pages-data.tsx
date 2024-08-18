@@ -48,9 +48,16 @@ interface FetchWebsitePagesDataProps {
   limit?: number;
 }
 
+interface WebsitePageData {
+  // Define the properties of WebsitePageData here
+  // For example:
+  id: number;
+  url: string;
+  // Add other relevant properties
+}
+
 interface WebsitePagesResponse {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[];
+  data: WebsitePageData[];
   meta: {
     total: number;
     page: number;

@@ -1,6 +1,7 @@
-import { LoadingSpinner } from "@/components/spinner";
+import LatestScreenshots from "@/components/latest-screenshots";
 import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
 import { ChartBar, Plus } from "@mynaui/icons-react";
@@ -51,8 +52,14 @@ export default function Page() {
         </div>
       </SignedOut>
       <SignedIn>
-        <Suspense fallback={<LoadingSpinner />}>
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
           <AnalyticsSignedIn />
+        </Suspense>
+        <CardHeader className="p-0">
+          <CardTitle>Latest Screenshots</CardTitle>
+        </CardHeader>
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+          <LatestScreenshots />
         </Suspense>
       </SignedIn>
     </>
