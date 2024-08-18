@@ -2,13 +2,19 @@ import CTA from "@/components/home/cta";
 import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { website_description, website_subtitle } from "@/lib/constants";
-import { ClerkLoading, SignInButton, SignUpButton } from "@clerk/nextjs";
+import {
+  ClerkLoaded,
+  ClerkLoading,
+  SignInButton,
+  SignUpButton,
+} from "@clerk/nextjs";
 import {
   ArrowLongDown,
   ArrowLongRight,
   CheckHexagon,
 } from "@mynaui/icons-react";
 import Image from "next/image";
+import { Suspense } from "react";
 
 const features = [
   "No Code Required",
@@ -67,26 +73,42 @@ export default function HomeSignedOut() {
           </p>
         </div>
         <div className="flex gap-2">
-          <ClerkLoading>
-            <Button size="lg" disabled>
-              Start for Free
-              <ArrowLongRight className="ml-2 size-4" stroke={2} />
-            </Button>
-            <Button variant="outline" size="lg" disabled>
-              Sign In
-            </Button>
-          </ClerkLoading>
-          <SignUpButton mode="modal">
-            <Button size="lg">
-              Start for Free
-              <ArrowLongRight className="ml-2 size-4" stroke={2} />
-            </Button>
-          </SignUpButton>
-          <SignInButton mode="modal">
-            <Button variant="outline" size="lg">
-              Sign In
-            </Button>
-          </SignInButton>
+          <Suspense
+            fallback={
+              <>
+                <Button size="lg" disabled>
+                  Start for Free
+                  <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                </Button>
+                <Button variant="outline" size="lg" disabled>
+                  Sign In
+                </Button>
+              </>
+            }
+          >
+            <ClerkLoading>
+              <Button size="lg" disabled>
+                Start for Free
+                <ArrowLongRight className="ml-2 size-4" stroke={2} />
+              </Button>
+              <Button variant="outline" size="lg" disabled>
+                Sign In
+              </Button>
+            </ClerkLoading>
+            <ClerkLoaded>
+              <SignUpButton mode="modal">
+                <Button size="lg">
+                  Start for Free
+                  <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                </Button>
+              </SignUpButton>
+              <SignInButton mode="modal">
+                <Button variant="outline" size="lg">
+                  Sign In
+                </Button>
+              </SignInButton>
+            </ClerkLoaded>
+          </Suspense>
         </div>
         <div className="flex flex-col items-center gap-4 text-muted-foreground md:flex-row">
           {features.map((feature, index) => (

@@ -49,13 +49,13 @@ export default function Page() {
   );
 
   return (
-    <div className="mx-auto grid w-full max-w-2xl gap-8 py-4 md:py-10">
+    <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">
       <CardHeader className="p-0">
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {Object.entries(groupedPosts).map(([category, posts]) => (
           <Card key={category}>
             <CardHeader>
@@ -77,7 +77,8 @@ export default function Page() {
           <CardTitle>Need Further Assistance?</CardTitle>
           <CardDescription>
             If you can&apos;t find the answer you&apos;re looking for, please
-            don&apos;t hesitate to reach out to our support team.
+            don&apos;t hesitate to reach out to our support email or send a DM
+            on X.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row">

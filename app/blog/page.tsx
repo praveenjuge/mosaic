@@ -36,7 +36,9 @@ export default function Page() {
         <Link key={item.slug} href={`/blog/${item.slug}`}>
           <Card>
             <CardHeader>
-              <CardTitle>{item.title}</CardTitle>
+              <CardTitle className="text-balance text-xl">
+                {item.title}
+              </CardTitle>
               <CardDescription>
                 {new Date(item.publishedAt).toLocaleDateString("en-US", {
                   year: "numeric",

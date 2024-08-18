@@ -19,8 +19,6 @@ import { Suspense } from "react";
 import { ManageCard } from "./manage-card";
 import { PlanButton } from "./plan-button";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "Subscription",
   description: "Manage your billing and invoices here.",

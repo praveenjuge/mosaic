@@ -9,8 +9,6 @@ import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "Websites",
   description: "Add, edit or remove websites here.",

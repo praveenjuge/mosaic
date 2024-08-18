@@ -5,11 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export async function generateMetadata({
   params,
@@ -101,7 +103,9 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <CardHeader className="p-0">
         <CardTitle>Latest Screenshots</CardTitle>
       </CardHeader>
-      <LatestScreenshots slug={params.slug} />
+      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+        <LatestScreenshots slug={params.slug} />
+      </Suspense>
     </>
   );
 }
