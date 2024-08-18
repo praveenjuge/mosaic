@@ -11,8 +11,6 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { ModeToggle } from "./theme-toggler";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "Settings",
   description:

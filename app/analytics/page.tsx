@@ -10,8 +10,6 @@ import { Suspense } from "react";
 import { AddWebsite } from "../websites/AddWebsite";
 import AnalyticsSignedIn from "./AnalyticsSignedIn";
 
-export const experimental_ppr = true;
-
 export const metadata: Metadata = {
   title: "Analytics",
   description: "View your logs and analytics here.",

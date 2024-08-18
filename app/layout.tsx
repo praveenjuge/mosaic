@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   applicationName: website_name,
   title: {
     template: `%s - ${website_name} - ${website_subtitle}`,
-    default: website_name + website_subtitle,
+    default: website_name + " - " + website_subtitle,
   },
   openGraph: {
     images: [getOgImageUrl("")],
