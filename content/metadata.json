@@ -1,25 +1,7 @@
 {
-  "commit": "ba23fe3aecff155dab4a4d6e8d94346c38070571",
-  "generated": "2024-08-18T08:57:39.413Z",
+  "commit": "2a32384ae7d1e59c4b75824098dc56a18fe9315a",
+  "generated": "2024-08-18T08:57:57.263Z",
   "metadata": [
-    {
-      "__outstatic": {
-        "commit": "c6826fadba230019d6eea7c8a434b9315a08774b",
-        "hash": "547973760",
-        "path": "content/changelog/added-changelog-help.md"
-      },
-      "author": {
-        "name": "Praveen Juge",
-        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
-      },
-      "collection": "changelog",
-      "coverImage": "",
-      "description": "",
-      "publishedAt": "2024-07-17T17:41:59.213Z",
-      "slug": "added-changelog-help",
-      "status": "published",
-      "title": "Added Changelog & Help"
-    },
     {
       "__outstatic": {
         "commit": "fcd1fcdb0e958f9739db91db1d0f19122bece953",
@@ -239,6 +221,24 @@
       "slug": "websites",
       "status": "published",
       "title": "Websites"
+    },
+    {
+      "__outstatic": {
+        "commit": "2a32384ae7d1e59c4b75824098dc56a18fe9315a",
+        "hash": "2077405761",
+        "path": "content/changelog/added-changelog-help.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "collection": "changelog",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-07-26T17:41:59.000Z",
+      "slug": "added-changelog-help",
+      "status": "published",
+      "title": "Added Changelog & Help"
     }
   ]
 }
