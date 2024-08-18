@@ -19,6 +19,17 @@ import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
 
+// Define a type for the website object
+type Website = {
+  id: string;
+  favicon_url?: string;
+  is_duplicate?: boolean;
+  title?: string;
+  website_url: string;
+  cleaned_website_url: string;
+  total_count: number;
+};
+
 export default async function WebsitesTable() {
   const client = await createClient();
   const { data, error } = await client.from("websites").select("*");
@@ -40,11 +51,16 @@ export default async function WebsitesTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data.map((website: any) => (
+            {data.map((website: Website) => (
               <TableRow key={website.id}>
                 <TableCell className="flex items-center gap-2">
                   {website.favicon_url ? (
-                    <img src={website.favicon_url} className="size-4" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={website.favicon_url}
+                      className="size-4"
+                      alt={website.title ? website.title : website.website_url}
+                    />
                   ) : (
                     <Globe className="size-4" />
                   )}

@@ -76,8 +76,8 @@ export default function Page() {
         <CardHeader>
           <CardTitle>Need Further Assistance?</CardTitle>
           <CardDescription>
-            If you can't find the answer you're looking for, please don't
-            hesitate to reach out to our support team.
+            If you can&apos;t find the answer you&apos;re looking for, please
+            don&apos;t hesitate to reach out to our support team.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4 sm:flex-row">

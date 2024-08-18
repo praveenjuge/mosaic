@@ -4,6 +4,7 @@ import { createBrowserClient } from "@supabase/ssr";
 // Add clerk to Window to avoid type errors
 declare global {
   interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Clerk: any;
   }
 }

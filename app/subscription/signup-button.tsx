@@ -1,7 +1,6 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { getCheckoutURL } from "@/lib/lemon";
 import { useRouter } from "next/navigation";
 import { forwardRef, useState } from "react";
 import { toast } from "sonner";
@@ -15,7 +14,6 @@ export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
   (props, ref) => {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const { plan, ...otherProps } = props;
 
     return (
       <Button
@@ -26,19 +24,17 @@ export const SignupButton = forwardRef<HTMLButtonElement, SignupButtonProps>(
           let checkoutUrl: string | undefined = "";
           try {
             setLoading(true);
-            checkoutUrl = await getCheckoutURL(plan.variantId);
+            checkoutUrl = "TEST";
           } catch (error) {
             setLoading(false);
             toast("Error creating a checkout.", {
-              description: "Please try again later.",
+              description: `Please try again later. ${error}`,
             });
           } finally {
             setLoading(false);
           }
-
           router.push(checkoutUrl ?? "/");
         }}
-        {...otherProps}
       >
         Get Pro Plan {"-->"}
       </Button>

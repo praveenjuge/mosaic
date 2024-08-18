@@ -14,27 +14,9 @@ export interface PlanButtonProps {
   type: "free" | "pro" | "teams" | "enterprise";
 }
 
-async function checkUserActive(userId: string) {
-  if (!userId) return false;
-
-  // const client = await createClient();
-  // const { data, error } = await client
-  //   .from("subscriptions")
-  //   .select("status")
-  //   .eq("user_id", userId)
-  //   .single();
-
-  // if (error) {
-  //   console.error("Error fetching user subscription", error);
-  //   return false;
-  // }
-
-  // return data?.status === "active";
-  return false;
-}
-
 export async function PlanButton({ type }: PlanButtonProps) {
   const userData = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metaData: any = await userData?.sessionClaims?.public_metadata;
   const { userId } = auth();
   const user = await currentUser();
@@ -66,8 +48,9 @@ export async function PlanButton({ type }: PlanButtonProps) {
           <>
             {/* <SignupButton plan={{ id: "321693", variantId: 468280 }} /> */}
             <Link
-              href={`https://mosaicimg.gumroad.com/l/pro?email=${user?.emailAddresses[0].emailAddress
-                }&clerk_user_id=${userId}&wanted=true`}
+              href={`https://mosaicimg.gumroad.com/l/pro?email=${
+                user?.emailAddresses[0].emailAddress
+              }&clerk_user_id=${userId}&wanted=true`}
               className={cn(buttonVariants(), "w-full")}
               target="_blank"
               rel="noopener noreferrer"

@@ -8,7 +8,15 @@ import {
 import { curveCardinal } from "d3-shape";
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-export function MosaicAreaChart({ datapoints, datakey }: { datapoints: any, datakey: string }) {
+export function MosaicAreaChart({
+  datapoints,
+  datakey,
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  datapoints: any;
+  datakey: string;
+}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any[] = [];
   const cardinal = curveCardinal.tension(0.2);
   if (datapoints) {
@@ -34,10 +42,7 @@ export function MosaicAreaChart({ datapoints, datakey }: { datapoints: any, data
           tickMargin={2}
           allowDataOverflow={false}
         />
-        <ChartTooltip
-          cursor={false}
-          content={<ChartTooltipContent />}
-        />
+        <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
         <Area
           type={cardinal}
           dataKey={datakey}

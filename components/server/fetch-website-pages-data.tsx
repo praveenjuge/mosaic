@@ -1,8 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 
-async function fetchWebsitePagesData(token: string, websiteIds?: number[], page?: number, limit?: number) {
-  const url = new URL("https://get.mosaicimg.com/api/websites/latest_website_pages");
+async function fetchWebsitePagesData(
+  token: string,
+  websiteIds?: number[],
+  page?: number,
+  limit?: number,
+) {
+  const url = new URL(
+    "https://get.mosaicimg.com/api/websites/latest_website_pages",
+  );
   if (websiteIds) {
     for (const websiteId of websiteIds) {
       url.searchParams.append("website_ids", websiteId.toString());
@@ -42,6 +49,7 @@ interface FetchWebsitePagesDataProps {
 }
 
 interface WebsitePagesResponse {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any[];
   meta: {
     total: number;
@@ -50,7 +58,12 @@ interface WebsitePagesResponse {
   };
 }
 
-const FetchWebsitePagesData = async ({ slug, websiteIds, page, limit }: FetchWebsitePagesDataProps): Promise<WebsitePagesResponse> => {
+const FetchWebsitePagesData = async ({
+  slug,
+  websiteIds,
+  page,
+  limit,
+}: FetchWebsitePagesDataProps): Promise<WebsitePagesResponse> => {
   let response: WebsitePagesResponse = {
     data: [],
     meta: {

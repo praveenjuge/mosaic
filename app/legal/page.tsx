@@ -159,8 +159,8 @@ export default function Page() {
             <h3>Refunds</h3>
             <p>
               At Mosaic, we strive to provide the best possible service to our
-              users. However, we understand that sometimes things don't go as
-              planned. This Refund Policy outlines the conditions under which
+              users. However, we understand that sometimes things don&apos;t go
+              as planned. This Refund Policy outlines the conditions under which
               refunds may be granted for our SaaS (Software as a Service)
               products and services.
             </p>

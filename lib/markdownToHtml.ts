@@ -55,7 +55,7 @@ const highlighter = await createHighlighterCore({
   loadWasm: import("shiki/wasm"),
 });
 md.use(
-  fromHighlighter(highlighter as any, {
+  fromHighlighter(highlighter as never, {
     themes: {
       light: "github-dark",
     },

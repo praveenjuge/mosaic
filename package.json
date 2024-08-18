@@ -17,14 +17,10 @@
   },
   "eslintConfig": {
     "parser": "@typescript-eslint/parser",
-    "plugins": [
-      "@typescript-eslint"
-    ],
+    "plugins": ["@typescript-eslint"],
     "extends": [
       "eslint:recommended",
       "plugin:@typescript-eslint/recommended",
-      "plugin:react/recommended",
-      "next",
       "next/core-web-vitals",
       "plugin:tailwindcss/recommended",
       "prettier"
@@ -33,7 +29,6 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.3.1",
-    "@lemonsqueezy/lemonsqueezy.js": "^3.2.0",
     "@mynaui/icons-react": "^0.2.1",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-collapsible": "^1.1.0",
@@ -45,9 +40,10 @@
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
-    "@shikijs/markdown-it": "^1.13.0",
+    "@shikijs/markdown-it": "^1.14.1",
     "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.45.1",
+    "@typescript-eslint/eslint-plugin": "^8.1.0",
     "babel-plugin-react-compiler": "latest",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -72,10 +68,9 @@
     "@types/react-dom": "^18.3.0",
     "@typescript-eslint/eslint-plugin": "^8.1.0",
     "@typescript-eslint/parser": "^8.1.0",
-    "eslint": "^9.9.0",
+    "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
     "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react": "^7.35.0",
     "eslint-plugin-tailwindcss": "^3.17.4",
     "postcss": "^8.4.41",
     "prettier-plugin-organize-imports": "^4.0.0",

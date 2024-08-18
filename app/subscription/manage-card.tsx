@@ -13,7 +13,9 @@ import { Suspense } from "react";
 
 export async function ManageCard() {
   const userData = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metaData: any = await userData?.sessionClaims?.public_metadata;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const subscriptionId: any = metaData?.plan?.subscription_id;
 
   return (

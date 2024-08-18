@@ -10,6 +10,7 @@ import { auth } from "@clerk/nextjs/server";
 
 export default async function HomeSignedIn() {
   const userData = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metaData: any = await userData?.sessionClaims?.public_metadata;
   let websitePagesData = [];
   const response = await FetchWebsitePagesData({ page: 1, limit: 5 });

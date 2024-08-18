@@ -49,6 +49,7 @@ async function fetchWebsiteData(token: string, websiteId: string) {
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let websiteData: any = {};
   let websitePagesData = [];
   const response = await FetchWebsitePagesData({ slug: params.slug });

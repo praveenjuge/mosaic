@@ -18,6 +18,7 @@ import { formatBytes } from "@/lib/utils";
 import Link from "next/link";
 
 interface LatestScreenshotsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   websitePages: any[];
   showPagination?: boolean;
 }
@@ -40,6 +41,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {websitePages.map((website_page: any) => (
                 <TableRow key={website_page.id}>
                   <TableCell className="py-0">
@@ -51,6 +53,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={
                           "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
