@@ -1,6 +1,6 @@
 {
-  "commit": "2a32384ae7d1e59c4b75824098dc56a18fe9315a",
-  "generated": "2024-08-18T08:57:57.263Z",
+  "commit": "ba16717c985ff53f70b88d3d1985bc7416c846e7",
+  "generated": "2024-08-18T09:19:55.855Z",
   "metadata": [
     {
       "__outstatic": {
@@ -239,6 +239,25 @@
       "slug": "added-changelog-help",
       "status": "published",
       "title": "Added Changelog & Help"
+    },
+    {
+      "__outstatic": {
+        "commit": "ba16717c985ff53f70b88d3d1985bc7416c846e7",
+        "hash": "2028232356",
+        "path": "content/help/change-your-account-password.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Authentication",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-08-18T09:51:15.583Z",
+      "slug": "change-your-account-password",
+      "status": "published",
+      "title": "Change Your Account Password"
     }
   ]
 }
