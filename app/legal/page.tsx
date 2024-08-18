@@ -85,6 +85,27 @@ export default function Page() {
               of your information and are prohibited from using it for any other
               purpose.
             </p>
+            <h3>Your Rights</h3>
+            <p>
+              You have the right to access, correct, or delete your personal
+              information. To exercise these rights, please contact us at
+              hello@praveenjuge.com.
+            </p>
+
+            <h3>Data Retention</h3>
+            <p>
+              We retain your personal information for as long as necessary to
+              provide our services and comply with legal obligations. The
+              retention period may vary depending on the type of data.
+            </p>
+
+            <h3>International Data Transfers</h3>
+            <p>
+              Your information may be transferred to and processed in countries
+              other than your own. We ensure appropriate safeguards are in place
+              to protect your data in compliance with applicable laws such as
+              GDPR and CCPA.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -146,6 +167,24 @@ export default function Page() {
               services at any time, without notice, for any reason, including
               but not limited to a violation of these Terms of Service.
             </p>
+            <h3>Subscription Terms and Pricing</h3>
+            <p>
+              Our services are available on a subscription basis. The
+              subscription terms and pricing are available on our website. We
+              reserve the right to change our pricing and terms at any time.
+            </p>
+            <h3>User-Generated Content</h3>
+            <p>
+              You are responsible for any content you create or upload to our
+              services. You grant us a license to use, modify, and distribute
+              your content as necessary to provide our services.
+            </p>
+            <h3>Age Restrictions</h3>
+            <p>
+              Our services are not intended for use by individuals under the age
+              of 18. By using our services, you represent that you are at least
+              18 years old.
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -161,8 +200,7 @@ export default function Page() {
               At Mosaic, we strive to provide the best possible service to our
               users. However, we understand that sometimes things don&apos;t go
               as planned. This Refund Policy outlines the conditions under which
-              refunds may be granted for our SaaS (Software as a Service)
-              products and services.
+              refunds may be granted for our app products and services.
             </p>
 
             <h3>Eligibility for Refunds</h3>
@@ -233,6 +271,28 @@ export default function Page() {
                 after the subscription or purchase.
               </li>
             </ul>
+
+            <h3>Partial Refunds</h3>
+            <p>
+              In some cases, we may offer partial refunds for unused portions of
+              your subscription. The amount of the partial refund will be
+              determined on a case-by-case basis.
+            </p>
+
+            <h3>Refund Process for Different Payment Methods</h3>
+            <p>
+              The refund process may vary depending on the payment method used.
+              For example, refunds for credit card payments may be processed
+              directly to the credit card, while refunds for bank transfers may
+              be processed via bank transfer.
+            </p>
+
+            <h3>Exceptions to the Refund Policy</h3>
+            <p>
+              We may offer special promotions or discounts that have specific
+              terms and conditions. In these cases, the refund policy may be
+              modified or waived.
+            </p>
 
             <h3>Contact Us</h3>
             <p>
