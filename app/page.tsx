@@ -1,6 +1,6 @@
-import HomeSignedIn from "@/components/home/homesignedin";
+import HomeQuickStats from "@/components/home/HomeQuickStats";
 import HomeSignedOut from "@/components/home/homesignedout";
-import { LoadingSpinner } from "@/components/spinner";
+import LatestScreenshots from "@/components/latest-screenshots";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { website_description, website_subtitle } from "@/lib/constants";
@@ -26,14 +26,20 @@ export default function Home() {
         <CardHeader className="p-0">
           <CardTitle>Overview</CardTitle>
         </CardHeader>
-        <Suspense fallback={<LoadingSpinner />}>
-          <HomeSignedIn />
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+          <HomeQuickStats />
         </Suspense>
         <CardHeader className="p-0">
           <CardTitle>Websites</CardTitle>
         </CardHeader>
-        <Suspense fallback={<Skeleton className="h-20 w-full rounded-lg" />}>
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
           <WebsitesTable />
+        </Suspense>
+        <CardHeader className="p-0">
+          <CardTitle>Latest Screenshots</CardTitle>
+        </CardHeader>
+        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+          <LatestScreenshots page={1} limit={5} showPagination={false} />
         </Suspense>
       </SignedIn>
     </>

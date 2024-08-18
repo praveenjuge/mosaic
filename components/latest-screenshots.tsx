@@ -15,21 +15,34 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatBytes } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
+import FetchWebsitePagesData from "./server/fetch-website-pages-data";
 
 interface LatestScreenshotsProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  websitePages: any[];
   showPagination?: boolean;
+  page?: number;
+  limit?: number;
+  slug?: string;
 }
 
-const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
-  websitePages,
+const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
+  page = 1,
+  limit = 10,
+  slug,
   showPagination = true,
 }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let websitePagesData: any[] = [];
+  const response = await FetchWebsitePagesData({ page, limit, slug });
+  if (!response || !response.data) {
+    console.log("No data");
+  } else {
+    websitePagesData = response.data;
+  }
   return (
     <Card>
-      {websitePages.length > 0 ? (
+      {websitePagesData.length > 0 ? (
         <>
           <Table>
             <TableHeader>
@@ -41,8 +54,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-              {websitePages.map((website_page: any) => (
+              {websitePagesData.map((website_page) => (
                 <TableRow key={website_page.id}>
                   <TableCell className="py-0">
                     <Link
@@ -53,14 +65,15 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={
                           "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
                           website_page.image_key
                         }
                         alt={website_page.title}
                         className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center"
+                        width={56}
+                        height={24}
                       />
                     </Link>
                   </TableCell>

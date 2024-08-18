@@ -16,11 +16,12 @@ export interface PlanButtonProps {
 
 export async function PlanButton({ type }: PlanButtonProps) {
   const userData = await auth();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaData: any = await userData?.sessionClaims?.public_metadata;
+  const metaData = (await userData?.sessionClaims?.public_metadata) as
+    | { plan?: { label: string } }
+    | undefined;
   const { userId } = auth();
   const user = await currentUser();
-  const isActive = Boolean(metaData?.plan?.label != "free");
+  const isActive = Boolean(metaData?.plan?.label !== "free");
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>

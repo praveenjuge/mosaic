@@ -1,5 +1,4 @@
 import LatestScreenshots from "@/components/latest-screenshots";
-import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardDescription,
@@ -49,16 +48,15 @@ async function fetchWebsiteData(token: string, websiteId: string) {
   return await response.json();
 }
 
+interface WebsiteData {
+  cleaned_website_url: string;
+  total_count: number;
+  total_bytes: number;
+  // Add other properties as needed
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let websiteData: any = {};
-  let websitePagesData = [];
-  const response = await FetchWebsitePagesData({ slug: params.slug });
-  if (!response || !response?.data) {
-    notFound();
-  } else {
-    websitePagesData = response.data;
-  }
+  let websiteData: WebsiteData | null = null;
 
   try {
     const { getToken } = auth();
@@ -77,13 +75,13 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>{websiteData.cleaned_website_url}</CardTitle>
+        <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
       </CardHeader>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{websiteData.total_count}</CardTitle>
+            <CardTitle>{websiteData?.total_count}</CardTitle>
             <CardDescription>Images</CardDescription>
           </CardHeader>
         </Card>
@@ -95,7 +93,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{formatBytes(websiteData.total_bytes)}</CardTitle>
+            <CardTitle>{formatBytes(websiteData?.total_bytes ?? 0)}</CardTitle>
             <CardDescription>Storage Used</CardDescription>
           </CardHeader>
         </Card>
@@ -103,7 +101,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       <CardHeader className="p-0">
         <CardTitle>Latest Screenshots</CardTitle>
       </CardHeader>
-      <LatestScreenshots websitePages={websitePagesData} />
+      <LatestScreenshots slug={params.slug} />
     </>
   );
 }
