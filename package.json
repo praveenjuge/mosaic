@@ -40,6 +40,7 @@
     "@radix-ui/react-switch": "^1.1.0",
     "@radix-ui/react-toggle": "^1.1.0",
     "@radix-ui/react-toggle-group": "^1.1.0",
+    "@sentry/nextjs": "^8",
     "@shikijs/markdown-it": "^1.14.1",
     "@supabase/ssr": "^0.5.0",
     "@supabase/supabase-js": "^2.45.1",
