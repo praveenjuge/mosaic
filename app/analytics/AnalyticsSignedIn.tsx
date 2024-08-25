@@ -53,14 +53,14 @@ export default async function AnalyticsSignedIn() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {data.total_count} out of {metaData.plan?.limits?.images || 500}
+              {metaData.images_used || data.total_count} out of {metaData.images_limit || 500}
             </CardTitle>
             <CardDescription>Images Generated</CardDescription>
             <Progress
               className="h-2"
               value={
-                (data.total_count * 100) /
-                (metaData.plan?.limits?.images || 500)
+                ((metaData.images_used || data.total_count) * 100) /
+                (metaData.images_limit || 500)
               }
             />
           </CardHeader>
@@ -68,15 +68,15 @@ export default async function AnalyticsSignedIn() {
         <Card>
           <CardHeader>
             <CardTitle>
-              {formatBytes(data.total_bytes)}/
-              {metaData.plan?.limits?.storage || "50 MB"}
+              {metaData.storage_used || formatBytes(data.total_bytes)}/
+              {metaData.storage_limit || "50 MB"}
             </CardTitle>
             <CardDescription>Storage Used</CardDescription>
             <Progress
               className="h-2"
               value={
                 (data.total_bytes * 100) /
-                (parseBytes(metaData.plan?.limits?.storage) || 1048576 * 50)
+                (parseBytes(metaData.storage_limit) || 1048576 * 50)
               }
             />
           </CardHeader>
