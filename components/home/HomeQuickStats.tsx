@@ -10,7 +10,9 @@ import { auth } from "@clerk/nextjs/server";
 export default async function HomeQuickStats() {
   const userData = await auth();
   const metaData = (await userData?.sessionClaims?.public_metadata) as {
-    plan?: { name: string };
+    plan?: string;
+    images_used?: number;
+    storage_used?: string;
   };
   const response = await FetchWebsitePagesData({ page: 1, limit: 5 });
 
@@ -18,19 +20,19 @@ export default async function HomeQuickStats() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardTitle>{response.meta.total}</CardTitle>
-          <CardDescription>Images</CardDescription>
+          <CardTitle>{metaData.images_used || response.meta.total}</CardTitle>
+          <CardDescription>Images Generated</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>30 Days</CardTitle>
-          <CardDescription>Cached</CardDescription>
+          <CardTitle>{metaData?.storage_used}</CardTitle>
+          <CardDescription>Storage Used</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{metaData?.plan?.name || "Free Plan"}</CardTitle>
+          <CardTitle>{metaData?.plan || "Free Plan"}</CardTitle>
           <CardDescription>Subscription</CardDescription>
         </CardHeader>
       </Card>
