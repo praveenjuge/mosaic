@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
+import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Websites",
@@ -17,7 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+export default async function Page() {
+  const userData = await auth();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const metaData: any = await userData?.sessionClaims?.public_metadata;
+
+  const preventSubmission = metaData?.websites_used > metaData?.websites_limit;
+
   return (
     <>
       <div className="flex items-center justify-between">
@@ -33,7 +40,7 @@ export default function Page() {
             </Button>
           }
         >
-          <AddWebsite />
+          <AddWebsite preventSubmission={preventSubmission} />
         </Suspense>
       </div>
       <SignedOut>

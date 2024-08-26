@@ -71,6 +71,12 @@ export default async function Page({ params }: { params: { slug: string } }) {
     notFound();
   }
 
+  if (!websiteData) {
+    // Render a loading indicator or fallback UI
+    return <div>Loading website data...</div>;
+  }
+
+
   return (
     <>
       <CardHeader className="p-0">
