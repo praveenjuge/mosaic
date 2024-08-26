@@ -10,7 +10,7 @@ import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Metadata } from "next";
 import Link from "next/link";
-// import { notFound } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 export async function generateMetadata({
@@ -67,8 +67,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       try {
         websiteData = await fetchWebsiteData(token, params.slug);
       } catch (error) {
-        console.error("Error fetching website data:", error);
-        return <div>Error fetching website data</div>;
+        notFound()
       }
     } else {
       console.log("No token available");
@@ -76,11 +75,11 @@ export default async function Page({ params }: { params: { slug: string } }) {
     }
   } catch (error) {
     console.error("Error:", error);
-    return <div>Failure</div>;
+    return <Skeleton className="h-24 w-full rounded-lg" />
   }
 
   if (!websiteData) {
-    return <div></div>;
+    return <Skeleton className="h-24 w-full rounded-lg" />
   }
 
 
