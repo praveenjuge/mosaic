@@ -64,14 +64,18 @@ export default async function Page({ params }: { params: { slug: string } }) {
     const { getToken } = auth();
     const token = await getToken({ template: "supabase" });
     if (token) {
-      websiteData = await fetchWebsiteData(token, params.slug);
+      try {
+        websiteData = await fetchWebsiteData(token, params.slug);
+      } catch (error) {
+        console.error("Error fetching website data:", error);
+        return <div>Error fetching website data</div>;
+      }
     } else {
       console.log("No token available");
       return <div>Error: No token available.</div>;
     }
   } catch (error) {
-    console.error("Error fetching website data:", error);
-    return <div>{JSON.stringify(error)}</div>;
+    return <div>Failure</div>;
   }
 
   if (!websiteData) {
