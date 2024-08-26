@@ -75,6 +75,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       return <div>Error: No token available.</div>;
     }
   } catch (error) {
+    console.error("Error:", error);
     return <div>Failure</div>;
   }
 
