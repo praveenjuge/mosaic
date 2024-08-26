@@ -71,7 +71,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
     }
   } catch (error) {
     console.error("Error fetching website data:", error);
-    return <div>{error?.message}</div>;
+    return <div>{JSON.stringify(error)}</div>;
   }
 
   if (!websiteData) {
