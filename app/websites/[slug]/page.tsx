@@ -67,6 +67,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       try {
         websiteData = await fetchWebsiteData(token, params.slug);
       } catch (error) {
+        console.error("Error:", error);
         notFound()
       }
     } else {
