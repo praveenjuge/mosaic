@@ -34,59 +34,68 @@ export function AddWebsite({ preventSubmission = false }) {
       <ClerkLoading>
         <Button size="sm" disabled>
           <Plus className="mr-1 size-4" stroke={2} />
-          Add Website
+          Add Websites
         </Button>
       </ClerkLoading>
       <ClerkLoaded>
         <SignedIn>
-          <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button size="sm">
-                <Plus className="mr-1 size-4" stroke={2} />
-                Add Website
+          {preventSubmission ? (
+            // Display upgrade prompt if preventSubmission is true
+            <div className="flex flex-col items-center">
+              <Button variant="default" asChild>
+                <Link href="/subscription">
+                  Upgrade to Pro</Link>
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Add Website</DialogTitle>
-                <DialogDescription>
-                  Enter the URL of the website you want to add.
-                </DialogDescription>
-              </DialogHeader>
-              <form
-                className="grid gap-4"
-                action={async (formData) => {
-                  await handleAdd(formData);
-                  setOpen(false);
-                  toast.success("Added your website!");
-                }}
-              >
-                <div className="grid gap-2">
-                  <Label htmlFor="website">Website</Label>
-                  <Input
-                    id="website"
-                    name="website"
-                    type="url"
-                    placeholder="Enter URL"
-                    required
-                  />
-                </div>
-                {preventSubmission ? (
-                  <Link
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={buttonVariants({ variant: "default" })}
-                    href="/subscriptions"
-                  >
-                    Upgrade to Pro
-                    <ExternalLink className="ml-2 size-4" strokeWidth={2} />
-                  </Link>
-                ) : (
-                  <SubmitButton text="Add" />
-                )}
-              </form>
-            </DialogContent>
-          </Dialog>
+            </div>
+          ) : (
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button size="sm">
+                  <Plus className="mr-1 size-4" stroke={2} />
+                  Add Websites
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Website</DialogTitle>
+                  <DialogDescription>
+                    Enter the URL of the website you want to add.
+                  </DialogDescription>
+                </DialogHeader>
+                <form
+                  className="grid gap-4"
+                  action={async (formData) => {
+                    await handleAdd(formData);
+                    setOpen(false);
+                    toast.success("Added your website!");
+                  }}
+                >
+                  <div className="grid gap-2">
+                    <Label htmlFor="website">Website</Label>
+                    <Input
+                      id="website"
+                      name="website"
+                      type="url"
+                      placeholder="Enter URL"
+                      required
+                    />
+                  </div>
+                  {preventSubmission ? (
+                    <Link
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={buttonVariants({ variant: "default" })}
+                      href="/subscriptions"
+                    >
+                      Upgrade to Pro
+                      <ExternalLink className="ml-2 size-4" strokeWidth={2} />
+                    </Link>
+                  ) : (
+                    <SubmitButton text="Add" />
+                  )}
+                </form>
+              </DialogContent>
+            </Dialog>)}
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
