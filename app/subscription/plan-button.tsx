@@ -17,11 +17,11 @@ export interface PlanButtonProps {
 export async function PlanButton({ type }: PlanButtonProps) {
   const userData = await auth();
   const metaData = (await userData?.sessionClaims?.public_metadata) as
-    | { plan?: { label: string } }
+    | { plan: string }
     | undefined;
   const { userId } = auth();
   const user = await currentUser();
-  const isActive = Boolean(metaData?.plan?.label !== "free");
+  const isActive = Boolean(metaData?.plan !== "Free") || Boolean(metaData?.plan === "free");
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>
@@ -49,9 +49,8 @@ export async function PlanButton({ type }: PlanButtonProps) {
           <>
             {/* <SignupButton plan={{ id: "321693", variantId: 468280 }} /> */}
             <Link
-              href={`https://mosaicimg.gumroad.com/l/pro?email=${
-                user?.emailAddresses[0].emailAddress
-              }&clerk_user_id=${userId}&wanted=true`}
+              href={`https://mosaicimg.gumroad.com/l/pro?email=${user?.emailAddresses[0].emailAddress
+                }&clerk_user_id=${userId}&wanted=true`}
               className={cn(buttonVariants(), "w-full")}
               target="_blank"
               rel="noopener noreferrer"
