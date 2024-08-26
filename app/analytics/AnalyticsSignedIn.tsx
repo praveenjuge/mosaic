@@ -94,7 +94,7 @@ export default async function AnalyticsSignedIn() {
           <CardContent>
             <MosaicAreaChart
               datapoints={data.page_hits}
-              datakey="Images served"
+              datakey="Served"
             />
           </CardContent>
         </Card>
@@ -109,7 +109,7 @@ export default async function AnalyticsSignedIn() {
           <CardContent>
             <MosaicBarChart
               datapoints={data.website_page_analytics}
-              datakey="Images generated"
+              datakey="Generated"
             />
           </CardContent>
         </Card>
