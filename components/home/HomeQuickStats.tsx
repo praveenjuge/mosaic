@@ -14,7 +14,6 @@ export default async function HomeQuickStats() {
     images_used?: number;
     storage_used?: string;
   };
-  console.log(metaData);
   const response = await FetchWebsitePagesData({ page: 1, limit: 5 });
 
   return (
@@ -27,7 +26,7 @@ export default async function HomeQuickStats() {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{metaData?.storage_used}</CardTitle>
+          <CardTitle>{metaData?.storage_used ?? "0 Bytes"}</CardTitle>
           <CardDescription>Storage Used</CardDescription>
         </CardHeader>
       </Card>
