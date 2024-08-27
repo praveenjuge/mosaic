@@ -20,6 +20,9 @@ import { WebsitePageData } from './server/fetch-website-pages-data';
 
 interface LatestScreenshotsProps {
   websitePagesData: WebsitePageData[];
+  page?: number;
+  limit?: number;
+  showPagination?: boolean;
 }
 
 
@@ -48,7 +51,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData 
 
   return (
     <Card>
-      {websitePagesData.length > 0 ? (
+      {websitePagesData && websitePagesData.length > 0 ? (
         <>
           <Table>
             <TableHeader>
@@ -69,7 +72,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData 
                       rel="noopener noreferrer"
                     >
                       <img
-                        src={`https://ddvbpf2rl5x5r.cloudfront.net/${websitePage.image_key}`}
+                        src={`https://dgcnyjbu13hj1.cloudfront.net/resized/75x40/${websitePage.image_key}`}
                         alt={websitePage.title}
                         className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center"
                         width={56}
