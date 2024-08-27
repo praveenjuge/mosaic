@@ -67,7 +67,8 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={
-                          "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
+                          // "https://dgcnyjbu13hj1.cloudfront.net/resized/150x79/" +
+                          "https://ddvbpf2rl5x5r.cloudfront.net/" +
                           website_page.image_key
                         }
                         alt={website_page.title}
