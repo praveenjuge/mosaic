@@ -32,7 +32,10 @@ type Website = {
 
 export default async function WebsitesTable() {
   const client = await createClient();
-  const { data, error } = await client.from("websites").select("*");
+  const { data, error } = await client
+    .from("websites")
+    .select("*")
+    .order("id", { ascending: true });
 
   if (error) {
     return <p>Error: {JSON.stringify(error, null, 2)}</p>;

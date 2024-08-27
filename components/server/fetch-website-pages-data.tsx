@@ -41,18 +41,22 @@ async function fetchWebsitePagesData(
   return await response.json();
 }
 
-interface FetchWebsitePagesDataProps {
+export interface FetchWebsitePagesDataProps {
   slug?: string;
   websiteIds?: number[];
   page?: number;
   limit?: number;
 }
 
-interface WebsitePageData {
+export interface WebsitePageData {
   // Define the properties of WebsitePageData here
   // For example:
-  id: number;
-  url: string;
+  id: string;
+  image_key: string;
+  title: string;
+  website_page_url: string;
+  size_in_bytes: number;
+  updated_at: string; // This is in UTC
   // Add other relevant properties
 }
 
