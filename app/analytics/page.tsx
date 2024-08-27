@@ -9,6 +9,8 @@ import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "../websites/AddWebsite";
 import AnalyticsSignedIn from "./AnalyticsSignedIn";
+import FetchWebsitePagesData, { WebsitePageData } from "@/components/server/fetch-website-pages-data";
+import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -18,7 +20,27 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Page() {
+export default async function Page() {
+
+  let websitePagesData: WebsitePageData[] = [];
+
+  try {
+    const { getToken } = auth();
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      try {
+        const response = await FetchWebsitePagesData({});
+        websitePagesData = response.data;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    } else {
+      console.log("No token available");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
   return (
     <>
       <CardHeader className="p-0">
@@ -57,7 +79,7 @@ export default function Page() {
           <CardTitle>Latest Screenshots</CardTitle>
         </CardHeader>
         <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-          <LatestScreenshots />
+          <LatestScreenshots websitePagesData={websitePagesData} />
         </Suspense>
       </SignedIn>
     </>

@@ -16,7 +16,7 @@ export async function ManageCard() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const metaData: any = await userData?.sessionClaims?.public_metadata;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subscriptionId: any = metaData?.plan?.subscription_id;
+  const subscriptionId: any = metaData?.plan?.gumroad_id;
 
   return (
     <SignedIn>
