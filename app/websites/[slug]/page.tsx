@@ -1,5 +1,4 @@
 import LatestScreenshots from "@/components/latest-screenshots";
-import FetchWebsitePagesData, { WebsitePageData } from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardDescription,
@@ -60,7 +59,6 @@ interface WebsiteData {
 
 export default async function Page({ params }: { params: { slug: string } }) {
   let websiteData: WebsiteData | null = null;
-  let websitePagesData: WebsitePageData[] = [];
 
   try {
     const { getToken } = auth();
@@ -68,10 +66,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
     if (token) {
       try {
         websiteData = await fetchWebsiteData(token, params.slug);
-        if (websiteData) {
-          const response = await FetchWebsitePagesData({ slug: params.slug });
-          websitePagesData = response.data;
-        }
       } catch (error) {
         console.error("Error:", error);
         notFound()
@@ -123,7 +117,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardTitle>Latest Screenshots</CardTitle>
       </CardHeader>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-        <LatestScreenshots websitePagesData={websitePagesData} />
+        <LatestScreenshots slug={params.slug} page={1} />
       </Suspense>
     </>
   );

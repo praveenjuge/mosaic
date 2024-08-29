@@ -1,8 +1,7 @@
-"use client";
-
 import {
   Card,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -17,18 +16,24 @@ import {
 import { formatBytes } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
-import { WebsitePageData } from "./server/fetch-website-pages-data";
+import FetchWebsitePagesData, { WebsitePageData } from "./server/fetch-website-pages-data";
+import { Button } from "@/components/ui/button";
 
 interface LatestScreenshotsProps {
-  websitePagesData: WebsitePageData[];
+  websitePagesData?: WebsitePageData[];
+  slug?: string;
   page?: number;
   limit?: number;
   showPagination?: boolean;
 }
 
-const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
-  websitePagesData,
+const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
+  slug, page, limit, showPagination
 }) => {
+
+  const response = await FetchWebsitePagesData({ slug: slug, page: page ? page : 1, limit: limit ? limit : 10 });
+  const websitePagesData = response.data;
+
   const formatUTCDateToLocalWithAMPM = (utcDateString: string) => {
     // Parse the UTC date string into a Date object
     utcDateString = utcDateString + "Z";
@@ -105,12 +110,12 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
               ))}
             </TableBody>
           </Table>
-          {/* {showPagination && (
+          {showPagination && (
             <CardFooter className="flex justify-between border-t-[0.5px] p-2">
               <Button variant="outline">Previous</Button>
               <Button variant="outline">Next</Button>
             </CardFooter>
-          )} */}
+          )}
         </>
       ) : (
         <CardHeader>

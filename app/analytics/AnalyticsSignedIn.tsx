@@ -54,25 +54,6 @@ export default async function AnalyticsSignedIn() {
     notFound();
   }
 
-  let websitePagesData: WebsitePageData[] = [];
-
-  try {
-    const { getToken } = auth();
-    const token = await getToken({ template: "supabase" });
-    if (token) {
-      try {
-        const response = await FetchWebsitePagesData({});
-        websitePagesData = response.data;
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    } else {
-      console.log("No token available");
-    }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-
   return (
     <SignedIn>
       <div className="grid w-full gap-6 sm:grid-cols-2">
@@ -143,7 +124,7 @@ export default async function AnalyticsSignedIn() {
         <CardTitle>Latest Screenshots</CardTitle>
       </CardHeader>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-        <LatestScreenshots websitePagesData={websitePagesData} />
+        <LatestScreenshots page={1} limit={10} />
       </Suspense>
     </SignedIn>
   );
