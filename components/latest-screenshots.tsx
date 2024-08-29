@@ -1,11 +1,6 @@
-"use client"
+"use client";
 
-import React from 'react';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -13,10 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import Link from 'next/link';
-import { formatBytes } from '@/lib/utils';
-import { WebsitePageData } from './server/fetch-website-pages-data';
+} from "@/components/ui/table";
+import { formatBytes } from "@/lib/utils";
+import Link from "next/link";
+import React from "react";
+import { WebsitePageData } from "./server/fetch-website-pages-data";
 
 interface LatestScreenshotsProps {
   websitePagesData: WebsitePageData[];
@@ -25,9 +21,9 @@ interface LatestScreenshotsProps {
   showPagination?: boolean;
 }
 
-
-const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData }) => {
-
+const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
+  websitePagesData,
+}) => {
   const formatUTCDateToLocalWithAMPM = (utcDateString: string) => {
     // Parse the UTC date string into a Date object
     utcDateString = utcDateString + "Z";
@@ -35,19 +31,18 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData 
 
     // Extract the local time components with AM/PM notation
     const options = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric',
-      second: 'numeric',
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
       hour12: true, // This will include the AM/PM notation
     } as const;
 
     // Format the date according to the local time zone with AM/PM
-    return utcDate.toLocaleString('en-US', options);
-  }
-
+    return utcDate.toLocaleString("en-US", options);
+  };
 
   return (
     <Card>
@@ -71,6 +66,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData 
                       target="_blank"
                       rel="noopener noreferrer"
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`https://dgcnyjbu13hj1.cloudfront.net/resized/75x40/${websitePage.image_key}`}
                         alt={websitePage.title}
@@ -88,12 +84,18 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({ websitePagesData 
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        {websitePage.title ? websitePage.title : websitePage.website_page_url}
+                        {websitePage.title
+                          ? websitePage.title
+                          : websitePage.website_page_url}
                       </Link>
                     </div>
                   </TableCell>
-                  <TableCell>{formatBytes(websitePage.size_in_bytes)}</TableCell>
-                  <TableCell>{formatUTCDateToLocalWithAMPM(websitePage.updated_at)}</TableCell>
+                  <TableCell>
+                    {formatBytes(websitePage.size_in_bytes)}
+                  </TableCell>
+                  <TableCell>
+                    {formatUTCDateToLocalWithAMPM(websitePage.updated_at)}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
