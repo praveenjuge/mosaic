@@ -1,7 +1,4 @@
 import LatestScreenshots from "@/components/latest-screenshots";
-import FetchWebsitePagesData, {
-  WebsitePageData,
-} from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardContent,
