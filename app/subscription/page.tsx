@@ -12,6 +12,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
 import { Check, ChevronDown } from "@mynaui/icons-react";
 import { Metadata } from "next";
@@ -183,7 +184,7 @@ export default function Page() {
           </Card>
         ))}
       </div>
-      <Suspense>
+      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <ManageCard />
       </Suspense>
       <Card>
