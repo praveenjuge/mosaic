@@ -36,7 +36,9 @@ export default function Page() {
           <AddWebsite />
         </Suspense>
       </div>
-      <WebsitesSignedOut />
+      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+        <WebsitesSignedOut />
+      </Suspense>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <WebsitesTable />
       </Suspense>
