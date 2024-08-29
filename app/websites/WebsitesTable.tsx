@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/server";
-import { Globe, InfoTriangle } from "@mynaui/icons-react";
+import { Globe } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -69,16 +69,13 @@ export default async function WebsitesTable() {
                   ) : (
                     <Globe className="size-4" />
                   )}
-                  {website.is_duplicate ? (
-                    <InfoTriangle className="size-4"></InfoTriangle>
-                  ) : (
-                    ""
-                  )}
                   <Link
                     href={`/websites/${website.id}`}
                     className="max-w-xs truncate font-medium text-primary"
                   >
-                    {website.title ? website.title : website.website_url}
+                    {website.title
+                      ? website.title
+                      : website.cleaned_website_url}
                   </Link>
                 </TableCell>
                 <TableCell className="max-w-xs truncate font-medium">

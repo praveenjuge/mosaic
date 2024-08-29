@@ -38,9 +38,14 @@ export function EditWebsite({
         <form
           className="grid gap-4"
           action={async (formData) => {
-            await handleEdit(formData, websiteId);
+            const { status, message } = await handleEdit(formData, websiteId);
+            if (status === "error") {
+              toast.error(message);
+            } else {
+              setOpen(false);
+              toast.success(message);
+            }
             setOpen(false);
-            toast.success("Updated website.");
           }}
         >
           <div className="grid gap-2">

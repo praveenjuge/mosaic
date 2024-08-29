@@ -40,13 +40,13 @@ export function AddWebsite({ preventSubmission = false }) {
       <ClerkLoaded>
         <SignedIn>
           {preventSubmission ? (
-            // Display upgrade prompt if preventSubmission is true
-            <div className="flex flex-col items-center">
-              <Button variant="default" asChild>
-                <Link href="/subscription">
-                  Upgrade to Pro</Link>
-              </Button>
-            </div>
+            <Link
+              href="/subscription"
+              className={buttonVariants({ size: "sm" })}
+            >
+              <Plus className="mr-1 size-4" stroke={2} />
+              Upgrade to Pro
+            </Link>
           ) : (
             <Dialog open={open} onOpenChange={setOpen}>
               <DialogTrigger asChild>
@@ -65,9 +65,14 @@ export function AddWebsite({ preventSubmission = false }) {
                 <form
                   className="grid gap-4"
                   action={async (formData) => {
-                    await handleAdd(formData);
+                    const { status, message } = await handleAdd(formData);
+                    if (status === "error") {
+                      toast.error(message);
+                    } else {
+                      setOpen(false);
+                      toast.success(message);
+                    }
                     setOpen(false);
-                    toast.success("Added your website!");
                   }}
                 >
                   <div className="grid gap-2">
@@ -95,7 +100,8 @@ export function AddWebsite({ preventSubmission = false }) {
                   )}
                 </form>
               </DialogContent>
-            </Dialog>)}
+            </Dialog>
+          )}
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
