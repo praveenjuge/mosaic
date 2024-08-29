@@ -1,3 +1,7 @@
+import LatestScreenshots from "@/components/latest-screenshots";
+import FetchWebsitePagesData, {
+  WebsitePageData,
+} from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardContent,
@@ -6,9 +10,12 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes, parseBytes } from "@/lib/utils";
+import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { MosaicAreaChart } from "./areaChart";
 import { MosaicBarChart } from "./barChart";
 
@@ -47,13 +54,33 @@ export default async function AnalyticsSignedIn() {
     notFound();
   }
 
+  let websitePagesData: WebsitePageData[] = [];
+
+  try {
+    const { getToken } = auth();
+    const token = await getToken({ template: "supabase" });
+    if (token) {
+      try {
+        const response = await FetchWebsitePagesData({});
+        websitePagesData = response.data;
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    } else {
+      console.log("No token available");
+    }
+  } catch (error) {
+    console.error("Error:", error);
+  }
+
   return (
-    <>
+    <SignedIn>
       <div className="grid w-full gap-6 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle>
-              {metaData.images_used || data.total_count} out of {metaData.images_limit || 500}
+              {metaData.images_used || data.total_count} out of{" "}
+              {metaData.images_limit || 500}
             </CardTitle>
             <CardDescription>Images Generated</CardDescription>
             <Progress
@@ -92,10 +119,7 @@ export default async function AnalyticsSignedIn() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <MosaicAreaChart
-              datapoints={data.page_hits}
-              datakey="Served"
-            />
+            <MosaicAreaChart datapoints={data.page_hits} datakey="Served" />
           </CardContent>
         </Card>
 
@@ -114,6 +138,13 @@ export default async function AnalyticsSignedIn() {
           </CardContent>
         </Card>
       </div>
-    </>
+
+      <CardHeader className="p-0">
+        <CardTitle>Latest Screenshots</CardTitle>
+      </CardHeader>
+      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+        <LatestScreenshots websitePagesData={websitePagesData} />
+      </Suspense>
+    </SignedIn>
   );
 }

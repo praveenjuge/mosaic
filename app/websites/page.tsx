@@ -2,12 +2,11 @@ import { Button } from "@/components/ui/button";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
-import { Earth, Plus } from "@mynaui/icons-react";
+import { Plus } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
+import WebsitesSignedOut from "./WebsitesSignedOut";
 import WebsitesTable from "./WebsitesTable";
 
 export const metadata: Metadata = {
@@ -18,13 +17,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page() {
-  const userData = await auth();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaData: any = await userData?.sessionClaims?.public_metadata;
-
-  const preventSubmission = metaData?.websites_used > metaData?.websites_limit;
-
+export default function Page() {
   return (
     <>
       <div className="flex items-center justify-between">
@@ -40,28 +33,13 @@ export default async function Page() {
             </Button>
           }
         >
-          <AddWebsite preventSubmission={preventSubmission} />
+          <AddWebsite />
         </Suspense>
       </div>
-      <SignedOut>
-        <div className="flex w-full flex-col items-center justify-center rounded border-[0.5px] bg-primary-foreground px-4 py-20 text-center">
-          <div className="mx-auto rounded-full border-[0.5px] bg-background p-2">
-            <Earth className="size-6" />
-          </div>
-          <h3 className="mb-1 mt-2 text-sm font-medium">
-            Add your websites here
-          </h3>
-          <p className="mb-4 text-balance text-sm text-muted-foreground">
-            When you add a website you will get a special URL to get your OG
-            Images for that website.
-          </p>
-        </div>
-      </SignedOut>
-      <SignedIn>
-        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-          <WebsitesTable />
-        </Suspense>
-      </SignedIn>
+      <WebsitesSignedOut />
+      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+        <WebsitesTable />
+      </Suspense>
     </>
   );
 }

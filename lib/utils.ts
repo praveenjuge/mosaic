@@ -7,7 +7,6 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function parseBytes(input: string): number | null {
-  console.log(input);
   if (!input) return null;
   const units = {
     B: 1,
