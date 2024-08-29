@@ -3,12 +3,12 @@ import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
 import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { Earth, Plus } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { AddWebsite } from "./AddWebsite";
 import WebsitesTable from "./WebsitesTable";
-import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Websites",

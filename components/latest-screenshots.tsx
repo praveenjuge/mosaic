@@ -1,6 +1,11 @@
 "use client";
 
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -109,7 +114,8 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
         </>
       ) : (
         <CardHeader>
-          <CardTitle>No screenshots yet</CardTitle>
+          <CardTitle>No OG images generated yet</CardTitle>
+          <CardDescription>Add a website to get started.</CardDescription>
         </CardHeader>
       )}
     </Card>
