@@ -12,11 +12,18 @@ import Link from "next/link";
 import { Suspense } from "react";
 
 export async function ManageCard() {
-  const userData = await auth();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaData: any = await userData?.sessionClaims?.public_metadata;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subscriptionId: any = metaData?.plan?.gumroad_id;
+  const subscriptionId = (
+    auth()?.sessionClaims?.public_metadata as {
+      gumroad_id?: string;
+    }
+  )?.gumroad_id as string | undefined;
+
+  const ManageButton = ({ disabled = false }) => (
+    <Button variant={disabled ? "outline" : "default"} disabled={disabled}>
+      Manage Plan
+      <ExternalLink className="ml-2 size-4 stroke-2" />
+    </Button>
+  );
 
   return (
     <SignedIn>
@@ -30,27 +37,20 @@ export async function ManageCard() {
               invoices, please contact our support team.
             </CardDescription>
           </div>
-          <Suspense
-            fallback={
-              <Button variant="outline" disabled>
+          <Suspense fallback={<ManageButton disabled />}>
+            {subscriptionId ? (
+              <Link
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "default" })}
+                href={`https://app.gumroad.com/subscriptions/${subscriptionId}/manage`}
+              >
                 Manage Plan
                 <ExternalLink className="ml-2 size-4 stroke-2" />
-              </Button>
-            }
-          >
-            <Link
-              target="_blank"
-              rel="noopener noreferrer"
-              className={buttonVariants({ variant: "default" })}
-              href={
-                subscriptionId
-                  ? `https://app.gumroad.com/subscriptions/${subscriptionId}/manage`
-                  : ""
-              }
-            >
-              Manage Plan
-              <ExternalLink className="ml-2 size-4 stroke-2" />
-            </Link>
+              </Link>
+            ) : (
+              <ManageButton disabled />
+            )}
           </Suspense>
         </CardHeader>
       </Card>

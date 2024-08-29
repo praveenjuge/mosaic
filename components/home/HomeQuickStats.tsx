@@ -1,4 +1,3 @@
-import FetchWebsitePagesData from "@/components/server/fetch-website-pages-data";
 import {
   Card,
   CardDescription,
@@ -14,25 +13,31 @@ export default async function HomeQuickStats() {
     images_used?: number;
     storage_used?: string;
   };
-  const response = await FetchWebsitePagesData({ page: 1, limit: 5 });
+
+  const formatPlan = (plan: string | undefined) => {
+    if (!plan) return "Free Plan";
+    const capitalizedPlan =
+      plan.charAt(0).toUpperCase() + plan.slice(1).toLowerCase();
+    return `${capitalizedPlan} Plan`;
+  };
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardTitle>{metaData.images_used || response.meta.total}</CardTitle>
+          <CardTitle>{metaData.images_used || "0"}</CardTitle>
           <CardDescription>Images Generated</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{metaData?.storage_used ?? "0 Bytes"}</CardTitle>
+          <CardTitle>{metaData?.storage_used ?? "0 MB"}</CardTitle>
           <CardDescription>Storage Used</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{metaData?.plan || "Free Plan"}</CardTitle>
+          <CardTitle>{formatPlan(metaData?.plan)}</CardTitle>
           <CardDescription>Subscription</CardDescription>
         </CardHeader>
       </Card>

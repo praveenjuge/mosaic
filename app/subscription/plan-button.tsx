@@ -15,13 +15,10 @@ export interface PlanButtonProps {
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
-  const userData = await auth();
-  const metaData = (await userData?.sessionClaims?.public_metadata) as
-    | { plan: string }
-    | undefined;
-  const { userId } = auth();
+  const { userId, sessionClaims } = await auth();
   const user = await currentUser();
-  const isActive = Boolean(metaData?.plan !== "Free") || Boolean(metaData?.plan === "free");
+  const plan = (sessionClaims?.public_metadata as { plan?: string })?.plan;
+  const isActive = plan !== "free" && plan !== "Free";
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>
@@ -39,25 +36,21 @@ export async function PlanButton({ type }: PlanButtonProps) {
   const renderContent = () => {
     switch (type) {
       case "free":
-        return isActive
-          ? commonButton("You are on Pro Plan 🎉", true)
-          : commonButton("You are on Free Plan", true);
+        return commonButton(
+          `You are on ${isActive ? "Pro" : "Free"} Plan ${isActive ? "🎉" : ""}`,
+          true,
+        );
       case "pro":
         return isActive ? (
           commonButton("You are on Pro Plan 🎉", true)
         ) : (
-          <>
-            {/* <SignupButton plan={{ id: "321693", variantId: 468280 }} /> */}
-            <Link
-              href={`https://mosaicimg.gumroad.com/l/pro?email=${user?.emailAddresses[0].emailAddress
-                }&clerk_user_id=${userId}&wanted=true`}
-              className={cn(buttonVariants(), "w-full")}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Get Pro Plan {"-->"}
-            </Link>
-          </>
+          <Link
+            href={`https://mosaicimg.gumroad.com/l/pro?email=${user?.emailAddresses[0].emailAddress}&clerk_user_id=${userId}&wanted=true`}
+            className={cn(buttonVariants(), "w-full")}
+            target="_blank"
+          >
+            Get Pro Plan {"-->"}
+          </Link>
         );
       case "teams":
         return commonButton("Coming Soon", true);
