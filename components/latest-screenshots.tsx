@@ -18,6 +18,7 @@ import Link from "next/link";
 import React from "react";
 import FetchWebsitePagesData, { WebsitePageData } from "./server/fetch-website-pages-data";
 import { Button } from "@/components/ui/button";
+import { LocalTime } from "./local-time";
 
 interface LatestScreenshotsProps {
   websitePagesData?: WebsitePageData[];
@@ -33,26 +34,6 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
 
   const response = await FetchWebsitePagesData({ slug: slug, page: page ? page : 1, limit: limit ? limit : 10 });
   const websitePagesData = response.data;
-
-  const formatUTCDateToLocalWithAMPM = (utcDateString: string) => {
-    // Parse the UTC date string into a Date object
-    utcDateString = utcDateString + "Z";
-    const utcDate = new Date(utcDateString);
-
-    // Extract the local time components with AM/PM notation
-    const options = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      hour12: true, // This will include the AM/PM notation
-    } as const;
-
-    // Format the date according to the local time zone with AM/PM
-    return utcDate.toLocaleString("en-US", options);
-  };
 
   return (
     <Card>
@@ -104,7 +85,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                     {formatBytes(websitePage.size_in_bytes)}
                   </TableCell>
                   <TableCell>
-                    {formatUTCDateToLocalWithAMPM(websitePage.updated_at)}
+                    {<LocalTime timeString={websitePage.updated_at} />}
                   </TableCell>
                 </TableRow>
               ))}
