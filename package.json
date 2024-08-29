@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^5.3.6",
+    "@clerk/types": "^4.16.0",
     "@mynaui/icons-react": "^0.2.5",
     "@radix-ui/react-alert-dialog": "^1.1.1",
     "@radix-ui/react-collapsible": "^1.1.0",
