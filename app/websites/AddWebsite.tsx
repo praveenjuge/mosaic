@@ -19,7 +19,7 @@ interface MetaData {
 export async function AddWebsite() {
   const metaData = auth()?.sessionClaims?.public_metadata as MetaData;
   const preventSubmission =
-    (metaData?.websites_used ?? 0) > (metaData?.websites_limit ?? Infinity);
+    (metaData?.websites_used ?? 0) >= (metaData?.websites_limit ?? Infinity);
 
   return (
     <>
