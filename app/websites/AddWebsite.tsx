@@ -26,7 +26,7 @@ export async function AddWebsite() {
       <ClerkLoading>
         <Button size="sm" disabled>
           <Plus className="mr-1 size-4" stroke={2} />
-          Add Websites
+          Add Website
         </Button>
       </ClerkLoading>
       <ClerkLoaded>
