@@ -38,8 +38,6 @@ export default function Page() {
       </div>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <WebsitesSignedOut />
-      </Suspense>
-      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <WebsitesTable />
       </Suspense>
     </>

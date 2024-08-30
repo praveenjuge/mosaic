@@ -6,13 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatBytes, parseBytes } from "@/lib/utils";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import AnalyticsQuickStats from "./AnalyticsQuickStats";
 import { MosaicAreaChart } from "./areaChart";
 import { MosaicBarChart } from "./barChart";
 
@@ -37,9 +36,8 @@ async function fetchAnalyticsData(token: string) {
 export default async function AnalyticsSignedIn() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
-  const userData = await auth();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaData: any = await userData?.sessionClaims?.public_metadata;
+  const userData = auth();
+
   try {
     const token = await userData.getToken({ template: "supabase" });
     if (token) {
@@ -53,40 +51,7 @@ export default async function AnalyticsSignedIn() {
 
   return (
     <SignedIn>
-      <div className="grid w-full gap-6 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {metaData.images_used || data.total_count} out of{" "}
-              {metaData.images_limit || 500}
-            </CardTitle>
-            <CardDescription>Images Generated</CardDescription>
-            <Progress
-              className="h-2"
-              value={
-                ((metaData.images_used || data.total_count) * 100) /
-                (metaData.images_limit || 500)
-              }
-            />
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {metaData.storage_used || formatBytes(data.total_bytes)}/
-              {metaData.storage_limit || "50 MB"}
-            </CardTitle>
-            <CardDescription>Storage Used</CardDescription>
-            <Progress
-              className="h-2"
-              value={
-                (data.total_bytes * 100) /
-                (parseBytes(metaData.storage_limit) || 1048576 * 50)
-              }
-            />
-          </CardHeader>
-        </Card>
-      </div>
+      <AnalyticsQuickStats />
 
       <div className="grid w-full gap-6 sm:grid-cols-2">
         <Card>
