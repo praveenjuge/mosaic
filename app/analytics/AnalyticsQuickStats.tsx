@@ -5,12 +5,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { UserMetaData } from "@/lib/types";
 import { parseBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function AnalyticsQuickStats() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const metaData: any = await auth()?.sessionClaims?.public_metadata;
+  const metaData = (await auth()?.sessionClaims
+    ?.public_metadata) as UserMetaData;
 
   return (
     <div className="grid w-full gap-6 sm:grid-cols-2">

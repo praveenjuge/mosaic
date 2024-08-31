@@ -4,15 +4,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { UserMetaData } from "@/lib/types";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function HomeQuickStats() {
-  const userData = await auth();
-  const metaData = (await userData?.sessionClaims?.public_metadata) as {
-    plan?: string;
-    images_used?: number;
-    storage_used?: string;
-  };
+  const metaData = (await auth()?.sessionClaims
+    ?.public_metadata) as UserMetaData;
 
   const formatPlan = (plan: string | undefined) => {
     if (!plan) return "Free Plan";
