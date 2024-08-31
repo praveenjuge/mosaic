@@ -24,19 +24,19 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Add Your First Website",
     description: "Go to websites page and click Add Website to get started.",
     href: "/websites",
-    isCompleted: (userData) => userData.websites_used > 0
+    isCompleted: (userData) => !!userData.websites_used && userData.websites_used > 0
   },
   {
     title: "Generate Your First OG Image",
     description: "After you add a website, add the given URL to your website to generate your first OG image.",
     href: "/websites",
-    isCompleted: (userData) => userData.images_used > 0
+    isCompleted: (userData) => !!userData.images_used && userData.images_used > 0
   },
   {
     title: "Upgrade to Pro",
     description: "Get unlimited websites and premium features to easily generate OG images for your websites.",
     href: "/subscription",
-    isCompleted: (userData) => userData.plan.toLowerCase() !== 'free'
+    isCompleted: (userData) => !!userData.plan && userData.plan.toLowerCase() !== 'free'
   }
 ]
 
@@ -58,7 +58,8 @@ export function OnboardingCard() {
   }
 
   const userData = (user?.publicMetadata as unknown as UserMetaData) || {};
-  const completedSteps = onboardingSteps.filter(step => step.isCompleted(userData)).length
+  const isUserDataEmpty = Object.keys(userData).length === 0;
+  const completedSteps = isUserDataEmpty ? 0 : onboardingSteps.filter(step => step.isCompleted(userData)).length;
 
   const handleClose = () => {
     setIsVisible(false)
@@ -76,7 +77,7 @@ export function OnboardingCard() {
     localStorage.setItem('onboardingCardMinimized', 'false')
   }
 
-  if (!isVisible || completedSteps === TOTAL_STEPS) {
+  if (!isVisible || (!isUserDataEmpty && completedSteps === TOTAL_STEPS)) {
     return null
   }
 
