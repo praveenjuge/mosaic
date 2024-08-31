@@ -1,4 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
+import { UserMetaData } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
   ClerkLoaded,
@@ -15,10 +16,10 @@ export interface PlanButtonProps {
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
-  const { userId, sessionClaims } = await auth();
+  const { userId, sessionClaims } = auth();
   const user = await currentUser();
-  const plan = (sessionClaims?.public_metadata as { plan?: string })?.plan;
-  const isActive = plan !== "free" && plan !== "Free";
+  const plan = (sessionClaims?.public_metadata as UserMetaData)?.plan;
+  const isActive = plan?.toLowerCase() === "pro";
 
   const commonButton = (text: string, disabled = false) => (
     <Button variant="outline" className="w-full" disabled={disabled}>
