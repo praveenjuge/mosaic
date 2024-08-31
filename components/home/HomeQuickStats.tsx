@@ -22,13 +22,13 @@ export default async function HomeQuickStats() {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardTitle>{metaData.images_used || "0"}</CardTitle>
+          <CardTitle>{metaData.images_used ?? "0"}</CardTitle>
           <CardDescription>Images Generated</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{metaData?.storage_used ?? "0 MB"}</CardTitle>
+          <CardTitle>{metaData.storage_used ?? "0 MB"}</CardTitle>
           <CardDescription>Storage Used</CardDescription>
         </CardHeader>
       </Card>
