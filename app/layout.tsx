@@ -1,5 +1,6 @@
 import "@/app/globals.css";
 import Aside from "@/components/aside";
+import { OnboardingCard } from "@/components/onboarding-card";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
@@ -12,6 +13,7 @@ import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 
 export const experimental_ppr = true;
 
@@ -66,6 +68,9 @@ export default function RootLayout({
               className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto px-4 py-20 md:px-10 md:py-6"
             >
               {children}
+              <Suspense>
+                <OnboardingCard />
+              </Suspense>
             </main>
             <Toaster richColors />
           </ThemeProvider>
