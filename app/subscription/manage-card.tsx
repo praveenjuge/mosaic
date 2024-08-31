@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { UserMetaData } from "@/lib/types";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { ExternalLink } from "@mynaui/icons-react";
@@ -13,10 +14,8 @@ import { Suspense } from "react";
 
 export async function ManageCard() {
   const subscriptionId = (
-    auth()?.sessionClaims?.public_metadata as {
-      gumroad_id?: string;
-    }
-  )?.gumroad_id as string | undefined;
+    auth()?.sessionClaims?.public_metadata as UserMetaData
+  )?.gumroad_id;
 
   const ManageButton = ({ disabled = false }) => (
     <Button variant={disabled ? "outline" : "default"} disabled={disabled}>

@@ -23,8 +23,6 @@ export default function Page() {
       </CardHeader>
       <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <AnalyticsSignedOut />
-      </Suspense>
-      <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
         <AnalyticsSignedIn />
       </Suspense>
     </>

@@ -1,4 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
+import { UserMetaData } from "@/lib/types";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -11,13 +12,8 @@ import { Plus } from "@mynaui/icons-react";
 import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
-interface MetaData {
-  websites_used?: number;
-  websites_limit?: number;
-}
-
 export async function AddWebsite() {
-  const metaData = auth()?.sessionClaims?.public_metadata as MetaData;
+  const metaData = auth()?.sessionClaims?.public_metadata as UserMetaData;
   const preventSubmission =
     (metaData?.websites_used ?? 0) >= (metaData?.websites_limit ?? Infinity);
 
@@ -26,7 +22,7 @@ export async function AddWebsite() {
       <ClerkLoading>
         <Button size="sm" disabled>
           <Plus className="mr-1 size-4" stroke={2} />
-          Add Websites
+          Add Website
         </Button>
       </ClerkLoading>
       <ClerkLoaded>
