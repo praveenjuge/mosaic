@@ -53,13 +53,13 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                 <TableRow key={websitePage.id}>
                   <TableCell className="py-0">
                     <Link
-                      href={`https://ddvbpf2rl5x5r.cloudfront.net/${websitePage.image_key}`}
+                      href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={`https://dgcnyjbu13hj1.cloudfront.net/resized/75x40/${websitePage.image_key}`}
+                        src={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/resized/75x40/${websitePage.image_key}`}
                         alt={websitePage.title}
                         className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center"
                         width={56}
@@ -70,7 +70,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`https://ddvbpf2rl5x5r.cloudfront.net/${websitePage.image_key}`}
+                        href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
                         className="max-w-xs truncate font-medium text-primary"
                         target="_blank"
                         rel="noopener noreferrer"
