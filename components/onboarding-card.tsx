@@ -1,14 +1,13 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, ChevronDown, ChevronUp, Check } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { SignedIn, useUser } from '@clerk/nextjs'
 import { UserMetaData } from '@/lib/types'
-import { Sparkles } from '@mynaui/icons-react'
+import { Check, ChevronDown, ChevronUp, Sparkles, X } from '@mynaui/icons-react'
 
 const TOTAL_STEPS = 3
 
