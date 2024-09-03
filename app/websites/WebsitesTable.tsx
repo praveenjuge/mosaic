@@ -19,7 +19,7 @@ import { Globe } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
-import { CopyButton } from "./copy-button";
+import { CopyButton } from "@/components/copy-button";
 
 // Define a type for the website object
 type Website = {
