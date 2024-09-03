@@ -70,7 +70,7 @@ export default function Page({ params }: { params: { slug: string } }) {
         <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
           <div
             dangerouslySetInnerHTML={{
-              __html: markdownToHtml(help.content),
+              __html: help.content,
             }}
           ></div>
         </CardContent>

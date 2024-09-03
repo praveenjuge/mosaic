@@ -12,6 +12,8 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
+import { WebsiteInfoModal } from "../WebsiteInfoModal";
+import { SmileGhost } from "@mynaui/icons-react";
 
 export async function generateMetadata({
   params,
@@ -83,7 +85,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
     return <Skeleton className="h-24 w-full rounded-lg" />
   }
 
-
   return (
     <>
       <CardHeader className="p-0">
@@ -92,6 +93,18 @@ export default async function Page({ params }: { params: { slug: string } }) {
         </CardDescription>
         <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
       </CardHeader>
+
+      {websiteData?.total_count === 0 && (
+        <div className="flex flex-col items-start gap-4 rounded-lg border-[0.5px] border-emerald-300 bg-emerald-50 p-3 font-medium dark:border-emerald-950 dark:bg-emerald-950 md:flex-row md:items-center md:justify-between" role="alert">
+          <div className="flex items-center gap-3">
+            <SmileGhost className="size-6 shrink-0 text-primary" />
+            <p>
+              It looks like you haven&apos;t added Mosaic to your website yet. Let&apos;s get you set up!
+            </p>
+          </div>
+          <WebsiteInfoModal websiteUrl={websiteData?.cleaned_website_url} />
+        </div>
+      )}
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
