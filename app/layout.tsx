@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import CounterscaleScript from "@/components/counterscale-script";
 import Aside from "@/components/aside";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -74,6 +75,7 @@ export default function RootLayout({
             </main>
             <Toaster richColors />
           </ThemeProvider>
+          <CounterscaleScript />
         </body>
       </html>
     </ClerkProvider>
