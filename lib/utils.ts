@@ -10,6 +10,7 @@ export function parseBytes(input: string): number | null {
   if (!input) return null;
   const units = {
     B: 1,
+    BYTES: 1,
     KB: 1024,
     MB: 1024 ** 2,
     GB: 1024 ** 3,
@@ -27,6 +28,8 @@ export function parseBytes(input: string): number | null {
 
   const value = parseFloat(match[1]);
   const unit = match[2].toUpperCase();
+
+  console.log(value, unit);
 
   if (!(unit in units)) throw new Error("Unknown unit");
 
