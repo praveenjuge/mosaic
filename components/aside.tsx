@@ -93,7 +93,7 @@ const AsideContent = ({
 }) => (
   <aside
     aria-label="Main navigation"
-    className="relative flex h-screen max-h-screen min-h-screen w-56 min-w-56 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]"
+    className="relative flex h-screen max-h-screen min-h-screen w-52 min-w-52 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]"
   >
     <div className="flex flex-col gap-6">
       <div className="flex h-[18px] items-center justify-between">
