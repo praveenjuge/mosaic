@@ -16,12 +16,6 @@ import {
 import Image from "next/image";
 import { Suspense } from "react";
 
-const features = [
-  "No Code Required",
-  "Fully Automated",
-  "No Credit Card Required",
-];
-
 const landingContent = [
   {
     title: "Automated OG Image Creation",
@@ -62,10 +56,10 @@ const FeaturePoint = ({ children }: { children: React.ReactNode }) => (
 export default function HomeSignedOut() {
   return (
     <>
-      <div className="mx-auto flex max-w-xl flex-col items-center gap-7 py-10 text-center">
+      <div className="mx-auto flex max-w-xl flex-col items-center gap-7 py-14 text-center">
         <Logo />
         <div className="space-y-3">
-          <h1 className="text-balance text-3xl font-semibold tracking-tighter">
+          <h1 className="text-balance text-4xl font-semibold tracking-tighter">
             {website_subtitle}
           </h1>
           <p className="text-balance text-base text-muted-foreground">
@@ -109,14 +103,6 @@ export default function HomeSignedOut() {
               </SignInButton>
             </ClerkLoaded>
           </Suspense>
-        </div>
-        <div className="flex flex-col items-center gap-4 text-muted-foreground md:flex-row">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <CheckHexagon />
-              <span>{feature}</span>
-            </div>
-          ))}
         </div>
       </div>
       <section className="mx-auto my-6 flex max-w-5xl flex-col gap-20">
