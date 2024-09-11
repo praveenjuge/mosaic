@@ -97,7 +97,7 @@ const AsideContent = ({
   >
     <div className="flex flex-col gap-6">
       <div className="flex h-[18px] items-center justify-between">
-        <Logo />
+        <Logo colorMode="mono" />
         <Suspense
           fallback={
             <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block"></div>
