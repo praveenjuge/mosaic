@@ -14,6 +14,8 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { WebsiteInfoModal } from "../WebsiteInfoModal";
 import { SmileGhost } from "@mynaui/icons-react";
+import { RefreshSiteButton } from "../refresh-site-button";
+import { toast } from "sonner";
 
 export async function generateMetadata({
   params,
@@ -59,12 +61,18 @@ interface WebsiteData {
   // Add other properties as needed
 }
 
+async function refreshPages() {
+  console.log("Refreshing pages...");
+  toast.success("Refreshed pages!");
+}
+
 export default async function Page({ params }: { params: { slug: string } }) {
   let websiteData: WebsiteData | null = null;
+  let token: string | null = null;
 
   try {
     const { getToken } = auth();
-    const token = await getToken({ template: "supabase" });
+    token = await getToken({ template: "supabase" });
     if (token) {
       try {
         websiteData = await fetchWebsiteData(token, params.slug);
@@ -91,7 +99,14 @@ export default async function Page({ params }: { params: { slug: string } }) {
         <CardDescription>
           <Link href="/websites">← Back</Link>
         </CardDescription>
-        <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
+
+        <div className="flex items-center justify-between">
+          <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
+          {websiteData?.total_count !== 0 && (
+            // Button to refresh all the pages
+            <RefreshSiteButton websiteId={params.slug} token={token} variant="outline"></RefreshSiteButton>
+          )}
+        </div>
       </CardHeader>
 
       {websiteData?.total_count === 0 && (

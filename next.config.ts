@@ -8,8 +8,8 @@ const bundleAnalyzer = withBundleAnalyzer({
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com;
-  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com;
+  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com;
   img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
@@ -80,13 +80,13 @@ const config = bundleAnalyzer(nextConfig);
 // Only use Sentry in production
 export default process.env.NODE_ENV === "production"
   ? withSentryConfig(config, {
-      // Sentry options
-      org: "mosaicimg",
-      project: "mosaic-frontend",
-      silent: !process.env.CI,
-      widenClientFileUpload: true,
-      hideSourceMaps: true,
-      disableLogger: true,
-      automaticVercelMonitors: false,
-    })
+    // Sentry options
+    org: "mosaicimg",
+    project: "mosaic-frontend",
+    silent: !process.env.CI,
+    widenClientFileUpload: true,
+    hideSourceMaps: true,
+    disableLogger: true,
+    automaticVercelMonitors: false,
+  })
   : config;
