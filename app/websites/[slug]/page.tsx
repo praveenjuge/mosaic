@@ -15,7 +15,6 @@ import { Suspense } from "react";
 import { WebsiteInfoModal } from "../WebsiteInfoModal";
 import { SmileGhost } from "@mynaui/icons-react";
 import { RefreshSiteButton } from "../refresh-site-button";
-import { toast } from "sonner";
 
 export async function generateMetadata({
   params,
