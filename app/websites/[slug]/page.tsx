@@ -61,11 +61,6 @@ interface WebsiteData {
   // Add other properties as needed
 }
 
-async function refreshPages() {
-  console.log("Refreshing pages...");
-  toast.success("Refreshed pages!");
-}
-
 export default async function Page({ params }: { params: { slug: string } }) {
   let websiteData: WebsiteData | null = null;
   let token: string | null = null;
