@@ -56,10 +56,10 @@ const FeaturePoint = ({ children }: { children: React.ReactNode }) => (
 export default function HomeSignedOut() {
   return (
     <>
-      <div className="mx-auto flex max-w-xl flex-col items-center gap-7 py-14 text-center">
+      <div className="mx-auto flex max-w-xl flex-col items-center gap-7 py-10 text-center">
         <Logo />
         <div className="space-y-3">
-          <h1 className="text-balance text-4xl font-semibold tracking-tighter">
+          <h1 className="text-balance text-3xl font-semibold tracking-tighter md:text-5xl">
             {website_subtitle}
           </h1>
           <p className="text-balance text-base text-muted-foreground">
