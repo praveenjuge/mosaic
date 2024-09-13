@@ -1,6 +1,6 @@
 import "@/app/globals.css";
-import CounterscaleScript from "@/components/counterscale-script";
 import Aside from "@/components/aside";
+import CounterscaleScript from "@/components/counterscale-script";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -69,7 +69,7 @@ export default function RootLayout({
               className="relative flex max-h-screen min-h-screen w-full flex-col gap-6 overflow-auto px-4 py-20 md:px-10 md:py-6"
             >
               {children}
-              <Suspense>
+              <Suspense fallback={<></>}>
                 <OnboardingCard />
               </Suspense>
             </main>
