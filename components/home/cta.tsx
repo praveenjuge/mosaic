@@ -5,8 +5,8 @@ import { Button } from "../ui/button";
 
 export default function CTA() {
   return (
-    <section className="py-14">
-      <div className="relative mx-auto flex h-96 max-w-5xl flex-col overflow-hidden rounded-lg border-[0.5px] border-black/20 bg-primary-foreground px-6 py-16 text-center">
+    <section className="py-10">
+      <div className="relative mx-auto flex h-96 max-w-5xl flex-col overflow-hidden rounded-lg border-[0.5px] bg-background px-2 py-16 text-center md:px-6">
         <Image
           src="/images/cta.png"
           alt="CTA"
