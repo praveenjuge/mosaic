@@ -7,4 +7,4 @@ export const website_name = "Mosaic";
 export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 
 export const website_description =
-  "Transform your website's Open Graph (OG) social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.";
+  "Transform your website's Open Graph social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.";

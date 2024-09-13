@@ -8,13 +8,13 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
+import { SmileGhost } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { WebsiteInfoModal } from "../WebsiteInfoModal";
-import { SmileGhost } from "@mynaui/icons-react";
 import { RefreshSiteButton } from "../refresh-site-button";
+import { WebsiteInfoModal } from "../WebsiteInfoModal";
 
 export async function generateMetadata({
   params,
@@ -72,7 +72,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
         websiteData = await fetchWebsiteData(token, params.slug);
       } catch (error) {
         console.error("Error:", error);
-        notFound()
+        notFound();
       }
     } else {
       console.log("No token available");
@@ -80,35 +80,40 @@ export default async function Page({ params }: { params: { slug: string } }) {
     }
   } catch (error) {
     console.error("Error:", error);
-    return <Skeleton className="h-24 w-full rounded-lg" />
+    return <Skeleton className="h-24 w-full rounded-lg" />;
   }
 
   if (!websiteData) {
-    return <Skeleton className="h-24 w-full rounded-lg" />
+    return <Skeleton className="h-24 w-full rounded-lg" />;
   }
 
   return (
     <>
-      <CardHeader className="p-0">
-        <CardDescription>
-          <Link href="/websites">← Back</Link>
-        </CardDescription>
-
-        <div className="flex items-center justify-between">
+      <CardHeader className="flex flex-row items-center justify-between p-0">
+        <div className="space-y-1">
+          <CardDescription>
+            <Link href="/websites">← Back</Link>
+          </CardDescription>
           <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
-          {websiteData?.total_count !== 0 && (
-            // Button to refresh all the pages
-            <RefreshSiteButton websiteId={params.slug} token={token} variant="outline"></RefreshSiteButton>
-          )}
         </div>
+        {websiteData?.total_count !== 0 ? (
+          <RefreshSiteButton token={token} websiteId={params.slug} />
+        ) : (
+          // Intentional empty span
+          <span></span>
+        )}
       </CardHeader>
 
       {websiteData?.total_count === 0 && (
-        <div className="flex flex-col items-start gap-4 rounded-lg border-[0.5px] border-emerald-300 bg-emerald-50 p-3 font-medium dark:border-emerald-950 dark:bg-emerald-950 md:flex-row md:items-center md:justify-between" role="alert">
+        <div
+          className="flex flex-col items-start gap-4 rounded-lg border-[0.5px] border-emerald-300 bg-emerald-50 p-3 font-medium dark:border-emerald-950 dark:bg-emerald-950 md:flex-row md:items-center md:justify-between"
+          role="alert"
+        >
           <div className="flex items-center gap-3">
             <SmileGhost className="size-6 shrink-0 text-primary" />
             <p>
-              It looks like you haven&apos;t added Mosaic to your website yet. Let&apos;s get you set up!
+              It looks like you haven&apos;t added Mosaic to your website yet.
+              Let&apos;s get you set up!
             </p>
           </div>
           <WebsiteInfoModal websiteUrl={websiteData?.cleaned_website_url} />
