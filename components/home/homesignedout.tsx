@@ -12,9 +12,11 @@ import {
   ArrowLongDown,
   ArrowLongRight,
   CheckHexagon,
+  FatCornerRightDown,
 } from "@mynaui/icons-react";
 import Image from "next/image";
 import { Suspense } from "react";
+import { Input } from "../ui/input";
 
 const landingContent = [
   {
@@ -47,7 +49,7 @@ const landingContent = [
 ];
 
 const FeaturePoint = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2 text-base">
     <CheckHexagon className="size-5 shrink-0 stroke-2 text-primary" />
     <span>{children}</span>
   </div>
@@ -56,10 +58,10 @@ const FeaturePoint = ({ children }: { children: React.ReactNode }) => (
 export default function HomeSignedOut() {
   return (
     <>
-      <div className="mx-auto flex max-w-xl flex-col items-center gap-7 py-10 text-center">
+      <section className="mx-auto flex max-w-xl flex-col items-center gap-6 py-6 text-center">
         <Logo />
         <div className="space-y-3">
-          <h1 className="text-balance text-3xl font-semibold tracking-tighter md:text-5xl">
+          <h1 className="text-balance text-4xl font-semibold tracking-tighter md:text-5xl">
             {website_subtitle}
           </h1>
           <p className="text-balance text-base text-muted-foreground">
@@ -104,54 +106,72 @@ export default function HomeSignedOut() {
             </ClerkLoaded>
           </Suspense>
         </div>
-      </div>
-      <section className="mx-auto my-6 flex max-w-5xl flex-col gap-20">
-        <div className="flex flex-col gap-10 text-xs md:flex-row">
-          <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <Image
-              src={`/images/original-example-og.jpg`}
-              alt={`Original Open Graph Image`}
-              className="h-60 w-full bg-emerald-50 object-cover"
-              width={600}
-              height={250}
-            />
-            <div className="flex flex-col gap-1 bg-primary-foreground p-4">
-              <p className="font-semibold">
-                To Use or Not to Use Auto Layout in Figma
-              </p>
-              <p>
-                The debate on whether or not to use Auto Layout in Figma is a
-                hot topic that frequently surfaces on Twitter. Based on my
-                experience with this…
-              </p>
-              <p className="text-muted-foreground">praveenjuge.com</p>
+      </section>
+      <section className="relative -mt-10 border-b-[0.5px] py-16 md:-mx-10">
+        <Image
+          src="/images/homebg.png"
+          alt="CTA"
+          width={1000}
+          height={1000}
+          className="pointer-events-none absolute left-0 top-0 -z-10 hidden size-full select-none object-cover object-top dark:hidden md:block"
+        />
+        <div className="relative mx-auto max-w-4xl sm:px-4">
+          <form className="mb-6 hidden gap-4">
+            <Input placeholder="https://praveenjuge.com" />
+            <Button variant="outline">
+              Live Demo of your New OG Image
+              <FatCornerRightDown className="ml-2" />
+            </Button>
+          </form>
+          <div className="flex flex-col gap-4 text-xs md:flex-row">
+            <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+              <Image
+                src="/images/original-example-og.jpg"
+                alt="Original Open Graph Image"
+                className="h-52 w-full object-cover"
+                width={600}
+                height={250}
+              />
+              <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
+                <p className="font-semibold">
+                  To Use or Not to Use Auto Layout in Figma
+                </p>
+                <p className="line-clamp-2">
+                  The debate on whether or not to use Auto Layout in Figma is a
+                  hot topic that frequently surfaces on Twitter. Based on my
+                  experience with this…
+                </p>
+                <p className="text-muted-foreground">praveenjuge.com</p>
+              </div>
             </div>
-          </div>
-          <div className="grid shrink-0 place-items-center text-muted-foreground">
-            <ArrowLongRight className="hidden size-7 md:block" />
-            <ArrowLongDown className="size-7 md:hidden" />
-          </div>
-          <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <Image
-              src={`/images/mosaic-example-og.jpg`}
-              alt={`Mosaic Open Graph Image`}
-              className="h-60 w-full bg-emerald-50 object-cover"
-              width={600}
-              height={250}
-            />
-            <div className="flex flex-col gap-1 bg-primary-foreground p-4">
-              <p className="font-semibold">
-                To Use or Not to Use Auto Layout in Figma
-              </p>
-              <p>
-                The debate on whether or not to use Auto Layout in Figma is a
-                hot topic that frequently surfaces on Twitter. Based on my
-                experience with this…
-              </p>
-              <p className="text-muted-foreground">praveenjuge.com</p>
+            <span className="pointer-events-none grid shrink-0 select-none place-items-center text-muted-foreground">
+              <ArrowLongRight className="hidden size-7 md:block" />
+              <ArrowLongDown className="size-7 md:hidden" />
+            </span>
+            <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+              <Image
+                src="/images/mosaic-example-og.png"
+                alt="Mosaic Open Graph Image"
+                className="h-52 w-full object-cover"
+                width={600}
+                height={250}
+              />
+              <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
+                <p className="font-semibold">
+                  To Use or Not to Use Auto Layout in Figma
+                </p>
+                <p className="line-clamp-2">
+                  The debate on whether or not to use Auto Layout in Figma is a
+                  hot topic that frequently surfaces on Twitter. Based on my
+                  experience with this…
+                </p>
+                <p className="text-muted-foreground">praveenjuge.com</p>
+              </div>
             </div>
           </div>
         </div>
+      </section>
+      <section className="mx-auto my-14 flex max-w-5xl flex-col gap-24">
         {landingContent.map((content, index) => (
           <div
             key={index}
@@ -159,7 +179,7 @@ export default function HomeSignedOut() {
           >
             {index % 2 === 0 ? (
               <>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-6">
                   <h2 className="text-xl font-semibold">{content.title}</h2>
                   <div className="flex flex-col gap-4">
                     {content.points.map((point, pointIndex) => (
@@ -184,7 +204,7 @@ export default function HomeSignedOut() {
                   width={500}
                   height={327}
                 />
-                <div className="order-first flex flex-col gap-4 md:order-none">
+                <div className="order-first flex flex-col gap-6 md:order-none">
                   <h2 className="text-xl font-semibold">{content.title}</h2>
                   <div className="flex flex-col gap-4">
                     {content.points.map((point, pointIndex) => (
