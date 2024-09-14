@@ -9,8 +9,8 @@ const bundleAnalyzer = withBundleAnalyzer({
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com;
-  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com;
-  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com *;
+  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co;
+  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://api.dub.co *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline';
@@ -26,6 +26,18 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
     ppr: "incremental",
     optimizePackageImports: ["@mynaui/icons-react"],
+  },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'assets.dub.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mosaicimg.com',
+      },
+    ],
   },
   async redirects() {
     return [
