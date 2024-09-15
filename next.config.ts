@@ -8,9 +8,9 @@ const bundleAnalyzer = withBundleAnalyzer({
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com;
-  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co;
-  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://api.dub.co *;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
+  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
+  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline';
@@ -44,6 +44,11 @@ const nextConfig: NextConfig = {
       {
         source: "/use",
         destination: "https://get.mosaicimg.com/image/get_image",
+        permanent: false,
+      },
+      {
+        source: "/demo",
+        destination: "https://get.mosaicimg.com/image/get_test_image",
         permanent: false,
       },
     ];

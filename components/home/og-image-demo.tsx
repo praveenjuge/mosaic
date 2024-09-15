@@ -46,7 +46,7 @@ export default function OGImageDemo() {
   }, [inputUrl]);
 
   const mosaicImageUrl = displayUrl
-    ? `https://mosaicimg.com/use?url=${encodeURIComponent(displayUrl)}`
+    ? `https://mosaicimg.com/demo?url=${encodeURIComponent(displayUrl)}`
     : "/images/mosaic-example-og.png";
 
   return (
