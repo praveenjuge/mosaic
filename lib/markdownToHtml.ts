@@ -51,6 +51,7 @@ const highlighter = await createHighlighterCore({
     import("shiki/langs/docker.mjs"),
     import("shiki/langs/bash.mjs"),
     import("shiki/langs/python.mjs"),
+    import("shiki/langs/yaml.mjs"),
   ],
   loadWasm: import("shiki/wasm"),
 });
