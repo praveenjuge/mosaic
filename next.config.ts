@@ -27,18 +27,6 @@ const nextConfig: NextConfig = {
     ppr: "incremental",
     optimizePackageImports: ["@mynaui/icons-react"],
   },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'assets.dub.co',
-      },
-      {
-        protocol: 'https',
-        hostname: 'mosaicimg.com',
-      },
-    ],
-  },
   async redirects() {
     return [
       {
