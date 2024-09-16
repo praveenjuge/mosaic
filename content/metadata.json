@@ -1,6 +1,6 @@
 {
-  "commit": "7438f3b86a2fe1adecea963273ae1879daa9609c",
-  "generated": "2024-08-18T09:20:47.154Z",
+  "commit": "e9e313cdae7b0ddce06bd137bb2e74eb44b470e8",
+  "generated": "2024-09-16T16:53:07.313Z",
   "metadata": [
     {
       "__outstatic": {
@@ -258,6 +258,25 @@
       "slug": "log-in-to-your-account",
       "status": "published",
       "title": "Log In to Your Account"
+    },
+    {
+      "__outstatic": {
+        "commit": "e9e313cdae7b0ddce06bd137bb2e74eb44b470e8",
+        "hash": "954486328",
+        "path": "content/help/add-mosaic-to-bear-blog.md"
+      },
+      "author": {
+        "name": "Praveen Juge",
+        "picture": "https://avatars.githubusercontent.com/u/13696888?v=4"
+      },
+      "category": "Guides",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-09-16T17:21:41.891Z",
+      "slug": "add-mosaic-to-bear-blog",
+      "status": "published",
+      "title": "Add Mosaic to Bear Blog"
     }
   ]
 }
