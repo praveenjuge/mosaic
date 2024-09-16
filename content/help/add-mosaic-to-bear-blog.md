@@ -42,7 +42,7 @@ Bear Blog is different from many modern blog platforms because it’s a fully ho
    ```yaml
    title: How to integrate Mosaic in BearBlog.dev
    link: how-to-integrate-mosaic-in-bearblogdev
-   meta_image: <https://mosaicimg.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev>
+   meta_image: https://mosaicimg.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev
    ```
 
    - The `meta_image` field should contain the Mosaic image URL with the **link** parameter appended to it.
@@ -60,7 +60,7 @@ If you want to make this process even easier, you can update your Bear Blog’s 
 
 ```yaml
 title:
-meta_image: <https://mosaicimg.com/use?url=https://yourblog.bearblog.dev>
+meta_image: https://mosaicimg.com/use?url=https://yourblog.bearblog.dev
 ___
 ```
 
