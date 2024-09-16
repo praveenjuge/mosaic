@@ -37,8 +37,8 @@ const navItems = [
 
 const secondaryNavItems = [
   { href: "/changelog", icon: ListCheck, label: "Changelog" },
-  { href: "/blog", icon: FileText, label: "Blog & Guides" },
-  { href: "/help", icon: Support, label: "Help & Support" },
+  { href: "/blog", icon: FileText, label: "Blog" },
+  { href: "/help", icon: Support, label: "Help & Guides" },
   { href: "/legal", icon: Copyright, label: "Privacy & Terms" },
 ];
 
