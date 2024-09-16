@@ -8,15 +8,10 @@ import {
   SignInButton,
   SignUpButton,
 } from "@clerk/nextjs";
-import {
-  ArrowLongDown,
-  ArrowLongRight,
-  CheckHexagon,
-  FatCornerRightDown,
-} from "@mynaui/icons-react";
+import { ArrowLongRight, CheckHexagon } from "@mynaui/icons-react";
 import Image from "next/image";
 import { Suspense } from "react";
-import { Input } from "../ui/input";
+import OGImageDemo from "./og-image-demo";
 
 const landingContent = [
   {
@@ -107,70 +102,7 @@ export default function HomeSignedOut() {
           </Suspense>
         </div>
       </section>
-      <section className="relative -mt-10 border-b-[0.5px] py-16 md:-mx-10">
-        <Image
-          src="/images/homebg.png"
-          alt="CTA"
-          width={1000}
-          height={1000}
-          className="pointer-events-none absolute left-0 top-0 -z-10 hidden size-full select-none object-cover object-top dark:hidden md:block"
-        />
-        <div className="relative mx-auto max-w-4xl sm:px-4">
-          <form className="mb-6 hidden gap-4">
-            <Input placeholder="https://praveenjuge.com" />
-            <Button variant="outline">
-              Live Demo of your New OG Image
-              <FatCornerRightDown className="ml-2" />
-            </Button>
-          </form>
-          <div className="flex flex-col gap-4 text-xs md:flex-row">
-            <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-              <Image
-                src="/images/original-example-og.jpg"
-                alt="Original Open Graph Image"
-                className="h-52 w-full object-cover"
-                width={600}
-                height={250}
-              />
-              <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-                <p className="font-semibold">
-                  To Use or Not to Use Auto Layout in Figma
-                </p>
-                <p className="line-clamp-2">
-                  The debate on whether or not to use Auto Layout in Figma is a
-                  hot topic that frequently surfaces on Twitter. Based on my
-                  experience with this…
-                </p>
-                <p className="text-muted-foreground">praveenjuge.com</p>
-              </div>
-            </div>
-            <span className="pointer-events-none grid shrink-0 select-none place-items-center text-muted-foreground">
-              <ArrowLongRight className="hidden size-7 md:block" />
-              <ArrowLongDown className="size-7 md:hidden" />
-            </span>
-            <div className="flex flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-              <Image
-                src="/images/mosaic-example-og.png"
-                alt="Mosaic Open Graph Image"
-                className="h-52 w-full object-cover"
-                width={600}
-                height={250}
-              />
-              <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-                <p className="font-semibold">
-                  To Use or Not to Use Auto Layout in Figma
-                </p>
-                <p className="line-clamp-2">
-                  The debate on whether or not to use Auto Layout in Figma is a
-                  hot topic that frequently surfaces on Twitter. Based on my
-                  experience with this…
-                </p>
-                <p className="text-muted-foreground">praveenjuge.com</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <OGImageDemo />
       <section className="mx-auto my-14 flex max-w-5xl flex-col gap-24">
         {landingContent.map((content, index) => (
           <div
