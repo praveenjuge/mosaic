@@ -4,9 +4,9 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowDown, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowDown, ArrowRight, FatCornerRightDown } from "@mynaui/icons-react";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 interface OGData {
   title: string;
@@ -14,12 +14,78 @@ interface OGData {
   image: string;
 }
 
+const ImageContainer = ({
+  isLoading,
+  src,
+  alt,
+}: {
+  isLoading: boolean;
+  src: string | null;
+  alt: string;
+}) => (
+  <div className="relative h-52 w-full">
+    {isLoading ? (
+      <Skeleton className="size-full" />
+    ) : src ? (
+      <>
+        <Skeleton className="absolute inset-0 size-full rounded-none" />
+        <img
+          src={src}
+          alt={alt}
+          width={600}
+          height={250}
+          className="relative size-full object-cover"
+        />
+      </>
+    ) : (
+      <div className="flex size-full items-center justify-center bg-primary-foreground">
+        <p>No image available</p>
+      </div>
+    )}
+  </div>
+);
+
+const ContentContainer = ({
+  isLoading,
+  title,
+  description,
+  url,
+}: {
+  isLoading: boolean;
+  title: string;
+  description: string;
+  url: string;
+}) => (
+  <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
+    {isLoading ? (
+      <>
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-4 w-1/2" />
+      </>
+    ) : (
+      <>
+        <p className="line-clamp-1 font-semibold">{title}</p>
+        <p className="line-clamp-2">{description}</p>
+        <p className="text-muted-foreground">{url}</p>
+      </>
+    )}
+  </div>
+);
+
+const defaultData = {
+  title: "To Use or Not to Use Auto Layout in Figma",
+  description:
+    "The debate on whether or not to use Auto Layout in Figma is a hot topic that frequently surfaces on Twitter. Based on my experience with this…",
+  url: "praveenjuge.com",
+};
+
 export default function OGImageDemo() {
-  const [inputUrl, setInputUrl] = useState<string>("");
-  const [displayUrl, setDisplayUrl] = useState<string>("");
+  const [inputUrl, setInputUrl] = useState("");
+  const [submittedUrl, setSubmittedUrl] = useState("");
   const [ogData, setOgData] = useState<OGData | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const fetchOGData = useCallback(async () => {
     if (!inputUrl) {
@@ -32,31 +98,37 @@ export default function OGImageDemo() {
       const response = await fetch(
         `https://api.dub.co/metatags?url=${encodeURIComponent(inputUrl)}`,
       );
-      if (!response.ok) {
-        throw new Error("Failed to fetch OG data");
-      }
-      const data: OGData = await response.json();
-      setOgData(data);
-      setDisplayUrl(inputUrl);
+      if (!response.ok) throw new Error("Failed to fetch OG data");
+      setOgData(await response.json());
+      setSubmittedUrl(inputUrl);
     } catch (error) {
-      console.error("Error fetching OG data:", error);
-      setError("Failed to load OG data. Please check the URL and try again.");
+      console.log("Error fetching OG data:", error);
+      setError(
+        "Failed to load OG data. Please check if the URL is correct and try again!",
+      );
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [inputUrl]);
 
-  const mosaicImageUrl = displayUrl
-    ? `https://mosaicimg.com/demo?url=${encodeURIComponent(displayUrl)}`
-    : "/images/mosaic-example-og.png";
+  const mosaicImageUrl = useMemo(
+    () =>
+      submittedUrl
+        ? `https://get.mosaicimg.com/image/get_test_image?url=${encodeURIComponent(submittedUrl)}`
+        : "/images/mosaic-example-og.png",
+    [submittedUrl],
+  );
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    fetchOGData();
+  };
 
   return (
     <section
       className="relative -mt-10 border-b-[0.5px] py-16 md:-mx-10"
       aria-labelledby="og-image-demo-title"
     >
-      <h2 id="og-image-demo-title" className="sr-only">
-        OG Image Demo
-      </h2>
       <Image
         src="/images/homebg.png"
         alt=""
@@ -65,82 +137,43 @@ export default function OGImageDemo() {
         className="pointer-events-none absolute left-0 top-0 -z-10 hidden size-full select-none object-cover object-top dark:hidden md:block"
       />
       <div className="relative mx-auto max-w-4xl sm:px-4">
-        <div className="mb-6 flex gap-4">
-          <div className="grow">
-            <label htmlFor="url-input" className="sr-only">
-              Enter URL for OG image preview
-            </label>
-            <Input
-              id="url-input"
-              placeholder="Enter a URL (e.g., https://praveenjuge.com)"
-              value={inputUrl}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                setInputUrl(e.target.value)
-              }
-              aria-describedby="url-input-description"
-            />
-            <p
-              id="url-input-description"
-              className="mt-2 text-sm text-muted-foreground"
-            >
-              Enter a URL to see its Open Graph image preview
-            </p>
-          </div>
-          <Button onClick={fetchOGData} disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            ) : (
-              "Get OG Data"
-            )}
+        <form
+          onSubmit={handleSubmit}
+          className="mb-6 flex flex-col gap-4 md:flex-row"
+        >
+          <Input
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            placeholder="Enter your website URL"
+            aria-label="Enter URL for OG image preview"
+          />
+          <Button type="submit" variant="outline" disabled={isLoading}>
+            Get a Live Demo of your new OG Image
+            <FatCornerRightDown className="ml-2 size-4" />
           </Button>
-        </div>
+        </form>
         {error && (
-          <p className="mb-4 text-sm text-red-500" role="alert">
+          <p className="mb-6 text-center text-destructive" role="alert">
             {error}
           </p>
         )}
         <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
           <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <div className="relative h-52 w-full">
-              {isLoading ? (
-                <Skeleton className="size-full" />
-              ) : ogData?.image ? (
-                <img
-                  src={ogData?.image || "/images/original-example-og.jpg"}
-                  alt="Original Open Graph Image"
-                  className="size-full object-cover"
-                  width={600}
-                  height={250}
-                />
-              ) : (
-                <div className="flex size-full items-center justify-center bg-gray-100">
-                  <p>No image available</p>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-              {isLoading ? (
-                <>
-                  <Skeleton className="h-4 w-3/4" />
-                  <Skeleton className="h-8 w-full" />
-                  <Skeleton className="h-4 w-1/2" />
-                </>
-              ) : (
-                <>
-                  <p className="font-semibold">
-                    {ogData?.title ||
-                      "To Use or Not to Use Auto Layout in Figma"}
-                  </p>
-                  <p className="line-clamp-2">
-                    {ogData?.description ||
-                      "The debate on whether or not to use Auto Layout in Figma is a hot topic that frequently surfaces on Twitter. Based on my experience with this…"}
-                  </p>
-                  <p className="text-muted-foreground">
-                    {displayUrl || "praveenjuge.com"}
-                  </p>
-                </>
-              )}
-            </div>
+            <ImageContainer
+              isLoading={isLoading}
+              src={
+                ogData
+                  ? ogData.image || null
+                  : "/images/original-example-og.jpg"
+              }
+              alt="Original Open Graph Image"
+            />
+            <ContentContainer
+              isLoading={isLoading}
+              title={ogData?.title || defaultData.title}
+              description={ogData?.description || defaultData.description}
+              url={submittedUrl || defaultData.url}
+            />
           </div>
           <span
             className="pointer-events-none grid size-7 shrink-0 select-none place-items-center text-muted-foreground"
@@ -150,31 +183,17 @@ export default function OGImageDemo() {
             <ArrowDown className="size-7 md:hidden" />
           </span>
           <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <div className="relative h-52 w-full">
-              {isLoading ? (
-                <Skeleton className="size-full" />
-              ) : (
-                <img
-                  src={mosaicImageUrl}
-                  alt="Mosaic Open Graph Image"
-                  className="size-full object-cover"
-                  width={600}
-                  height={250}
-                />
-              )}
-            </div>
-            <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-              <p className="font-semibold">
-                {ogData?.title || "To Use or Not to Use Auto Layout in Figma"}
-              </p>
-              <p className="line-clamp-2">
-                {ogData?.description ||
-                  "The debate on whether or not to use Auto Layout in Figma is a hot topic that frequently surfaces on Twitter. Based on my experience with this…"}
-              </p>
-              <p className="text-muted-foreground">
-                {displayUrl || "praveenjuge.com"}
-              </p>
-            </div>
+            <ImageContainer
+              isLoading={isLoading}
+              src={mosaicImageUrl}
+              alt="Mosaic Open Graph Image"
+            />
+            <ContentContainer
+              isLoading={isLoading}
+              title={ogData?.title || defaultData.title}
+              description={ogData?.description || defaultData.description}
+              url={submittedUrl || defaultData.url}
+            />
           </div>
         </div>
       </div>

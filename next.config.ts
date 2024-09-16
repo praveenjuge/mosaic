@@ -45,12 +45,7 @@ const nextConfig: NextConfig = {
         source: "/use",
         destination: "https://get.mosaicimg.com/image/get_image",
         permanent: false,
-      },
-      {
-        source: "/demo",
-        destination: "https://get.mosaicimg.com/image/get_test_image",
-        permanent: false,
-      },
+      }
     ];
   },
   async headers() {
