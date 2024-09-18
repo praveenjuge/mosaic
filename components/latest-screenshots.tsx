@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,
@@ -16,9 +17,10 @@ import {
 import { formatBytes } from "@/lib/utils";
 import Link from "next/link";
 import React from "react";
-import FetchWebsitePagesData, { WebsitePageData } from "./server/fetch-website-pages-data";
-import { Button } from "@/components/ui/button";
 import { LocalTime } from "./local-time";
+import FetchWebsitePagesData, {
+  WebsitePageData,
+} from "./server/fetch-website-pages-data";
 
 interface LatestScreenshotsProps {
   websitePagesData?: WebsitePageData[];
@@ -29,10 +31,16 @@ interface LatestScreenshotsProps {
 }
 
 const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
-  slug, page, limit, showPagination
+  slug,
+  page,
+  limit,
+  showPagination,
 }) => {
-
-  const response = await FetchWebsitePagesData({ slug: slug, page: page ? page : 1, limit: limit ? limit : 10 });
+  const response = await FetchWebsitePagesData({
+    slug: slug,
+    page: page ? page : 1,
+    limit: limit ? limit : 10,
+  });
   const websitePagesData = response.data;
 
   return (
@@ -53,9 +61,9 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                 <TableRow key={websitePage.id}>
                   <TableCell className="py-0">
                     <Link
-                      href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
@@ -70,14 +78,14 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
-                        className="max-w-xs truncate font-medium text-primary"
                         target="_blank"
                         rel="noopener noreferrer"
+                        href={websitePage.page_url}
+                        className="max-w-xs truncate font-medium text-primary"
                       >
                         {websitePage.title
                           ? websitePage.title
-                          : websitePage.website_page_url}
+                          : websitePage.page_url}
                       </Link>
                     </div>
                   </TableCell>

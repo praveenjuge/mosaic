@@ -57,7 +57,6 @@ interface WebsiteData {
   cleaned_website_url: string;
   total_count: number;
   total_bytes: number;
-  // Add other properties as needed
 }
 
 export default async function Page({ params }: { params: { slug: string } }) {

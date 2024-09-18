@@ -26,8 +26,6 @@ async function fetchWebsitePagesData(
     url.searchParams.append("limit", "10");
   }
 
-  console.log(url.toString());
-
   const response = await fetch(url, {
     method: "GET",
     headers: {
@@ -49,15 +47,12 @@ export interface FetchWebsitePagesDataProps {
 }
 
 export interface WebsitePageData {
-  // Define the properties of WebsitePageData here
-  // For example:
   id: string;
   image_key: string;
   title: string;
-  website_page_url: string;
+  page_url: string;
   size_in_bytes: number;
   updated_at: string; // This is in UTC
-  // Add other relevant properties
 }
 
 interface WebsitePagesResponse {

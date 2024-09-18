@@ -1,3 +1,10 @@
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -7,15 +14,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
-import { Check, ChevronDown } from "@mynaui/icons-react";
+import { Check } from "@mynaui/icons-react";
 import { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 import { ManageCard } from "./manage-card";
 import { PlanButton } from "./plan-button";
@@ -31,47 +34,39 @@ export const metadata: Metadata = {
 const plans = [
   {
     title: "Free",
-    description: "For trying out",
+    description: "For Trying Out",
     price: "$0",
-    features: ["500 images", "1 website", "500 MB storage", "No support"],
+    features: ["500 Images", "1 Website", "No Support"],
     type: "free",
   },
   {
     title: "Pro",
-    description: "For individual use",
+    description: "For Individual Use",
     price: "$19",
-    features: [
-      "5000 images",
-      "Unlimited websites",
-      "2 GB storage",
-      "Email support",
-    ],
+    features: ["5000 Images", "Unlimited Websites", "Priority Email Support"],
     type: "pro",
   },
+  // {
+  //   title: "Teams",
+  //   description: "For small to medium teams",
+  //   price: "$99",
+  //   features: [
+  //     "Unlimited images",
+  //     "Unlimited websites",
+  //     "Priority email support",
+  //   ],
+  //   type: "teams",
+  // },
   {
-    title: "Teams",
-    description: "For small to medium teams",
-    price: "$99",
+    title: "Pro Plus",
+    description: "For Larger Websites",
+    price: "Custom",
     features: [
-      "Unlimited images",
-      "Unlimited websites",
-      "100 GB storage",
-      "Priority email support",
+      "Unlimited Images",
+      "Unlimited Websites",
+      "Dedicated Account Manager",
     ],
-    type: "teams",
-  },
-  {
-    title: "Enterprise",
-    description: "For large organizations",
-    price: "Contact us",
-    priceSubtext: "Custom pricing and features",
-    features: [
-      "Unlimited images",
-      "Unlimited websites",
-      "Unlimited storage",
-      "Dedicated account manager",
-    ],
-    type: "enterprise",
+    type: "pro-plus",
   },
 ];
 
@@ -145,21 +140,21 @@ export default function Page() {
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-4">
+      <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
         {plans.map((plan, index) => (
           <Card key={index}>
-            <CardHeader className="border-b-[0.5px]">
+            <CardHeader className="flex-row justify-between space-y-0 border-b-[0.5px]">
               <CardTitle>{plan.title}</CardTitle>
-              <CardDescription>{plan.description}</CardDescription>
+              <Badge variant="outline">{plan.description}</Badge>
             </CardHeader>
-            <CardContent className="flex flex-col items-center py-8">
-              <div className="mb-1 text-4xl font-bold tracking-tight">
-                {plan.price}
+            <CardContent className="flex flex-col py-6">
+              <div className="flex items-center gap-2">
+                <div className="text-4xl font-bold tracking-tight">
+                  {plan.price}
+                </div>
+                <div className="text-sm text-muted-foreground">per month</div>
               </div>
-              <div className="text-sm text-muted-foreground">
-                {plan.priceSubtext || "per month"}
-              </div>
-              <ul className="mt-8 grid w-full gap-2">
+              <ul className="mt-6 grid w-full gap-3">
                 {plan.features.map((feature, featureIndex) => (
                   <li key={featureIndex} className="flex items-center gap-2">
                     <Check className="size-5 text-primary" stroke={2} />
@@ -177,7 +172,7 @@ export default function Page() {
                 }
               >
                 <PlanButton
-                  type={plan.type as "free" | "pro" | "teams" | "enterprise"}
+                  type={plan.type as "free" | "pro" | "teams" | "pro-plus"}
                 />
               </Suspense>
             </CardFooter>
@@ -192,26 +187,32 @@ export default function Page() {
           <CardTitle>Frequently Asked Questions</CardTitle>
           <CardDescription>
             If you can&apos;t find the answer you&apos;re looking for, please
-            don&apos;t hesitate to reach out to our support team.
+            don&apos;t checkout our{" "}
+            <Link href="/help" className="underline">
+              help articles
+            </Link>
+            .
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-2">
-          {faqs.map((faq, index) => (
-            <Collapsible key={index}>
-              <CollapsibleTrigger asChild>
-                <div className="flex cursor-pointer items-center justify-between space-x-4 rounded border-[0.5px] pl-4">
-                  <h4 className="text-sm font-medium">{faq.question}</h4>
-                  <Button variant="ghost" size="icon">
-                    <ChevronDown className="size-4" />
-                    <span className="sr-only">Toggle</span>
-                  </Button>
-                </div>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="px-4 py-2 text-muted-foreground">
-                {faq.answer}
-              </CollapsibleContent>
-            </Collapsible>
-          ))}
+        <CardContent>
+          <Accordion
+            type="single"
+            collapsible
+            className="grid w-full gap-2 text-sm"
+          >
+            {faqs.map((faq, index) => (
+              <AccordionItem
+                key={index}
+                value={faq.question}
+                className="rounded border-[0.5px] px-4"
+              >
+                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                <AccordionContent className="text-muted-foreground">
+                  {faq.answer}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
         </CardContent>
       </Card>
     </>

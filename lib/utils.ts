@@ -29,8 +29,6 @@ export function parseBytes(input: string): number | null {
   const value = parseFloat(match[1]);
   const unit = match[2].toUpperCase();
 
-  console.log(value, unit);
-
   if (!(unit in units)) throw new Error("Unknown unit");
 
   return value * (units as Record<string, number>)[unit];
