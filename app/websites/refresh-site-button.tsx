@@ -3,7 +3,6 @@
 import { LoadingSpinner } from "@/components/spinner";
 import { Button } from "@/components/ui/button";
 import { backend_url } from "@/lib/constants";
-
 import React from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
@@ -11,16 +10,13 @@ import { toast } from "sonner";
 interface RefreshSiteButtonProps {
   token: string;
   websiteId: string;
-  text?: string;
 }
 
 export function RefreshSiteButton({
   token,
   websiteId,
-  text = "Refresh Site",
 }: RefreshSiteButtonProps) {
   const { pending } = useFormStatus();
-
   const [loading, setLoading] = React.useState(false);
 
   const handleRefresh = async () => {
@@ -48,18 +44,17 @@ export function RefreshSiteButton({
       }
     }
     setLoading(false);
-    console.log("Refreshed!");
   };
 
   return (
     <Button
-      variant="outline"
       size="sm"
+      variant="outline"
       disabled={pending || loading}
       aria-disabled={pending || loading}
       onClick={handleRefresh}
     >
-      {loading ? <LoadingSpinner /> : text}
+      {loading ? <LoadingSpinner /> : "Refresh Site"}
     </Button>
   );
 }

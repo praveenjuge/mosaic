@@ -12,7 +12,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import Link from "next/link";
 
 export interface PlanButtonProps {
-  type: "free" | "pro" | "teams" | "enterprise";
+  type: "free" | "pro" | "teams" | "pro-plus";
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
@@ -55,13 +55,13 @@ export async function PlanButton({ type }: PlanButtonProps) {
         );
       case "teams":
         return commonButton("Coming Soon", true);
-      case "enterprise":
+      case "pro-plus":
         return (
           <Link
             href="mailto:hello@praveenjuge.com"
             className={cn(buttonVariants({ variant: "outline" }), "w-full")}
           >
-            Contact Sales
+            Contact Us
           </Link>
         );
       default:
