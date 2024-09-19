@@ -13,7 +13,7 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { RefreshSiteButton } from "../refresh-site-button";
+import { RefreshSiteButton } from "./refresh-site-button";
 import { WebsiteInfoModal } from "../WebsiteInfoModal";
 
 export async function generateMetadata({
