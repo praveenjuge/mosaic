@@ -72,64 +72,98 @@ const plans = [
 
 const faqs = [
   {
-    question: "How do I upgrade my plan?",
-    answer: (
-      <>
-        <p>To upgrade your plan, follow these steps:</p>
-        <ol className="list-inside list-decimal">
-          <li>
-            Click on the &quot;Subscription&quot; tab in the left-hand
-            navigation menu.
-          </li>
-          <li>
-            Under &quot;Your Plan&quot;, click on the &quot;Upgrade&quot;
-            button.
-          </li>
-          <li>
-            Select the new plan you want to upgrade to and follow the prompts to
-            complete the upgrade process.
-          </li>
-        </ol>
-      </>
-    ),
+    question: "What is an OG Image?",
+    answer:
+      "An OG Image, or Open Graph Image, is a preview image that appears when you share a link to your website on social media platforms. It enhances your shared content by displaying a visual representation of your webpage.",
   },
   {
-    question: "How do I cancel my subscription?",
-    answer: (
-      <>
-        <p>To cancel your subscription, follow these steps:</p>
-        <ol className="list-inside list-decimal">
-          <li>
-            Click on the &quot;Subscription&quot; tab in the left-hand
-            navigation menu.
-          </li>
-          <li>
-            Under &quot;Your Plan&quot;, click on the &quot;Cancel
-            Subscription&quot; button.
-          </li>
-          <li>Follow the prompts to confirm the cancellation.</li>
-        </ol>
-      </>
-    ),
+    question: "What's included in each plan?",
+    answer:
+      "Free Plan: Get 500 images for 1 website with no support at $0 per month. Pro Plan: Enjoy 5,000 images for unlimited websites with priority email support at $19 per month. Pro Plus Plan: Receive unlimited images for unlimited websites with a dedicated account manager. Pricing is custom—please contact us for details.",
   },
   {
-    question: "How do I add a team member?",
-    answer: (
-      <>
-        <p>To add a team member, follow these steps:</p>
-        <ol className="list-inside list-decimal">
-          <li>
-            Click on the &quot;Team&quot; tab in the left-hand navigation menu.
-          </li>
-          <li>Click on the &quot;Add Member&quot; button.</li>
-          <li>Enter the email address of the team member you want to add.</li>
-          <li>Select the role and permissions for the new team member.</li>
-          <li>
-            Click &quot;Invite&quot; to send an invitation to the team member.
-          </li>
-        </ol>
-      </>
-    ),
+    question: "How many free OG Images do I get?",
+    answer: "With our Free plan, you receive up to 500 OG Images.",
+  },
+  {
+    question: "Why upgrade to Mosaic Pro?",
+    answer:
+      "Upgrading to Mosaic Pro gives you more resources: 5,000 images per month, support for unlimited websites, and priority email support. It's ideal if you need more than what the Free plan offers.",
+  },
+  {
+    question: "What happens if I hit the free plan limit?",
+    answer:
+      "If you reach your Free plan limit, no new images will be generated, but your existing OG Images will remain available. You can upgrade to a higher plan to continue generating new images.",
+  },
+  {
+    question: "Can I switch or cancel plans?",
+    answer:
+      "Yes, you can switch between plans or cancel your subscription at any time.",
+  },
+  {
+    question: "Is there a free trial or refund option?",
+    answer:
+      "We don't offer a free trial since our Free plan lets you try out our services at no cost. If you're unsatisfied within the first 30 days of your Pro subscription, you may be eligible for a refund as outlined in our Refund Policy.",
+  },
+  {
+    question: "Are there any hidden fees or penalties?",
+    answer:
+      "No, there are no hidden fees or penalties. All our pricing is transparent.",
+  },
+  {
+    question: "Which plan is best for my team?",
+    answer:
+      "We recommend the Pro plan for most teams. It offers ample resources, supports unlimited websites, and includes priority email support. For larger teams or websites, the Pro Plus plan might be more suitable.",
+  },
+  {
+    question: "How do I pick the right features?",
+    answer:
+      "Consider the number of images you need, the number of websites you manage, and the level of support you want. The Free plan is great for trying out the service, the Pro plan offers more resources and priority support, and the Pro Plus plan provides unlimited images and a dedicated account manager.",
+  },
+  {
+    question: "Can I pay annually or get non-profit/student discounts?",
+    answer:
+      "Currently, we don't offer annual payment options or specific discounts for non-profits or students.",
+  },
+  {
+    question: "What payment methods do you accept, and can I change them?",
+    answer:
+      "We accept major credit cards and PayPal through Gumroad. You can update your payment method anytime in your account settings.",
+  },
+  {
+    question: "How is payment processed, and can I use promo codes?",
+    answer:
+      "Payments are securely processed through Gumroad. If you have a promo code, you can apply it during the checkout process.",
+  },
+  {
+    question: "What happens if my payment fails?",
+    answer:
+      "If your payment fails, we'll notify you to update your payment information. Your account may be temporarily in free plan until the payment issue is resolved.",
+  },
+  {
+    question: "Do you offer price localization?",
+    answer:
+      "No, all our prices are listed in USD, and we do not offer price localization at this time.",
+  },
+  {
+    question: "Do all plans include support, and what is Priority Support?",
+    answer:
+      "The Free plan does not include support. The Pro plan includes Priority Email Support, meaning your inquiries are addressed promptly. The Pro Plus plan offers a dedicated account manager for personalized assistance.",
+  },
+  {
+    question: "How fast is support response?",
+    answer:
+      "For plans with support, we aim to respond to inquiries as quickly as possible, typically within 24 hours on business days.",
+  },
+  {
+    question: "Is onboarding available for new users?",
+    answer:
+      "While we don't offer formal onboarding sessions, our platform is user-friendly, and our support team is ready to assist with any questions you may have.",
+  },
+  {
+    question: "How do you handle privacy and security?",
+    answer:
+      "We take your privacy and security seriously, implementing industry-standard measures to protect your data. Please refer to our Privacy Policy for more details.",
   },
 ];
 
@@ -187,25 +221,17 @@ export default function Page() {
           <CardTitle>Frequently Asked Questions</CardTitle>
           <CardDescription>
             If you can&apos;t find the answer you&apos;re looking for, please
-            don&apos;t checkout our{" "}
+            check out our{" "}
             <Link href="/help" className="underline">
               help articles
             </Link>
             .
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Accordion
-            type="single"
-            collapsible
-            className="grid w-full gap-2 text-sm"
-          >
+        <CardContent className="p-0 text-sm">
+          <Accordion type="single">
             {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={faq.question}
-                className="rounded border-[0.5px] px-4"
-              >
+              <AccordionItem key={index} value={faq.question} className="px-6">
                 <AccordionTrigger>{faq.question}</AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {faq.answer}

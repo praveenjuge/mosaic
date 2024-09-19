@@ -30,7 +30,7 @@ export async function PlanButton({ type }: PlanButtonProps) {
   const loadingButton = commonButton("Loading...", true);
   const getStartedButton = (
     <SignUpButton mode="modal">
-      <Button className="w-full">Get Started →</Button>
+      <Button className="w-full">Get Started {"-->"}</Button>
     </SignUpButton>
   );
 
