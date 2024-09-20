@@ -125,17 +125,16 @@ export default function OGImageDemo() {
   };
 
   return (
-    <section
-      className="relative -mt-10 border-b-[0.5px] py-16 md:-mx-10"
-      aria-labelledby="og-image-demo-title"
-    >
-      <Image
-        src="/images/homebg.png"
-        alt=""
-        width={1000}
-        height={1000}
-        className="pointer-events-none absolute left-0 top-0 -z-10 hidden size-full select-none object-cover object-top dark:hidden md:block"
-      />
+    <section className="relative -mt-10 py-16">
+      <div className="pointer-events-none absolute inset-0 -z-10 select-none border-b-[0.5px] md:-mx-10">
+        <Image
+          src="/images/homebg.png"
+          alt=""
+          width={1000}
+          height={1000}
+          className="hidden size-full select-none object-cover object-top dark:hidden md:block"
+        />
+      </div>
       <div className="relative mx-auto max-w-4xl sm:px-4">
         <form
           onSubmit={handleSubmit}
