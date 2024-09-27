@@ -14,19 +14,19 @@ Ever clicked on a link and been greeted by a bland, generic image? Or worse, no 
 
 So let's chat about Open Graph (OG) images – you know, those preview images you see when sharing links on social media. They're kinda a big deal, and here's why you should care:
 
-# First impressions matter
+## First impressions matter
 
 Think about it – how do you feel when you see a link with no image or some random stock photo? Be honest! For me, it's often a quick "meh" before scrolling on. Your content deserves better than that!
 
-# Stand out in the feed
+## Stand out in the feed
 
 Social media moves fast. An eye-catching, personalized OG image can stop thumbs mid-scroll. It's your chance to say "Hey, this is worth your time!" without saying a word.
 
-# Brand recognition
+## Brand recognition
 
 Consistent, on-brand OG images help people recognize your content instantly. It's like your digital signature.
 
-# Show what's inside
+## Show what's inside
 
 A good OG image gives a sneak peek of your content. It's the movie trailer of your blog post or product page. Now, I'm curious – how do you feel when you see an OG image that doesn't relate to you or the content at all? Does it make you less likely to click?
 
