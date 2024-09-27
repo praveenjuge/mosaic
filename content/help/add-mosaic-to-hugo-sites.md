@@ -19,8 +19,6 @@ To generate OG images dynamically in your Hugo site using the image service, you
 2. And you will find the meta property tags with `og:image` defined.
 3. Most of the time, these properties will be present in the header.html in the partials
 
-![](/images/screenshot-2024-09-27-at-9.38.58-pm-YyNT.png)
-
 ### Step 2: Replace them with the following snippet
 
 Replace the meta property tags of og:images with the following snippet.
