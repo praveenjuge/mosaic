@@ -1,6 +1,6 @@
 {
-  "commit": "ada8003a99a6c00297c892cce8115febcceb0957",
-  "generated": "2024-09-27T08:05:05.610Z",
+  "commit": "6cbc336111d3ec7d35c47447ee28dda1816e75a4",
+  "generated": "2024-09-27T08:05:21.653Z",
   "metadata": [
     {
       "__outstatic": {
@@ -280,8 +280,8 @@
     },
     {
       "__outstatic": {
-        "commit": "ada8003a99a6c00297c892cce8115febcceb0957",
-        "hash": "4281049910",
+        "commit": "6cbc336111d3ec7d35c47447ee28dda1816e75a4",
+        "hash": "593270275",
         "path": "content/blog/why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images.md"
       },
       "author": {
@@ -294,7 +294,7 @@
       "publishedAt": "2024-09-27T08:37:21.750Z",
       "slug": "why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images",
       "status": "published",
-      "title": "Why do you need personalised OG imags? Why skip boring or no OG images?"
+      "title": "Why do you need personalized OG images? Why skip boring or no OG images?"
     }
   ]
 }

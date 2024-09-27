@@ -1,5 +1,5 @@
 ---
-title: 'Why do you need personalised OG imags? Why skip boring or no OG images?'
+title: 'Why do you need personalized OG images? Why skip boring or no OG images?'
 status: 'published'
 author:
   name: 'Naveen Honest Raj'
