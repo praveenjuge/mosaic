@@ -1,6 +1,6 @@
 {
-  "commit": "32d3e88175c477b9e67f433986527ebfdd8f3100",
-  "generated": "2024-09-27T08:07:58.135Z",
+  "commit": "04ac378da78fc477f056e9c145a0a73a86e96503",
+  "generated": "2024-09-27T08:17:11.708Z",
   "metadata": [
     {
       "__outstatic": {
@@ -314,6 +314,25 @@
       "slug": "add-mosaic-to-hugo-sites",
       "status": "published",
       "title": "Add Mosaic to Hugo sites"
+    },
+    {
+      "__outstatic": {
+        "commit": "04ac378da78fc477f056e9c145a0a73a86e96503",
+        "hash": "3702579173",
+        "path": "content/help/add-mosaic-to-nuxt-js-sites.md"
+      },
+      "author": {
+        "name": "Naveen Honest Raj",
+        "picture": "https://avatars.githubusercontent.com/u/10878354?v=4"
+      },
+      "category": "Guides",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-09-27T08:48:06.079Z",
+      "slug": "add-mosaic-to-nuxt-js-sites",
+      "status": "published",
+      "title": "Add Mosaic to Nuxt.js sites"
     }
   ]
 }
