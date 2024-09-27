@@ -1,6 +1,6 @@
 {
-  "commit": "e9e313cdae7b0ddce06bd137bb2e74eb44b470e8",
-  "generated": "2024-09-16T16:53:07.313Z",
+  "commit": "ada8003a99a6c00297c892cce8115febcceb0957",
+  "generated": "2024-09-27T08:05:05.610Z",
   "metadata": [
     {
       "__outstatic": {
@@ -277,6 +277,24 @@
       "slug": "add-mosaic-to-bear-blog",
       "status": "published",
       "title": "Add Mosaic to Bear Blog"
+    },
+    {
+      "__outstatic": {
+        "commit": "ada8003a99a6c00297c892cce8115febcceb0957",
+        "hash": "4281049910",
+        "path": "content/blog/why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images.md"
+      },
+      "author": {
+        "name": "Naveen Honest Raj",
+        "picture": "https://avatars.githubusercontent.com/u/10878354?v=4"
+      },
+      "collection": "blog",
+      "coverImage": "",
+      "description": "Ever clicked on a link and been greeted by a bland, generic image? Or worse, no image at all? ",
+      "publishedAt": "2024-09-27T08:37:21.750Z",
+      "slug": "why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images",
+      "status": "published",
+      "title": "Why do you need personalised OG imags? Why skip boring or no OG images?"
     }
   ]
 }
