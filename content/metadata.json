@@ -1,6 +1,6 @@
 {
-  "commit": "321c93eaae104088575d7c025b94b3b80eb3d389",
-  "generated": "2024-09-27T08:48:43.650Z",
+  "commit": "8ec706948fb85d25b2a2f0906d4d85015168d78d",
+  "generated": "2024-09-27T16:11:18.299Z",
   "metadata": [
     {
       "__outstatic": {
@@ -317,8 +317,8 @@
     },
     {
       "__outstatic": {
-        "commit": "321c93eaae104088575d7c025b94b3b80eb3d389",
-        "hash": "1789778469",
+        "commit": "8ec706948fb85d25b2a2f0906d4d85015168d78d",
+        "hash": "3403332003",
         "path": "content/help/add-mosaic-to-hugo-sites.md"
       },
       "author": {
