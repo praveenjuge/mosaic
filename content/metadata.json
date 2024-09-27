@@ -1,6 +1,6 @@
 {
-  "commit": "6cbc336111d3ec7d35c47447ee28dda1816e75a4",
-  "generated": "2024-09-27T08:05:21.653Z",
+  "commit": "32d3e88175c477b9e67f433986527ebfdd8f3100",
+  "generated": "2024-09-27T08:07:58.135Z",
   "metadata": [
     {
       "__outstatic": {
@@ -295,6 +295,25 @@
       "slug": "why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images",
       "status": "published",
       "title": "Why do you need personalized OG images? Why skip boring or no OG images?"
+    },
+    {
+      "__outstatic": {
+        "commit": "32d3e88175c477b9e67f433986527ebfdd8f3100",
+        "hash": "2467302295",
+        "path": "content/help/add-mosaic-to-hugo-sites.md"
+      },
+      "author": {
+        "name": "Naveen Honest Raj",
+        "picture": "https://avatars.githubusercontent.com/u/10878354?v=4"
+      },
+      "category": "Guides",
+      "collection": "help",
+      "coverImage": "",
+      "description": "",
+      "publishedAt": "2024-09-27T08:38:56.976Z",
+      "slug": "add-mosaic-to-hugo-sites",
+      "status": "published",
+      "title": "Add Mosaic to Hugo sites"
     }
   ]
 }
