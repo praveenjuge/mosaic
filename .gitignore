@@ -21,6 +21,8 @@
 *.pem
 bun.lockb
 package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
 # debug
 npm-debug.log*
