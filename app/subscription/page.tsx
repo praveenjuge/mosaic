@@ -232,7 +232,9 @@ export default function Page() {
           <Accordion type="single">
             {faqs.map((faq, index) => (
               <AccordionItem key={index} value={faq.question} className="px-6">
-                <AccordionTrigger>{faq.question}</AccordionTrigger>
+                <AccordionTrigger className="text-left">
+                  {faq.question}
+                </AccordionTrigger>
                 <AccordionContent className="text-muted-foreground">
                   {faq.answer}
                 </AccordionContent>
