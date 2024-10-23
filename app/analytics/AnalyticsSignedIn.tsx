@@ -36,7 +36,7 @@ async function fetchAnalyticsData(token: string) {
 export default async function AnalyticsSignedIn() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
-  const userData = auth();
+  const userData = await auth();
 
   try {
     const token = await userData.getToken({ template: "supabase" });

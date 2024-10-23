@@ -16,7 +16,7 @@ export interface PlanButtonProps {
 }
 
 export async function PlanButton({ type }: PlanButtonProps) {
-  const { userId, sessionClaims } = auth();
+  const { userId, sessionClaims } = await auth();
   const user = await currentUser();
   const plan = (sessionClaims?.public_metadata as UserMetaData)?.plan;
   const isActive = plan?.toLowerCase() === "pro";

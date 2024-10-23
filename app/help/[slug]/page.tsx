@@ -27,11 +27,10 @@ function getData(slug: string) {
   return { ...help, content: markdownToHtml(help.content) };
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const params = await props.params;
   const help = getData(params.slug);
 
   return {
@@ -49,7 +48,10 @@ export async function generateMetadata({
   };
 }
 
-export default function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
   const help = getData(params.slug);
   return (
     <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">

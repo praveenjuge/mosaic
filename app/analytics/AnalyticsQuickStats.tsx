@@ -10,8 +10,9 @@ import { parseBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function AnalyticsQuickStats() {
-  const metaData = (await auth()?.sessionClaims
-    ?.public_metadata) as UserMetaData;
+  const metaData = (await (
+    await auth()
+  )?.sessionClaims?.public_metadata) as UserMetaData;
 
   return (
     <div className="grid w-full gap-6 sm:grid-cols-2">

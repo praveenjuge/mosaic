@@ -1,3 +1,4 @@
+import { CopyButton } from "@/components/copy-button";
 import {
   Card,
   CardDescription,
@@ -19,7 +20,6 @@ import { Globe } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
-import { CopyButton } from "@/components/copy-button";
 
 // Define a type for the website object
 type Website = {
@@ -83,12 +83,14 @@ export default async function WebsitesTable() {
                         : website.cleaned_website_url}
                     </Link>
                   </TableCell>
-                  <TableCell >
+                  <TableCell>
                     <div className="flex items-center gap-1">
                       <span className="max-w-lg items-center truncate font-medium">
                         {`${website_url}use?url=https://${website.cleaned_website_url}`}
                       </span>
-                      <CopyButton text={`${website_url}use?url=https://${website.cleaned_website_url}`} />
+                      <CopyButton
+                        text={`${website_url}use?url=https://${website.cleaned_website_url}`}
+                      />
                     </div>
                   </TableCell>
                   <TableCell>{website.total_count}</TableCell>
