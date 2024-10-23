@@ -82,7 +82,7 @@ const FetchWebsitePagesData = async ({
     websiteIds = [parseInt(slug)];
   }
   try {
-    const { getToken } = auth();
+    const { getToken } = await auth();
     const token = await getToken({ template: "supabase" });
     if (token) {
       response = await fetchWebsitePagesData(token, websiteIds, page, limit);

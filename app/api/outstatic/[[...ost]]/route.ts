@@ -1,6 +1,12 @@
-import { OutstaticApi } from "outstatic";
+// import { OutstaticApi } from "outstatic";
+
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-export const GET = OutstaticApi.GET;
-export const POST = OutstaticApi.POST;
+export async function GET() {
+  return NextResponse.json({ message: "Hello, world!" });
+}
+
+// export const GET = OutstaticApi.GET;
+// export const POST = OutstaticApi.POST;

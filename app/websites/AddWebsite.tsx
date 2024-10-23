@@ -13,7 +13,9 @@ import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
 export async function AddWebsite() {
-  const metaData = auth()?.sessionClaims?.public_metadata as UserMetaData;
+  const metaData = (await (
+    await auth()
+  )?.sessionClaims?.public_metadata) as UserMetaData;
   const preventSubmission =
     (metaData?.websites_used ?? 0) >= (metaData?.websites_limit ?? Infinity);
 

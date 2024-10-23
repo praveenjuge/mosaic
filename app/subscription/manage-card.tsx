@@ -14,7 +14,9 @@ import { Suspense } from "react";
 
 export async function ManageCard() {
   const subscriptionId = (
-    auth()?.sessionClaims?.public_metadata as UserMetaData
+    (await (
+      await auth()
+    )?.sessionClaims?.public_metadata) as UserMetaData
   )?.gumroad_id;
 
   const ManageButton = ({ disabled = false }) => (

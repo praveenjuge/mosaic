@@ -13,14 +13,13 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { RefreshSiteButton } from "./refresh-site-button";
 import { WebsiteInfoModal } from "../WebsiteInfoModal";
+import { RefreshSiteButton } from "./refresh-site-button";
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
+export async function generateMetadata(props: {
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const params = await props.params;
   return {
     title: params.slug,
     description: "Manage your website's OG settings here.",
@@ -59,12 +58,15 @@ interface WebsiteData {
   total_bytes: number;
 }
 
-export default async function Page({ params }: { params: { slug: string } }) {
+export default async function Page(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
   let websiteData: WebsiteData | null = null;
   let token: string | null = null;
 
   try {
-    const { getToken } = auth();
+    const { getToken } = await auth();
     token = await getToken({ template: "supabase" });
     if (token) {
       try {
@@ -102,7 +104,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <span></span>
         )}
       </CardHeader>
-
       {websiteData?.total_count === 0 && (
         <div
           className="flex flex-col items-start gap-4 rounded-lg border-[0.5px] border-emerald-300 bg-emerald-50 p-3 font-medium dark:border-emerald-950 dark:bg-emerald-950 md:flex-row md:items-center md:justify-between"
@@ -118,7 +119,6 @@ export default async function Page({ params }: { params: { slug: string } }) {
           <WebsiteInfoModal websiteUrl={websiteData?.cleaned_website_url} />
         </div>
       )}
-
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>

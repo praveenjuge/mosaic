@@ -8,8 +8,9 @@ import { UserMetaData } from "@/lib/types";
 import { auth } from "@clerk/nextjs/server";
 
 export default async function HomeQuickStats() {
-  const metaData = (await auth()?.sessionClaims
-    ?.public_metadata) as UserMetaData;
+  const metaData = (await (
+    await auth()
+  )?.sessionClaims?.public_metadata) as UserMetaData;
 
   const formatPlan = (plan: string | undefined) => {
     if (!plan) return "Free Plan";
