@@ -1,14 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
-import { cn } from "@/lib/utils";
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   Config,
@@ -18,14 +9,14 @@ import {
   Home,
   Lightning,
   ListCheck,
-  Menu,
   ShootingStar,
   Support,
 } from "@mynaui/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense } from "react";
 import Logo from "./logo";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -42,126 +33,60 @@ const secondaryNavItems = [
   { href: "/legal", icon: Copyright, label: "Privacy & Terms" },
 ];
 
-const NavLink = ({
-  href,
-  icon: Icon,
-  label,
-  setOpen,
-}: {
-  href: string;
-  icon: React.ComponentType<{ className?: string; stroke?: number }>;
-  label: string;
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) => {
+export default function Aside() {
   const pathname = usePathname();
-  const isActive = pathname === href;
-
   return (
-    <Link
-      href={href}
-      className={cn(
-        "relative flex items-center gap-2 py-1",
-        isActive && "font-semibold text-primary [&_svg]:text-primary",
-      )}
-      aria-current={isActive ? "page" : undefined}
-      onClick={() => {
-        setOpen(false);
-      }}
-    >
-      {isActive && (
-        <span
-          aria-hidden="true"
-          className="pointer-events-none absolute -left-4 h-full w-1 select-none rounded-r-full bg-primary"
-        />
-      )}
-      {Icon && (
-        <Icon
-          stroke={2}
-          aria-hidden="true"
-          className="size-[1.125rem] text-muted-foreground"
-        />
-      )}
-      <span>{label}</span>
-    </Link>
-  );
-};
-
-const AsideContent = ({
-  setOpen,
-}: {
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}) => (
-  <aside
-    aria-label="Main navigation"
-    className="relative flex h-screen max-h-screen min-h-screen w-52 min-w-52 flex-col gap-2 overflow-auto bg-primary-foreground p-4 font-medium md:justify-between md:border-r-[0.5px]"
-  >
-    <div className="flex flex-col gap-5">
-      <div className="flex h-[18px] items-center justify-between">
+    <Sidebar>
+      <SidebarHeader className="h-[46px] flex-row items-center justify-between px-4 pb-3 pt-4">
         <Logo colorMode="mono" />
         <Suspense
           fallback={
-            <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block"></div>
+            <div className="block size-6 shrink-0 rounded-full bg-sidebar-border"></div>
           }
         >
-          <SignedIn>
-            <div className="hidden size-6 shrink-0 rounded-full bg-muted-foreground md:block [&_.cl-avatarBox]:size-6 [&_button]:size-6">
-              <UserButton />
-            </div>
-          </SignedIn>
-        </Suspense>
-      </div>
-      <nav className="flex flex-col gap-1.5" aria-label="Primary navigation">
-        {navItems.map((item) => (
-          <NavLink key={item.href} {...item} setOpen={setOpen} />
-        ))}
-      </nav>
-    </div>
-    <nav className="flex flex-col gap-1.5" aria-label="Secondary navigation">
-      {secondaryNavItems.map((item) => (
-        <NavLink key={item.href} {...item} setOpen={setOpen} />
-      ))}
-    </nav>
-  </aside>
-);
-
-export default function Aside() {
-  const [sheetOpen, setSheetOpen] = useState(false);
-
-  return (
-    <>
-      <div className="hidden md:block">
-        <AsideContent setOpen={setSheetOpen} />
-      </div>
-      <Suspense
-        fallback={
-          <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden"></div>
-        }
-      >
         <SignedIn>
-          <div className="fixed right-4 top-4 z-10 size-8 shrink-0 rounded-full bg-muted-foreground md:hidden [&_.cl-avatarBox]:size-8 [&_button]:size-8">
+          <div className="block size-6 shrink-0 rounded-full bg-sidebar-border [&_.cl-avatarBox]:size-6 [&_button]:size-6">
             <UserButton />
           </div>
         </SignedIn>
       </Suspense>
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetTrigger asChild>
-          <Button
-            size="icon"
-            variant="outline"
-            aria-label="Toggle navigation menu"
-            className="fixed left-3 top-3 z-10 shrink-0 rounded-full md:hidden"
-          >
-            <Menu className="size-6" />
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-auto p-0">
-          <SheetTitle className="sr-only">Main navigation</SheetTitle>
-          <SheetDescription className="sr-only">
-            Main navigation
-          </SheetDescription>
-          <AsideContent setOpen={setSheetOpen} />
-        </SheetContent>
-      </Sheet>
-    </>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={pathname === item.href}>
+                    <Link href={item.href}>
+                      <item.icon stroke={2} />
+                      <span>{item.label}</span>
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {secondaryNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                    <SidebarMenuButton asChild isActive={pathname === item.href}>
+                      <Link href={item.href}>
+                        <item.icon stroke={2} />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
