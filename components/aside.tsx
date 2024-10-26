@@ -16,7 +16,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import Logo from "./logo";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -35,6 +35,7 @@ const secondaryNavItems = [
 
 export default function Aside() {
   const pathname = usePathname();
+  const {setOpenMobile} = useSidebar();
   return (
     <Sidebar>
       <SidebarHeader className="h-[46px] flex-row items-center justify-between px-4 pb-3 pt-4">
@@ -58,7 +59,7 @@ export default function Aside() {
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={pathname === item.href}>
-                    <Link href={item.href}>
+                    <Link href={item.href} onClick={() => {setOpenMobile(false)}}>
                       <item.icon stroke={2} />
                       <span>{item.label}</span>
                     </Link>
@@ -76,7 +77,7 @@ export default function Aside() {
               {secondaryNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
                     <SidebarMenuButton asChild isActive={pathname === item.href}>
-                      <Link href={item.href}>
+                      <Link href={item.href} onClick={() => {setOpenMobile(false)}}>
                         <item.icon stroke={2} />
                         <span>{item.label}</span>
                       </Link>
