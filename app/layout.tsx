@@ -67,13 +67,13 @@ export default function RootLayout({
             <SidebarProvider>
               <Aside />
               <SidebarInset>
-                <SidebarTrigger className="fixed left-4 top-4 z-10 md:hidden" />
+                <SidebarTrigger />
                 {children}
-                <Suspense fallback={<></>}>
-                  <OnboardingCard />
-                </Suspense>
               </SidebarInset>
             </SidebarProvider>
+            <Suspense fallback={<></>}>
+              <OnboardingCard />
+            </Suspense>
             <Toaster richColors />
           </ThemeProvider>
           <CounterscaleScript />
