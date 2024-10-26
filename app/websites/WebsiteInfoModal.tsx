@@ -10,11 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code, ExternalLink, SmileGhost } from "@mynaui/icons-react";
+import Guides from "../help/guides";
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
   const getMetaTag = (isHomePage: boolean) =>
-    `<meta property="og:image" content="https://mosaicimg.com/use?url=${isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/slug`}" />`;
+    `<meta property="og:image" content="https://mosaicimg.com/use?url=${isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`}" />`;
 
   const renderCodeBlock = (content: string) => (
     <div className="relative w-full whitespace-pre-wrap rounded bg-muted p-2 pr-4 font-mono text-xs font-medium">
@@ -24,26 +25,6 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
       {content}
     </div>
   );
-
-  const tabContents = {
-    "Next.js": `export const metadata = {
-  openGraph: {
-    images: [
-      {
-        url: 'https://mosaicimg.com/use?url=${finalWebsiteUrl}',
-        width: 1200,
-        height: 630,
-      },
-    ],
-  },
-}`,
-    React: `<Helmet>
-  <meta property="og:image" content="https://mosaicimg.com/use?url=${finalWebsiteUrl}" />
-</Helmet>`,
-    HTML: `<head>
-  <meta property="og:image" content="https://mosaicimg.com/use?url=${finalWebsiteUrl}" />
-</head>`,
-  };
 
   return (
     <Dialog>
@@ -80,31 +61,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             ))}
           </Tabs>
 
-          <div className="w-full border-t-[0.5px]" />
-
-          <Tabs defaultValue="Next.js">
-            <TabsList className="w-full">
-              {Object.keys(tabContents).map((tab) => (
-                <TabsTrigger key={tab} className="w-full" value={tab}>
-                  {tab}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {Object.entries(tabContents).map(([tab, content]) => (
-              <TabsContent key={tab} value={tab}>
-                <p className="mb-2">
-                  {tab === "Next.js"
-                    ? "Add the meta tag to your page metadata export in Next.js:"
-                    : tab === "React"
-                      ? "Use a library like react-helmet to add the meta tag:"
-                      : "Add the meta tag to your HTML head:"}
-                </p>
-                {renderCodeBlock(content)}
-              </TabsContent>
-            ))}
-          </Tabs>
-
-          <div className="w-full border-t-[0.5px]" />
+          <Guides />
 
           {["Learn more about Open Graph", "Validate your metadata"].map(
             (text, index) => (

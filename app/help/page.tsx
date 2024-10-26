@@ -11,6 +11,7 @@ import { BrandX, Envelope } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { load } from "outstatic/server";
+import Guides from "./guides";
 
 export const dynamic = "force-static";
 
@@ -54,6 +55,8 @@ export default function Page() {
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
+
+      <Guides />
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {Object.entries(groupedPosts).map(([category, posts]) => (

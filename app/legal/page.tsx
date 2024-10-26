@@ -31,9 +31,8 @@ export default function Page() {
         <CardContent>
           <div className="prose prose-sm prose-zinc dark:prose-invert">
             <p>
-              At Mosaic, we take your privacy seriously. This Privacy Policy
-              explains how we collect, use, and protect your personal
-              information when you use our services.
+              This Privacy Policy explains how we collect, use, and protect your
+              personal information when you use our services.
             </p>
             <h3>Information We Collect</h3>
             <p>

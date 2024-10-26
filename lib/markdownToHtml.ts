@@ -53,6 +53,13 @@ const highlighter = await createHighlighterCore({
     import("shiki/langs/python.mjs"),
     import("shiki/langs/yaml.mjs"),
     import("shiki/langs/html.mjs"),
+    import("shiki/langs/astro.mjs"),
+    import("shiki/langs/vue.mjs"),
+    import("shiki/langs/typescript.mjs"),
+    import("shiki/langs/mdx.mjs"),
+    import("shiki/langs/markdown.mjs"),
+    import("shiki/langs/svelte.mjs"),
+    import("shiki/langs/php.mjs"),
   ],
   loadWasm: import("shiki/wasm"),
 });
