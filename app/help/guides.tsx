@@ -19,7 +19,10 @@ export const guides: Guide[] = [
     slug: "nextjs",
     svg: "nextjs_icon_dark",
     steps: [
-      { title: "You can add the OG image URL in your `layout.js` or `page.js` file.", code: `import { Metadata } from 'next'
+      {
+        title:
+          "You can add the OG image URL in your `layout.js` or `page.js` file.",
+        code: `import { Metadata } from 'next'
 
 export const metadata: Metadata = {
   openGraph: {
@@ -38,10 +41,13 @@ export default function Page() {
   return (
     // Your page content
   )
-}`, codeLang: "js" },
-        {
-          title: "You can use the `generateMetadata` function in combination with dynamic routes. Create a dynamic route in your Next.js app. For example, let's create a `[slug].tsx` file in the `app/posts` directory.",
-          code: `export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+}`,
+        codeLang: "js",
+      },
+      {
+        title:
+          "You can use the `generateMetadata` function in combination with dynamic routes. Create a dynamic route in your Next.js app. For example, let's create a `[slug].tsx` file in the `app/posts` directory.",
+        code: `export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   const slug = await (params.slug);
 
   return {
@@ -58,19 +64,26 @@ export default function Page() {
     },
   }
 }`,
-          codeLang: "js"
-        },
-              {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
+        codeLang: "js",
+      },
+      {
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
     ],
   },
-  { 
+  {
     title: "React",
     slug: "react",
     steps: [
-      { title: "First, install React Helmet:", code: `npm install react-helmet`, codeLang: "bash" },
-      { title: "Then, you can use it in your React component like this:", code: `import React from 'react'
+      {
+        title: "First, install React Helmet:",
+        code: `npm install react-helmet`,
+        codeLang: "bash",
+      },
+      {
+        title: "Then, you can use it in your React component like this:",
+        code: `import React from 'react'
 import { Helmet } from 'react-helmet'
 
 export default function Page() {
@@ -87,16 +100,22 @@ export default function Page() {
     </div>
   )
 }`,
-          codeLang: "js",
-        },
-        {
-          title: `Remember to replace the placeholder values (like 'Your Page Title' and 'yourwebsite.com') with your actual page title and website URL.`,
-        }
-      ]
-    },
-  { title: "Remix", slug: "remix", svg: "remix_light",
+        codeLang: "js",
+      },
+      {
+        title: `Remember to replace the placeholder values (like 'Your Page Title' and 'yourwebsite.com') with your actual page title and website URL.`,
+      },
+    ],
+  },
+  {
+    title: "Remix",
+    slug: "remix",
+    svg: "remix_light",
     steps: [
-      { title: "If you want to add OG metadata to all pages in your Remix app, you can create a root layout file (`app/root.tsx`) and define a `meta` export there:", code: `import type { MetaFunction } from "@remix-run/node";
+      {
+        title:
+          "If you want to add OG metadata to all pages in your Remix app, you can create a root layout file (`app/root.tsx`) and define a `meta` export there:",
+        code: `import type { MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -135,9 +154,12 @@ export default function App() {
       </body>
     </html>
   );
-}`, codeLang: "js" },
+}`,
+        codeLang: "js",
+      },
       {
-        title: "To add OG metadata to a specific route (e.g., `app/routes/your-page.tsx`), export a `meta` function that returns an array of meta objects.",
+        title:
+          "To add OG metadata to a specific route (e.g., `app/routes/your-page.tsx`), export a `meta` function that returns an array of meta objects.",
         code: `import type { MetaFunction, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
@@ -183,15 +205,16 @@ export default function YourPage() {
     </div>
   );
 }`,
-          codeLang: "js"
-        },
-              {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-      ]
-   },
-  {   
-    title: "Astro", 
+        codeLang: "js",
+      },
+      {
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "Astro",
     slug: "astro",
     steps: [
       {
@@ -204,11 +227,11 @@ const image = "${mosaicURL}/your_slug";
 
 <p>your page content</p>
 `,
-          codeLang: "astro"
-        },
-        {
-          title: "Add you can reference the image URL in your Layout file:",
-          code: `---
+        codeLang: "astro",
+      },
+      {
+        title: "Add you can reference the image URL in your Layout file:",
+        code: `---
 const { image } = Astro.props;
 ---
 
@@ -219,14 +242,17 @@ const { image } = Astro.props;
     <meta property="og:image" content="\${image}" />
   </head>
 </html>`,
-          codeLang: "astro"
-        },
-              {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-      ]
-   },
-  { title: "Nuxt", slug: "nuxt",
+        codeLang: "astro",
+      },
+      {
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "Nuxt",
+    slug: "nuxt",
     steps: [
       {
         title: "In your Nuxt App, use useHead composable in your index page",
@@ -249,11 +275,11 @@ useHead({
   ]
 })
 </script>`,
-          codeLang: "vue"
-        },
-        {
-          title: "For dynamic pages:",
-          code: `// pages/blog/[slug].vue
+        codeLang: "vue",
+      },
+      {
+        title: "For dynamic pages:",
+        code: `// pages/blog/[slug].vue
 <script setup>
 const route = useRoute()
 
@@ -277,14 +303,17 @@ useHead({
   ]
 })
 </script> `,
-          codeLang: "vue"
-        },
+        codeLang: "vue",
+      },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-    ]
-   },
-  { title: "Hugo", slug: "hugo",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "Hugo",
+    slug: "hugo",
     steps: [
       {
         title: "In your Hugo Layout file, you can add the OG image URL:",
@@ -294,14 +323,18 @@ useHead({
 <meta property="og:image" content="{{ $ogImageURL }}">
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />`,
-          codeLang: "html"
+        codeLang: "html",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
-      }
-    ]
-   },
-  { title: "HTML", slug: "html", svg: "html5",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
+      },
+    ],
+  },
+  {
+    title: "HTML",
+    slug: "html",
+    svg: "html5",
     steps: [
       {
         title: "In your HTML file, you can add the OG image URL:",
@@ -334,7 +367,7 @@ useHead({
 </body>
 </html>
 `,
-        codeLang: "html"
+        codeLang: "html",
       },
       {
         title: "For pages with dynamic slugs, create a template like this: ",
@@ -372,14 +405,17 @@ useHead({
     <!-- Your content here -->
 </body>
 </html>`,
-          codeLang: "html"
+        codeLang: "html",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-    ]
-   },
-  { title: "Angular", slug: "angular",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "Angular",
+    slug: "angular",
     steps: [
       {
         title: "In your Angular app, you can add the OG image URL:",
@@ -406,7 +442,7 @@ export class AppComponent {
     ]);
   }
 }`,
-          codeLang: "ts"
+        codeLang: "ts",
       },
       {
         title: "For dynamic pages:",
@@ -463,14 +499,17 @@ export class BlogPostComponent implements OnInit {
   }
 }
 `,
-          codeLang: "ts"
+        codeLang: "ts",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
-      }
-    ]
-   },
-  { title: "Docusaurus", slug: "docusaurus",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
+      },
+    ],
+  },
+  {
+    title: "Docusaurus",
+    slug: "docusaurus",
     steps: [
       {
         title: "For Blog Posts:",
@@ -513,7 +552,7 @@ export default function BlogPostPageWrapper(props) {
     </>
   );
 }`,
-          codeLang: "js"
+        codeLang: "js",
       },
       {
         title: "For Documentation Pages:",
@@ -547,7 +586,7 @@ export default function DocItemWrapper(props) {
     </>
   );
 }`,
-          codeLang: "js"
+        codeLang: "js",
       },
       {
         title: "For custom pages, create a component like this:",
@@ -575,47 +614,59 @@ export default function CustomPage() {
     </Layout>
   );
 }`,
-          codeLang: "js"
+        codeLang: "js",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
-      }
-    ]
-   },
-  { title: "Dub", slug: "dub",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
+      },
+    ],
+  },
+  {
+    title: "Dub",
+    slug: "dub",
     steps: [
       {
-        title: "While creating a New Link in dub.co, Click on the Edit Icon next to 'Link Preview'"
+        title:
+          "While creating a New Link in dub.co, Click on the Edit Icon next to 'Link Preview'",
       },
       {
-        title: "In the Edit Link Preview window, click on the Link Icon next to Image Box",
+        title:
+          "In the Edit Link Preview window, click on the Link Icon next to Image Box",
       },
       {
         title: `In the 'Use image from URL' modal, add ${mosaicURL}/your_slug`,
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-    ]
-   },
-  { title: "Mintlify", slug: "mintlify",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "Mintlify",
+    slug: "mintlify",
     steps: [
       {
-        title: "In your Mintlify project, add the following to the frontmatter of your page:",
+        title:
+          "In your Mintlify project, add the following to the frontmatter of your page:",
         code: `// pages/introduction.mdx
 ---
 title: 'Introduction'
 description: 'Learn how to use our platform'
 'og:image': '${mosaicURL}/your_slug'
 ---`,
-          codeLang: "mdx"
+        codeLang: "mdx",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-    ]
-   },
-  { title: "SvelteKit", slug: "svelte",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "SvelteKit",
+    slug: "svelte",
     steps: [
       {
         title: "For static pages (e.g., src/routes/+page.svelte)",
@@ -632,7 +683,7 @@ description: 'Learn how to use our platform'
 </svelte:head>
 
 <!-- Your page content -->`,
-        codeLang: "svelte"
+        codeLang: "svelte",
       },
       {
         title: "For dynamic pages (e.g., src/routes/blog/[slug]/+page.svelte)",
@@ -651,14 +702,17 @@ description: 'Learn how to use our platform'
 
 <!-- Your page content -->
 `,
-        codeLang: "svelte"
+        codeLang: "svelte",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
-      }
-    ]
-   },
-  { title: "WordPress", slug: "wordpress",
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
+    title: "WordPress",
+    slug: "wordpress",
     steps: [
       {
         title: `Open your WordPress theme’s functions.php file (Appearance > Theme Editor > Theme Functions – functions.php).`,
@@ -674,13 +728,14 @@ description: 'Learn how to use our platform'
     echo '<meta property="og:image" content="' . esc_url($og_image_url) . '" />';
 }
 add_action('wp_head', 'add_dynamic_og_image');`,
-        codeLang: "php"
+        codeLang: "php",
       },
       {
-        title: "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
-      }
-    ]
-   },
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com') with your actual website URL.",
+      },
+    ],
+  },
 ];
 
 function GuideLink({ guide }: { guide: Guide }) {
@@ -691,16 +746,17 @@ function GuideLink({ guide }: { guide: Guide }) {
       href={`/help/guides/${guide.slug}`}
       className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
     >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt={`${guide.title} icon`}
         className={cn(
           "shrink-0 select-none",
-          guide.slug === "hugo" ? "size-12" : "size-4"
+          guide.slug === "hugo" ? "size-12" : "size-4",
         )}
         src={`https://svgl.app/library/${guide.svg || guide.slug}.svg`}
       />
       {guide.title}
-      <ChevronRight className="size-4 text-muted-foreground stroke-2" />
+      <ChevronRight className="size-4 stroke-2 text-muted-foreground" />
     </Link>
   );
 }

@@ -1,14 +1,14 @@
 ---
-title: 'Log In to Your Account'
-status: 'published'
+title: "Log In to Your Account"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'log-in-to-your-account'
-description: ''
-coverImage: ''
-category: 'Authentication'
-publishedAt: '2024-07-18T14:14:32.336Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "log-in-to-your-account"
+description: ""
+coverImage: ""
+category: "Authentication"
+publishedAt: "2024-07-18T14:14:32.336Z"
 ---
 
 1. **Go to [Mosaic](https://mosaicimg.com)**

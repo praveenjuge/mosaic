@@ -1,7 +1,7 @@
 import { website_url } from "@/lib/constants";
 import type { MetadataRoute } from "next";
 import { getDocumentSlugs } from "outstatic/server";
-import {guides} from "./help/guides";
+import { guides } from "./help/guides";
 
 export const dynamic = "force-static";
 
@@ -39,12 +39,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   const guidesList = [] as sitemap[];
-  guides.map((guide) => ({ slug: guide.slug })).forEach(({ slug }) => {
-    guidesList.push({
-      url: `${website_url}help/guides/${slug}`,
-      lastModified: new Date(),
+  guides
+    .map((guide) => ({ slug: guide.slug }))
+    .forEach(({ slug }) => {
+      guidesList.push({
+        url: `${website_url}help/guides/${slug}`,
+        lastModified: new Date(),
+      });
     });
-  });
 
   return [
     {

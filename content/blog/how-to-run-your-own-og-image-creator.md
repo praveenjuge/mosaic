@@ -1,13 +1,13 @@
 ---
-title: 'How to run your own OG image creator?'
-status: 'published'
+title: "How to run your own OG image creator?"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'how-to-run-your-own-og-image-creator'
-description: 'Ever wondered how to create eye-catching Open Graph (OG) images without any design skills? Those captivating images that appear when you share links on social media are OG images. Here''s a step-by-step guide to creating your own using Playwright and Python.'
-coverImage: ''
-publishedAt: '2024-07-31T08:16:13.093Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "how-to-run-your-own-og-image-creator"
+description: "Ever wondered how to create eye-catching Open Graph (OG) images without any design skills? Those captivating images that appear when you share links on social media are OG images. Here's a step-by-step guide to creating your own using Playwright and Python."
+coverImage: ""
+publishedAt: "2024-07-31T08:16:13.093Z"
 ---
 
 Before understanding how to create your Open Graph images with zero design skills, first, let us establish what are OG images - so there are no confusions. Do you know those fancy images that pop up when you share links on social media? Yes, those pictures grab your attention.
@@ -41,7 +41,7 @@ def capture_og_magic(url, output_file):
     page.goto(url)
     page.screenshot(path=output_file, full_page=False)
     browser.close()
-    
+
 url = "<https://mosaicimg.com/>"
 output_file = "og_image_of_awesomeness.png"
 capture_og_magic(url, output_file)

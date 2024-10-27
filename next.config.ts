@@ -1,5 +1,5 @@
-import { withSentryConfig } from "@sentry/nextjs";
 import withBundleAnalyzer from "@next/bundle-analyzer";
+import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
 const bundleAnalyzer = withBundleAnalyzer({
@@ -33,7 +33,7 @@ const nextConfig: NextConfig = {
         source: "/use",
         destination: "https://get.mosaicimg.com/image/get_image",
         permanent: false,
-      }
+      },
     ];
   },
   async headers() {
@@ -80,13 +80,13 @@ const config = bundleAnalyzer(nextConfig);
 // Only use Sentry in production
 export default process.env.NODE_ENV === "production"
   ? withSentryConfig(config, {
-    // Sentry options
-    org: "mosaicimg",
-    project: "mosaic-frontend",
-    silent: !process.env.CI,
-    widenClientFileUpload: true,
-    hideSourceMaps: true,
-    disableLogger: true,
-    automaticVercelMonitors: false,
-  })
+      // Sentry options
+      org: "mosaicimg",
+      project: "mosaic-frontend",
+      silent: !process.env.CI,
+      widenClientFileUpload: true,
+      hideSourceMaps: true,
+      disableLogger: true,
+      automaticVercelMonitors: false,
+    })
   : config;
