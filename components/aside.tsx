@@ -16,7 +16,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
 import Logo from "./logo";
-import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "./ui/sidebar";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "./ui/sidebar";
 
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
@@ -35,7 +46,7 @@ const secondaryNavItems = [
 
 export default function Aside() {
   const pathname = usePathname();
-  const {setOpenMobile} = useSidebar();
+  const { setOpenMobile } = useSidebar();
   return (
     <Sidebar>
       <SidebarHeader className="h-[46px] flex-row items-center justify-between px-4 pb-3 pt-4">
@@ -45,12 +56,12 @@ export default function Aside() {
             <div className="block size-6 shrink-0 rounded-full bg-sidebar-border"></div>
           }
         >
-        <SignedIn>
-          <div className="block size-6 shrink-0 rounded-full bg-sidebar-border [&_.cl-avatarBox]:size-6 [&_button]:size-6">
-            <UserButton />
-          </div>
-        </SignedIn>
-      </Suspense>
+          <SignedIn>
+            <div className="block size-6 shrink-0 rounded-full bg-sidebar-border [&_.cl-avatarBox]:size-6 [&_button]:size-6">
+              <UserButton />
+            </div>
+          </SignedIn>
+        </Suspense>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -58,12 +69,17 @@ export default function Aside() {
             <SidebarMenu>
               {navItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href}>
-                    <Link href={item.href} onClick={() => {setOpenMobile(false)}}>
+                  <SidebarMenuButton asChild isActive={pathname === item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => {
+                        setOpenMobile(false);
+                      }}
+                    >
                       <item.icon stroke={2} />
                       <span>{item.label}</span>
                     </Link>
-                    </SidebarMenuButton>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>
@@ -76,12 +92,17 @@ export default function Aside() {
             <SidebarMenu>
               {secondaryNavItems.map((item) => (
                 <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={pathname === item.href}>
-                      <Link href={item.href} onClick={() => {setOpenMobile(false)}}>
-                        <item.icon stroke={2} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </SidebarMenuButton>
+                  <SidebarMenuButton asChild isActive={pathname === item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => {
+                        setOpenMobile(false);
+                      }}
+                    >
+                      <item.icon stroke={2} />
+                      <span>{item.label}</span>
+                    </Link>
+                  </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
             </SidebarMenu>

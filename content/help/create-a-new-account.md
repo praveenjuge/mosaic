@@ -1,14 +1,14 @@
 ---
-title: 'Create a New Account'
-status: 'published'
+title: "Create a New Account"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'create-a-new-account'
-description: ''
-coverImage: ''
-category: 'Authentication'
-publishedAt: '2024-07-18T14:09:12.600Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "create-a-new-account"
+description: ""
+coverImage: ""
+category: "Authentication"
+publishedAt: "2024-07-18T14:09:12.600Z"
 ---
 
 1. **Go to [Mosaic](https://mosaicimg.com)**

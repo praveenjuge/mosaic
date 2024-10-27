@@ -32,7 +32,10 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
     .single();
 
   if (existingWebsite) {
-    return { status: "error", message: "This website already exists in your list." };
+    return {
+      status: "error",
+      message: "This website already exists in your list.",
+    };
   }
 
   const { data, error } = await client
@@ -65,7 +68,10 @@ export const handleAdd = async (formData: FormData) => {
     .single();
 
   if (existingWebsite) {
-    return { status: "error", message: "This website already exists in your list." };
+    return {
+      status: "error",
+      message: "This website already exists in your list.",
+    };
   }
 
   const { data, error } = await client
@@ -89,7 +95,9 @@ function cleanUrl(url: string): string {
     return parsedUrl.hostname;
   } catch {
     // If parsing fails, attempt to extract domain using regex
-    const domainMatch = url.match(/^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/);
+    const domainMatch = url.match(
+      /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/,
+    );
     return domainMatch ? domainMatch[1] : url;
   }
 }

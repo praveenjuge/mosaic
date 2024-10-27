@@ -3,6 +3,11 @@ import Aside from "@/components/aside";
 import CounterscaleScript from "@/components/counterscale-script";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { ThemeProvider } from "@/components/theme-provider";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import {
   website_description,
@@ -15,7 +20,6 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 
 export const experimental_ppr = true;
 

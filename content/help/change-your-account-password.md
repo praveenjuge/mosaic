@@ -1,14 +1,14 @@
 ---
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-coverImage: ''
-title: 'Change Your Account Password'
-status: 'published'
-slug: 'change-your-account-password'
-description: ''
-category: 'Authentication'
-publishedAt: '2024-08-18T09:51:15.583Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+coverImage: ""
+title: "Change Your Account Password"
+status: "published"
+slug: "change-your-account-password"
+description: ""
+category: "Authentication"
+publishedAt: "2024-08-18T09:51:15.583Z"
 ---
 
 If you need to change your password on Mosaicimg.com, follow these simple steps:

@@ -5,12 +5,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import markdownToHtml from "@/lib/markdownToHtml";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { guides } from "../../guides";
-import markdownToHtml from "@/lib/markdownToHtml";
 
 export const dynamic = "force-static";
 
@@ -46,7 +46,7 @@ export default async function Page(props: {
   if (!guide) notFound();
 
   return (
-    <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
+    <article className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-4 md:py-10">
       <CardDescription>
         <Link href="/help">← Help</Link>
       </CardDescription>
@@ -57,19 +57,33 @@ export default async function Page(props: {
             Get started with integrating Mosaic into your {guide.title} project.
           </CardDescription>
         </CardHeader>
-        <CardContent className="max-w-none p-0 border-t-[0.5px] divide-y-[0.5px] mt-4">
+        <CardContent className="mt-4 divide-y-[0.5px] border-t-[0.5px] p-0">
           {guide.steps?.map((step, index) => (
-            <div key={step.title} className="grid grid-cols-6 gap-2 px-6 py-4">
-              <p className="font-mono uppercase text-sm text-primary font-medium select-none">Step {index + 1}</p>
-              <div className="col-span-5 text-sm">
+            <div
+              key={step.title}
+              className="flex flex-col gap-4 px-6 py-4 sm:grid sm:grid-cols-6"
+            >
+              <p className="shrink-0 select-none font-mono font-medium uppercase text-primary">
+                Step {index + 1}
+              </p>
+              <div className="gap-4 sm:col-span-5">
                 <p>{step.title}</p>
-                {step.code && <div className="rounded mt-4 [&>pre]:rounded-md [&>pre]:p-2 [&>pre]:overflow-x-auto [&>code]:overflow-x-auto overflow-hidden" dangerouslySetInnerHTML={{ __html: markdownToHtml(`\`\`\`${step.codeLang}\n${step.code}\n\`\`\``) }} />}
+                {step.code && (
+                  <div
+                    className="mt-4 overflow-hidden rounded [&>code]:overflow-x-auto [&>pre]:overflow-x-auto [&>pre]:rounded-md [&>pre]:p-2"
+                    dangerouslySetInnerHTML={{
+                      __html: markdownToHtml(
+                        `\`\`\`${step.codeLang}\n${step.code}\n\`\`\``,
+                      ),
+                    }}
+                  />
+                )}
               </div>
             </div>
           ))}
         </CardContent>
       </Card>
-    </article >
+    </article>
   );
 }
 

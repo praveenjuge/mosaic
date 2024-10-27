@@ -1,13 +1,13 @@
 ---
-title: 'The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime'
-status: 'published'
+title: "The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime'
-description: 'Discover how Mosaic HQ achieves near-zero downtime deployment with Docker and Caddy. Learn our step-by-step process to ensure smooth updates with minimal user disruption.'
-coverImage: ''
-publishedAt: '2024-08-18T09:23:19.552Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime"
+description: "Discover how Mosaic HQ achieves near-zero downtime deployment with Docker and Caddy. Learn our step-by-step process to ensure smooth updates with minimal user disruption."
+coverImage: ""
+publishedAt: "2024-08-18T09:23:19.552Z"
 ---
 
 We at Mosaic HQ, love doing dirty engineering things on our own. And one of such thing is to deploy our backend application (which takes a good amount of preloading time) without any downtime. We’ve got used to most out-of-the-box solutions like Heroku, Fly, or Appliku, but we want to get this straight this time.
@@ -67,7 +67,7 @@ After building, you can find the built image by running `docker images` .
 To run our application using the image we built now, we need to run the following
 
 ```docker
-docker run -d -p 8000:8000 app-backend gunicorn app.main:app -c gunicorn.conf.py 
+docker run -d -p 8000:8000 app-backend gunicorn app.main:app -c gunicorn.conf.py
 ```
 
 And now you have your docker instance up and running. Now you changed some code, what is the next step?

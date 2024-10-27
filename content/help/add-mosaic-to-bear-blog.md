@@ -1,14 +1,14 @@
 ---
-title: 'Add Mosaic to Bear Blog'
-status: 'published'
+title: "Add Mosaic to Bear Blog"
+status: "published"
 author:
-  name: 'Praveen Juge'
-  picture: 'https://avatars.githubusercontent.com/u/13696888?v=4'
-slug: 'add-mosaic-to-bear-blog'
-description: ''
-coverImage: ''
-category: 'Guides'
-publishedAt: '2024-09-16T17:21:41.891Z'
+  name: "Praveen Juge"
+  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
+slug: "add-mosaic-to-bear-blog"
+description: ""
+coverImage: ""
+category: "Guides"
+publishedAt: "2024-09-16T17:21:41.891Z"
 ---
 
 ### Prerequisites
