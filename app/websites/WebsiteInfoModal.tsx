@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code, ExternalLink, SmileGhost } from "@mynaui/icons-react";
-import Guides from "../help/guides";
+import { GuideLink, guides } from "../help/guides";
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
@@ -61,7 +61,11 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             ))}
           </Tabs>
 
-          <Guides />
+          <div className="flex flex-wrap gap-2">
+            {guides.map((guide) => (
+              <GuideLink key={guide.slug} guide={guide} />
+            ))}
+          </div>
 
           {["Learn more about Open Graph", "Validate your metadata"].map(
             (text, index) => (
