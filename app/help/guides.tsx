@@ -738,7 +738,7 @@ add_action('wp_head', 'add_dynamic_og_image');`,
   },
 ];
 
-function GuideLink({ guide }: { guide: Guide }) {
+export function GuideLink({ guide }: { guide: Guide }) {
   return (
     <Link
       target="_blank"
