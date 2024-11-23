@@ -1,15 +1,9 @@
-import withBundleAnalyzer from "@next/bundle-analyzer";
-import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
-
-const bundleAnalyzer = withBundleAnalyzer({
-  enabled: process.env.ANALYZE === "true",
-});
 
 const cspHeader = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
-  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://*.sentry-cdn.com https://*.ingest.sentry.io https://*.ingest.de.sentry.io https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
+  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
   img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
@@ -23,8 +17,8 @@ const cspHeader = `
 
 const nextConfig: NextConfig = {
   experimental: {
+    ppr: true,
     reactCompiler: true,
-    ppr: "incremental",
     optimizePackageImports: ["@mynaui/icons-react"],
   },
   async redirects() {
@@ -75,18 +69,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-const config = bundleAnalyzer(nextConfig);
-
-// Only use Sentry in production
-export default process.env.NODE_ENV === "production"
-  ? withSentryConfig(config, {
-      // Sentry options
-      org: "mosaicimg",
-      project: "mosaic-frontend",
-      silent: !process.env.CI,
-      widenClientFileUpload: true,
-      hideSourceMaps: true,
-      disableLogger: true,
-      automaticVercelMonitors: false,
-    })
-  : config;
+export default nextConfig;
