@@ -4,24 +4,15 @@ import {
   website_description,
   website_url,
 } from "@/lib/constants";
-import markdownToHtml from "@/lib/markdownToHtml";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { Feed } from "feed";
-import { load } from "outstatic/server";
 
 export const dynamic = "force-static";
 
-const allPosts = await (await load())
-  .find({ collection: "changelog" }, [
-    "title",
-    "publishedAt",
-    "description",
-    "content",
-    "slug",
-  ])
-  .sort({ publishedAt: -1 })
-  .toArray();
+const allPosts = getMarkDownData("content/changelog/");
 
 export function GET() {
+
   const feed = new Feed({
     title: author_name,
     description: website_description,
@@ -42,13 +33,11 @@ export function GET() {
 
   for (const post of allPosts) {
     const url = `${website_url}changelog/${post.slug}`;
-    const content = markdownToHtml(post.content) as string;
     feed.addItem({
       title: post.title || "",
       id: url,
       link: url,
-      content: `${post.description}<br />${content}`,
-      description: post.description || "",
+      content: post.content,
       date: new Date(post.publishedAt || ""),
       author: [
         {

@@ -4,10 +4,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
-import { load } from "outstatic/server";
 
 export const dynamic = "force-static";
 
@@ -19,10 +19,7 @@ export const metadata: Metadata = {
   },
 };
 
-const allPosts = await (await load())
-  .find({ collection: "blog" }, ["title", "slug", "publishedAt", "description"])
-  .sort({ publishedAt: -1 })
-  .toArray();
+const allPosts = getMarkDownData("content/blog/");
 
 export default function Page() {
   return (

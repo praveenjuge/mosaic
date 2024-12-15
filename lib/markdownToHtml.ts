@@ -19,23 +19,6 @@ md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
   return defaultLinkRender(tokens, idx, options, env, self);
 };
 
-md.renderer.rules.heading_open = (tokens, idx) => {
-  const token = tokens[idx];
-  const level = token.tag;
-  const text = tokens[idx + 1].content;
-  const slug = text
-    .toLowerCase()
-    .replace(/[^\w]+/g, "-")
-    .replace(/-+$/, "");
-  token.attrSet("id", slug);
-  token.attrJoin("class", "tracking-tight");
-
-  return `<${level} id="${slug}" class="tracking-tight"><a href="#${slug}" class="font-semibold">`;
-};
-md.renderer.rules.heading_close = (tokens, idx) => {
-  return `</a></${tokens[idx].tag}>`;
-};
-
 md.renderer.rules.image = (tokens, idx) => {
   const token = tokens[idx];
   const href = token.attrGet("src");

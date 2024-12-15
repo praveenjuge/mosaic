@@ -5,37 +5,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import markdownToHtml from "@/lib/markdownToHtml";
+import { getMarkDownContent, getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 
 export const dynamic = "force-static";
-
-function getData(slug: string) {
-  const help = getDocumentBySlug("help", slug, [
-    "title",
-    "publishedAt",
-    "slug",
-    "content",
-  ]);
-
-  if (!help) notFound();
-
-  return { ...help, content: markdownToHtml(help.content) };
-}
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const help = getData(params.slug);
+  const help = getMarkDownContent("content/help/", params.slug);
 
   return {
     title: help.title,
-    description: markdownToHtml(help.content),
+    description: help.description,
     openGraph: {
       type: "article",
       url: "./",
@@ -52,7 +38,9 @@ export default async function Page(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
-  const help = getData(params.slug);
+  const help = getMarkDownContent("content/help/", params.slug);
+
+  if (!help) notFound();
   return (
     <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
       <CardDescription>
@@ -82,5 +70,5 @@ export default async function Page(props: {
 }
 
 export function generateStaticParams() {
-  return getDocumentSlugs("help").map((slug) => ({ slug }));
+  return getMarkDownData("content/help/").map((item) => ({ slug: item.slug }));
 }

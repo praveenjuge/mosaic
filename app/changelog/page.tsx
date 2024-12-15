@@ -5,11 +5,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import markdownToHtml from "@/lib/markdownToHtml";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
-import { load } from "outstatic/server";
 
 export const dynamic = "force-static";
 
@@ -21,15 +20,7 @@ export const metadata: Metadata = {
   },
 };
 
-const allPosts = await (await load())
-  .find({ collection: "changelog" }, [
-    "title",
-    "slug",
-    "publishedAt",
-    "content",
-  ])
-  .sort({ publishedAt: -1 })
-  .toArray();
+const allPosts = getMarkDownData("content/changelog/");
 
 export default function Page() {
   return (
@@ -55,7 +46,7 @@ export default function Page() {
             <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
               <div
                 dangerouslySetInnerHTML={{
-                  __html: markdownToHtml(item.content),
+                  __html: item.content,
                 }}
               ></div>
             </CardContent>

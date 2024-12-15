@@ -6,11 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { BrandX, Envelope } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { load } from "outstatic/server";
 import Guides from "./guides";
 
 export const dynamic = "force-static";
@@ -31,23 +31,17 @@ type Post = {
   category: string;
 };
 
-const allPosts = (await (await load())
-  .find({ collection: "help" }, ["title", "slug", "category"])
-  .sort({ publishedAt: -1 })
-  .toArray()) as unknown as Post[];
+const allPosts = getMarkDownData("content/help/");
 
 export default function Page() {
   // Group posts by category
-  const groupedPosts = allPosts.reduce(
-    (acc: Record<string, Post[]>, post: Post) => {
-      if (!acc[post.category]) {
-        acc[post.category] = [];
-      }
-      acc[post.category].push(post);
-      return acc;
-    },
-    {},
-  );
+  const groupedPosts = allPosts.reduce<Record<string, Post[]>>((acc, post) => {
+    if (!acc[post.category]) {
+      acc[post.category] = [];
+    }
+    acc[post.category].push(post);
+    return acc;
+  }, {});
 
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">
