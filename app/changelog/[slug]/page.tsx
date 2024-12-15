@@ -5,34 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getMarkDownContent, getMarkDownData } from "@/lib/getMarkdown";
 import markdownToHtml from "@/lib/markdownToHtml";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 
 export const dynamic = "force-static";
-
-function getData(slug: string) {
-  const changelog = getDocumentBySlug("changelog", slug, [
-    "title",
-    "publishedAt",
-    "description",
-    "slug",
-    "content",
-  ]);
-
-  if (!changelog) notFound();
-
-  return { ...changelog, content: markdownToHtml(changelog.content) };
-}
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const changelog = getData(params.slug);
+  const changelog = getMarkDownContent("content/changelog/", params.slug);
 
   return {
     title: changelog.title,
@@ -53,7 +39,10 @@ export default async function Page(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
-  const changelog = getData(params.slug);
+  const changelog = getMarkDownContent("content/changelog/", params.slug);
+
+  if (!changelog) notFound();
+
   return (
     <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
       <meta
@@ -87,5 +76,7 @@ export default async function Page(props: {
 }
 
 export function generateStaticParams() {
-  return getDocumentSlugs("changelog").map((slug) => ({ slug }));
+  return getMarkDownData("content/changelog/").map((item) => ({
+    slug: item.slug,
+  }));
 }

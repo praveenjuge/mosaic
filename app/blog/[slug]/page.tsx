@@ -5,34 +5,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { getMarkDownContent, getMarkDownData } from "@/lib/getMarkdown";
 import markdownToHtml from "@/lib/markdownToHtml";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getDocumentBySlug, getDocumentSlugs } from "outstatic/server";
 
 export const dynamic = "force-static";
-
-function getData(slug: string) {
-  const blog = getDocumentBySlug("blog", slug, [
-    "title",
-    "publishedAt",
-    "description",
-    "slug",
-    "content",
-  ]);
-
-  if (!blog) notFound();
-
-  return { ...blog, content: markdownToHtml(blog.content) };
-}
 
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  const blog = getData(params.slug);
+  const blog = getMarkDownContent("content/blog/", params.slug);
 
   return {
     title: blog.title,
@@ -53,7 +39,10 @@ export default async function Page(props: {
   params: Promise<{ slug: string }>;
 }) {
   const params = await props.params;
-  const blog = getData(params.slug);
+  const blog = getMarkDownContent("content/blog/", params.slug);
+
+  if (!blog) notFound();
+
   return (
     <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
       <meta itemProp="image" content={getOgImageUrl("blog/" + params.slug)} />
@@ -62,7 +51,7 @@ export default async function Page(props: {
       </CardDescription>
       <Card>
         <CardHeader className="pb-0">
-          <CardTitle className="text-balance text-4xl font-semibold tracking-tighter">
+          <CardTitle className="text-balance text-2xl font-bold tracking-tight">
             {blog.title}
           </CardTitle>
           <CardDescription>
@@ -86,5 +75,5 @@ export default async function Page(props: {
 }
 
 export function generateStaticParams() {
-  return getDocumentSlugs("blog").map((slug) => ({ slug }));
+  return getMarkDownData("content/blog/").map((item) => ({ slug: item.slug }));
 }

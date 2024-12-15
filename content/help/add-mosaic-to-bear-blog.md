@@ -1,29 +1,24 @@
 ---
 title: "Add Mosaic to Bear Blog"
-status: "published"
-author:
-  name: "Praveen Juge"
-  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
 slug: "add-mosaic-to-bear-blog"
 description: ""
-coverImage: ""
 category: "Guides"
 publishedAt: "2024-09-16T17:21:41.891Z"
 ---
 
 ### Prerequisites
 
-1. **Have a Bear Blog**
+- **Have a Bear Blog**
 
-   First, ensure you’ve created your Bear Blog at [bearblog.dev](https://bearblog.dev/). Your blog URL will look something like `yourblogname.bearblog.dev`. For example, check out our blog at [naveenhonestraj.bearblog.dev](https://naveenhonestraj.bearblog.dev/).
+  First, ensure you’ve created your Bear Blog at [bearblog.dev](https://bearblog.dev/). Your blog URL will look something like `yourblogname.bearblog.dev`. For example, check out our blog at [naveenhonestraj.bearblog.dev](https://naveenhonestraj.bearblog.dev/).
 
-2. **Sign up for Mosaic**
+- **Sign up for Mosaic**
 
-   Next, sign up for Mosaic and add your Bear Blog website to it. Our onboarding widget will guide you through this process, making it quick and easy to get started.
+  Next, sign up for Mosaic and add your Bear Blog website to it. Our onboarding widget will guide you through this process, making it quick and easy to get started.
 
-3. **Get the URL from Mosaic**
+- **Get the URL from Mosaic**
 
-   Once your website is set up in Mosaic, you’ll find the OG image URL under the **URL column** of your site’s page. Copy this URL, as you’ll need it for the integration.
+  Once your website is set up in Mosaic, you’ll find the OG image URL under the **URL column** of your site’s page. Copy this URL, as you’ll need it for the integration.
 
 ---
 
@@ -31,24 +26,24 @@ publishedAt: "2024-09-16T17:21:41.891Z"
 
 Bear Blog is different from many modern blog platforms because it’s a fully hosted solution, meaning you don’t need to build and deploy it locally. You can simply log in and create blog posts with ease. Here’s how to integrate Mosaic into Bear Blog and add OG images to your posts:
 
-1. **Create or edit a blog post**
+- **Create or edit a blog post**
 
-   Start by either creating a new post or editing an existing one.
+  Start by either creating a new post or editing an existing one.
 
-2. **Add the** `meta_image` **attribute**
+- **Add the** `meta_image` **attribute**
 
-   In your post, you can add the following attributes to include an OG image:
+  In your post, you can add the following attributes to include an OG image:
 
-   ```yaml
-   title: How to integrate Mosaic in BearBlog.dev
-   link: how-to-integrate-mosaic-in-bearblogdev
-   meta_image: https://mosaicimg.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev
-   ```
+  ```yaml
+  title: How to integrate Mosaic in BearBlog.dev
+  link: how-to-integrate-mosaic-in-bearblogdev
+  meta_image: https://mosaicimg.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev
+  ```
 
-   - The `meta_image` field should contain the Mosaic image URL with the **link** parameter appended to it.
-   - If you haven’t created a custom link for your post, simply publish your post with the title attribute first. Bear Blog will automatically generate a link, which you can then use in the `meta_image` field when you republish your post.
+  - The `meta_image` field should contain the Mosaic image URL with the **link** parameter appended to it.
+  - If you haven’t created a custom link for your post, simply publish your post with the title attribute first. Bear Blog will automatically generate a link, which you can then use in the `meta_image` field when you republish your post.
 
-   **Tip:** This method allows you to dynamically generate beautiful OG images for your blog posts.
+  **Tip:** This method allows you to dynamically generate beautiful OG images for your blog posts.
 
 ![](/images/screenshot-202024-09-16-20at-209.05.07-e2-80-afpm-AzMT.png)
 

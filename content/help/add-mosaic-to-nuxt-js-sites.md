@@ -1,12 +1,7 @@
 ---
 title: "Add Mosaic to Nuxt.js sites"
-status: "published"
-author:
-  name: "Naveen Honest Raj"
-  picture: "https://avatars.githubusercontent.com/u/10878354?v=4"
 slug: "add-mosaic-to-nuxt-js-sites"
 description: ""
-coverImage: ""
 category: "Guides"
 publishedAt: "2024-09-27T08:48:06.079Z"
 ---

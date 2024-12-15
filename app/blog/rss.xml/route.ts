@@ -4,22 +4,12 @@ import {
   website_description,
   website_url,
 } from "@/lib/constants";
-import markdownToHtml from "@/lib/markdownToHtml";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { Feed } from "feed";
-import { load } from "outstatic/server";
 
 export const dynamic = "force-static";
 
-const allPosts = await (await load())
-  .find({ collection: "blog" }, [
-    "title",
-    "publishedAt",
-    "description",
-    "content",
-    "slug",
-  ])
-  .sort({ publishedAt: -1 })
-  .toArray();
+const allPosts = getMarkDownData("content/blog/");
 
 export function GET() {
   const feed = new Feed({
@@ -42,12 +32,11 @@ export function GET() {
 
   for (const post of allPosts) {
     const url = `${website_url}blog/${post.slug}`;
-    const content = markdownToHtml(post.content) as string;
     feed.addItem({
       title: post.title || "",
       id: url,
       link: url,
-      content: `${post.description}<br />${content}`,
+      content: `${post.description}<br />${post.content}`,
       description: post.description || "",
       date: new Date(post.publishedAt || ""),
       author: [
