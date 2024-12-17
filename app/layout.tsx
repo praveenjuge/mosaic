@@ -1,6 +1,5 @@
 import "@/app/globals.css";
 import Aside from "@/components/aside";
-import CounterscaleScript from "@/components/counterscale-script";
 import { OnboardingCard } from "@/components/onboarding-card";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
@@ -55,7 +54,7 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02",_"ss03",_"ss04",_"ss07",_"ss08",_"ss09"] [font-synthesis:none] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
+        className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02",_"ss03",_"ss04",_"ss07",_"ss08",_"ss09"] [text-rendering:optimizeLegibility] [touch-action:manipulation]`}
       >
         <body className="relative text-sm">
           <ThemeProvider
@@ -80,7 +79,6 @@ export default function RootLayout({
             </Suspense>
             <Toaster richColors />
           </ThemeProvider>
-          <CounterscaleScript />
         </body>
       </html>
     </ClerkProvider>
