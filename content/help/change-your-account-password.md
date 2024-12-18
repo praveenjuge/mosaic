@@ -1,7 +1,5 @@
 ---
 title: "Change Your Account Password"
-slug: "change-your-account-password"
-description: ""
 category: "Authentication"
 publishedAt: "2024-08-18T09:51:15.583Z"
 ---

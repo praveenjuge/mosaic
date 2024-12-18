@@ -1,12 +1,6 @@
 ---
 title: "The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime"
-status: "published"
-author:
-  name: "Praveen Juge"
-  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
-slug: "the-secret-to-seamless-deployments-how-we-achieved-near-zero-downtime"
 description: "Discover how Mosaic HQ achieves near-zero downtime deployment with Docker and Caddy. Learn our step-by-step process to ensure smooth updates with minimal user disruption."
-coverImage: ""
 publishedAt: "2024-08-18T09:23:19.552Z"
 ---
 

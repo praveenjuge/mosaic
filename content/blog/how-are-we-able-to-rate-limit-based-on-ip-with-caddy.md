@@ -1,12 +1,6 @@
 ---
 title: "How are we able to rate limit based on IP with Caddy"
-status: "published"
-author:
-  name: "Praveen Juge"
-  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
-slug: "how-are-we-able-to-rate-limit-based-on-ip-with-caddy"
 description: "Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance."
-coverImage: ""
 publishedAt: "2024-08-01T07:51:36.232Z"
 ---
 

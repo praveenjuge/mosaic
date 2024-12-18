@@ -1,12 +1,6 @@
 ---
 title: "How to run your own OG image creator?"
-status: "published"
-author:
-  name: "Praveen Juge"
-  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
-slug: "how-to-run-your-own-og-image-creator"
 description: "Ever wondered how to create eye-catching Open Graph (OG) images without any design skills? Those captivating images that appear when you share links on social media are OG images. Here's a step-by-step guide to creating your own using Playwright and Python."
-coverImage: ""
 publishedAt: "2024-07-31T08:16:13.093Z"
 ---
 

@@ -1,12 +1,6 @@
 ---
 title: "Why do you need personalized OG images? Why skip boring or no OG images?"
-status: "published"
-author:
-  name: "Naveen Honest Raj"
-  picture: "https://avatars.githubusercontent.com/u/10878354?v=4"
-slug: "why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images"
 description: "Ever clicked on a link and been greeted by a bland, generic image? Or worse, no image at all? "
-coverImage: ""
 publishedAt: "2024-09-27T08:37:21.750Z"
 ---
 

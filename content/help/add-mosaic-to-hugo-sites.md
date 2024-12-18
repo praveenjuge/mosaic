@@ -1,7 +1,5 @@
 ---
 title: "Add Mosaic to Hugo sites"
-slug: "add-mosaic-to-hugo-sites"
-description: ""
 category: "Guides"
 publishedAt: "2024-09-27T08:38:56.976Z"
 ---

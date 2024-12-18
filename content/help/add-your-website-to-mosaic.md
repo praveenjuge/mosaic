@@ -1,7 +1,5 @@
 ---
 title: "Add Your Website to Mosaic"
-slug: "add-your-website-to-mosaic"
-description: ""
 category: "Getting Started"
 publishedAt: "2024-07-18T14:25:38.421Z"
 ---

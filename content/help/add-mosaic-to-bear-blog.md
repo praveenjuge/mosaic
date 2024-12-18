@@ -1,7 +1,5 @@
 ---
 title: "Add Mosaic to Bear Blog"
-slug: "add-mosaic-to-bear-blog"
-description: ""
 category: "Guides"
 publishedAt: "2024-09-16T17:21:41.891Z"
 ---

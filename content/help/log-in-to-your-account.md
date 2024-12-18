@@ -1,7 +1,5 @@
 ---
 title: "Log In to Your Account"
-slug: "log-in-to-your-account"
-description: ""
 category: "Authentication"
 publishedAt: "2024-07-18T14:14:32.336Z"
 ---

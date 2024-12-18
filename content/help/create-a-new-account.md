@@ -1,7 +1,5 @@
 ---
 title: "Create a New Account"
-slug: "create-a-new-account"
-description: ""
 category: "Authentication"
 publishedAt: "2024-07-18T14:09:12.600Z"
 ---
