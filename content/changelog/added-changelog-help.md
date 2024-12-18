@@ -1,7 +1,5 @@
 ---
 title: "Added Changelog & Help"
-slug: "added-changelog-help"
-description: ""
 publishedAt: "2024-07-26T17:41:59.000Z"
 ---
 

@@ -55,13 +55,6 @@ export default async function Page(props: {
       <Card>
         <CardHeader className="pb-0">
           <CardTitle>{changelog.title}</CardTitle>
-          <CardDescription>
-            {new Date(changelog.publishedAt).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </CardDescription>
         </CardHeader>
         <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
           <div

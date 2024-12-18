@@ -1,12 +1,5 @@
 ---
 title: "Dark Mode"
-status: "published"
-author:
-  name: "Praveen Juge"
-  picture: "https://avatars.githubusercontent.com/u/13696888?v=4"
-slug: "dark-mode"
-description: ""
-coverImage: ""
 publishedAt: "2024-08-07T15:18:52.292Z"
 ---
 

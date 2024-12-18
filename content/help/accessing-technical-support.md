@@ -1,6 +1,5 @@
 ---
 title: "Accessing Technical Support"
-slug: "accessing-technical-support"
 description: "How to contact Mosaic technical support for assistance."
 category: "Troubleshooting"
 publishedAt: "2024-07-17T16:48:02.393Z"

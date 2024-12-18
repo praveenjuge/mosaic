@@ -35,13 +35,6 @@ export default function Page() {
           <Card>
             <CardHeader className="pb-0">
               <CardTitle>{item.title}</CardTitle>
-              <CardDescription>
-                {new Date(item.publishedAt).toLocaleDateString("en-US", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </CardDescription>
             </CardHeader>
             <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
               <div

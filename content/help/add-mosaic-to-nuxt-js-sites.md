@@ -1,7 +1,5 @@
 ---
 title: "Add Mosaic to Nuxt.js sites"
-slug: "add-mosaic-to-nuxt-js-sites"
-description: ""
 category: "Guides"
 publishedAt: "2024-09-27T08:48:06.079Z"
 ---
