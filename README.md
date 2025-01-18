@@ -27,3 +27,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 LEMONSQUEEZY_API_KEY=
 NEXT_PUBLIC_LEMONSQUEEZY_MYNA_URL=
 ```
+
+## TODO
+
+- Remove Supabase Everywhere 
+- Move existing suapbase tables and data to API
+- Create a slack notification for database errors
