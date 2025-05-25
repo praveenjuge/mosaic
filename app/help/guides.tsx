@@ -10,6 +10,7 @@ interface Guide {
   title: string;
   slug: string;
   svg?: string;
+  svgdark?: boolean;
   steps: { title: string; code?: string; codeLang?: string }[];
 }
 
@@ -47,7 +48,8 @@ export default function Page() {
       {
         title:
           "You can use the `generateMetadata` function in combination with dynamic routes. Create a dynamic route in your Next.js app. For example, let's create a `[slug].tsx` file in the `app/posts` directory.",
-        code: `export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+        code:
+          `export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
   const slug = await (params.slug);
 
   return {
@@ -75,6 +77,7 @@ export default function Page() {
   {
     title: "React",
     slug: "react",
+    svgdark: true,
     steps: [
       {
         title: "First, install React Helmet:",
@@ -103,14 +106,15 @@ export default function Page() {
         codeLang: "js",
       },
       {
-        title: `Remember to replace the placeholder values (like 'Your Page Title' and 'yourwebsite.com') with your actual page title and website URL.`,
+        title:
+          `Remember to replace the placeholder values (like 'Your Page Title' and 'yourwebsite.com') with your actual page title and website URL.`,
       },
     ],
   },
   {
     title: "Remix",
     slug: "remix",
-    svg: "remix_light",
+    svgdark: true,
     steps: [
       {
         title:
@@ -160,7 +164,8 @@ export default function App() {
       {
         title:
           "To add OG metadata to a specific route (e.g., `app/routes/your-page.tsx`), export a `meta` function that returns an array of meta objects.",
-        code: `import type { MetaFunction, LoaderFunction } from "@remix-run/node";
+        code:
+          `import type { MetaFunction, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 type LoaderData = {
@@ -216,6 +221,7 @@ export default function YourPage() {
   {
     title: "Astro",
     slug: "astro",
+    svgdark: true,
     steps: [
       {
         title: "In your Astro page, you can add the OG image URL:",
@@ -625,6 +631,7 @@ export default function CustomPage() {
   {
     title: "Dub",
     slug: "dub",
+    svgdark: true,
     steps: [
       {
         title:
@@ -715,7 +722,8 @@ description: 'Learn how to use our platform'
     slug: "wordpress",
     steps: [
       {
-        title: `Open your WordPress theme’s functions.php file (Appearance > Theme Editor > Theme Functions – functions.php).`,
+        title:
+          `Open your WordPress theme’s functions.php file (Appearance > Theme Editor > Theme Functions – functions.php).`,
         code: `function add_dynamic_og_image() {
     // Get the current post slug
     global $post;
@@ -750,10 +758,10 @@ export function GuideLink({ guide }: { guide: Guide }) {
       <img
         alt={`${guide.title} icon`}
         className={cn(
-          "shrink-0 select-none",
+          "shrink-0 select-none dark:block not-dark:hidden",
           guide.slug === "hugo" ? "size-12" : "size-4",
         )}
-        src={`https://svgl.app/library/${guide.svg || guide.slug}.svg`}
+        src={`https://svgl.app/library/${guide.svg}.svg`}
       />
       {guide.title}
       <ChevronRight className="size-4 stroke-2 text-muted-foreground" />
@@ -768,9 +776,7 @@ export default function Guides() {
         <CardTitle>Framework Guides</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
-        {guides.map((guide) => (
-          <GuideLink key={guide.slug} guide={guide} />
-        ))}
+        {guides.map((guide) => <GuideLink key={guide.slug} guide={guide} />)}
       </CardContent>
     </Card>
   );

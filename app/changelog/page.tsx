@@ -31,20 +31,19 @@ export default function Page() {
       </CardHeader>
 
       {allPosts.map((item) => (
-        <Link key={item.slug} href={`/changelog/${item.slug}`}>
-          <Card>
-            <CardHeader className="pb-0">
-              <CardTitle>{item.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: item.content,
-                }}
-              ></div>
-            </CardContent>
-          </Card>
-        </Link>
+        <Card key={item.slug}>
+          <CardHeader className="pb-0">
+            <CardTitle>{item.title}</CardTitle>
+          </CardHeader>
+          <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
+            <div
+              dangerouslySetInnerHTML={{
+                __html: item.content,
+              }}
+            >
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );

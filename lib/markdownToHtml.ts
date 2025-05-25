@@ -1,6 +1,7 @@
 import { fromHighlighter } from "@shikijs/markdown-it/core";
 import MarkdownIt from "markdown-it";
 import { createHighlighterCore } from "shiki/core";
+import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 
 const md = new MarkdownIt({
   html: true,
@@ -44,7 +45,7 @@ const highlighter = await createHighlighterCore({
     import("shiki/langs/svelte.mjs"),
     import("shiki/langs/php.mjs"),
   ],
-  loadWasm: import("shiki/wasm"),
+  engine: createOnigurumaEngine(() => import("shiki/wasm")),
 });
 md.use(
   fromHighlighter(highlighter as never, {

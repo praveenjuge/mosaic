@@ -95,10 +95,30 @@ export default function Page() {
             Send a DM on X
           </Link>
           {/* TODO */}
-          {/* <a href="#" className={buttonVariants({ variant: "outline" })}>
+          {
+            /* <a href="#" className={buttonVariants({ variant: "outline" })}>
             <Ticket className="mr-2 size-4" />
             Submit a Ticket
-          </a> */}
+          </a> */
+          }
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Privacy and Terms</CardTitle>
+          <CardDescription>
+            Review our privacy policy and terms of service to understand how we
+            protect your data and outline our service agreements.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Link
+            href="/legal"
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Read →
+          </Link>
         </CardContent>
       </Card>
     </div>
