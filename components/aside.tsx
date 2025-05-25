@@ -3,9 +3,7 @@
 import { SignedIn, UserButton } from "@clerk/nextjs";
 import {
   Config,
-  Copyright,
   Earth,
-  FileText,
   Home,
   Lightning,
   ListCheck,

@@ -26,14 +26,14 @@ export default function CTA() {
           <ClerkLoading>
             <Button disabled>
               Start for Free
-              <ArrowLongRight className="ml-2 size-4" stroke={2} />
+              <ArrowLongRight className="size-4" stroke={2} />
             </Button>
           </ClerkLoading>
           <ClerkLoaded>
             <SignUpButton mode="modal">
               <Button>
                 Start for Free
-                <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                <ArrowLongRight className="size-4" stroke={2} />
               </Button>
             </SignUpButton>
           </ClerkLoaded>

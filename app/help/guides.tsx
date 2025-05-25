@@ -9,8 +9,8 @@ const mosaicURL = "https://mosaicimg.com/use?url=yourwebsite.com";
 interface Guide {
   title: string;
   slug: string;
-  svg?: string;
-  svgdark?: boolean;
+  svgLight?: string;
+  svgDark?: string;
   steps: { title: string; code?: string; codeLang?: string }[];
 }
 
@@ -18,7 +18,8 @@ export const guides: Guide[] = [
   {
     title: "Next.js",
     slug: "nextjs",
-    svg: "nextjs_icon_dark",
+    svgLight: "nextjs_icon_dark",
+    svgDark: "nextjs_icon_dark",
     steps: [
       {
         title:
@@ -77,7 +78,8 @@ export default function Page() {
   {
     title: "React",
     slug: "react",
-    svgdark: true,
+    svgLight: "react_light",
+    svgDark: "react_dark",
     steps: [
       {
         title: "First, install React Helmet:",
@@ -114,7 +116,8 @@ export default function Page() {
   {
     title: "Remix",
     slug: "remix",
-    svgdark: true,
+    svgLight: "remix_light",
+    svgDark: "remix_dark",
     steps: [
       {
         title:
@@ -221,7 +224,8 @@ export default function YourPage() {
   {
     title: "Astro",
     slug: "astro",
-    svgdark: true,
+    svgLight: "astro",
+    svgDark: "astro_dark",
     steps: [
       {
         title: "In your Astro page, you can add the OG image URL:",
@@ -340,7 +344,8 @@ useHead({
   {
     title: "HTML",
     slug: "html",
-    svg: "html5",
+    svgLight: "html5",
+    svgDark: "html5",
     steps: [
       {
         title: "In your HTML file, you can add the OG image URL:",
@@ -631,7 +636,8 @@ export default function CustomPage() {
   {
     title: "Dub",
     slug: "dub",
-    svgdark: true,
+    svgLight: "dub",
+    svgDark: "dub_dark_logo",
     steps: [
       {
         title:
@@ -758,10 +764,22 @@ export function GuideLink({ guide }: { guide: Guide }) {
       <img
         alt={`${guide.title} icon`}
         className={cn(
+          "shrink-0 select-none dark:hidden not-dark:block",
+          guide.slug === "hugo" ? "size-12" : "size-4",
+        )}
+        src={guide.svgLight
+          ? `https://svgl.app/library/${guide.svgLight}.svg`
+          : `https://svgl.app/library/${guide.slug}.svg`}
+      />
+      <img
+        alt={`${guide.title} icon`}
+        className={cn(
           "shrink-0 select-none dark:block not-dark:hidden",
           guide.slug === "hugo" ? "size-12" : "size-4",
         )}
-        src={`https://svgl.app/library/${guide.svg}.svg`}
+        src={guide.svgDark
+          ? `https://svgl.app/library/${guide.svgDark}.svg`
+          : `https://svgl.app/library/${guide.slug}.svg`}
       />
       {guide.title}
       <ChevronRight className="size-4 stroke-2 text-muted-foreground" />

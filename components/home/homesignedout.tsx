@@ -69,7 +69,7 @@ export default function HomeSignedOut() {
               <>
                 <Button size="lg" disabled>
                   Start for Free
-                  <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                  <ArrowLongRight className="size-4" stroke={2} />
                 </Button>
                 <Button variant="outline" size="lg" disabled>
                   Sign In
@@ -80,7 +80,7 @@ export default function HomeSignedOut() {
             <ClerkLoading>
               <Button size="lg" disabled>
                 Start for Free
-                <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                <ArrowLongRight className="size-4" stroke={2} />
               </Button>
               <Button variant="outline" size="lg" disabled>
                 Sign In
@@ -90,7 +90,7 @@ export default function HomeSignedOut() {
               <SignUpButton mode="modal">
                 <Button size="lg">
                   Start for Free
-                  <ArrowLongRight className="ml-2 size-4" stroke={2} />
+                  <ArrowLongRight className="size-4" stroke={2} />
                 </Button>
               </SignUpButton>
               <SignInButton mode="modal">
@@ -109,43 +109,45 @@ export default function HomeSignedOut() {
             key={index}
             className="grid grid-cols-1 items-center gap-10 md:grid-cols-2"
           >
-            {index % 2 === 0 ? (
-              <>
-                <div className="flex flex-col gap-6">
-                  <h2 className="text-xl font-semibold">{content.title}</h2>
-                  <div className="flex flex-col gap-4">
-                    {content.points.map((point, pointIndex) => (
-                      <FeaturePoint key={pointIndex}>{point}</FeaturePoint>
-                    ))}
+            {index % 2 === 0
+              ? (
+                <>
+                  <div className="flex flex-col gap-6">
+                    <h2 className="text-xl font-semibold">{content.title}</h2>
+                    <div className="flex flex-col gap-4">
+                      {content.points.map((point, pointIndex) => (
+                        <FeaturePoint key={pointIndex}>{point}</FeaturePoint>
+                      ))}
+                    </div>
                   </div>
-                </div>
-                <Image
-                  src={content.image}
-                  alt={content.title}
-                  className="w-full object-cover"
-                  width={500}
-                  height={327}
-                />
-              </>
-            ) : (
-              <>
-                <Image
-                  src={content.image}
-                  alt={content.title}
-                  className="w-full object-cover"
-                  width={500}
-                  height={327}
-                />
-                <div className="order-first flex flex-col gap-6 md:order-none">
-                  <h2 className="text-xl font-semibold">{content.title}</h2>
-                  <div className="flex flex-col gap-4">
-                    {content.points.map((point, pointIndex) => (
-                      <FeaturePoint key={pointIndex}>{point}</FeaturePoint>
-                    ))}
+                  <Image
+                    src={content.image}
+                    alt={content.title}
+                    className="w-full object-cover"
+                    width={500}
+                    height={327}
+                  />
+                </>
+              )
+              : (
+                <>
+                  <Image
+                    src={content.image}
+                    alt={content.title}
+                    className="w-full object-cover"
+                    width={500}
+                    height={327}
+                  />
+                  <div className="order-first flex flex-col gap-6 md:order-none">
+                    <h2 className="text-xl font-semibold">{content.title}</h2>
+                    <div className="flex flex-col gap-4">
+                      {content.points.map((point, pointIndex) => (
+                        <FeaturePoint key={pointIndex}>{point}</FeaturePoint>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </>
-            )}
+                </>
+              )}
           </div>
         ))}
       </section>

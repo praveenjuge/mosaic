@@ -19,7 +19,7 @@ export default [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "next/core-web-vitals",
-    "plugin:tailwindcss/recommended",
+    // "plugin:tailwindcss/recommended",
     "prettier",
   ),
   {

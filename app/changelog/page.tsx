@@ -8,7 +8,6 @@ import {
 import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
-import Link from "next/link";
 
 export const dynamic = "force-static";
 
@@ -31,11 +30,11 @@ export default function Page() {
       </CardHeader>
 
       {allPosts.map((item) => (
-        <Card key={item.slug}>
+        <Card key={item.slug} className="gap-0 pb-0">
           <CardHeader className="pb-0">
             <CardTitle>{item.title}</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-sm prose-zinc max-w-none pb-2 dark:prose-invert">
+          <CardContent className="prose prose-sm prose-zinc max-w-none dark:prose-invert">
             <div
               dangerouslySetInnerHTML={{
                 __html: item.content,

@@ -22,7 +22,7 @@ export async function ManageCard() {
   const ManageButton = ({ disabled = false }) => (
     <Button variant={disabled ? "outline" : "default"} disabled={disabled}>
       Manage Plan
-      <ExternalLink className="ml-2 size-4 stroke-2" />
+      <ExternalLink className="size-4 stroke-2" />
     </Button>
   );
 
@@ -39,19 +39,19 @@ export async function ManageCard() {
             </CardDescription>
           </div>
           <Suspense fallback={<ManageButton disabled />}>
-            {subscriptionId ? (
-              <Link
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: "default" })}
-                href={`https://app.gumroad.com/subscriptions/${subscriptionId}/manage`}
-              >
-                Manage Plan
-                <ExternalLink className="ml-2 size-4 stroke-2" />
-              </Link>
-            ) : (
-              <ManageButton disabled />
-            )}
+            {subscriptionId
+              ? (
+                <Link
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({ variant: "default" })}
+                  href={`https://app.gumroad.com/subscriptions/${subscriptionId}/manage`}
+                >
+                  Manage Plan
+                  <ExternalLink className="size-4 stroke-2" />
+                </Link>
+              )
+              : <ManageButton disabled />}
           </Suspense>
         </CardHeader>
       </Card>
