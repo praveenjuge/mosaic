@@ -39,9 +39,7 @@ const navItems = [
 
 const secondaryNavItems = [
   { href: "/changelog", icon: ListCheck, label: "Changelog" },
-  { href: "/blog", icon: FileText, label: "Blog" },
   { href: "/help", icon: Support, label: "Help & Guides" },
-  { href: "/legal", icon: Copyright, label: "Privacy & Terms" },
 ];
 
 export default function Aside() {
@@ -53,7 +51,8 @@ export default function Aside() {
         <Logo colorMode="mono" />
         <Suspense
           fallback={
-            <div className="block size-6 shrink-0 rounded-full bg-sidebar-border"></div>
+            <div className="block size-6 shrink-0 rounded-full bg-sidebar-border">
+            </div>
           }
         >
           <SignedIn>
