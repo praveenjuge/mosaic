@@ -771,6 +771,7 @@ export function GuideLink({ guide }: { guide: Guide }) {
           ? `https://svgl.app/library/${guide.svgLight}.svg`
           : `https://svgl.app/library/${guide.slug}.svg`}
       />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         alt={`${guide.title} icon`}
         className={cn(
