@@ -18,12 +18,12 @@ export function ModeToggle() {
       type="single"
       disabled={!defaultValue}
       value={defaultValue}
-      className="rounded-full border-[0.5px] bg-muted p-0.5"
+      className="border-[0.5px] bg-muted p-0.5 w-full"
     >
       <ToggleGroupItem
         value="system"
         onClick={() => setTheme("system")}
-        className="w-full gap-2 rounded-full data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
       >
         <Desktop className="size-5" />
         System
@@ -31,7 +31,7 @@ export function ModeToggle() {
       <ToggleGroupItem
         value="light"
         onClick={() => setTheme("light")}
-        className="w-full gap-2 rounded-full data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
       >
         <Sun className="size-5" />
         Light
@@ -39,7 +39,7 @@ export function ModeToggle() {
       <ToggleGroupItem
         value="dark"
         onClick={() => setTheme("dark")}
-        className="w-full gap-2 rounded-full data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
       >
         <Moon className="size-5" />
         Dark

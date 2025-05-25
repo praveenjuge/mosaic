@@ -24,24 +24,24 @@ const ImageContainer = ({
   alt: string;
 }) => (
   <div className="relative h-52 w-full">
-    {isLoading ? (
-      <Skeleton className="size-full" />
-    ) : src ? (
-      <>
-        <Skeleton className="absolute inset-0 size-full rounded-none" />
-        <img
-          src={src}
-          alt={alt}
-          width={600}
-          height={250}
-          className="relative size-full object-cover"
-        />
-      </>
-    ) : (
-      <div className="flex size-full items-center justify-center bg-primary-foreground">
-        <p>No image available</p>
-      </div>
-    )}
+    {isLoading ? <Skeleton className="size-full" /> : src
+      ? (
+        <>
+          <Skeleton className="absolute inset-0 size-full rounded-none" />
+          <img
+            src={src}
+            alt={alt}
+            width={600}
+            height={250}
+            className="relative size-full object-cover"
+          />
+        </>
+      )
+      : (
+        <div className="flex size-full items-center justify-center bg-primary-foreground">
+          <p>No image available</p>
+        </div>
+      )}
   </div>
 );
 
@@ -57,19 +57,21 @@ const ContentContainer = ({
   url: string;
 }) => (
   <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-    {isLoading ? (
-      <>
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-4 w-1/2" />
-      </>
-    ) : (
-      <>
-        <p className="line-clamp-1 font-semibold">{title}</p>
-        <p className="line-clamp-2">{description}</p>
-        <p className="text-muted-foreground">{url}</p>
-      </>
-    )}
+    {isLoading
+      ? (
+        <>
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+        </>
+      )
+      : (
+        <>
+          <p className="line-clamp-1 font-semibold">{title}</p>
+          <p className="line-clamp-2">{description}</p>
+          <p className="text-muted-foreground">{url}</p>
+        </>
+      )}
   </div>
 );
 
@@ -114,7 +116,9 @@ export default function OGImageDemo() {
   const mosaicImageUrl = useMemo(
     () =>
       submittedUrl
-        ? `https://get.mosaicimg.com/image/get_test_image?url=${encodeURIComponent(submittedUrl)}`
+        ? `https://get.mosaicimg.com/image/get_test_image?url=${
+          encodeURIComponent(submittedUrl)
+        }`
         : "/images/mosaic-example-og.png",
     [submittedUrl],
   );
@@ -148,7 +152,7 @@ export default function OGImageDemo() {
           />
           <Button type="submit" variant="outline" disabled={isLoading}>
             Get a Live Demo of your new OG Image
-            <FatCornerRightDown className="ml-2 size-4" />
+            <FatCornerRightDown className="size-4" />
           </Button>
         </form>
         {error && (
@@ -160,11 +164,9 @@ export default function OGImageDemo() {
           <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
             <ImageContainer
               isLoading={isLoading}
-              src={
-                ogData
-                  ? ogData.image || null
-                  : "/images/original-example-og.jpg"
-              }
+              src={ogData
+                ? ogData.image || null
+                : "/images/original-example-og.jpg"}
               alt="Original Open Graph Image"
             />
             <ContentContainer

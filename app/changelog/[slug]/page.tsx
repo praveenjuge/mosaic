@@ -52,7 +52,7 @@ export default async function Page(props: {
       <CardDescription>
         <Link href="/changelog">← Changelog</Link>
       </CardDescription>
-      <Card>
+      <Card className="gap-0 pb-0">
         <CardHeader className="pb-0">
           <CardTitle>{changelog.title}</CardTitle>
         </CardHeader>
@@ -61,7 +61,8 @@ export default async function Page(props: {
             dangerouslySetInnerHTML={{
               __html: changelog.content,
             }}
-          ></div>
+          >
+          </div>
         </CardContent>
       </Card>
     </article>

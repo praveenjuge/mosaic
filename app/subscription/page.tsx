@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardFooter,
@@ -176,10 +177,12 @@ export default function Page() {
       </CardHeader>
       <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-3">
         {plans.map((plan, index) => (
-          <Card key={index}>
-            <CardHeader className="flex-row justify-between space-y-0 border-b-[0.5px]">
+          <Card key={index} className="gap-0">
+            <CardHeader className="flex-row justify-between">
               <CardTitle>{plan.title}</CardTitle>
-              <Badge variant="outline">{plan.description}</Badge>
+              <CardAction className="ml-auto">
+                <Badge variant="outline">{plan.description}</Badge>
+              </CardAction>
             </CardHeader>
             <CardContent className="flex flex-col py-6">
               <div className="flex items-center gap-2">

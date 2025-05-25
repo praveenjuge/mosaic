@@ -21,7 +21,7 @@ export default function Page() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <CardHeader className="p-0">
+        <CardHeader className="p-0 w-full">
           <CardTitle>{metadata.title as string}</CardTitle>
           <CardDescription>{metadata.description}</CardDescription>
         </CardHeader>

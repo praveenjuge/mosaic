@@ -105,7 +105,7 @@ export function OnboardingCard() {
         className="fixed bottom-4 right-4 z-50"
       >
         Start here ({completedSteps}/{TOTAL_STEPS})
-        <ChevronUp className="ml-2 size-4" />
+        <ChevronUp className="size-4" />
       </Button>
     );
   }
@@ -113,7 +113,7 @@ export function OnboardingCard() {
   return (
     <SignedIn>
       <div className="fixed bottom-4 right-4 z-50">
-        <Card className="w-full max-w-md shadow-lg">
+        <Card className="w-full max-w-md shadow-lg py-0">
           <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4">
             <ClosePopover
               isOpen={isPopoverOpen}
@@ -219,14 +219,20 @@ function OnboardingStep({
   const isCompleted = step.isCompleted(userData);
   return (
     <li
-      className={`${isCompleted ? "pointer-events-none line-through opacity-40" : ""}`}
+      className={`${
+        isCompleted ? "pointer-events-none line-through opacity-40" : ""
+      }`}
     >
       <Link
         href={step.href}
         className="flex items-start gap-3 rounded border-[0.5px] bg-primary-foreground p-3 transition-colors hover:bg-secondary"
       >
         <div
-          className={`flex size-6 shrink-0 items-center justify-center rounded-full border-[0.5px] text-xs font-medium ${isCompleted ? "border-emerald-500 bg-emerald-500 text-primary-foreground" : "bg-background"}`}
+          className={`flex size-6 shrink-0 items-center justify-center rounded-full border-[0.5px] text-xs font-medium ${
+            isCompleted
+              ? "border-emerald-500 bg-emerald-500 text-primary-foreground"
+              : "bg-background"
+          }`}
         >
           {isCompleted ? <Check className="size-3 stroke-2" /> : stepNumber}
         </div>

@@ -23,28 +23,28 @@ export async function AddWebsite() {
     <>
       <ClerkLoading>
         <Button size="sm" disabled>
-          <Plus className="mr-1 size-4" stroke={2} />
+          <Plus className="size-4" stroke={2} />
           Add Website
         </Button>
       </ClerkLoading>
       <ClerkLoaded>
         <SignedIn>
-          {preventSubmission ? (
-            <Link
-              href="/subscription"
-              className={buttonVariants({ size: "sm" })}
-            >
-              <Plus className="mr-1 size-4" stroke={2} />
-              Upgrade to Pro
-            </Link>
-          ) : (
-            <AddWebsiteModal />
-          )}
+          {preventSubmission
+            ? (
+              <Link
+                href="/subscription"
+                className={buttonVariants({ size: "sm" })}
+              >
+                <Plus className="size-4" stroke={2} />
+                Upgrade to Pro
+              </Link>
+            )
+            : <AddWebsiteModal />}
         </SignedIn>
         <SignedOut>
           <SignInButton mode="modal">
             <Button size="sm">
-              <Plus className="mr-1 size-4" stroke={2} />
+              <Plus className="size-4" stroke={2} />
               Add Website
             </Button>
           </SignInButton>

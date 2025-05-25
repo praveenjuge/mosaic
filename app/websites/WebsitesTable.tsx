@@ -45,73 +45,77 @@ export default async function WebsitesTable() {
 
   return (
     <SignedIn>
-      <Card>
-        {data.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Website</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead>Images</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((website: Website) => (
-                <TableRow key={website.id}>
-                  <TableCell className="flex items-center gap-2">
-                    {website.favicon_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={website.favicon_url}
-                        className="size-4"
-                        alt={
-                          website.title ? website.title : website.website_url
-                        }
-                        width={16}
-                        height={16}
-                      />
-                    ) : (
-                      <Globe className="size-4" />
-                    )}
-                    <Link
-                      href={`/websites/${website.id}`}
-                      className="max-w-xs truncate font-medium text-primary"
-                    >
-                      {website.title
-                        ? website.title
-                        : website.cleaned_website_url}
-                    </Link>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="max-w-lg items-center truncate font-medium">
-                        {`${website_url}use?url=https://${website.cleaned_website_url}`}
-                      </span>
-                      <CopyButton
-                        text={`${website_url}use?url=https://${website.cleaned_website_url}`}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell>{website.total_count}</TableCell>
-                  <TableCell className="flex items-center gap-2">
-                    <EditWebsite
-                      websiteId={website.id}
-                      currentUrl={website.website_url}
-                    />
-                    <span>•</span>
-                    <DeleteWebsite websiteId={website.id} />
-                  </TableCell>
+      <Card className="p-0">
+        {data.length > 0
+          ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Website</TableHead>
+                  <TableHead>URL</TableHead>
+                  <TableHead>Images</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <CardHeader>
-            <CardTitle>No websites yet</CardTitle>
-            <CardDescription>Add a new website to get started.</CardDescription>
-          </CardHeader>
-        )}
+              </TableHeader>
+              <TableBody>
+                {data.map((website: Website) => (
+                  <TableRow key={website.id}>
+                    <TableCell className="flex items-center gap-2">
+                      {website.favicon_url
+                        ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={website.favicon_url}
+                            className="size-4"
+                            alt={website.title
+                              ? website.title
+                              : website.website_url}
+                            width={16}
+                            height={16}
+                          />
+                        )
+                        : <Globe className="size-4" />}
+                      <Link
+                        href={`/websites/${website.id}`}
+                        className="max-w-xs truncate font-medium text-primary"
+                      >
+                        {website.title
+                          ? website.title
+                          : website.cleaned_website_url}
+                      </Link>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-1">
+                        <span className="max-w-lg items-center truncate font-medium">
+                          {`${website_url}use?url=https://${website.cleaned_website_url}`}
+                        </span>
+                        <CopyButton
+                          text={`${website_url}use?url=https://${website.cleaned_website_url}`}
+                        />
+                      </div>
+                    </TableCell>
+                    <TableCell>{website.total_count}</TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <EditWebsite
+                        websiteId={website.id}
+                        currentUrl={website.website_url}
+                      />
+                      <span>•</span>
+                      <DeleteWebsite websiteId={website.id} />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )
+          : (
+            <CardHeader>
+              <CardTitle>No websites yet</CardTitle>
+              <CardDescription>
+                Add a new website to get started.
+              </CardDescription>
+            </CardHeader>
+          )}
       </Card>
     </SignedIn>
   );
