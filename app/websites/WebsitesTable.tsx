@@ -109,7 +109,7 @@ export default async function WebsitesTable() {
             </Table>
           )
           : (
-            <CardHeader>
+            <CardHeader className="py-6">
               <CardTitle>No websites yet</CardTitle>
               <CardDescription>
                 Add a new website to get started.
