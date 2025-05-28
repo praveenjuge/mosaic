@@ -212,7 +212,7 @@ export default function OGImageDemo() {
           <Input
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="Enter your website URL (e.g., github.com)"
+            placeholder="Enter your website URL"
             aria-label="Enter URL for OG image preview"
             className="bg-background"
           />
