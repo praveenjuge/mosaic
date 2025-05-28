@@ -5,12 +5,12 @@ export const dynamic = "force-dynamic";
 
 // Initialize R2 client
 function getR2Client() {
-  const r2AccessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const r2SecretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const r2AccessKeyId = process.env.DEMO_R2_ACCESS_KEY_ID;
+  const r2SecretAccessKey = process.env.DEMO_R2_SECRET_ACCESS_KEY;
   const r2AccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
   if (!r2AccessKeyId || !r2SecretAccessKey || !r2AccountId) {
-    throw new Error("Missing R2 configuration");
+    throw new Error("Missing Demo R2 configuration");
   }
 
   return new AWS.S3({
@@ -34,7 +34,7 @@ export async function GET(
     }
 
     const s3 = getR2Client();
-    const bucketName = process.env.R2_BUCKET_NAME || "mosaic-screenshots";
+    const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
 
     // Get the object from R2
     const object = await s3

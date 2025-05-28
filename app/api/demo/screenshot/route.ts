@@ -11,12 +11,12 @@ function generateCacheKey(url: string): string {
 
 // Initialize R2 client
 function getR2Client() {
-  const r2AccessKeyId = process.env.R2_ACCESS_KEY_ID;
-  const r2SecretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
+  const r2AccessKeyId = process.env.DEMO_R2_ACCESS_KEY_ID;
+  const r2SecretAccessKey = process.env.DEMO_R2_SECRET_ACCESS_KEY;
   const r2AccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
   if (!r2AccessKeyId || !r2SecretAccessKey || !r2AccountId) {
-    throw new Error("Missing R2 configuration");
+    throw new Error("Missing Demo R2 configuration");
   }
 
   return new AWS.S3({
@@ -35,7 +35,7 @@ async function checkImageInR2(
 ): Promise<string | null> {
   try {
     const s3 = getR2Client();
-    const bucketName = process.env.R2_BUCKET_NAME || "mosaic-screenshots";
+    const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
 
     await s3
       .headObject({
@@ -47,7 +47,7 @@ async function checkImageInR2(
     // If no error, object exists - return our internal API URL
     const host = request.headers.get("host") || "localhost:3000";
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}/api/images/${cacheKey}.png`;
+    return `${protocol}://${host}/api/demo/images/${cacheKey}.png`;
   } catch (error: unknown) {
     if (
       error &&
@@ -70,7 +70,7 @@ async function uploadToR2(
 ): Promise<string | null> {
   try {
     const s3 = getR2Client();
-    const bucketName = process.env.R2_BUCKET_NAME || "mosaic-screenshots";
+    const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
 
     await s3
       .upload({
@@ -85,7 +85,7 @@ async function uploadToR2(
     // Return internal API URL instead of public R2 URL for better reliability
     const host = request.headers.get("host") || "localhost:3000";
     const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}/api/images/${cacheKey}.png`;
+    return `${protocol}://${host}/api/demo/images/${cacheKey}.png`;
   } catch (error) {
     console.error("Error uploading to R2:", error);
     return null;

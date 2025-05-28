@@ -129,7 +129,7 @@ export default function OGImageDemo() {
     try {
       // Fetch OG data using our own API
       const ogResponse = await fetch(
-        `/api/metadata?url=${encodeURIComponent(normalizedUrl)}`,
+        `/api/demo/metadata?url=${encodeURIComponent(normalizedUrl)}`,
       );
       if (!ogResponse.ok) {
         const errorData = await ogResponse.json();
@@ -159,7 +159,7 @@ export default function OGImageDemo() {
       // Fetch screenshot (this might take longer)
       try {
         const screenshotResponse = await fetch(
-          `/api/screenshot?url=${encodeURIComponent(normalizedUrl)}`,
+          `/api/demo/screenshot?url=${encodeURIComponent(normalizedUrl)}`,
         );
         if (!screenshotResponse.ok) {
           throw new Error(`Screenshot API error: ${screenshotResponse.status}`);
