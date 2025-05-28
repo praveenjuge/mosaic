@@ -121,6 +121,11 @@ async function takeScreenshot(url: string): Promise<ArrayBuffer | null> {
           waitUntil: "networkidle0",
           timeout: 30000,
         },
+        addStyleTag: [
+          {
+            content: "html, body { overflow: hidden; }",
+          },
+        ],
       }),
     });
 
