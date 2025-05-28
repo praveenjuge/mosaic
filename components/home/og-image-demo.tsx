@@ -133,7 +133,23 @@ export default function OGImageDemo() {
       );
       if (!ogResponse.ok) {
         const errorData = await ogResponse.json();
-        throw new Error(errorData.error || "Failed to fetch metadata");
+        let userMessage = "Failed to fetch metadata";
+
+        // Provide more specific error messages based on status
+        if (ogResponse.status === 403) {
+          userMessage = errorData.error ||
+            "This website blocks automated requests. Please try a different URL.";
+        } else if (ogResponse.status === 404) {
+          userMessage =
+            "The requested page was not found. Please check the URL and try again.";
+        } else if (ogResponse.status === 502) {
+          userMessage =
+            "The website is currently experiencing issues. Please try again later.";
+        } else {
+          userMessage = errorData.error || "Failed to fetch metadata";
+        }
+
+        throw new Error(userMessage);
       }
       const ogDataResult = await ogResponse.json();
       setOgData(ogDataResult);
@@ -162,9 +178,10 @@ export default function OGImageDemo() {
       }
     } catch (error) {
       console.log("Error fetching data:", error);
-      setError(
-        "Failed to load data. Please check if the URL is correct and try again!",
-      );
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Failed to load data. Please check if the URL is correct and try again!";
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
       setIsScreenshotLoading(false);
