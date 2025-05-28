@@ -3,8 +3,8 @@ import type { NextConfig } from "next";
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
-  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
-  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://api.dub.co https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;
+  connect-src 'self' https://clerk.mosaicimg.com https://api.github.com/graphql https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://get.mosaicimg.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev https://api.cloudflare.com;
+  img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
   style-src 'self' 'unsafe-inline';
@@ -35,6 +35,10 @@ const nextConfig: NextConfig = {
       {
         source: "/(.*)",
         headers: [
+          {
+            key: "Content-Security-Policy",
+            value: cspHeader.replace(/\n/g, "").replace(/\s{2,}/g, " "),
+          },
           {
             key: "X-Frame-Options",
             value: "DENY",
