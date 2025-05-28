@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowDown, ArrowRight, FatCornerRightDown } from "@mynaui/icons-react";
 import Image from "next/image";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 
 interface OGData {
   title: string;
@@ -14,17 +14,37 @@ interface OGData {
   image: string;
 }
 
+// Normalize URL by adding protocol if missing
+function normalizeUrl(url: string): string {
+  if (!url) return url;
+
+  // Remove any leading/trailing whitespace
+  url = url.trim();
+
+  // If URL already has a protocol, return as is
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  // Add https:// prefix for URLs without protocol
+  return `https://${url}`;
+}
+
 const ImageContainer = ({
   isLoading,
   src,
   alt,
+  isScreenshotLoading,
 }: {
   isLoading: boolean;
   src: string | null;
   alt: string;
+  isScreenshotLoading?: boolean;
 }) => (
   <div className="relative h-52 w-full">
-    {isLoading ? <Skeleton className="size-full" /> : src
+    {isLoading || isScreenshotLoading
+      ? <Skeleton className="size-full rounded-none" />
+      : src
       ? (
         <>
           <Skeleton className="absolute inset-0 size-full rounded-none" />
@@ -87,41 +107,69 @@ export default function OGImageDemo() {
   const [submittedUrl, setSubmittedUrl] = useState("");
   const [ogData, setOgData] = useState<OGData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mosaicImageUrl, setMosaicImageUrl] = useState(
+    "/images/mosaic-example-og.png",
+  );
 
   const fetchOGData = useCallback(async () => {
     if (!inputUrl) {
       setError("Please enter a URL");
       return;
     }
+
+    // Normalize the URL before processing
+    const normalizedUrl = normalizeUrl(inputUrl);
+
     setIsLoading(true);
+    setIsScreenshotLoading(true);
     setError("");
+
     try {
-      const response = await fetch(
-        `https://api.dub.co/metatags?url=${encodeURIComponent(inputUrl)}`,
+      // Fetch OG data using our own API
+      const ogResponse = await fetch(
+        `/api/metadata?url=${encodeURIComponent(normalizedUrl)}`,
       );
-      if (!response.ok) throw new Error("Failed to fetch OG data");
-      setOgData(await response.json());
-      setSubmittedUrl(inputUrl);
+      if (!ogResponse.ok) {
+        const errorData = await ogResponse.json();
+        throw new Error(errorData.error || "Failed to fetch metadata");
+      }
+      const ogDataResult = await ogResponse.json();
+      setOgData(ogDataResult);
+      setSubmittedUrl(normalizedUrl);
+      setIsLoading(false); // OG data loaded, stop general loading
+
+      // Fetch screenshot (this might take longer)
+      try {
+        const screenshotResponse = await fetch(
+          `/api/screenshot?url=${encodeURIComponent(normalizedUrl)}`,
+        );
+        if (!screenshotResponse.ok) {
+          throw new Error(`Screenshot API error: ${screenshotResponse.status}`);
+        }
+        const screenshotData = await screenshotResponse.json();
+
+        if (screenshotData.imageUrl) {
+          setMosaicImageUrl(screenshotData.imageUrl);
+        } else {
+          throw new Error("No image URL received");
+        }
+      } catch (screenshotError) {
+        console.error("Screenshot error:", screenshotError);
+        setError("Failed to generate screenshot. Using fallback image.");
+        // Keep the default fallback image
+      }
     } catch (error) {
-      console.log("Error fetching OG data:", error);
+      console.log("Error fetching data:", error);
       setError(
-        "Failed to load OG data. Please check if the URL is correct and try again!",
+        "Failed to load data. Please check if the URL is correct and try again!",
       );
     } finally {
       setIsLoading(false);
+      setIsScreenshotLoading(false);
     }
   }, [inputUrl]);
-
-  const mosaicImageUrl = useMemo(
-    () =>
-      submittedUrl
-        ? `https://get.mosaicimg.com/image/get_test_image?url=${
-          encodeURIComponent(submittedUrl)
-        }`
-        : "/images/mosaic-example-og.png",
-    [submittedUrl],
-  );
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -147,8 +195,9 @@ export default function OGImageDemo() {
           <Input
             value={inputUrl}
             onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="Enter your website URL"
+            placeholder="Enter your website URL (e.g., github.com)"
             aria-label="Enter URL for OG image preview"
+            className="bg-background"
           />
           <Button type="submit" variant="outline" disabled={isLoading}>
             Get a Live Demo of your new OG Image
@@ -188,6 +237,7 @@ export default function OGImageDemo() {
               isLoading={isLoading}
               src={mosaicImageUrl}
               alt="Mosaic Open Graph Image"
+              isScreenshotLoading={isScreenshotLoading}
             />
             <ContentContainer
               isLoading={isLoading}
