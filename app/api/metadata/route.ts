@@ -103,12 +103,16 @@ export async function GET(request: NextRequest) {
       const response = await fetch(url, {
         headers: {
           "User-Agent":
-            "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaicimg.com)",
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
           Accept:
-            "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-          "Accept-Language": "en-US,en;q=0.5",
-          "Accept-Encoding": "gzip, deflate",
+            "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+          "Accept-Language": "en-US,en;q=0.9",
+          "Accept-Encoding": "gzip, deflate, br",
           "Cache-Control": "no-cache",
+          "Sec-Fetch-Dest": "document",
+          "Sec-Fetch-Mode": "navigate",
+          "Sec-Fetch-Site": "none",
+          "Upgrade-Insecure-Requests": "1",
         },
         signal: controller.signal,
       });
@@ -116,11 +120,34 @@ export async function GET(request: NextRequest) {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
+        // Handle specific status codes with more user-friendly messages
+        let errorMessage = `Failed to fetch URL: ${response.status} ${response.statusText}`;
+        let statusCode = 400;
+
+        if (response.status === 999) {
+          errorMessage =
+            "This website blocks automated requests. Please try a different URL.";
+          statusCode = 403;
+        } else if (response.status === 403) {
+          errorMessage =
+            "Access to this website is forbidden. The site may have anti-bot protection.";
+          statusCode = 403;
+        } else if (response.status === 404) {
+          errorMessage = "The requested page was not found.";
+          statusCode = 404;
+        } else if (response.status >= 500) {
+          errorMessage =
+            "The website is currently experiencing issues. Please try again later.";
+          statusCode = 502;
+        }
+
+        console.log(
+          `Fetch failed for ${url}: ${response.status} ${response.statusText}`,
+        );
+
         return NextResponse.json(
-          {
-            error: `Failed to fetch URL: ${response.status} ${response.statusText}`,
-          },
-          { status: 400 },
+          { error: errorMessage },
+          { status: statusCode },
         );
       }
 
