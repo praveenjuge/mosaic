@@ -53,7 +53,7 @@ async function fetchWebsiteData(token: string, websiteId: string) {
 }
 
 interface WebsiteData {
-  cleaned_website_url: string;
+  url_base: string;
   total_count: number;
   total_bytes: number;
 }
@@ -95,14 +95,14 @@ export default async function Page(props: {
           <CardDescription>
             <Link href="/websites">← Back</Link>
           </CardDescription>
-          <CardTitle>{websiteData?.cleaned_website_url}</CardTitle>
+          <CardTitle>{websiteData?.url_base}</CardTitle>
         </div>
-        {websiteData?.total_count !== 0 ? (
-          <RefreshSiteButton token={token} websiteId={params.slug} />
-        ) : (
-          // Intentional empty span
-          <span></span>
-        )}
+        {websiteData?.total_count !== 0
+          ? <RefreshSiteButton token={token} websiteId={params.slug} />
+          : (
+            // Intentional empty span
+            <span></span>
+          )}
       </CardHeader>
       {websiteData?.total_count === 0 && (
         <div
@@ -116,7 +116,7 @@ export default async function Page(props: {
               Let&apos;s get you set up!
             </p>
           </div>
-          <WebsiteInfoModal websiteUrl={websiteData?.cleaned_website_url} />
+          <WebsiteInfoModal websiteUrl={websiteData?.url_base} />
         </div>
       )}
       <div className="grid gap-6 md:grid-cols-3">

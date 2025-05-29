@@ -78,6 +78,7 @@ hooks/              # Custom React hooks
 - Handle errors gracefully with try/catch blocks
 - Use proper RLS (Row Level Security) policies
 - Follow the pattern: `createClient()` for server operations
+- For any db migrations or schema changes, use Supabase CLI
 
 ### UI/UX Patterns
 - Use shadcn/ui components consistently
