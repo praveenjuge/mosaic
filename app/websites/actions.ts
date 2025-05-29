@@ -1,13 +1,25 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
 export const handleDelete = async (websiteId: string) => {
   "use server";
 
   const client = await createClient();
-  const { error } = await client.from("websites").delete().eq("id", websiteId);
+
+  // Get the current user
+  const { userId } = await auth();
+  if (!userId) {
+    throw new Error("You must be logged in to delete a website.");
+  }
+
+  const { error } = await client
+    .from("websites_new")
+    .delete()
+    .eq("id", websiteId)
+    .eq("user_id", userId); // Ensure user can only delete their own websites
 
   if (error) {
     throw new Error(error.message);
@@ -23,11 +35,21 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
   const cleanedUrl = cleanUrl(url);
   const client = await createClient();
 
-  // Check if the cleaned URL already exists
+  // Get the current user
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      status: "error",
+      message: "You must be logged in to edit a website.",
+    };
+  }
+
+  // Check if the cleaned URL already exists for this user (excluding current website)
   const { data: existingWebsite } = await client
-    .from("websites")
+    .from("websites_new")
     .select("id")
-    .eq("cleaned_website_url", cleanedUrl)
+    .eq("url_base", cleanedUrl)
+    .eq("user_id", userId)
     .neq("id", websiteId)
     .single();
 
@@ -39,9 +61,10 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
   }
 
   const { data, error } = await client
-    .from("websites")
-    .update({ website_url: url, cleaned_website_url: cleanedUrl })
+    .from("websites_new")
+    .update({ url_base: cleanedUrl })
     .eq("id", websiteId)
+    .eq("user_id", userId) // Ensure user can only edit their own websites
     .select();
 
   if (error) {
@@ -60,11 +83,21 @@ export const handleAdd = async (formData: FormData) => {
   const cleanedUrl = cleanUrl(url);
   const client = await createClient();
 
-  // Check if the cleaned URL already exists
+  // Get the current user
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      status: "error",
+      message: "You must be logged in to add a website.",
+    };
+  }
+
+  // Check if the cleaned URL already exists for this user
   const { data: existingWebsite } = await client
-    .from("websites")
+    .from("websites_new")
     .select("id")
-    .eq("cleaned_website_url", cleanedUrl)
+    .eq("url_base", cleanedUrl)
+    .eq("user_id", userId)
     .single();
 
   if (existingWebsite) {
@@ -75,8 +108,8 @@ export const handleAdd = async (formData: FormData) => {
   }
 
   const { data, error } = await client
-    .from("websites")
-    .insert([{ website_url: url, cleaned_website_url: cleanedUrl }])
+    .from("websites_new")
+    .insert([{ url_base: cleanedUrl, user_id: userId }])
     .select();
 
   if (error) {

@@ -21,15 +21,6 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
     optimizePackageImports: ["@mynaui/icons-react"],
   },
-  async redirects() {
-    return [
-      {
-        source: "/use",
-        destination: "https://get.mosaicimg.com/image/get_image",
-        permanent: false,
-      },
-    ];
-  },
   async headers() {
     return [
       {
