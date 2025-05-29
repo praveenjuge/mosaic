@@ -28,7 +28,7 @@ export default function Page() {
         <Suspense
           fallback={
             <Button size="sm" disabled>
-              <Plus className="mr-1 size-4" stroke={2} />
+              <Plus className="size-4" stroke={2} />
               Add Website
             </Button>
           }

@@ -25,7 +25,7 @@ export default function AddWebsiteModal() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button size="sm">
-            <Plus className="mr-1 size-4" stroke={2} />
+            <Plus className="size-4" stroke={2} />
             Add Website
           </Button>
         </DialogTrigger>

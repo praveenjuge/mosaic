@@ -66,7 +66,7 @@ export function RefreshSiteButton({
           disabled={pending || loading}
           aria-disabled={pending || loading}
         >
-          <Repeat className="mr-2 size-4 stroke-2" />
+          <Repeat className="size-4 stroke-2" />
           Refresh OG Images
         </Button>
       </AlertDialogTrigger>
