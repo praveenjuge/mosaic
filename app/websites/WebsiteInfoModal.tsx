@@ -15,7 +15,9 @@ import { GuideLink, guides } from "../help/guides";
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
   const getMetaTag = (isHomePage: boolean) =>
-    `<meta property="og:image" content="https://mosaicimg.com/use?url=${isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`}" />`;
+    `<meta property="og:image" content="https://mosaicimg.com/use?url=${
+      isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`
+    }" />`;
 
   const renderCodeBlock = (content: string) => (
     <div className="relative w-full whitespace-pre-wrap rounded bg-muted p-2 pr-4 font-mono text-xs font-medium">
@@ -30,7 +32,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
     <Dialog>
       <DialogTrigger asChild>
         <Button size="sm" variant="outline">
-          <Code className="mr-2 size-4 stroke-2" />
+          <Code className="size-4 stroke-2" />
           Add to Your Website
         </Button>
       </DialogTrigger>
@@ -62,9 +64,10 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
           </Tabs>
 
           <div className="flex flex-wrap gap-2">
-            {guides.map((guide) => (
-              <GuideLink key={guide.slug} guide={guide} />
-            ))}
+            {guides.map((guide) => <GuideLink
+              key={guide.slug}
+              guide={guide}
+            />)}
           </div>
 
           {["Learn more about Open Graph", "Validate your metadata"].map(
