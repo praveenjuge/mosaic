@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { extractUrlPartsConsistent } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import AWS from "aws-sdk";
 import crypto from "crypto";
@@ -112,10 +113,8 @@ async function storeImageInDatabase(
   try {
     const supabase = await createClient();
 
-    // Parse URL to get base and path
-    const parsedUrl = new URL(pageUrl);
-    const urlBase = `${parsedUrl.protocol}//${parsedUrl.host}`;
-    const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+    // Parse URL to get base and path using consistent parsing
+    const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
     const pageTitle = extractTitleFromUrl(pageUrl);
 
     // Get user ID from auth context (if available)
@@ -125,7 +124,7 @@ async function storeImageInDatabase(
       if (authUserId) {
         userId = authUserId;
       }
-    } catch (error) {
+    } catch {
       // Auth might not be available for public API usage
       console.log("No auth context available, using public user");
     }
@@ -146,7 +145,7 @@ async function storeImageInDatabase(
         .insert({
           user_id: userId,
           url_base: urlBase,
-          site_name: parsedUrl.hostname,
+          site_name: hostname,
         })
         .select("id")
         .single();

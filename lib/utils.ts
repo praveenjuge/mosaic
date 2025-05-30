@@ -49,3 +49,63 @@ export function formatBytes(bytes: number, decimals = 2) {
 export function getOgImageUrl(slug: string) {
   return `${website_url}use?url=https://mosaicimg.com/${slug}`;
 }
+
+/**
+ * Centralized URL cleaning function to ensure consistency across the application
+ * Returns just the hostname without protocol (e.g., "example.com")
+ */
+export function cleanUrl(url: string): string {
+  if (!url) return "";
+
+  // Remove whitespace
+  url = url.trim();
+
+  try {
+    // Try parsing as-is first
+    const parsedUrl = new URL(url);
+    return parsedUrl.hostname;
+  } catch {
+    try {
+      // If parsing fails, try adding https:// protocol
+      const urlWithProtocol =
+        url.startsWith("http://") || url.startsWith("https://")
+          ? url
+          : `https://${url}`;
+      const parsedUrl = new URL(urlWithProtocol);
+      return parsedUrl.hostname;
+    } catch {
+      // If parsing still fails, attempt to extract domain using regex
+      const domainMatch = url.match(
+        /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/,
+      );
+      return domainMatch ? domainMatch[1] : url;
+    }
+  }
+}
+
+/**
+ * Extract URL parts consistently for database storage
+ * urlBase will always be just the hostname (e.g., "example.com")
+ */
+export function extractUrlPartsConsistent(fullUrl: string): {
+  urlBase: string;
+  path: string;
+  hostname: string;
+} {
+  try {
+    const parsedUrl = new URL(fullUrl);
+    return {
+      urlBase: parsedUrl.hostname, // Just hostname, no protocol
+      path: parsedUrl.pathname + parsedUrl.search + parsedUrl.hash,
+      hostname: parsedUrl.hostname,
+    };
+  } catch {
+    // Fallback for malformed URLs
+    const cleaned = cleanUrl(fullUrl);
+    return {
+      urlBase: cleaned,
+      path: "/",
+      hostname: cleaned,
+    };
+  }
+}

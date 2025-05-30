@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getWebsiteWithStats } from "@/lib/database-helpers";
 import { formatBytes, getOgImageUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { SmileGhost } from "@mynaui/icons-react";
@@ -20,40 +21,78 @@ export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const params = await props.params;
-  return {
-    title: params.slug,
-    description: "Manage your website's OG settings here.",
-    openGraph: {
-      type: "article",
-      url: "./",
-      locale: "en_US",
-      images: {
-        url: getOgImageUrl(""),
-        alt: params.slug,
+
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        title: "Website Details",
+        description: "Manage your website's OG settings here.",
+      };
+    }
+
+    const websiteData = await getWebsiteWithStats(params.slug, userId);
+
+    if (!websiteData || !websiteData.website) {
+      return {
+        title: "Website Not Found",
+        description: "The requested website could not be found.",
+      };
+    }
+
+    const { website, total_count } = websiteData;
+    const websiteName = website.site_name || website.url_base;
+    const hasImages = total_count > 0;
+
+    const title = `${websiteName}`;
+    const description = hasImages
+      ? `Manage ${websiteName} with ${total_count} generated OG images.`
+      : `Set up OG image generation for ${websiteName}. Add Mosaic to automatically create Open Graph images.`;
+
+    return {
+      title,
+      description,
+      openGraph: {
+        title,
+        description,
+        images: [getOgImageUrl(`websites/${params.slug}`)],
       },
-    },
-  };
+      twitter: {
+        card: "summary_large_image",
+      },
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  } catch (error) {
+    console.error("Error generating metadata:", error);
+    return {
+      title: "Website Dashboard",
+      description: "Manage your website's OG settings here.",
+      openGraph: {
+        images: {
+          url: getOgImageUrl("websites"),
+          alt: "Mosaic Website Dashboard",
+        },
+      },
+    };
+  }
 }
 
-async function fetchWebsiteData(token: string, websiteId: string) {
-  const url = "https://get.mosaicimg.com/api/websites/" + websiteId;
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  return await response.json();
+async function fetchWebsiteData(websiteId: string, userId: string) {
+  return await getWebsiteWithStats(websiteId, userId);
 }
 
 interface WebsiteData {
-  url_base: string;
+  website: {
+    id: string;
+    user_id: string;
+    url_base: string;
+    site_name: string | null;
+    created_at: string;
+    updated_at: string;
+  } | null;
   total_count: number;
   total_bytes: number;
 }
@@ -63,28 +102,30 @@ export default async function Page(props: {
 }) {
   const params = await props.params;
   let websiteData: WebsiteData | null = null;
-  let token: string | null = null;
 
   try {
-    const { getToken } = await auth();
-    token = await getToken({ template: "supabase" });
-    if (token) {
-      try {
-        websiteData = await fetchWebsiteData(token, params.slug);
-      } catch (error) {
-        console.error("Error:", error);
+    const { userId } = await auth();
+
+    if (!userId) {
+      console.log("No user ID available");
+      return <div>Error: Please sign in to view this page.</div>;
+    }
+
+    try {
+      websiteData = await fetchWebsiteData(params.slug, userId);
+      if (!websiteData) {
         notFound();
       }
-    } else {
-      console.log("No token available");
-      return <div>Error: No token available.</div>;
+    } catch (error) {
+      console.error("Error:", error);
+      notFound();
     }
   } catch (error) {
     console.error("Error:", error);
     return <Skeleton className="h-24 w-full rounded-lg" />;
   }
 
-  if (!websiteData) {
+  if (!websiteData || !websiteData.website) {
     return <Skeleton className="h-24 w-full rounded-lg" />;
   }
 
@@ -95,16 +136,16 @@ export default async function Page(props: {
           <CardDescription>
             <Link href="/websites">← Back</Link>
           </CardDescription>
-          <CardTitle>{websiteData?.url_base}</CardTitle>
+          <CardTitle>{websiteData.website.url_base}</CardTitle>
         </div>
-        {websiteData?.total_count !== 0
-          ? <RefreshSiteButton token={token} websiteId={params.slug} />
+        {websiteData.total_count !== 0
+          ? <RefreshSiteButton websiteId={params.slug} />
           : (
             // Intentional empty span
             <span></span>
           )}
       </CardHeader>
-      {websiteData?.total_count === 0 && (
+      {websiteData.total_count === 0 && (
         <div
           className="flex flex-col items-start gap-4 rounded-lg border-[0.5px] border-emerald-300 bg-emerald-50 p-3 font-medium dark:border-emerald-950 dark:bg-emerald-950 md:flex-row md:items-center md:justify-between"
           role="alert"
@@ -116,13 +157,13 @@ export default async function Page(props: {
               Let&apos;s get you set up!
             </p>
           </div>
-          <WebsiteInfoModal websiteUrl={websiteData?.url_base} />
+          <WebsiteInfoModal websiteUrl={websiteData.website.url_base} />
         </div>
       )}
       <div className="grid gap-6 md:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{websiteData?.total_count}</CardTitle>
+            <CardTitle>{websiteData.total_count}</CardTitle>
             <CardDescription>Images</CardDescription>
           </CardHeader>
         </Card>
@@ -134,7 +175,7 @@ export default async function Page(props: {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{formatBytes(websiteData?.total_bytes ?? 0)}</CardTitle>
+            <CardTitle>{formatBytes(websiteData.total_bytes ?? 0)}</CardTitle>
             <CardDescription>Storage Used</CardDescription>
           </CardHeader>
         </Card>
