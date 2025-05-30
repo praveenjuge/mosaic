@@ -631,3 +631,130 @@ export async function getUserStats(userId: string): Promise<{
     return null;
   }
 }
+
+// Analytics functions
+export async function getImagesServedAnalytics(
+  userId: string,
+  days: number = 30,
+): Promise<Record<string, number>> {
+  try {
+    const supabase = await createClient();
+
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - days);
+
+    // For now, we'll simulate "served" data since we don't track actual serves
+    // In the future, you might want to track this separately or via CDN logs
+    const { data: screenshots, error } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        generated_at,
+        pages_new!inner(
+          id,
+          websites_new!inner(
+            user_id
+          )
+        )
+      `,
+      )
+      .eq("pages_new.websites_new.user_id", userId)
+      .gte("generated_at", startDate.toISOString())
+      .lte("generated_at", endDate.toISOString())
+      .order("generated_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching served analytics:", error);
+      return {};
+    }
+
+    // Group by date and count
+    const dailyCounts: Record<string, number> = {};
+
+    screenshots?.forEach((screenshot) => {
+      const date = new Date(screenshot.generated_at)
+        .toISOString()
+        .split("T")[0];
+      dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+    });
+
+    return dailyCounts;
+  } catch (error) {
+    console.error("Error in getImagesServedAnalytics:", error);
+    return {};
+  }
+}
+
+export async function getImagesGeneratedAnalytics(
+  userId: string,
+  days: number = 30,
+): Promise<Record<string, number>> {
+  try {
+    const supabase = await createClient();
+
+    // Calculate date range
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - days);
+
+    const { data: screenshots, error } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        generated_at,
+        pages_new!inner(
+          id,
+          websites_new!inner(
+            user_id
+          )
+        )
+      `,
+      )
+      .eq("pages_new.websites_new.user_id", userId)
+      .gte("generated_at", startDate.toISOString())
+      .lte("generated_at", endDate.toISOString())
+      .order("generated_at", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching generated analytics:", error);
+      return {};
+    }
+
+    // Group by date and count
+    const dailyCounts: Record<string, number> = {};
+
+    screenshots?.forEach((screenshot) => {
+      const date = new Date(screenshot.generated_at)
+        .toISOString()
+        .split("T")[0];
+      dailyCounts[date] = (dailyCounts[date] || 0) + 1;
+    });
+
+    return dailyCounts;
+  } catch (error) {
+    console.error("Error in getImagesGeneratedAnalytics:", error);
+    return {};
+  }
+}
+
+export async function getAnalyticsData(userId: string) {
+  try {
+    const [imagesServed, imagesGenerated] = await Promise.all([
+      getImagesServedAnalytics(userId, 30),
+      getImagesGeneratedAnalytics(userId, 30),
+    ]);
+
+    return {
+      page_hits: imagesServed,
+      website_page_analytics: imagesGenerated,
+    };
+  } catch (error) {
+    console.error("Error in getAnalyticsData:", error);
+    return {
+      page_hits: {},
+      website_page_analytics: {},
+    };
+  }
+}
