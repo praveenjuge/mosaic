@@ -58,3 +58,17 @@ export interface PageWithWebsite extends PageNew {
 export interface ScreenshotWithPage extends ScreenshotNew {
   pages_new: PageWithWebsite;
 }
+
+export interface WebsiteWithStats extends WebsiteNew {
+  screenshot_count: number;
+}
+
+export interface ScreenshotWithDetails {
+  id: string;
+  screenshot_url: string;
+  size_in_bytes: number;
+  generated_at: string | null;
+  page_title: string | null;
+  page_url: string;
+  website_name?: string; // Optional for when used with specific website
+}

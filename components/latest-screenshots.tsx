@@ -14,16 +14,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  getLatestScreenshotsForAllUserWebsites,
+  getLatestScreenshotsForWebsite,
+} from "@/lib/database-helpers";
+import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
 import React from "react";
 import { LocalTime } from "./local-time";
-import FetchWebsitePagesData, {
-  WebsitePageData,
-} from "./server/fetch-website-pages-data";
 
 interface LatestScreenshotsProps {
-  websitePagesData?: WebsitePageData[];
   slug?: string;
   page?: number;
   limit?: number;
@@ -36,12 +38,71 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
   limit,
   showPagination,
 }) => {
-  const response = await FetchWebsitePagesData({
-    slug: slug,
-    page: page ? page : 1,
-    limit: limit ? limit : 10,
-  });
-  const websitePagesData = response.data;
+  const { userId } = await auth();
+
+  // Debug info
+  console.log("[LatestScreenshots] Component props:", { slug, page, limit });
+  console.log("[LatestScreenshots] User ID:", userId);
+
+  if (!userId) {
+    return (
+      <CardHeader className="py-6">
+        <CardTitle>No screenshots available</CardTitle>
+        <CardDescription>
+          Please sign in to view your screenshots.
+        </CardDescription>
+      </CardHeader>
+    );
+  }
+
+  let websitePagesData: Array<ScreenshotWithDetails> = [];
+
+  if (slug) {
+    // Get screenshots for a specific website
+    const response = await getLatestScreenshotsForWebsite(
+      slug,
+      userId,
+      page || 1,
+      limit || 10,
+    );
+
+    if (!response) {
+      return (
+        <CardHeader className="py-6">
+          <CardTitle>Error loading screenshots</CardTitle>
+          <CardDescription>
+            Unable to fetch screenshots from the database.
+          </CardDescription>
+        </CardHeader>
+      );
+    }
+
+    websitePagesData = response.data;
+  } else {
+    // Get latest screenshots from all user's websites (for homepage)
+    const response = await getLatestScreenshotsForAllUserWebsites(
+      userId,
+      limit || 5,
+    );
+
+    if (!response) {
+      return (
+        <CardHeader className="py-6">
+          <CardTitle>Error loading screenshots</CardTitle>
+          <CardDescription>
+            Unable to fetch screenshots from the database.
+          </CardDescription>
+        </CardHeader>
+      );
+    }
+
+    websitePagesData = response;
+  }
+
+  // Debug final data
+  console.log("[LatestScreenshots] Final websitePagesData:", websitePagesData);
+  console.log("[LatestScreenshots] Data length:", websitePagesData?.length);
+  console.log("[LatestScreenshots] First item:", websitePagesData?.[0]);
 
   return (
     <>
@@ -53,6 +114,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                 <TableRow>
                   <TableHead>Image</TableHead>
                   <TableHead>URL</TableHead>
+                  {!slug && <TableHead>Website</TableHead>}
                   <TableHead>Size</TableHead>
                   <TableHead>Last refreshed at</TableHead>
                 </TableRow>
@@ -64,13 +126,13 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                       <Link
                         target="_blank"
                         rel="noopener noreferrer"
-                        href={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/${websitePage.image_key}`}
+                        href={websitePage.screenshot_url}
                       >
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
-                          src={`https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev/resized/75x40/${websitePage.image_key}`}
-                          alt={websitePage.title}
-                          className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center"
+                          src={websitePage.screenshot_url}
+                          alt={websitePage.page_title || websitePage.page_url}
+                          className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center object-cover"
                           width={56}
                           height={24}
                         />
@@ -84,23 +146,28 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                           href={websitePage.page_url}
                           className="max-w-xs truncate font-medium text-primary"
                         >
-                          {websitePage.title
-                            ? websitePage.title
+                          {websitePage.page_title
+                            ? websitePage.page_title
                             : websitePage.page_url}
                         </Link>
                       </div>
                     </TableCell>
+                    {!slug && (
+                      <TableCell>
+                        {websitePage.website_name || "Unknown"}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {formatBytes(websitePage.size_in_bytes)}
                     </TableCell>
                     <TableCell>
-                      {<LocalTime timeString={websitePage.updated_at} />}
+                      {<LocalTime timeString={websitePage.generated_at} />}
                     </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
             </Table>
-            {showPagination && (
+            {showPagination && slug && (
               <CardFooter className="flex justify-between border-t-[0.5px] p-2">
                 <Button variant="outline">Previous</Button>
                 <Button variant="outline">Next</Button>

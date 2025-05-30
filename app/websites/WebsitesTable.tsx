@@ -14,8 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
-import { createClient } from "@/lib/supabase/server";
-import { WebsiteNew } from "@/lib/types";
+import { getAllWebsitesWithStats } from "@/lib/database-helpers";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { Globe } from "@mynaui/icons-react";
@@ -24,21 +23,16 @@ import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
 
 export default async function WebsitesTable() {
-  const client = await createClient();
   const { userId } = await auth();
 
   if (!userId) {
     return <p>Please sign in to view your websites.</p>;
   }
 
-  const { data, error } = await client
-    .from("websites_new")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+  const data = await getAllWebsitesWithStats(userId);
 
-  if (error) {
-    return <p>Error: {JSON.stringify(error, null, 2)}</p>;
+  if (!data) {
+    return <p>Error loading websites. Please try again.</p>;
   }
 
   return (
@@ -56,7 +50,7 @@ export default async function WebsitesTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data.map((website: WebsiteNew) => (
+                {data.map((website) => (
                   <TableRow key={website.id}>
                     <TableCell className="flex items-center gap-2">
                       <Globe className="size-4" />
@@ -77,7 +71,7 @@ export default async function WebsitesTable() {
                         />
                       </div>
                     </TableCell>
-                    <TableCell>0</TableCell>
+                    <TableCell>{website.screenshot_count}</TableCell>
                     <TableCell className="flex items-center gap-2">
                       <EditWebsite
                         websiteId={website.id}

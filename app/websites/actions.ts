@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { cleanUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 
@@ -120,17 +121,3 @@ export const handleAdd = async (formData: FormData) => {
 
   return { status: "success", message: "Website added successfully", data };
 };
-
-// Updated helper function to clean the URL
-function cleanUrl(url: string): string {
-  try {
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname;
-  } catch {
-    // If parsing fails, attempt to extract domain using regex
-    const domainMatch = url.match(
-      /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/,
-    );
-    return domainMatch ? domainMatch[1] : url;
-  }
-}

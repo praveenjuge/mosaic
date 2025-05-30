@@ -12,19 +12,16 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { backend_url } from "@/lib/constants";
 import { Repeat } from "@mynaui/icons-react";
 import React from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
 
 interface RefreshSiteButtonProps {
-  token: string;
   websiteId: string;
 }
 
 export function RefreshSiteButton({
-  token,
   websiteId,
 }: RefreshSiteButtonProps) {
   const { pending } = useFormStatus();
@@ -33,27 +30,26 @@ export function RefreshSiteButton({
   const handleRefresh = async () => {
     setLoading(true);
 
-    if (token) {
-      const response = await fetch(
-        `${backend_url}websites/${websiteId}/refresh`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+    try {
+      const response = await fetch(`/api/websites/${websiteId}/refresh`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
-      );
-      try {
-        const data = await response.json();
-        if (response.ok) {
-          toast.success(data.message);
-        } else {
-          toast.error(data.message);
-        }
-      } catch (error) {
-        console.error(error);
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success(data.message);
+      } else {
+        toast.error(data.error || "Failed to refresh website");
       }
+    } catch (error) {
+      console.error("Refresh error:", error);
+      toast.error("Failed to refresh website. Please try again.");
     }
+
     setLoading(false);
   };
 

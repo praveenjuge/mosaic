@@ -1,5 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
-import { PageNew, ScreenshotNew, WebsiteNew } from "@/lib/types";
+import {
+  PageNew,
+  ScreenshotNew,
+  ScreenshotWithDetails,
+  WebsiteNew,
+  WebsiteWithStats,
+} from "@/lib/types";
+import { extractUrlPartsConsistent } from "@/lib/utils";
 
 /**
  * Helper functions for working with the new database structure
@@ -45,6 +52,189 @@ export async function getOrCreateWebsite(
     return newWebsite;
   } catch (error) {
     console.error("Error in getOrCreateWebsite:", error);
+    return null;
+  }
+}
+
+// Get website with statistics
+export async function getWebsiteWithStats(
+  websiteId: string,
+  userId: string,
+): Promise<{
+  website: WebsiteNew | null;
+  total_count: number;
+  total_bytes: number;
+} | null> {
+  try {
+    console.log("[DEBUG] getWebsiteWithStats called with:", {
+      websiteId,
+      userId,
+    });
+
+    const supabase = await createClient();
+
+    // Get website data
+    const { data: website, error: websiteError } = await supabase
+      .from("websites_new")
+      .select("*")
+      .eq("id", websiteId)
+      .eq("user_id", userId)
+      .single();
+
+    if (websiteError || !website) {
+      console.error("[DEBUG] Error fetching website:", websiteError);
+      return null;
+    }
+
+    console.log("[DEBUG] Website found:", website);
+
+    // Get statistics - count of screenshots and total size
+    const { data: stats, error: statsError } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        id,
+        size_in_bytes,
+        pages_new!inner(
+          id,
+          websites_new!inner(
+            id
+          )
+        )
+      `,
+      )
+      .eq("pages_new.websites_new.id", websiteId);
+
+    if (statsError) {
+      console.error("[DEBUG] Error fetching stats:", statsError);
+      return {
+        website,
+        total_count: 0,
+        total_bytes: 0,
+      };
+    }
+
+    console.log("[DEBUG] Stats query result:", stats);
+
+    const total_count = stats?.length || 0;
+    const total_bytes =
+      stats?.reduce((sum, item) => sum + (item.size_in_bytes || 0), 0) || 0;
+
+    console.log("[DEBUG] Calculated stats:", { total_count, total_bytes });
+
+    return {
+      website,
+      total_count,
+      total_bytes,
+    };
+  } catch (error) {
+    console.error("Error in getWebsiteWithStats:", error);
+    return null;
+  }
+}
+
+// Get latest screenshots for a website
+export async function getLatestScreenshotsForWebsite(
+  websiteId: string,
+  userId: string,
+  page: number = 1,
+  limit: number = 10,
+): Promise<{
+  data: Array<ScreenshotWithDetails>;
+  total: number;
+} | null> {
+  try {
+    console.log("[DEBUG] getLatestScreenshotsForWebsite called with:", {
+      websiteId,
+      userId,
+      page,
+      limit,
+    });
+
+    const supabase = await createClient();
+
+    // Get total count first
+    const { count, error: countError } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        id,
+        pages_new!inner(
+          id,
+          websites_new!inner(
+            id
+          )
+        )
+      `,
+        { count: "exact", head: true },
+      )
+      .eq("pages_new.websites_new.id", websiteId)
+      .eq("pages_new.websites_new.user_id", userId);
+
+    if (countError) {
+      console.error("[DEBUG] Error counting screenshots:", countError);
+      return null;
+    }
+
+    console.log("[DEBUG] Screenshot count:", count);
+
+    // Get paginated screenshots
+    const offset = (page - 1) * limit;
+    const { data: screenshots, error: screenshotsError } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        id,
+        screenshot_url,
+        size_in_bytes,
+        generated_at,
+        pages_new!inner(
+          title,
+          full_url,
+          websites_new!inner(
+            id,
+            user_id
+          )
+        )
+      `,
+      )
+      .eq("pages_new.websites_new.id", websiteId)
+      .eq("pages_new.websites_new.user_id", userId)
+      .order("generated_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (screenshotsError) {
+      console.error("[DEBUG] Error fetching screenshots:", screenshotsError);
+      return null;
+    }
+
+    console.log("[DEBUG] Screenshots fetched:", screenshots?.length || 0);
+    console.log("[DEBUG] Screenshots data:", screenshots);
+
+    const formattedData =
+      screenshots?.map(
+        (screenshot: {
+          id: string;
+          screenshot_url: string;
+          size_in_bytes?: number;
+          generated_at: string;
+          pages_new: { title?: string; full_url?: string }[];
+        }) => ({
+          id: screenshot.id,
+          screenshot_url: screenshot.screenshot_url,
+          size_in_bytes: screenshot.size_in_bytes || 0,
+          generated_at: screenshot.generated_at,
+          page_title: screenshot.pages_new?.[0]?.title || null,
+          page_url: screenshot.pages_new?.[0]?.full_url || "",
+        }),
+      ) || [];
+
+    return {
+      data: formattedData,
+      total: count || 0,
+    };
+  } catch (error) {
+    console.error("Error in getLatestScreenshotsForWebsite:", error);
     return null;
   }
 }
@@ -134,10 +324,8 @@ export async function getLatestScreenshot(
   try {
     const supabase = await createClient();
 
-    // Parse URL to get base and path
-    const parsedUrl = new URL(pageUrl);
-    const urlBase = `${parsedUrl.protocol}//${parsedUrl.host}`;
-    const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+    // Parse URL to get base and path using consistent parsing
+    const { urlBase, path } = extractUrlPartsConsistent(pageUrl);
 
     // Query the new table structure
     const { data, error } = await supabase
@@ -176,22 +364,7 @@ export function extractUrlParts(fullUrl: string): {
   path: string;
   hostname: string;
 } {
-  try {
-    const parsedUrl = new URL(fullUrl);
-    return {
-      urlBase: `${parsedUrl.protocol}//${parsedUrl.host}`,
-      path: parsedUrl.pathname + parsedUrl.search + parsedUrl.hash,
-      hostname: parsedUrl.hostname,
-    };
-  } catch (error) {
-    // Fallback for malformed URLs
-    const hostname = fullUrl.replace(/^https?:\/\//, "").split("/")[0];
-    return {
-      urlBase: `https://${hostname}`,
-      path: "/",
-      hostname: hostname,
-    };
-  }
+  return extractUrlPartsConsistent(fullUrl);
 }
 
 export function extractTitleFromUrl(url: string): string {
@@ -212,5 +385,249 @@ export function extractTitleFromUrl(url: string): string {
       .replace(/\b\w/g, (l) => l.toUpperCase());
   } catch {
     return url;
+  }
+}
+
+// Get all websites for a user with screenshot counts
+export async function getAllWebsitesWithStats(
+  userId: string,
+): Promise<Array<WebsiteWithStats> | null> {
+  try {
+    const supabase = await createClient();
+
+    // Get all websites with screenshot counts in a single query
+    const { data: websites, error } = await supabase
+      .from("websites_new")
+      .select(
+        `
+        *,
+        pages_new(
+          id,
+          screenshots_new(
+            id
+          )
+        )
+      `,
+      )
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching websites with stats:", error);
+      return null;
+    }
+
+    // Transform the data to include screenshot counts
+    const websitesWithStats =
+      websites?.map(
+        (
+          website: WebsiteNew & {
+            pages_new: Array<{
+              id: string;
+              screenshots_new: Array<{ id: string }>;
+            }>;
+          },
+        ) => {
+          const screenshot_count =
+            website.pages_new?.reduce(
+              (
+                total: number,
+                page: { screenshots_new: Array<{ id: string }> },
+              ) => {
+                return total + (page.screenshots_new?.length || 0);
+              },
+              0,
+            ) || 0;
+
+          return {
+            id: website.id,
+            user_id: website.user_id,
+            url_base: website.url_base,
+            site_name: website.site_name,
+            created_at: website.created_at,
+            updated_at: website.updated_at,
+            screenshot_count,
+          };
+        },
+      ) || [];
+
+    return websitesWithStats;
+  } catch (error) {
+    console.error("Error in getAllWebsitesWithStats:", error);
+    return null;
+  }
+}
+
+// Get latest screenshots for all user's websites
+export async function getLatestScreenshotsForAllUserWebsites(
+  userId: string,
+  limit: number = 5,
+): Promise<Array<ScreenshotWithDetails> | null> {
+  try {
+    const supabase = await createClient();
+
+    // Step 1: Get user's website IDs
+    const { data: userWebsites, error: websitesError } = await supabase
+      .from("websites_new")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (websitesError) {
+      console.error("Error fetching websites:", websitesError);
+      return null;
+    }
+
+    if (!userWebsites || userWebsites.length === 0) {
+      return [];
+    }
+
+    const websiteIds = userWebsites.map((w) => w.id);
+
+    // Step 2: Get screenshots with page data
+    const { data: screenshots, error: screenshotsError } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        id,
+        screenshot_url,
+        size_in_bytes,
+        generated_at,
+        pages_new (
+          id,
+          title,
+          full_url,
+          website_id
+        )
+      `,
+      )
+      .order("generated_at", { ascending: false });
+
+    if (screenshotsError) {
+      console.error("Error fetching screenshots:", screenshotsError);
+      return null;
+    }
+
+    if (!screenshots || screenshots.length === 0) {
+      return [];
+    }
+
+    // Step 3: Filter for user's websites
+    const userScreenshots = screenshots
+      .filter((screenshot) => {
+        const pages = screenshot.pages_new;
+        const page = Array.isArray(pages) ? pages[0] : pages;
+        return page && websiteIds.includes(page.website_id);
+      })
+      .slice(0, limit);
+
+    if (userScreenshots.length === 0) {
+      return [];
+    }
+
+    // Step 4: Get website details
+    const { data: websites, error: websiteError } = await supabase
+      .from("websites_new")
+      .select("id, site_name, url_base")
+      .in("id", websiteIds);
+
+    if (websiteError) {
+      console.error("Error fetching website details:", websiteError);
+      return null;
+    }
+
+    // Step 5: Format the data
+    const formattedData = userScreenshots.map((screenshot) => {
+      const pages = screenshot.pages_new;
+      const page = Array.isArray(pages) ? pages[0] : pages;
+      const website = websites?.find((w) => w.id === page?.website_id);
+
+      return {
+        id: screenshot.id,
+        screenshot_url: screenshot.screenshot_url,
+        size_in_bytes: screenshot.size_in_bytes || 0,
+        generated_at: screenshot.generated_at,
+        page_title: page?.title || null,
+        page_url: page?.full_url || "",
+        website_name: website?.site_name || website?.url_base || "Unknown",
+      };
+    });
+
+    return formattedData;
+  } catch (error) {
+    console.error("Error in getLatestScreenshotsForAllUserWebsites:", error);
+    return null;
+  }
+}
+
+// Get user statistics from new tables
+export async function getUserStats(userId: string): Promise<{
+  total_images: number;
+  total_storage_bytes: number;
+  total_websites: number;
+} | null> {
+  try {
+    const supabase = await createClient();
+
+    // Get all user's websites
+    const { data: websites, error: websitesError } = await supabase
+      .from("websites_new")
+      .select("id")
+      .eq("user_id", userId);
+
+    if (websitesError) {
+      console.error("Error fetching websites for stats:", websitesError);
+      return null;
+    }
+
+    const total_websites = websites?.length || 0;
+
+    if (total_websites === 0) {
+      return {
+        total_images: 0,
+        total_storage_bytes: 0,
+        total_websites: 0,
+      };
+    }
+
+    const websiteIds = websites.map((w) => w.id);
+
+    // Get all screenshots for user's websites
+    const { data: screenshots, error: screenshotsError } = await supabase
+      .from("screenshots_new")
+      .select(
+        `
+        id,
+        size_in_bytes,
+        pages_new!inner(
+          id,
+          website_id
+        )
+      `,
+      )
+      .in("pages_new.website_id", websiteIds);
+
+    if (screenshotsError) {
+      console.error("Error fetching screenshots for stats:", screenshotsError);
+      return {
+        total_images: 0,
+        total_storage_bytes: 0,
+        total_websites,
+      };
+    }
+
+    const total_images = screenshots?.length || 0;
+    const total_storage_bytes =
+      screenshots?.reduce((sum, screenshot) => {
+        return sum + (screenshot.size_in_bytes || 0);
+      }, 0) || 0;
+
+    return {
+      total_images,
+      total_storage_bytes,
+      total_websites,
+    };
+  } catch (error) {
+    console.error("Error in getUserStats:", error);
+    return null;
   }
 }
