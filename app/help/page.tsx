@@ -13,8 +13,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import Guides from "./guides";
 
-export const dynamic = "force-static";
-
 export const metadata: Metadata = {
   title: "Help & Support",
   description:
@@ -58,7 +56,7 @@ export default function Page() {
             <CardHeader>
               <CardTitle>{category}</CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col gap-2 font-medium text-primary">
+            <CardContent className="text-primary flex flex-col gap-2 font-medium">
               {posts.map((post) => (
                 <Link key={post.slug} href={`/help/${post.slug}`}>
                   {post.title}
@@ -95,12 +93,10 @@ export default function Page() {
             Send a DM on X
           </Link>
           {/* TODO */}
-          {
-            /* <a href="#" className={buttonVariants({ variant: "outline" })}>
+          {/* <a href="#" className={buttonVariants({ variant: "outline" })}>
             <Ticket className="size-4" />
             Submit a Ticket
-          </a> */
-          }
+          </a> */}
         </CardContent>
       </Card>
 

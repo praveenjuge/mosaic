@@ -12,8 +12,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { guides } from "../../guides";
 
-export const dynamic = "force-static";
-
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
@@ -63,7 +61,7 @@ export default async function Page(props: {
               key={step.title}
               className="flex flex-col gap-4 px-6 py-4 sm:grid sm:grid-cols-6"
             >
-              <p className="shrink-0 select-none font-mono font-medium uppercase text-primary">
+              <p className="text-primary shrink-0 font-mono font-medium uppercase select-none">
                 Step {index + 1}
               </p>
               <div className="gap-4 sm:col-span-5">

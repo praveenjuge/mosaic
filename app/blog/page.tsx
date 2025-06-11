@@ -9,8 +9,6 @@ import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
 
-export const dynamic = "force-static";
-
 export const metadata: Metadata = {
   title: "Blog",
   description: "Our thoughts and ideas about everything. Mostly OG Images.",
@@ -33,7 +31,7 @@ export default function Page() {
         <Link key={item.slug} href={`/blog/${item.slug}`}>
           <Card>
             <CardHeader>
-              <CardTitle className="text-balance text-xl">
+              <CardTitle className="text-xl text-balance">
                 {item.title}
               </CardTitle>
               <CardDescription>

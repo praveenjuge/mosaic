@@ -1,3 +1,4 @@
+import { GuideLink, guides } from "@/app/help/guides";
 import { CopyButton } from "@/components/copy-button";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Code, ExternalLink, SmileGhost } from "@mynaui/icons-react";
-import { GuideLink, guides } from "../help/guides";
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
@@ -20,8 +20,8 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
     }" />`;
 
   const renderCodeBlock = (content: string) => (
-    <div className="relative w-full whitespace-pre-wrap rounded bg-muted p-2 pr-4 font-mono text-xs font-medium">
-      <div className="absolute right-2 top-2">
+    <div className="bg-muted relative w-full rounded p-2 pr-4 font-mono text-xs font-medium whitespace-pre-wrap">
+      <div className="absolute top-2 right-2">
         <CopyButton text={content} />
       </div>
       {content}
@@ -65,10 +65,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
 
           <div className="flex flex-wrap gap-2">
             {guides.map((guide) => (
-              <GuideLink
-                key={guide.slug}
-                guide={guide}
-              />
+              <GuideLink key={guide.slug} guide={guide} />
             ))}
           </div>
 
@@ -79,7 +76,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
                 href={index === 0 ? "https://ogp.me/" : "https://metatags.io/"}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center font-medium text-primary"
+                className="text-primary flex items-center font-medium"
               >
                 {text} <ExternalLink className="ml-1 size-3.5 stroke-2" />
               </a>

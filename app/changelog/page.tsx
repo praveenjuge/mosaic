@@ -9,8 +9,6 @@ import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 
-export const dynamic = "force-static";
-
 export const metadata: Metadata = {
   title: "Changelog",
   description: "See what's new in the latest version of mosaic.",
@@ -34,13 +32,12 @@ export default function Page() {
           <CardHeader className="pb-0">
             <CardTitle>{item.title}</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-sm prose-zinc max-w-none dark:prose-invert">
+          <CardContent className="prose prose-sm prose-zinc dark:prose-invert max-w-none">
             <div
               dangerouslySetInnerHTML={{
                 __html: item.content,
               }}
-            >
-            </div>
+            ></div>
           </CardContent>
         </Card>
       ))}

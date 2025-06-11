@@ -12,8 +12,6 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-static";
-
 export async function generateMetadata(props: {
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
@@ -51,7 +49,7 @@ export default async function Page(props: {
       </CardDescription>
       <Card>
         <CardHeader className="pb-0">
-          <CardTitle className="text-balance text-2xl font-bold tracking-tight">
+          <CardTitle className="text-2xl font-bold tracking-tight text-balance">
             {blog.title}
           </CardTitle>
           <CardDescription>
@@ -62,7 +60,7 @@ export default async function Page(props: {
             })}
           </CardDescription>
         </CardHeader>
-        <CardContent className="prose prose-zinc max-w-2xl dark:prose-invert prose-pre:whitespace-pre-wrap">
+        <CardContent className="prose prose-zinc dark:prose-invert prose-pre:whitespace-pre-wrap max-w-2xl">
           <div
             dangerouslySetInnerHTML={{
               __html: blog.content,

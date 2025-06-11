@@ -29,7 +29,6 @@ app/                    # Next.js App Router pages
 ├── help/             # Help and documentation
 ├── legal/            # Legal pages
 ├── settings/         # User settings, theme preferences, and subscription management
-└── websites/         # Website management (add, edit, delete)
 
 components/           # Reusable React components
 ├── home/            # Homepage-specific components

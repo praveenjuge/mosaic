@@ -48,9 +48,9 @@ export default function RootLayout({
       <html
         lang="en"
         suppressHydrationWarning
-        className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility] touch-manipulation`}
+        className={`${GeistSans.variable} touch-manipulation [font-family:var(--font-geist-sans)] antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
       >
-        <body className="relative text-sm flex flex-col">
+        <body className="relative flex flex-col text-sm">
           <ThemeProvider
             enableSystem
             attribute="class"
@@ -58,12 +58,11 @@ export default function RootLayout({
             disableTransitionOnChange
           >
             <div
-              className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-primary opacity-15 blur-3xl"
+              className="bg-primary pointer-events-none fixed -top-48 -right-48 size-96 opacity-15 blur-3xl select-none"
               aria-hidden="true"
-            >
-            </div>
+            ></div>
             <Header />
-            <main className="flex-1 space-y-6 px-4 py-6 md:px-10 max-w-6xl mx-auto w-full min-h-screen">
+            <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 py-6 md:px-10">
               {children}
             </main>
             <Footer />

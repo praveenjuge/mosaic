@@ -49,6 +49,16 @@ const nextConfig: NextConfig = {
         destination: '/',
         permanent: false,
       },
+      {
+        source: '/websites',
+        destination: '/',
+        permanent: false,
+      },
+      {
+        source: '/websites/:slug*',
+        destination: '/',
+        permanent: false,
+      },
     ];
   },
   async headers() {

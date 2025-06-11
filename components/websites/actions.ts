@@ -127,7 +127,7 @@ export const handleDelete = async (websiteId: string) => {
   }
 
   console.log("Website deleted successfully");
-  revalidatePath("/websites");
+  revalidatePath("/");
 
   return {
     status: "success",
@@ -178,7 +178,7 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
     return { status: "error", message: error.message };
   }
 
-  revalidatePath("/websites");
+  revalidatePath("/");
 
   return { status: "success", message: "Website updated successfully", data };
 };
@@ -223,7 +223,7 @@ export const handleAdd = async (formData: FormData) => {
     return { status: "error", message: error.message };
   }
 
-  revalidatePath("/websites");
+  revalidatePath("/");
 
   return { status: "success", message: "Website added successfully", data };
 };

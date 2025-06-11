@@ -9,15 +9,15 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
-import { Config, Earth } from "@mynaui/icons-react";
+import { Config } from "@mynaui/icons-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import Logo from "./logo";
 
 const Header = () => {
   return (
-    <header className="sticky top-0 z-50 w-full border-b-[0.5px] bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="mx-auto flex h-14 w-full max-w-screen-2xl items-center justify-between px-4 md:px-8">
+    <header className="bg-background/95 supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b-[0.5px] backdrop-blur">
+      <div className="mx-auto flex h-12 w-full max-w-7xl items-center justify-between px-4">
         {/* Left side - Logo */}
         <div className="flex items-center">
           <Logo />
@@ -29,14 +29,12 @@ const Header = () => {
             fallback={
               <div className="flex items-center gap-2">
                 <Skeleton className="h-8 w-16" />
-                <Skeleton className="h-8 w-16" />
                 <Skeleton className="size-8 rounded-full" />
               </div>
             }
           >
             <ClerkLoading>
               <div className="flex items-center gap-2">
-                <Skeleton className="h-8 w-16" />
                 <Skeleton className="h-8 w-16" />
                 <Skeleton className="size-8 rounded-full" />
               </div>
@@ -51,9 +49,7 @@ const Header = () => {
                     </Button>
                   </SignInButton>
                   <SignUpButton mode="modal">
-                    <Button size="sm">
-                      Sign Up
-                    </Button>
+                    <Button size="sm">Sign Up</Button>
                   </SignUpButton>
                 </div>
               </SignedOut>
@@ -61,15 +57,8 @@ const Header = () => {
               <SignedIn>
                 <nav className="flex items-center gap-2 md:gap-4">
                   <Link
-                    href="/websites"
-                    className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-                  >
-                    <Earth className="size-4" />
-                    <span className="hidden sm:inline">Websites</span>
-                  </Link>
-                  <Link
                     href="/settings"
-                    className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
+                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors"
                   >
                     <Config className="size-4" />
                     <span className="hidden sm:inline">Settings</span>

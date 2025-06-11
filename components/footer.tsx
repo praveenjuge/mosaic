@@ -23,10 +23,10 @@ const footerSections = [
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t-[0.5px] bg-background">
-      <div className="mx-auto max-w-7xl pt-14 pb-8">
+    <footer className="bg-background mt-auto border-t-[0.5px]">
+      <div className="mx-auto max-w-7xl px-4 pt-14 pb-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-          <div className="space-y-8 xl:col-span-1 gap-4">
+          <div className="gap-4 space-y-8 xl:col-span-1">
             <Logo />
             <p className="text-muted-foreground mt-4">
               Transform your website&apos;s Open Graph social images by
@@ -39,7 +39,7 @@ export default function Footer() {
           <div className="mt-12 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
             <div className="md:grid md:grid-cols-1 md:gap-8">
               <div>
-                <h3 className="font-semibold leading-6 text-foreground mb-2">
+                <h3 className="text-foreground mb-2 leading-6 font-semibold">
                   {footerSections[0].title}
                 </h3>
                 <ul role="list" className="space-y-2">
@@ -47,7 +47,7 @@ export default function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="leading-6 text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground leading-6 transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -58,7 +58,7 @@ export default function Footer() {
             </div>
             <div className="md:grid md:grid-cols-1 md:gap-8">
               <div>
-                <h3 className="font-semibold leading-6 text-foreground mb-2">
+                <h3 className="text-foreground mb-2 leading-6 font-semibold">
                   {footerSections[1].title}
                 </h3>
                 <ul role="list" className="space-y-2">
@@ -66,7 +66,7 @@ export default function Footer() {
                     <li key={link.href}>
                       <Link
                         href={link.href}
-                        className="leading-6 text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-muted-foreground hover:text-foreground leading-6 transition-colors"
                       >
                         {link.label}
                       </Link>
@@ -79,8 +79,8 @@ export default function Footer() {
         </div>
         <div className="mt-12 border-t-[0.5px] pt-8">
           <p className="text-muted-foreground xl:text-center">
-            &copy; {new Date().getFullYear()} {website_name}
-            . All rights reserved.
+            &copy; {new Date().getFullYear()} {website_name}. All rights
+            reserved.
           </p>
         </div>
       </div>
