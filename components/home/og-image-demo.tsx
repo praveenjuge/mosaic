@@ -156,7 +156,7 @@ export default function OGImageDemo() {
       // Fetch screenshot (this might take longer)
       try {
         const screenshotResponse = await fetch(
-          `/api/demo/screenshot?url=${encodeURIComponent(normalizedUrl)}`,
+          `/use?url=${encodeURIComponent(normalizedUrl)}&demo=true`,
         );
         if (!screenshotResponse.ok) {
           throw new Error(`Screenshot API error: ${screenshotResponse.status}`);

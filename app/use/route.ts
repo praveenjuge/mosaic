@@ -1,14 +1,14 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
 // Utility functions
-const getDirectR2Url = (imageKey: string): string =>
-  `https://og.mosaicimg.com/${imageKey}`;
+const getDirectR2Url = (imageKey: string, isDemo = false): string =>
+  `https://og.mosaicimg.com/${isDemo ? 'demo/' : ''}${imageKey}`;
 
 const generateCacheKey = (url: string): string =>
   crypto.createHash("sha256").update(url).digest("hex");
@@ -30,7 +30,7 @@ const getR2Client = () => {
   });
 };
 
-// Check cache and return URL if exists
+// Check cache and return URL if exists (database for production, R2 for demo)
 async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   console.log(`[CACHE_CHECK_START] Checking cache for URL: ${pageUrl}`);
   try {
@@ -58,12 +58,40 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   }
 }
 
-// Upload to R2 and return direct public URL
-async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string): Promise<string | null> {
-  console.log(`[R2_UPLOAD_START] Starting R2 upload for cache key: ${cacheKey}`);
+// Check if demo image exists in R2
+async function checkDemoImageInR2(cacheKey: string): Promise<string | null> {
+  console.log(`[DEMO_CACHE_CHECK_START] Checking R2 cache for key: ${cacheKey}`);
   try {
     const s3 = getR2Client();
-    const imageKey = `${cacheKey}.png`;
+    const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
+
+    const command = new HeadObjectCommand({
+      Bucket: bucketName,
+      Key: `demo/${cacheKey}.png`,
+    });
+
+    await s3.send(command);
+
+    // If no error, object exists - return direct R2 URL
+    const cachedUrl = getDirectR2Url(`${cacheKey}.png`, true);
+    console.log(`[DEMO_CACHE_CHECK_HIT] Cache hit! Found demo image: ${cachedUrl}`);
+    return cachedUrl;
+  } catch (error: unknown) {
+    if (error && typeof error === "object" && "name" in error && error.name === "NotFound") {
+      console.log(`[DEMO_CACHE_CHECK_MISS] No cached demo image found for key: ${cacheKey}`);
+      return null;
+    }
+    console.error("[DEMO_CACHE_CHECK_ERROR] Error checking R2:", error);
+    return null;
+  }
+}
+
+// Upload to R2 and return direct public URL
+async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, isDemo = false): Promise<string | null> {
+  console.log(`[R2_UPLOAD_START] Starting R2 upload for cache key: ${cacheKey} (demo: ${isDemo})`);
+  try {
+    const s3 = getR2Client();
+    const imageKey = isDemo ? `demo/${cacheKey}.png` : `${cacheKey}.png`;
     const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
 
     console.log(`[R2_UPLOAD_CONFIG] Bucket: ${bucketName}, Key: ${imageKey}, Size: ${imageBuffer.byteLength} bytes`);
@@ -78,7 +106,7 @@ async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string): Promise<s
 
     await s3.send(command);
 
-    const directUrl = getDirectR2Url(imageKey);
+    const directUrl = getDirectR2Url(isDemo ? `${cacheKey}.png` : imageKey, isDemo);
     console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, direct URL: ${directUrl}`);
     return directUrl;
   } catch (error) {
@@ -255,7 +283,8 @@ export async function GET(request: NextRequest) {
   console.log("[API_REQUEST_START] Processing OG image request");
   try {
     const url = new URL(request.url).searchParams.get("url");
-    console.log(`[API_REQUEST_URL] Requested URL: ${url}`);
+    const isDemo = new URL(request.url).searchParams.get("demo") === "true";
+    console.log(`[API_REQUEST_URL] Requested URL: ${url}, Demo mode: ${isDemo}`);
 
     if (!url) {
       console.warn("[API_REQUEST_NO_URL] Missing URL parameter");
@@ -269,39 +298,54 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    // Check cache first
-    const cachedImageUrl = await checkImageInDatabase(url);
-    if (cachedImageUrl) {
-      console.log(`[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedImageUrl}`);
-      return NextResponse.redirect(cachedImageUrl, { status: 302 });
+    const cacheKey = generateCacheKey(url);
+    console.log(`[API_REQUEST_CACHE_KEY] Generated cache key: ${cacheKey}`);
+
+    // Check cache based on mode
+    let cachedImageUrl: string | null = null;
+    if (isDemo) {
+      cachedImageUrl = await checkDemoImageInR2(cacheKey);
+      if (cachedImageUrl) {
+        console.log(`[API_REQUEST_DEMO_CACHE_HIT] Returning cached demo image: ${cachedImageUrl}`);
+        return NextResponse.json({
+          imageUrl: cachedImageUrl,
+          cached: true,
+        });
+      }
+    } else {
+      cachedImageUrl = await checkImageInDatabase(url);
+      if (cachedImageUrl) {
+        console.log(`[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedImageUrl}`);
+        return NextResponse.redirect(cachedImageUrl, { status: 302 });
+      }
+
+      // Check if website exists (only for production mode)
+      console.log("[API_REQUEST_WEBSITE_CHECK] Checking if website exists");
+      const supabase = await createServiceRoleClient();
+      const { urlBase } = extractUrlPartsConsistent(url);
+      console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
+
+      const { data: existingWebsites, error: websiteCheckError } = await supabase
+        .from("websites_new")
+        .select("id")
+        .eq("url_base", urlBase)
+        .limit(1);
+
+      if (websiteCheckError) {
+        console.error("[API_REQUEST_WEBSITE_CHECK_ERROR] Database error checking website:", websiteCheckError);
+        return NextResponse.json({ error: "Database error while checking website" }, { status: 500 });
+      }
+
+      if (!existingWebsites?.length) {
+        console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
+        return NextResponse.json(
+          { error: "Website must be added to your account before generating OG images" },
+          { status: 404 }
+        );
+      }
+
+      console.log(`[API_REQUEST_WEBSITE_FOUND] Website exists, proceeding with screenshot`);
     }
-
-    // Check if website exists
-    console.log("[API_REQUEST_WEBSITE_CHECK] Checking if website exists");
-    const supabase = await createServiceRoleClient();
-    const { urlBase } = extractUrlPartsConsistent(url);
-    console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
-
-    const { data: existingWebsites, error: websiteCheckError } = await supabase
-      .from("websites_new")
-      .select("id")
-      .eq("url_base", urlBase)
-      .limit(1);
-
-    if (websiteCheckError) {
-      console.error("[API_REQUEST_WEBSITE_CHECK_ERROR] Database error checking website:", websiteCheckError);
-      return NextResponse.json({ error: "Database error while checking website" }, { status: 500 });
-    }
-
-    if (!existingWebsites?.length) {
-      console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
-      return NextResponse.json(
-        { error: "Website must be added to your account before generating OG images" },
-        { status: 404 }
-      );
-    }
-
-    console.log(`[API_REQUEST_WEBSITE_FOUND] Website exists, proceeding with screenshot`);
 
     // Generate screenshot
     const imageBuffer = await takeScreenshot(url);
@@ -311,31 +355,49 @@ export async function GET(request: NextRequest) {
     }
 
     // Upload to R2
-    const cacheKey = generateCacheKey(url);
-    console.log(`[API_REQUEST_CACHE_KEY] Generated cache key: ${cacheKey}`);
-    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey);
+    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey, isDemo);
 
     if (!uploadedUrl) {
-      console.warn("[API_REQUEST_R2_FAILED] R2 upload failed, returning image directly");
-      // Return image directly if upload fails
-      return new NextResponse(Buffer.from(imageBuffer), {
-        status: 200,
-        headers: {
-          "Content-Type": "image/png",
-          "Cache-Control": "public, max-age=31536000",
-        },
-      });
+      console.warn("[API_REQUEST_R2_FAILED] R2 upload failed");
+      if (isDemo) {
+        // For demo mode, return base64 fallback
+        const base64Image = Buffer.from(imageBuffer).toString("base64");
+        console.log("[API_REQUEST_DEMO_FALLBACK] Returning base64 fallback for demo");
+        return NextResponse.json({
+          imageUrl: `data:image/png;base64,${base64Image}`,
+          cached: false,
+          fallback: true,
+        });
+      } else {
+        // For production mode, return image directly
+        console.log("[API_REQUEST_PROD_FALLBACK] Returning image directly for production");
+        return new NextResponse(Buffer.from(imageBuffer), {
+          status: 200,
+          headers: {
+            "Content-Type": "image/png",
+            "Cache-Control": "public, max-age=31536000",
+          },
+        });
+      }
     }
 
-    // Store in database (background task)
-    const imageSize = Buffer.from(imageBuffer).length;
-    console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
-    storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl).catch((error) =>
-      console.error("[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:", error)
-    );
+    if (isDemo) {
+      console.log(`[API_REQUEST_DEMO_SUCCESS] Successfully processed demo request: ${uploadedUrl}`);
+      return NextResponse.json({
+        imageUrl: uploadedUrl,
+        cached: false,
+      });
+    } else {
+      // Store in database (background task) - only for production mode
+      const imageSize = Buffer.from(imageBuffer).length;
+      console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
+      storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl).catch((error) =>
+        console.error("[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:", error)
+      );
 
-    console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadedUrl}`);
-    return NextResponse.redirect(uploadedUrl, { status: 302 });
+      console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadedUrl}`);
+      return NextResponse.redirect(uploadedUrl, { status: 302 });
+    }
   } catch (error) {
     console.error("[API_REQUEST_ERROR] Unexpected error in OG Image API:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
