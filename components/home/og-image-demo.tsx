@@ -43,7 +43,7 @@ const ImageContainer = ({
 }) => (
   <div className="relative h-52 w-full">
     {isLoading || isScreenshotLoading
-      ? <Skeleton className="size-full rounded-none" />
+      ? <Skeleton className="size-full rounded-none bg-muted-foreground" />
       : src
       ? (
         <>
