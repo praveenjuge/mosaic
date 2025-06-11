@@ -40,16 +40,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
 }) => {
   const { userId } = await auth();
 
-  if (!userId) {
-    return (
-      <CardHeader className="py-6">
-        <CardTitle>No screenshots available</CardTitle>
-        <CardDescription>
-          Please sign in to view your screenshots.
-        </CardDescription>
-      </CardHeader>
-    );
-  }
+  if (!userId) return null;
 
   let websitePagesData: Array<ScreenshotWithDetails> = [];
 

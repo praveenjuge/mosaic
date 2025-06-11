@@ -26,7 +26,7 @@ export default async function WebsitesTable() {
   const { userId } = await auth();
 
   if (!userId) {
-    return <p>Please sign in to view your websites.</p>;
+    return null;
   }
 
   const data = await getAllWebsitesWithStats();
