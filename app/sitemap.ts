@@ -1,7 +1,7 @@
 import { website_url } from "@/lib/constants";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import type { MetadataRoute } from "next";
 import { guides } from "./help/guides";
-import { getMarkDownData } from "@/lib/getMarkdown";
 
 export const dynamic = "force-static";
 
@@ -14,13 +14,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticRoutes = [
     '',
-    'analytics',
     'blog',
     'changelog',
     'help',
     'legal',
     'settings',
-    'subscription',
     'websites',
   ].map(path => ({
     url: `${website_url}${path}`,

@@ -569,3 +569,71 @@ export async function getUserStats(): Promise<{
     };
   }
 }
+
+// User subscription and limits helper functions - simplified for free plan only
+export async function getUserSubscriptionInfo(): Promise<{
+  plan: string;
+  plan_properties: {
+    websites_limit: number;
+    images_limit: number;
+    storage_limit: string;
+  };
+}> {
+  // For now, all users are on free plan
+  return {
+    plan: "free",
+    plan_properties: {
+      websites_limit: 1,
+      images_limit: 500,
+      storage_limit: "50 MB",
+    },
+  };
+}
+
+// Get current usage vs limits for a user
+export async function getUserUsageInfo(): Promise<{
+  images_used: number;
+  images_limit: number;
+  websites_used: number;
+  websites_limit: number;
+  storage_used_bytes: number;
+  storage_limit: string;
+}> {
+  try {
+    const [userStats, subscriptionInfo] = await Promise.all([
+      getUserStats(),
+      getUserSubscriptionInfo(),
+    ]);
+
+    if (!userStats) {
+      return {
+        images_used: 0,
+        images_limit: subscriptionInfo.plan_properties.images_limit,
+        websites_used: 0,
+        websites_limit: subscriptionInfo.plan_properties.websites_limit,
+        storage_used_bytes: 0,
+        storage_limit: subscriptionInfo.plan_properties.storage_limit,
+      };
+    }
+
+    return {
+      images_used: userStats.total_images,
+      images_limit: subscriptionInfo.plan_properties.images_limit,
+      websites_used: userStats.total_websites,
+      websites_limit: subscriptionInfo.plan_properties.websites_limit,
+      storage_used_bytes: userStats.total_storage_bytes,
+      storage_limit: subscriptionInfo.plan_properties.storage_limit,
+    };
+  } catch (error) {
+    console.error("Error in getUserUsageInfo:", error);
+    // Return safe defaults
+    return {
+      images_used: 0,
+      images_limit: 500,
+      websites_used: 0,
+      websites_limit: 1,
+      storage_used_bytes: 0,
+      storage_limit: "50 MB",
+    };
+  }
+}

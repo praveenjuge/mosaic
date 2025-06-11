@@ -1,14 +1,7 @@
 "use client";
 
 import { SignedIn, UserButton } from "@clerk/nextjs";
-import {
-  Config,
-  Earth,
-  Home,
-  ListCheck,
-  ShootingStar,
-  Support,
-} from "@mynaui/icons-react";
+import { Config, Earth, Home, ListCheck, Support } from "@mynaui/icons-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
@@ -29,7 +22,6 @@ import {
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
   { href: "/websites", icon: Earth, label: "Websites" },
-  { href: "/subscription", icon: ShootingStar, label: "Subscription" },
   { href: "/settings", icon: Config, label: "Settings" },
 ];
 

@@ -28,8 +28,7 @@ app/                    # Next.js App Router pages
 ├── changelog/        # Changelog pages
 ├── help/             # Help and documentation
 ├── legal/            # Legal pages
-├── settings/         # User settings
-├── subscription/     # Billing and subscription management
+├── settings/         # User settings, theme preferences, and subscription management
 └── websites/         # Website management (add, edit, delete)
 
 components/           # Reusable React components
@@ -100,8 +99,8 @@ hooks/              # Custom React hooks
 
 ## Deployment & Build
 
-- Build command: `bun run build --turbo`
-- Development: `bun dev --turbo`
+- Build command: `bun run build`
+- Development command: `bun dev`
 
 ## Important Notes
 

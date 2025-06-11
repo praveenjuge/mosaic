@@ -7,7 +7,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { UserMetaData } from "@/lib/types";
 import { SignedIn, useUser } from "@clerk/nextjs";
 import {
   Check,
@@ -25,7 +24,10 @@ interface OnboardingStep {
   title: string;
   description: string;
   href: string;
-  isCompleted: (userData: UserMetaData) => boolean;
+  isCompleted: (usageData: {
+    images_used: number;
+    websites_used: number;
+  }) => boolean;
 }
 
 const onboardingSteps: OnboardingStep[] = [
@@ -33,32 +35,36 @@ const onboardingSteps: OnboardingStep[] = [
     title: "Add Your First Website",
     description: "Go to websites page and click Add Website to get started.",
     href: "/websites",
-    isCompleted: (userData) =>
-      !!userData.websites_used && userData.websites_used > 0,
+    isCompleted: (usageData) => usageData.websites_used > 0,
   },
   {
     title: "Generate Your First OG Image",
     description:
       "After you add a website, add the given URL to your website to generate your first OG image.",
     href: "/websites",
-    isCompleted: (userData) =>
-      !!userData.images_used && userData.images_used > 0,
+    isCompleted: (usageData) => usageData.images_used > 0,
   },
   {
     title: "Upgrade to Pro",
     description:
       "Get unlimited websites and premium features to easily generate OG images for your websites.",
-    href: "/subscription",
-    isCompleted: (userData) =>
-      !!userData.plan && userData.plan.toLowerCase() !== "free",
+    href: "/settings",
+    isCompleted: () => false, // For now, all users are on free plan
   },
 ];
 
-export function OnboardingCard() {
+export function OnboardingCard({
+  usageData,
+}: {
+  usageData: {
+    images_used: number;
+    websites_used: number;
+  } | null;
+}) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const { isSignedIn, user, isLoaded } = useUser();
+  const { isSignedIn, isLoaded } = useUser();
 
   useEffect(() => {
     const storedVisibility = localStorage.getItem("onboardingCardVisible");
@@ -71,11 +77,10 @@ export function OnboardingCard() {
     return null;
   }
 
-  const userData = (user?.publicMetadata as unknown as UserMetaData) || {};
-  const isUserDataEmpty = Object.keys(userData).length === 0;
-  const completedSteps = isUserDataEmpty
-    ? 0
-    : onboardingSteps.filter((step) => step.isCompleted(userData)).length;
+  // Use fallback values if no usage data provided
+  const safeUsageData = usageData || { images_used: 0, websites_used: 0 };
+  const completedSteps =
+    onboardingSteps.filter((step) => step.isCompleted(safeUsageData)).length;
 
   const handleClose = () => {
     setIsVisible(false);
@@ -93,7 +98,7 @@ export function OnboardingCard() {
     localStorage.setItem("onboardingCardMinimized", "false");
   };
 
-  if (!isVisible || (!isUserDataEmpty && completedSteps === TOTAL_STEPS)) {
+  if (!isVisible || completedSteps === TOTAL_STEPS) {
     return null;
   }
 
@@ -113,8 +118,8 @@ export function OnboardingCard() {
   return (
     <SignedIn>
       <div className="fixed bottom-4 right-4 z-50">
-        <Card className="w-full max-w-md shadow-lg py-0">
-          <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4">
+        <Card className="w-full max-w-md shadow-lg py-0 gap-0">
+          <CardHeader className="flex flex-row items-start justify-between space-y-0 p-4 pb-0">
             <ClosePopover
               isOpen={isPopoverOpen}
               setIsOpen={setIsPopoverOpen}
@@ -123,13 +128,13 @@ export function OnboardingCard() {
             <CardTitles />
             <MinimizeButton onClick={handleMinimize} />
           </CardHeader>
-          <CardContent className="p-4 pt-2">
+          <CardContent className="p-4">
             <ol className="space-y-4">
               {onboardingSteps.map((step, index) => (
                 <OnboardingStep
                   key={index}
                   step={step}
-                  userData={userData}
+                  usageData={safeUsageData}
                   stepNumber={index + 1}
                 />
               ))}
@@ -209,14 +214,17 @@ function MinimizeButton({ onClick }: { onClick: () => void }) {
 
 function OnboardingStep({
   step,
-  userData,
+  usageData,
   stepNumber,
 }: {
   step: OnboardingStep;
-  userData: UserMetaData;
+  usageData: {
+    images_used: number;
+    websites_used: number;
+  };
   stepNumber: number;
 }) {
-  const isCompleted = step.isCompleted(userData);
+  const isCompleted = step.isCompleted(usageData);
   return (
     <li
       className={`${
@@ -225,7 +233,7 @@ function OnboardingStep({
     >
       <Link
         href={step.href}
-        className="flex items-start gap-3 rounded border-[0.5px] bg-primary-foreground p-3 transition-colors hover:bg-secondary"
+        className="flex items-start gap-3 rounded border-[0.5px] bg-primary-foreground p-2.5 transition-colors hover:bg-secondary"
       >
         <div
           className={`flex size-6 shrink-0 items-center justify-center rounded-full border-[0.5px] text-xs font-medium ${

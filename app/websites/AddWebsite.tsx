@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { UserMetaData } from "@/lib/types";
+import { getUserUsageInfo } from "@/lib/database-helpers";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -7,17 +7,13 @@ import {
   SignedOut,
   SignInButton,
 } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
 import { Plus } from "@mynaui/icons-react";
 import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
 export async function AddWebsite() {
-  const metaData = (await (
-    await auth()
-  )?.sessionClaims?.public_metadata) as UserMetaData;
-  const preventSubmission =
-    (metaData?.websites_used ?? 0) >= (metaData?.websites_limit ?? Infinity);
+  const usageInfo = await getUserUsageInfo();
+  const preventSubmission = usageInfo.websites_used >= usageInfo.websites_limit;
 
   return (
     <>
@@ -32,7 +28,7 @@ export async function AddWebsite() {
           {preventSubmission
             ? (
               <Link
-                href="/subscription"
+                href="/settings"
                 className={buttonVariants({ size: "sm" })}
               >
                 <Plus className="size-4" stroke={2} />

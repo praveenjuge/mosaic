@@ -1,6 +1,6 @@
 import "@/app/globals.css";
 import Aside from "@/components/aside";
-import { OnboardingCard } from "@/components/onboarding-card";
+import { OnboardingWrapper } from "@/components/onboarding-wrapper";
 import { ThemeProvider } from "@/components/theme-provider";
 import {
   SidebarInset,
@@ -66,7 +66,8 @@ export default function RootLayout({
             <div
               className="pointer-events-none fixed -right-48 -top-48 size-96 select-none bg-primary opacity-15 blur-3xl"
               aria-hidden="true"
-            ></div>
+            >
+            </div>
             <SidebarProvider>
               <Aside />
               <SidebarInset>
@@ -75,7 +76,7 @@ export default function RootLayout({
               </SidebarInset>
             </SidebarProvider>
             <Suspense fallback={<></>}>
-              <OnboardingCard />
+              <OnboardingWrapper />
             </Suspense>
             <Toaster richColors />
           </ThemeProvider>
