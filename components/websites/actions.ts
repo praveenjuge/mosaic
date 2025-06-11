@@ -24,7 +24,7 @@ export const handleDelete = async (websiteId: string) => {
 
   // First check if the website exists and belongs to the user
   const { data: website, error: selectError } = await client
-    .from("websites_new")
+    .from("sites")
     .select("id, url_base")
     .eq("id", websiteId)
     .eq("user_id", userId)
@@ -50,8 +50,8 @@ export const handleDelete = async (websiteId: string) => {
 
   // Try using the database function first (cleaner approach)
   const { data: functionResult, error: functionError } = await client
-    .rpc('delete_user_website', {
-      website_id_param: websiteId,
+    .rpc('delete_user_site', {
+      site_id_param: websiteId,
       user_id_param: userId
     });
 
@@ -62,7 +62,7 @@ export const handleDelete = async (websiteId: string) => {
     // Fallback to manual cascade delete
     // First, get all pages for this website
     const { data: pages, error: pagesError } = await client
-      .from("pages_new")
+      .from("pages")
       .select("id")
       .eq("website_id", websiteId);
 
@@ -78,7 +78,7 @@ export const handleDelete = async (websiteId: string) => {
     if (pages && pages.length > 0) {
       const pageIds = pages.map(p => p.id);
       const { error: screenshotsDeleteError } = await client
-        .from("screenshots_new")
+        .from("screenshots")
         .delete()
         .in("page_id", pageIds);
 
@@ -92,7 +92,7 @@ export const handleDelete = async (websiteId: string) => {
 
       // Delete pages
       const { error: pagesDeleteError } = await client
-        .from("pages_new")
+        .from("pages")
         .delete()
         .eq("website_id", websiteId);
 
@@ -107,7 +107,7 @@ export const handleDelete = async (websiteId: string) => {
 
     // Finally, delete the website
     const { error } = await client
-      .from("websites_new")
+      .from("sites")
       .delete()
       .eq("id", websiteId)
       .eq("user_id", userId);
@@ -153,7 +153,7 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
 
   // Check if the cleaned URL already exists for this user (excluding current website)
   const { data: existingWebsite } = await client
-    .from("websites_new")
+    .from("sites")
     .select("id")
     .eq("url_base", cleanedUrl)
     .eq("user_id", userId)
@@ -168,7 +168,7 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
   }
 
   const { data, error } = await client
-    .from("websites_new")
+    .from("sites")
     .update({ url_base: cleanedUrl })
     .eq("id", websiteId)
     .eq("user_id", userId) // Ensure user can only edit their own websites
@@ -201,7 +201,7 @@ export const handleAdd = async (formData: FormData) => {
 
   // Check if the cleaned URL already exists for this user
   const { data: existingWebsite } = await client
-    .from("websites_new")
+    .from("sites")
     .select("id")
     .eq("url_base", cleanedUrl)
     .eq("user_id", userId)
@@ -215,7 +215,7 @@ export const handleAdd = async (formData: FormData) => {
   }
 
   const { data, error } = await client
-    .from("websites_new")
+    .from("sites")
     .insert([{ url_base: cleanedUrl, user_id: userId }])
     .select();
 

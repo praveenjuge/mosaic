@@ -20,7 +20,7 @@ export async function POST(
 
     // Verify that the website belongs to the authenticated user
     const { data: website, error: websiteError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select("id, url_base, site_name")
       .eq("id", websiteId)
       .eq("user_id", userId)
@@ -35,7 +35,7 @@ export async function POST(
 
     // Get all pages for this website
     const { data: pages, error: pagesError } = await supabase
-      .from("pages_new")
+      .from("pages")
       .select("id, full_url")
       .eq("website_id", websiteId);
 

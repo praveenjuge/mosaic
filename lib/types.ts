@@ -11,7 +11,7 @@ export interface Website {
 }
 
 // New table structure types
-export interface WebsiteNew {
+export interface Site {
   id: string;
   user_id: string;
   url_base: string;
@@ -20,7 +20,7 @@ export interface WebsiteNew {
   updated_at: string;
 }
 
-export interface PageNew {
+export interface Page {
   id: string;
   website_id: string;
   path: string;
@@ -29,7 +29,7 @@ export interface PageNew {
   updated_at: string;
 }
 
-export interface ScreenshotNew {
+export interface Screenshot {
   id: string;
   page_id: string;
   screenshot_url: string;
@@ -39,15 +39,15 @@ export interface ScreenshotNew {
 }
 
 // Extended types with relations
-export interface PageWithWebsite extends PageNew {
-  websites_new: WebsiteNew;
+export interface PageWithSite extends Page {
+  sites: Site;
 }
 
-export interface ScreenshotWithPage extends ScreenshotNew {
-  pages_new: PageWithWebsite;
+export interface ScreenshotWithPage extends Screenshot {
+  pages: PageWithSite;
 }
 
-export interface WebsiteWithStats extends WebsiteNew {
+export interface SiteWithStats extends Site {
   screenshot_count: number;
 }
 

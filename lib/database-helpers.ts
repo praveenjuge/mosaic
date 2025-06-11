@@ -1,10 +1,10 @@
 import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  PageNew,
-  ScreenshotNew,
+  Page,
+  Screenshot,
   ScreenshotWithDetails,
-  WebsiteNew,
-  WebsiteWithStats,
+  Site,
+  SiteWithStats,
 } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 
@@ -17,14 +17,14 @@ import { extractUrlPartsConsistent } from "@/lib/utils";
 export async function getOrCreateWebsite(
   urlBase: string,
   siteName: string,
-): Promise<WebsiteNew | null> {
+): Promise<Site | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
     // First try to get existing website
     // RLS policy will automatically filter by authenticated user
     const { data: existingWebsite, error: selectError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select("*")
       .eq("url_base", urlBase)
       .single();
@@ -36,7 +36,7 @@ export async function getOrCreateWebsite(
     // Create new website if it doesn't exist
     // RLS policy will automatically set user_id to authenticated user
     const { data: newWebsite, error: insertError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .insert({
         url_base: urlBase,
         site_name: siteName,
@@ -60,7 +60,7 @@ export async function getOrCreateWebsite(
 export async function getWebsiteWithStats(
   websiteId: string,
 ): Promise<{
-  website: WebsiteNew | null;
+  website: Site | null;
   total_count: number;
   total_bytes: number;
 } | null> {
@@ -71,7 +71,7 @@ export async function getWebsiteWithStats(
 
     // Get website data - RLS will automatically filter by authenticated user
     const { data: website, error: websiteError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select("*")
       .eq("id", websiteId)
       .single();
@@ -85,20 +85,20 @@ export async function getWebsiteWithStats(
 
     // Get statistics - count of screenshots and total size
     const { data: stats, error: statsError } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(
         `
         id,
         size_in_bytes,
-        pages_new!inner(
+        pages!inner(
           id,
-          websites_new!inner(
+          sites!inner(
             id
           )
         )
       `,
       )
-      .eq("pages_new.websites_new.id", websiteId);
+      .eq("pages.sites.id", websiteId);
 
     if (statsError) {
       console.error("[DEBUG] Error fetching stats:", statsError);
@@ -142,20 +142,20 @@ export async function getLatestScreenshotsForWebsite(
 
     // Get total count first - RLS will automatically filter by user
     const { count, error: countError } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(
         `
         id,
-        pages_new!inner(
+        pages!inner(
           id,
-          websites_new!inner(
+          sites!inner(
             id
           )
         )
       `,
         { count: "exact", head: true },
       )
-      .eq("pages_new.websites_new.id", websiteId);
+      .eq("pages.sites.id", websiteId);
 
     if (countError) {
       console.error("Error counting screenshots:", countError);
@@ -165,23 +165,23 @@ export async function getLatestScreenshotsForWebsite(
     // Get paginated screenshots - RLS will automatically filter by user
     const offset = (page - 1) * limit;
     const { data: screenshots, error: screenshotsError } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(
         `
         id,
         screenshot_url,
         size_in_bytes,
         generated_at,
-        pages_new!inner(
+        pages!inner(
           full_url,
-          websites_new!inner(
+          sites!inner(
             id,
             user_id
           )
         )
       `,
       )
-      .eq("pages_new.websites_new.id", websiteId)
+      .eq("pages.sites.id", websiteId)
       .order("generated_at", { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -197,12 +197,12 @@ export async function getLatestScreenshotsForWebsite(
           screenshot_url: string;
           size_in_bytes?: number;
           generated_at: string;
-          pages_new: Array<{ full_url?: string }>;
+          pages: Array<{ full_url?: string }>;
         }) => {
-          // pages_new is an array due to join, so take the first element
-          const page = Array.isArray(screenshot.pages_new)
-            ? screenshot.pages_new[0]
-            : screenshot.pages_new;
+          // pages is an array due to join, so take the first element
+          const page = Array.isArray(screenshot.pages)
+            ? screenshot.pages[0]
+            : screenshot.pages;
 
           return {
             id: screenshot.id,
@@ -230,13 +230,13 @@ export async function getOrCreatePage(
   websiteId: string,
   path: string,
   fullUrl: string,
-): Promise<PageNew | null> {
+): Promise<Page | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
     // First try to get existing page
     const { data: existingPage, error: selectError } = await supabase
-      .from("pages_new")
+      .from("pages")
       .select("*")
       .eq("website_id", websiteId)
       .eq("path", path)
@@ -248,7 +248,7 @@ export async function getOrCreatePage(
 
     // Create new page if it doesn't exist
     const { data: newPage, error: insertError } = await supabase
-      .from("pages_new")
+      .from("pages")
       .insert({
         website_id: websiteId,
         path: path,
@@ -275,12 +275,12 @@ export async function createScreenshot(
   screenshotUrl: string,
   imageHash?: string,
   sizeInBytes?: number,
-): Promise<ScreenshotNew | null> {
+): Promise<Screenshot | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
     const { data: newScreenshot, error } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .insert({
         page_id: pageId,
         screenshot_url: screenshotUrl,
@@ -313,20 +313,20 @@ export async function getLatestScreenshot(
 
     // Query the new table structure
     const { data, error } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(
         `
         screenshot_url,
-        pages_new!inner(
+        pages!inner(
           full_url,
-          websites_new!inner(
+          sites!inner(
             url_base
           )
         )
       `,
       )
-      .eq("pages_new.websites_new.url_base", urlBase)
-      .eq("pages_new.path", path)
+      .eq("pages.sites.url_base", urlBase)
+      .eq("pages.path", path)
       .order("generated_at", { ascending: false })
       .limit(1)
       .single();
@@ -373,20 +373,20 @@ export function extractTitleFromUrl(url: string): string {
 }
 
 // Get all websites for a user with screenshot counts
-export async function getAllWebsitesWithStats(): Promise<Array<WebsiteWithStats> | null> {
+export async function getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
     // Get all websites with screenshot counts in a single query
     // RLS will automatically filter by authenticated user
     const { data: websites, error } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select(
         `
         *,
-        pages_new(
+        pages(
           id,
-          screenshots_new(
+          screenshots(
             id
           )
         )
@@ -403,20 +403,20 @@ export async function getAllWebsitesWithStats(): Promise<Array<WebsiteWithStats>
     const websitesWithStats =
       websites?.map(
         (
-          website: WebsiteNew & {
-            pages_new: Array<{
+          website: Site & {
+            pages: Array<{
               id: string;
-              screenshots_new: Array<{ id: string }>;
+              screenshots: Array<{ id: string }>;
             }>;
           },
         ) => {
           const screenshot_count =
-            website.pages_new?.reduce(
+            website.pages?.reduce(
               (
                 total: number,
-                page: { screenshots_new: Array<{ id: string }> },
+                page: { screenshots: Array<{ id: string }> },
               ) => {
-                return total + (page.screenshots_new?.length || 0);
+                return total + (page.screenshots?.length || 0);
               },
               0,
             ) || 0;
@@ -449,18 +449,18 @@ export async function getLatestScreenshotsForAllUserWebsites(
 
     // Get screenshots with page data - RLS will automatically filter by user
     const { data: screenshots, error: screenshotsError } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(
         `
         id,
         screenshot_url,
         size_in_bytes,
         generated_at,
-        pages_new (
+        pages (
           id,
           full_url,
           website_id,
-          websites_new (
+          sites (
             id,
             site_name,
             url_base
@@ -483,9 +483,9 @@ export async function getLatestScreenshotsForAllUserWebsites(
     // Format the data - handle the nested structure from Supabase
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formattedData = screenshots.map((screenshot: any) => {
-      // Since we're using regular joins (not !inner), pages_new should be a single object
-      const page = screenshot.pages_new;
-      const website = page?.websites_new;
+      // Since we're using regular joins (not !inner), pages should be a single object
+      const page = screenshot.pages;
+      const website = page?.sites;
 
       return {
         id: screenshot.id,
@@ -516,7 +516,7 @@ export async function getUserStats(): Promise<{
 
     // Get websites count - RLS will automatically filter by authenticated user
     const { count: websitesCount, error: websitesError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select("*", { count: "exact", head: true });
 
     if (websitesError) {
@@ -530,13 +530,13 @@ export async function getUserStats(): Promise<{
 
     // Get screenshots data with proper joins - RLS will automatically filter by authenticated user
     const { data: screenshots, error: screenshotsError } = await supabase
-      .from("screenshots_new")
+      .from("screenshots")
       .select(`
         id,
         size_in_bytes,
-        pages_new!inner(
+        pages!inner(
           id,
-          websites_new!inner(
+          sites!inner(
             id
           )
         )

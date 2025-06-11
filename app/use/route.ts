@@ -38,9 +38,9 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
     console.log("[CACHE_CHECK_DB] Supabase client created successfully");
 
     const { data } = await supabase
-      .from("screenshots_new")
-      .select("screenshot_url, pages_new!inner(full_url)")
-      .eq("pages_new.full_url", pageUrl)
+      .from("screenshots")
+      .select("screenshot_url, pages!inner(full_url)")
+      .eq("pages.full_url", pageUrl)
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -127,7 +127,7 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
 
     // Get random website for this URL base
     const { data: websitesData, error: websiteError } = await supabase
-      .from("websites_new")
+      .from("sites")
       .select("id, user_id")
       .eq("url_base", urlBase);
 
@@ -146,7 +146,7 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
 
     // Get or create page
     const { data: pageData, error: pageSelectError } = await supabase
-      .from("pages_new")
+      .from("pages")
       .select("id")
       .eq("website_id", website.id)
       .eq("path", path)
@@ -162,7 +162,7 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
     if (!page) {
       console.log(`[DB_STORE_PAGE_CREATE] Creating new page for path: ${path}`);
       const { data: newPage, error: pageCreateError } = await supabase
-        .from("pages_new")
+        .from("pages")
         .insert({
           website_id: website.id,
           user_id: website.user_id,
@@ -184,7 +184,7 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
 
     if (page) {
       console.log(`[DB_STORE_SCREENSHOT_START] Storing screenshot for page ID: ${page.id}`);
-      const { error: screenshotError } = await supabase.from("screenshots_new").insert({
+      const { error: screenshotError } = await supabase.from("screenshots").insert({
         page_id: page.id,
         screenshot_url: uploadedUrl,
         image_hash: imageKey,
@@ -326,7 +326,7 @@ export async function GET(request: NextRequest) {
       console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
 
       const { data: existingWebsites, error: websiteCheckError } = await supabase
-        .from("websites_new")
+        .from("sites")
         .select("id")
         .eq("url_base", urlBase)
         .limit(1);
