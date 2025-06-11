@@ -1,6 +1,5 @@
-import { createServiceRoleClient, createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
 import AWS from "aws-sdk";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
