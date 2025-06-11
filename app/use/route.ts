@@ -229,9 +229,9 @@ async function takeScreenshot(url: string): Promise<ArrayBuffer | null> {
       },
       body: JSON.stringify({
         url,
-        viewport: { width: 1200, height: 630 },
+        viewport: { width: 1200 * 1.3, height: 630 * 1.3 },
         gotoOptions: { waitUntil: "networkidle0", timeout: 30000 },
-        addStyleTag: [{ content: "html, body { overflow: hidden; }" }],
+        addStyleTag: [{ content: "* { overflow: hidden; }" }],
       }),
     });
 
