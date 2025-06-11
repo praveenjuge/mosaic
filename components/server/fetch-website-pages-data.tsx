@@ -1,42 +1,32 @@
+// DEPRECATED COMPONENT
+// This component was used to fetch data from the external get.mosaicimg.com service
+// The external service has been discontinued and all functionality moved to internal database operations
+// Use functions from @/lib/database-helpers.ts instead
+
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
 
+// DEPRECATED: External service fetch has been disabled
+// This component previously fetched data from get.mosaicimg.com external service
+// All functionality has been migrated to internal database operations
 async function fetchWebsitePagesData(
   token: string,
   websiteIds?: number[],
   page?: number,
   limit?: number,
 ) {
-  const url = new URL(
-    "https://get.mosaicimg.com/api/websites/latest_website_pages",
+  console.warn(
+    "External service fetch has been disabled - use database helpers instead",
   );
-  if (websiteIds) {
-    for (const websiteId of websiteIds) {
-      url.searchParams.append("website_ids", websiteId.toString());
-    }
-  }
-  if (page) {
-    url.searchParams.append("page", page.toString());
-  } else {
-    url.searchParams.append("page", "1");
-  }
-  if (limit) {
-    url.searchParams.append("limit", limit.toString());
-  } else {
-    url.searchParams.append("limit", "10");
-  }
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
+  // Return empty data structure to maintain compatibility
+  return {
+    data: [],
+    meta: {
+      total: 0,
+      page: page || 1,
+      limit: limit || 10,
     },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-  return await response.json();
+  };
 }
 
 export interface FetchWebsitePagesDataProps {

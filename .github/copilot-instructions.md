@@ -110,7 +110,7 @@ hooks/              # Custom React hooks
 - The application uses Bun as the runtime and package manager
 - All database operations should go through Supabase
 - Authentication is handled entirely by Clerk
-- OG image generation happens on external service at `get.mosaicimg.com`
+- OG image generation is now handled internally via Cloudflare Browser Rendering API (external service disabled)
 - Website URL format: always clean and normalize URLs before storage
 
 When working with this codebase, always consider the user's subscription status, handle loading/error states properly, and maintain the consistent UI patterns established throughout the application.
