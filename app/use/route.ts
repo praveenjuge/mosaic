@@ -153,68 +153,66 @@ async function storeImageInDatabase(
   uploadedUrl: string,
 ): Promise<void> {
   try {
-    // Get user ID from auth context (if available)
-    let userId: string | null = null;
-    try {
-      const { userId: authUserId } = await auth();
-      if (authUserId) {
-        userId = authUserId;
-        console.log("Authenticated request from user:", userId);
-      }
-    } catch (authError) {
-      console.log("Auth error or no auth context:", authError);
-    }
-
-    // Only store in database if there's an authenticated user
-    // This prevents duplicates between user-added websites and public API usage
-    if (!userId) {
-      console.log("Skipping database storage for anonymous image generation");
-      return;
-    }
-
-    // Use authenticated client when user is authenticated
-    const supabase = await createClerkSupabaseServerClient();
+    // Use service role client since we know the website exists
+    const supabase = await createServiceRoleClient();
 
     // Parse URL to get base and path using consistent parsing
-    const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
+    const { urlBase, path } = extractUrlPartsConsistent(pageUrl);
 
-    // Use upsert operations for better performance and handle conflicts
-    // First, upsert website
-    const { data: websiteData, error: websiteError } = await supabase
+    // Get all existing websites with the same URL base (we know at least one exists)
+    const { data: websitesData, error: websiteError } = await supabase
       .from("websites_new")
-      .upsert({
-        user_id: userId,
-        url_base: urlBase,
-        site_name: hostname,
-      }, {
-        onConflict: 'user_id,url_base',
-        ignoreDuplicates: false
-      })
-      .select("id")
-      .single();
+      .select("id, user_id")
+      .eq("url_base", urlBase);
 
-    if (websiteError || !websiteData) {
-      console.error("Error upserting website:", websiteError);
+    if (websiteError || !websitesData || websitesData.length === 0) {
+      console.error("Error getting websites:", websiteError);
       return;
     }
 
-    // Next, upsert page
-    const { data: pageData, error: pageError } = await supabase
-      .from("pages_new")
-      .upsert({
-        website_id: websiteData.id,
-        path: path,
-        full_url: pageUrl,
-      }, {
-        onConflict: 'website_id,path',
-        ignoreDuplicates: false
-      })
-      .select("id")
-      .single();
+    // Randomly select one of the websites if multiple users have the same site
+    const randomIndex = Math.floor(Math.random() * websitesData.length);
+    const websiteData = websitesData[randomIndex];
 
-    if (pageError || !pageData) {
-      console.error("Error upserting page:", pageError);
+    console.log(`Found ${websitesData.length} website(s) for ${urlBase}, randomly selected user ${websiteData.user_id}`);
+
+    // Check if the page already exists for this website
+    const { data: existingPage, error: pageCheckError } = await supabase
+      .from("pages_new")
+      .select("id")
+      .eq("website_id", websiteData.id)
+      .eq("path", path)
+      .maybeSingle();
+
+    if (pageCheckError) {
+      console.error("Error checking existing page:", pageCheckError);
       return;
+    }
+
+    let pageData;
+    if (existingPage) {
+      // Page exists, use it
+      pageData = existingPage;
+      console.log(`Page exists, using existing page ${pageData.id}`);
+    } else {
+      // Create new page
+      const { data: newPageData, error: pageError } = await supabase
+        .from("pages_new")
+        .insert({
+          website_id: websiteData.id,
+          user_id: websiteData.user_id,
+          path: path,
+          full_url: pageUrl,
+        })
+        .select("id")
+        .single();
+
+      if (pageError || !newPageData) {
+        console.error("Error creating page:", pageError);
+        return;
+      }
+      pageData = newPageData;
+      console.log(`Created new page ${pageData.id}`);
     }
 
     // Finally, store the screenshot
@@ -224,6 +222,8 @@ async function storeImageInDatabase(
       image_hash: imageKey,
       size_in_bytes: imageSize,
     });
+
+    console.log(`Screenshot stored for page ${pageData.id} under user ${websiteData.user_id}`);
   } catch (error) {
     console.error("Error storing image in database:", error);
   }
@@ -337,7 +337,35 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(cachedImageUrl, { status: 302 });
     }
 
-    console.log(`Database miss for ${url}, generating new screenshot`);
+    console.log(`Database miss for ${url}, checking if website exists`);
+
+    // Check if the website exists for any user before generating new image
+    const supabase = await createServiceRoleClient();
+    const { urlBase } = extractUrlPartsConsistent(url);
+
+    const { data: existingWebsites, error: websiteCheckError } = await supabase
+      .from("websites_new")
+      .select("id, user_id")
+      .eq("url_base", urlBase)
+      .limit(1);
+
+    if (websiteCheckError) {
+      console.error("Error checking existing websites:", websiteCheckError);
+      return NextResponse.json(
+        { error: "Database error while checking website" },
+        { status: 500 },
+      );
+    }
+
+    if (!existingWebsites || existingWebsites.length === 0) {
+      console.log(`No website found for ${urlBase}, refusing to generate image`);
+      return NextResponse.json(
+        { error: "Website must be added to your account before generating OG images" },
+        { status: 404 },
+      );
+    }
+
+    console.log(`Website exists for ${urlBase}, proceeding with screenshot generation`);
 
     // Take new screenshot
     const imageBuffer = await takeScreenshot(url);
@@ -367,6 +395,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Store image metadata in database (don't await to improve response time)
+    // Website existence is already confirmed, so storage will succeed
     const imageSize = Buffer.from(imageBuffer).length;
     storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl).catch(
       (error) => console.error("Background database storage failed:", error)
