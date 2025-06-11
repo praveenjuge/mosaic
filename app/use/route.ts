@@ -1,4 +1,4 @@
-import { createClient, createServiceRoleClient, createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { createServiceRoleClient, createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import AWS from "aws-sdk";
