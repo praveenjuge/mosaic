@@ -7,7 +7,6 @@ import {
   WebsiteWithStats,
 } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
 
 /**
  * Helper functions for working with the new database structure
@@ -506,66 +505,19 @@ export async function getLatestScreenshotsForAllUserWebsites(
   }
 }
 
-// Get user statistics from new tables - optimized version
+// Get user statistics from new tables - simplified direct query version
 export async function getUserStats(): Promise<{
   total_images: number;
   total_storage_bytes: number;
   total_websites: number;
 } | null> {
   try {
-    // Get Clerk user ID first to ensure proper authentication
-    const { userId } = await auth();
-
-    if (!userId) {
-      console.error("No authenticated user found for stats");
-      return {
-        total_images: 0,
-        total_storage_bytes: 0,
-        total_websites: 0,
-      };
-    }
-
     const supabase = await createClerkSupabaseServerClient();
 
-    // Try to get stats from materialized view first (fastest)
-    // Note: materialized view doesn't have RLS, so we filter manually
-    const { data: mvStats, error: mvError } = await supabase
-      .from("user_stats_mv")
-      .select("total_images, total_storage_bytes, total_websites")
-      .eq("user_id", userId)
-      .maybeSingle();
-
-    if (!mvError && mvStats) {
-      return {
-        total_images: Number(mvStats.total_images) || 0,
-        total_storage_bytes: Number(mvStats.total_storage_bytes) || 0,
-        total_websites: Number(mvStats.total_websites) || 0,
-      };
-    }
-
-    console.log("Materialized view failed, trying database function:", mvError);
-
-    // Fallback to database function (still fast)
-    const { data: stats, error: statsError } = await supabase
-      .rpc("get_user_stats", {
-        user_id_param: userId,
-      });
-
-    if (!statsError && stats && stats.length > 0) {
-      const result = stats[0];
-      return {
-        total_images: Number(result.total_images) || 0,
-        total_storage_bytes: Number(result.total_storage_bytes) || 0,
-        total_websites: Number(result.total_websites) || 0,
-      };
-    }
-
-    console.log("Database function failed, using manual calculation:", statsError);
-
-    // Final fallback: manual calculation using individual queries with RLS
-    const { data: websites, error: websitesError } = await supabase
+    // Get websites count - RLS will automatically filter by authenticated user
+    const { count: websitesCount, error: websitesError } = await supabase
       .from("websites_new")
-      .select("id");
+      .select("*", { count: "exact", head: true });
 
     if (websitesError) {
       console.error("Error counting websites:", websitesError);
@@ -576,28 +528,26 @@ export async function getUserStats(): Promise<{
       };
     }
 
-    const websiteIds = websites?.map(w => w.id) || [];
-
-    if (websiteIds.length === 0) {
-      return {
-        total_images: 0,
-        total_storage_bytes: 0,
-        total_websites: 0,
-      };
-    }
-
-    // Get screenshots count and total size
+    // Get screenshots data with proper joins - RLS will automatically filter by authenticated user
     const { data: screenshots, error: screenshotsError } = await supabase
       .from("screenshots_new")
-      .select("size_in_bytes, pages_new!inner(website_id)")
-      .in("pages_new.website_id", websiteIds);
+      .select(`
+        id,
+        size_in_bytes,
+        pages_new!inner(
+          id,
+          websites_new!inner(
+            id
+          )
+        )
+      `);
 
     if (screenshotsError) {
       console.error("Error fetching screenshots for stats:", screenshotsError);
       return {
         total_images: 0,
         total_storage_bytes: 0,
-        total_websites: websiteIds.length,
+        total_websites: websitesCount || 0,
       };
     }
 
@@ -607,7 +557,7 @@ export async function getUserStats(): Promise<{
     return {
       total_images: totalImages,
       total_storage_bytes: totalStorageBytes,
-      total_websites: websiteIds.length,
+      total_websites: websitesCount || 0,
     };
   } catch (error) {
     console.error("Error in getUserStats:", error);
@@ -618,32 +568,6 @@ export async function getUserStats(): Promise<{
       total_websites: 0,
     };
   }
-}
-
-// Cache-enabled version of getUserStats with Next.js cache
-export async function getUserStatsCached(): Promise<{
-  total_images: number;
-  total_storage_bytes: number;
-  total_websites: number;
-} | null> {
-  const { userId } = await auth();
-  if (!userId) return null;
-
-  try {
-    // Use Next.js cache with revalidation
-    const cachedStats = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/stats/user`, {
-      next: { revalidate: 300, tags: [`user-stats-${userId}`] },
-    });
-
-    if (cachedStats.ok) {
-      return await cachedStats.json();
-    }
-  } catch {
-    console.log("Cache miss, fetching fresh stats");
-  }
-
-  // Fallback to direct database call
-  return getUserStats();
 }
 
 // Analytics functions
