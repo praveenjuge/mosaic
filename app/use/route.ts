@@ -75,48 +75,31 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   try {
     const supabase = await createServiceRoleClient();
 
-    // Parse URL to get base and path
-    const parsedUrl = new URL(pageUrl);
-    const urlBase = `${parsedUrl.protocol}//${parsedUrl.host}`;
-    const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
+    console.log(`Checking cache for URL: ${pageUrl}`);
 
-    // Optimized query with minimal data selection and proper indexing
+    // Direct query using full_url - this is the fastest approach
     const { data, error } = await supabase
       .from("screenshots_new")
       .select(`
-        screenshot_url, 
-        image_hash,
-        pages_new!inner(
-          path,
-          websites_new!inner(url_base)
-        )
+        screenshot_url,
+        pages_new!inner(full_url)
       `)
-      .eq("pages_new.websites_new.url_base", urlBase)
-      .eq("pages_new.path", path)
+      .eq("pages_new.full_url", pageUrl)
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (error || !data) {
+    if (error) {
+      console.error("Database query error:", error);
       return null;
     }
 
-    // Convert old internal API URLs to direct R2 URLs for better performance
-    if (data.screenshot_url.includes("/api/prod-images/")) {
-      const imageKey = data.image_hash || data.screenshot_url.split("/").pop();
-      if (imageKey) {
-        // For now, return the original URL since R2 public access may not be configured
-        // TODO: Enable R2 direct URLs after configuring public access
-        return data.screenshot_url;
-      }
+    if (!data) {
+      console.log(`No cached image found for ${pageUrl}`);
+      return null;
     }
 
-    // Return existing R2 URL if already direct
-    if (data.screenshot_url.includes(".r2.cloudflarestorage.com") ||
-      data.screenshot_url.includes(".r2.dev")) {
-      return data.screenshot_url;
-    }
-
+    console.log(`Cache hit! Found image: ${data.screenshot_url}`);
     return data.screenshot_url;
   } catch (error) {
     console.error("Error checking database:", error);
