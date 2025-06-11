@@ -23,24 +23,30 @@ export default function Home() {
         <HomeSignedOut />
       </SignedOut>
       <SignedIn>
-        <CardHeader className="p-0">
-          <CardTitle>Overview</CardTitle>
-        </CardHeader>
-        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-          <HomeQuickStats />
-        </Suspense>
-        <CardHeader className="p-0">
-          <CardTitle>Websites</CardTitle>
-        </CardHeader>
-        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-          <WebsitesTable />
-        </Suspense>
-        <CardHeader className="p-0">
-          <CardTitle>Latest Screenshots</CardTitle>
-        </CardHeader>
-        <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-          <LatestScreenshots />
-        </Suspense>
+        <div className="flex flex-col gap-1">
+          <CardHeader className="p-0">
+            <CardTitle>Overview</CardTitle>
+          </CardHeader>
+          <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+            <HomeQuickStats />
+          </Suspense>
+        </div>
+        <div className="flex flex-col gap-1">
+          <CardHeader className="p-0">
+            <CardTitle>Websites</CardTitle>
+          </CardHeader>
+          <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+            <WebsitesTable />
+          </Suspense>
+        </div>
+        <div className="flex flex-col gap-1">
+          <CardHeader className="p-0">
+            <CardTitle>Latest Screenshots</CardTitle>
+          </CardHeader>
+          <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
+            <LatestScreenshots />
+          </Suspense>
+        </div>
       </SignedIn>
     </>
   );

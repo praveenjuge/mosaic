@@ -33,9 +33,18 @@ export function DeleteWebsite({ websiteId }: { websiteId: string }) {
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <form
             action={async () => {
-              await handleDelete(websiteId);
-              setOpen(false);
-              toast.success("Your website has been deleted.");
+              try {
+                const result = await handleDelete(websiteId);
+                if (result.status === "error") {
+                  toast.error(result.message);
+                } else {
+                  setOpen(false);
+                  toast.success(result.message);
+                }
+              } catch (error) {
+                console.error("Delete error:", error);
+                toast.error("Failed to delete website. Please try again.");
+              }
             }}
           >
             <SubmitButton text="Yes, Delete" variant="destructive" />
