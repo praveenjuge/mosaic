@@ -42,26 +42,24 @@ const ImageContainer = ({
   isScreenshotLoading?: boolean;
 }) => (
   <div className="relative h-52 w-full">
-    {isLoading || isScreenshotLoading
-      ? <Skeleton className="size-full rounded-none bg-muted-foreground" />
-      : src
-      ? (
-        <>
-          <Skeleton className="absolute inset-0 size-full rounded-none" />
-          <img
-            src={src}
-            alt={alt}
-            width={600}
-            height={250}
-            className="relative size-full object-cover"
-          />
-        </>
-      )
-      : (
-        <div className="flex size-full items-center justify-center bg-primary-foreground">
-          <p>No image available</p>
-        </div>
-      )}
+    {isLoading || isScreenshotLoading ? (
+      <Skeleton className="bg-primary size-full rounded-none" />
+    ) : src ? (
+      <>
+        <Skeleton className="absolute inset-0 size-full rounded-none" />
+        <img
+          src={src}
+          alt={alt}
+          width={600}
+          height={250}
+          className="relative size-full object-cover"
+        />
+      </>
+    ) : (
+      <div className="bg-primary-foreground flex size-full items-center justify-center">
+        <p>No image available</p>
+      </div>
+    )}
   </div>
 );
 
@@ -76,22 +74,20 @@ const ContentContainer = ({
   description: string;
   url: string;
 }) => (
-  <div className="flex flex-col gap-0.5 bg-primary-foreground p-3.5">
-    {isLoading
-      ? (
-        <>
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-4 w-1/2" />
-        </>
-      )
-      : (
-        <>
-          <p className="line-clamp-1 font-semibold">{title}</p>
-          <p className="line-clamp-2">{description}</p>
-          <p className="text-muted-foreground">{url}</p>
-        </>
-      )}
+  <div className="bg-primary-foreground flex flex-col gap-0.5 p-3.5">
+    {isLoading ? (
+      <>
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-8 w-full" />
+        <Skeleton className="h-4 w-1/2" />
+      </>
+    ) : (
+      <>
+        <p className="line-clamp-1 font-semibold">{title}</p>
+        <p className="line-clamp-2">{description}</p>
+        <p className="text-muted-foreground">{url}</p>
+      </>
+    )}
   </div>
 );
 
@@ -137,7 +133,8 @@ export default function OGImageDemo() {
 
         // Provide more specific error messages based on status
         if (ogResponse.status === 403) {
-          userMessage = errorData.error ||
+          userMessage =
+            errorData.error ||
             "This website blocks automated requests. Please try a different URL.";
         } else if (ogResponse.status === 404) {
           userMessage =
@@ -178,9 +175,10 @@ export default function OGImageDemo() {
       }
     } catch (error) {
       console.log("Error fetching data:", error);
-      const errorMessage = error instanceof Error
-        ? error.message
-        : "Failed to load data. Please check if the URL is correct and try again!";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to load data. Please check if the URL is correct and try again!";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
@@ -195,13 +193,13 @@ export default function OGImageDemo() {
 
   return (
     <section className="relative -mt-10 py-16">
-      <div className="pointer-events-none absolute inset-0 -z-10 select-none border-b-[0.5px] md:-mx-10">
+      <div className="pointer-events-none absolute inset-0 -z-10 border-b-[0.5px] select-none md:-mx-10">
         <Image
           src="/images/homebg.png"
           alt=""
           width={1000}
           height={1000}
-          className="hidden size-full select-none object-cover object-top dark:hidden md:block"
+          className="hidden size-full object-cover object-top select-none md:block dark:hidden"
         />
       </div>
       <div className="relative mx-auto max-w-4xl sm:px-4">
@@ -222,7 +220,7 @@ export default function OGImageDemo() {
           </Button>
         </form>
         {error && (
-          <p className="mb-6 text-center text-destructive" role="alert">
+          <p className="text-destructive mb-6 text-center" role="alert">
             {error}
           </p>
         )}
@@ -230,9 +228,11 @@ export default function OGImageDemo() {
           <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
             <ImageContainer
               isLoading={isLoading}
-              src={ogData
-                ? ogData.image || null
-                : "/images/original-example-og.jpg"}
+              src={
+                ogData
+                  ? ogData.image || null
+                  : "/images/original-example-og.jpg"
+              }
               alt="Original Open Graph Image"
             />
             <ContentContainer
@@ -243,7 +243,7 @@ export default function OGImageDemo() {
             />
           </div>
           <span
-            className="pointer-events-none grid size-7 shrink-0 select-none place-items-center text-muted-foreground"
+            className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
             aria-hidden="true"
           >
             <ArrowRight className="hidden size-7 md:block" />

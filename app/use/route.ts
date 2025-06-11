@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 
 // Utility functions
-const getInternalApiUrl = (imageKey: string, request: NextRequest): string =>
-  `${process.env.NODE_ENV === "production" ? "https" : "http"}://${request.headers.get("host") || "localhost:3000"}/api/prod-images/${imageKey}`;
+const getDirectR2Url = (imageKey: string): string =>
+  `https://og.mosaicimg.com/${imageKey}`;
 
 const generateCacheKey = (url: string): string =>
   crypto.createHash("sha256").update(url).digest("hex");
@@ -58,8 +58,8 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   }
 }
 
-// Upload to R2 and return internal API URL
-async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, request: NextRequest): Promise<string | null> {
+// Upload to R2 and return direct public URL
+async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string): Promise<string | null> {
   console.log(`[R2_UPLOAD_START] Starting R2 upload for cache key: ${cacheKey}`);
   try {
     const s3 = getR2Client();
@@ -78,9 +78,9 @@ async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, request: N
 
     await s3.send(command);
 
-    const internalUrl = getInternalApiUrl(imageKey, request);
-    console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, internal URL: ${internalUrl}`);
-    return internalUrl;
+    const directUrl = getDirectR2Url(imageKey);
+    console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, direct URL: ${directUrl}`);
+    return directUrl;
   } catch (error) {
     console.error("[R2_UPLOAD_ERROR] R2 upload failed:", error);
     return null;
@@ -313,7 +313,7 @@ export async function GET(request: NextRequest) {
     // Upload to R2
     const cacheKey = generateCacheKey(url);
     console.log(`[API_REQUEST_CACHE_KEY] Generated cache key: ${cacheKey}`);
-    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey, request);
+    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey);
 
     if (!uploadedUrl) {
       console.warn("[API_REQUEST_R2_FAILED] R2 upload failed, returning image directly");

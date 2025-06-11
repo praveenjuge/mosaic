@@ -9,14 +9,19 @@ function generateCacheKey(url: string): string {
   return crypto.createHash("sha256").update(url).digest("hex");
 }
 
-// Initialize R2 client
+// Get direct R2 URL for demo images
+function getDirectDemoR2Url(cacheKey: string): string {
+  return `https://og.mosaicimg.com/demo/${cacheKey}.png`;
+}
+
+// Initialize R2 client (now using production bucket)
 function getR2Client() {
-  const r2AccessKeyId = process.env.DEMO_R2_ACCESS_KEY_ID;
-  const r2SecretAccessKey = process.env.DEMO_R2_SECRET_ACCESS_KEY;
+  const r2AccessKeyId = process.env.PROD_R2_ACCESS_KEY_ID;
+  const r2SecretAccessKey = process.env.PROD_R2_SECRET_ACCESS_KEY;
   const r2AccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 
   if (!r2AccessKeyId || !r2SecretAccessKey || !r2AccountId) {
-    throw new Error("Missing Demo R2 configuration");
+    throw new Error("Missing Production R2 configuration");
   }
 
   return new S3Client({
@@ -32,23 +37,20 @@ function getR2Client() {
 // Check if image exists in R2
 async function checkImageInR2(
   cacheKey: string,
-  request: NextRequest,
 ): Promise<string | null> {
   try {
     const s3 = getR2Client();
-    const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
+    const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
 
     const command = new HeadObjectCommand({
       Bucket: bucketName,
-      Key: `screenshots/${cacheKey}.png`,
+      Key: `demo/${cacheKey}.png`,
     });
 
     await s3.send(command);
 
-    // If no error, object exists - return our internal API URL
-    const host = request.headers.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}/api/demo/images/${cacheKey}.png`;
+    // If no error, object exists - return direct R2 URL
+    return getDirectDemoR2Url(cacheKey);
   } catch (error: unknown) {
     if (
       error &&
@@ -67,15 +69,14 @@ async function checkImageInR2(
 async function uploadToR2(
   imageBuffer: ArrayBuffer,
   cacheKey: string,
-  request: NextRequest,
 ): Promise<string | null> {
   try {
     const s3 = getR2Client();
-    const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
+    const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
 
     const command = new PutObjectCommand({
       Bucket: bucketName,
-      Key: `screenshots/${cacheKey}.png`,
+      Key: `demo/${cacheKey}.png`,
       Body: Buffer.from(imageBuffer),
       ContentType: "image/png",
       CacheControl: "public, max-age=31536000", // Cache for 1 year
@@ -83,10 +84,8 @@ async function uploadToR2(
 
     await s3.send(command);
 
-    // Return internal API URL instead of public R2 URL for better reliability
-    const host = request.headers.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}/api/demo/images/${cacheKey}.png`;
+    // Return direct R2 URL
+    return getDirectDemoR2Url(cacheKey);
   } catch (error) {
     console.error("Error uploading to R2:", error);
     return null;
@@ -198,7 +197,7 @@ export async function GET(request: NextRequest) {
     );
 
     // Check if image exists in cache
-    const cachedImageUrl = await checkImageInR2(cacheKey, request);
+    const cachedImageUrl = await checkImageInR2(cacheKey);
     if (cachedImageUrl) {
       console.log(`Cache hit for ${url}`);
       return NextResponse.json({
@@ -221,7 +220,7 @@ export async function GET(request: NextRequest) {
     console.log(`Screenshot generated for ${url}, uploading to R2`);
 
     // Upload to R2
-    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey, request);
+    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey);
     if (!uploadedUrl) {
       console.log(`R2 upload failed for ${url}, returning base64 image`);
       // If upload fails, return the image buffer directly as base64
