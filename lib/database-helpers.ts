@@ -139,12 +139,6 @@ export async function getLatestScreenshotsForWebsite(
   total: number;
 } | null> {
   try {
-    console.log("[DEBUG] getLatestScreenshotsForWebsite called with:", {
-      websiteId,
-      page,
-      limit,
-    });
-
     const supabase = await createClerkSupabaseServerClient();
 
     // Get total count first - RLS will automatically filter by user
@@ -165,11 +159,9 @@ export async function getLatestScreenshotsForWebsite(
       .eq("pages_new.websites_new.id", websiteId);
 
     if (countError) {
-      console.error("[DEBUG] Error counting screenshots:", countError);
+      console.error("Error counting screenshots:", countError);
       return null;
     }
-
-    console.log("[DEBUG] Screenshot count:", count);
 
     // Get paginated screenshots - RLS will automatically filter by user
     const offset = (page - 1) * limit;
@@ -195,12 +187,9 @@ export async function getLatestScreenshotsForWebsite(
       .range(offset, offset + limit - 1);
 
     if (screenshotsError) {
-      console.error("[DEBUG] Error fetching screenshots:", screenshotsError);
+      console.error("Error fetching screenshots:", screenshotsError);
       return null;
     }
-
-    console.log("[DEBUG] Screenshots fetched:", screenshots?.length || 0);
-    console.log("[DEBUG] Screenshots data:", screenshots);
 
     const formattedData =
       screenshots?.map(
@@ -209,15 +198,22 @@ export async function getLatestScreenshotsForWebsite(
           screenshot_url: string;
           size_in_bytes?: number;
           generated_at: string;
-          pages_new: { full_url?: string }[];
-        }) => ({
-          id: screenshot.id,
-          screenshot_url: screenshot.screenshot_url,
-          size_in_bytes: screenshot.size_in_bytes || 0,
-          generated_at: screenshot.generated_at,
-          page_title: null,
-          page_url: screenshot.pages_new?.[0]?.full_url || "",
-        }),
+          pages_new: Array<{ full_url?: string }>;
+        }) => {
+          // pages_new is an array due to join, so take the first element
+          const page = Array.isArray(screenshot.pages_new)
+            ? screenshot.pages_new[0]
+            : screenshot.pages_new;
+
+          return {
+            id: screenshot.id,
+            screenshot_url: screenshot.screenshot_url,
+            size_in_bytes: screenshot.size_in_bytes || 0,
+            generated_at: screenshot.generated_at,
+            page_title: null,
+            page_url: page?.full_url || "",
+          };
+        }
       ) || [];
 
     return {
@@ -485,18 +481,12 @@ export async function getLatestScreenshotsForAllUserWebsites(
       return [];
     }
 
-    // Format the data - handle the nested array structure from Supabase
+    // Format the data - handle the nested structure from Supabase
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formattedData = screenshots.map((screenshot: any) => {
-      // Extract first page from array
-      const page = Array.isArray(screenshot.pages_new)
-        ? screenshot.pages_new[0]
-        : screenshot.pages_new;
-
-      // Extract first website from array  
-      const website = Array.isArray(page?.websites_new)
-        ? page.websites_new[0]
-        : page?.websites_new;
+      // Since we're using regular joins (not !inner), pages_new should be a single object
+      const page = screenshot.pages_new;
+      const website = page?.websites_new;
 
       return {
         id: screenshot.id,

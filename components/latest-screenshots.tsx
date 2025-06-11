@@ -40,10 +40,6 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
 }) => {
   const { userId } = await auth();
 
-  // Debug info
-  console.log("[LatestScreenshots] Component props:", { slug, page, limit });
-  console.log("[LatestScreenshots] User ID:", userId);
-
   if (!userId) {
     return (
       <CardHeader className="py-6">
@@ -96,11 +92,6 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
 
     websitePagesData = response;
   }
-
-  // Debug final data
-  console.log("[LatestScreenshots] Final websitePagesData:", websitePagesData);
-  console.log("[LatestScreenshots] Data length:", websitePagesData?.length);
-  console.log("[LatestScreenshots] First item:", websitePagesData?.[0]);
 
   return (
     <>
