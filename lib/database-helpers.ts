@@ -639,7 +639,7 @@ export async function getUserStatsCached(): Promise<{
   const { userId } = await auth();
   if (!userId) return null;
 
-    try {
+  try {
     // Use Next.js cache with revalidation
     const cachedStats = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/stats/user`, {
       next: { revalidate: 300, tags: [`user-stats-${userId}`] },
