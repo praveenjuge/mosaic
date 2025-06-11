@@ -18,7 +18,7 @@ export default async function AnalyticsQuickStats() {
   // Get actual data from Supabase
   let actualStats = null;
   if (userData?.userId) {
-    actualStats = await getUserStats(userData.userId);
+    actualStats = await getUserStats();
   }
 
   // Use actual data from DB if available, fallback to metadata

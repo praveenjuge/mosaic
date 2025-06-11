@@ -34,7 +34,7 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@shikijs/markdown-it": "^3.4.2",
     "@supabase/ssr": "^0.6.1",
-    "@supabase/supabase-js": "^2.49.8",
+    "@supabase/supabase-js": "^2.50.0",
     "@tailwindcss/postcss": "^4.1.8",
     "aws-sdk": "^2.1692.0",
     "cheerio": "^1.0.0",

@@ -17,7 +17,6 @@ import { website_url } from "@/lib/constants";
 import { getAllWebsitesWithStats } from "@/lib/database-helpers";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { Globe } from "@mynaui/icons-react";
 import Link from "next/link";
 import { DeleteWebsite } from "./DeleteWebsite";
 import { EditWebsite } from "./EditWebsite";
@@ -29,7 +28,7 @@ export default async function WebsitesTable() {
     return <p>Please sign in to view your websites.</p>;
   }
 
-  const data = await getAllWebsitesWithStats(userId);
+  const data = await getAllWebsitesWithStats();
 
   if (!data) {
     return <p>Error loading websites. Please try again.</p>;
@@ -53,7 +52,11 @@ export default async function WebsitesTable() {
                 {data.map((website) => (
                   <TableRow key={website.id}>
                     <TableCell className="flex items-center gap-2">
-                      <Globe className="size-4" />
+                      <img
+                        src={`https://www.google.com/s2/favicons?domain=https://${website.url_base}&sz=64`}
+                        alt="Favicon"
+                        className="size-3.5"
+                      />
                       <Link
                         href={`/websites/${website.id}`}
                         className="max-w-xs truncate font-medium text-primary"

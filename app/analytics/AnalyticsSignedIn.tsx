@@ -23,7 +23,7 @@ export default async function AnalyticsSignedIn() {
 
   try {
     if (userData?.userId) {
-      data = await getAnalyticsData(userData.userId);
+      data = await getAnalyticsData();
     }
   } catch (error) {
     console.log(error);

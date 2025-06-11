@@ -36,7 +36,7 @@ export default async function HomeQuickStats() {
     );
   }
 
-  const userStats = await getUserStats(userId);
+  const userStats = await getUserStats();
 
   const totalImages = userStats?.total_images ?? 0;
   const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
