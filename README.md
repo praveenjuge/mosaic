@@ -12,14 +12,13 @@ bun install
 bun dev
 ```
 
-## Create an .env file
+## Environment variables
+
+Copy the `.env.example` file to `.env` and add your credentials:
 
 ```sh
-# Clerk
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
-CLERK_SECRET_KEY=
-
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
+cp .env.example .env
 ```
+
+Then edit `.env` and provide values for the required variables.
+The `.env.example` file documents each variable used by the project.
