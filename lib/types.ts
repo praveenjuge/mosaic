@@ -15,7 +15,6 @@ export interface Site {
   id: string;
   user_id: string;
   url_base: string;
-  site_name: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -21,7 +21,7 @@ export async function POST(
     // Verify that the website belongs to the authenticated user
     const { data: website, error: websiteError } = await supabase
       .from("sites")
-      .select("id, url_base, site_name")
+      .select("id, url_base")
       .eq("id", websiteId)
       .eq("user_id", userId)
       .single();
@@ -115,13 +115,13 @@ export async function POST(
 
     if (failureCount > 0) {
       console.log(
-        `Refresh summary for ${website.site_name}: ${successCount} success, ${failureCount} failures`,
+        `Refresh summary for ${website.url_base}: ${successCount} success, ${failureCount} failures`,
       );
     }
 
     return NextResponse.json({
       message,
-      website: website.site_name,
+      website: website.url_base,
       totalPages,
       successCount,
       failureCount,

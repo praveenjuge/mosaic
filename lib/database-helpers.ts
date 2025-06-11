@@ -39,7 +39,6 @@ export async function getOrCreateWebsite(
       .from("sites")
       .insert({
         url_base: urlBase,
-        site_name: siteName,
       })
       .select()
       .single();
@@ -425,7 +424,6 @@ export async function getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | 
             id: website.id,
             user_id: website.user_id,
             url_base: website.url_base,
-            site_name: website.site_name,
             created_at: website.created_at,
             updated_at: website.updated_at,
             screenshot_count,
@@ -462,7 +460,6 @@ export async function getLatestScreenshotsForAllUserWebsites(
           website_id,
           sites (
             id,
-            site_name,
             url_base
           )
         )
@@ -494,7 +491,7 @@ export async function getLatestScreenshotsForAllUserWebsites(
         generated_at: screenshot.generated_at,
         page_title: null,
         page_url: page?.full_url || "",
-        website_name: website?.site_name || website?.url_base || "Unknown",
+        website_name: website?.url_base || "Unknown",
       };
     });
 

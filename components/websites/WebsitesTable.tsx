@@ -65,7 +65,7 @@ export default async function WebsitesTable() {
                         rel="noopener noreferrer"
                         className="text-primary max-w-xs truncate font-medium"
                       >
-                        {website.site_name || website.url_base}
+                        {website.url_base}
                       </a>
                     </div>
                   </TableCell>
