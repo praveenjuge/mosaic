@@ -61,7 +61,6 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
     // Get screenshots for a specific website
     const response = await getLatestScreenshotsForWebsite(
       slug,
-      userId,
       page || 1,
       limit || 10,
     );
@@ -81,7 +80,6 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
   } else {
     // Get latest screenshots from all user's websites (for homepage)
     const response = await getLatestScreenshotsForAllUserWebsites(
-      userId,
       limit || 5,
     );
 

@@ -31,7 +31,7 @@ export async function generateMetadata(props: {
       };
     }
 
-    const websiteData = await getWebsiteWithStats(params.slug, userId);
+    const websiteData = await getWebsiteWithStats(params.slug);
 
     if (!websiteData || !websiteData.website) {
       return {
@@ -80,8 +80,8 @@ export async function generateMetadata(props: {
   }
 }
 
-async function fetchWebsiteData(websiteId: string, userId: string) {
-  return await getWebsiteWithStats(websiteId, userId);
+async function fetchWebsiteData(websiteId: string) {
+  return await getWebsiteWithStats(websiteId);
 }
 
 interface WebsiteData {
@@ -112,7 +112,7 @@ export default async function Page(props: {
     }
 
     try {
-      websiteData = await fetchWebsiteData(params.slug, userId);
+      websiteData = await fetchWebsiteData(params.slug);
       if (!websiteData) {
         notFound();
       }
