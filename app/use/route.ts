@@ -41,31 +41,26 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
     const urlBase = `${parsedUrl.protocol}//${parsedUrl.host}`;
     const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
 
-    // Use optimized query approach - remove .single() to avoid the error and use limit
+    // Optimized query with proper joins
     const { data, error } = await supabase
       .from("screenshots_new")
-      .select(
-        `
+      .select(`
         screenshot_url,
         pages_new!inner(
-          id,
-          websites_new!inner(
-            id,
-            url_base
-          )
+          websites_new!inner(url_base)
         )
-      `,
-      )
+      `)
       .eq("pages_new.websites_new.url_base", urlBase)
       .eq("pages_new.path", path)
       .order("generated_at", { ascending: false })
-      .limit(1);
+      .limit(1)
+      .maybeSingle();
 
-    if (error || !data || data.length === 0) {
+    if (error || !data) {
       return null;
     }
 
-    return data[0].screenshot_url;
+    return data.screenshot_url;
   } catch (error) {
     console.error("Error checking database:", error);
     return null;
@@ -103,7 +98,7 @@ async function uploadToR2(
   }
 }
 
-// Store image metadata in new database structure
+// Store image metadata in new database structure with optimized queries
 async function storeImageInDatabase(
   pageUrl: string,
   imageKey: string,
@@ -128,69 +123,48 @@ async function storeImageInDatabase(
       console.log("No auth context available, using public user");
     }
 
-    // First, ensure website exists
+    // Use upsert operations for better performance and handle conflicts
+    // First, upsert website
     const { data: websiteData, error: websiteError } = await supabase
       .from("websites_new")
+      .upsert({
+        user_id: userId,
+        url_base: urlBase,
+        site_name: hostname,
+      }, {
+        onConflict: 'user_id,url_base',
+        ignoreDuplicates: false
+      })
       .select("id")
-      .eq("url_base", urlBase)
-      .eq("user_id", userId)
       .single();
 
-    let websiteId;
     if (websiteError || !websiteData) {
-      // Create new website
-      const { data: newWebsite, error: createWebsiteError } = await supabase
-        .from("websites_new")
-        .insert({
-          user_id: userId,
-          url_base: urlBase,
-          site_name: hostname,
-        })
-        .select("id")
-        .single();
-
-      if (createWebsiteError || !newWebsite) {
-        console.error("Error creating website:", createWebsiteError);
-        return;
-      }
-      websiteId = newWebsite.id;
-    } else {
-      websiteId = websiteData.id;
+      console.error("Error upserting website:", websiteError);
+      return;
     }
 
-    // Next, ensure page exists
+    // Next, upsert page
     const { data: pageData, error: pageError } = await supabase
       .from("pages_new")
+      .upsert({
+        website_id: websiteData.id,
+        path: path,
+        full_url: pageUrl,
+      }, {
+        onConflict: 'website_id,path',
+        ignoreDuplicates: false
+      })
       .select("id")
-      .eq("website_id", websiteId)
-      .eq("path", path)
       .single();
 
-    let pageId;
     if (pageError || !pageData) {
-      // Create new page
-      const { data: newPage, error: createPageError } = await supabase
-        .from("pages_new")
-        .insert({
-          website_id: websiteId,
-          path: path,
-          full_url: pageUrl,
-        })
-        .select("id")
-        .single();
-
-      if (createPageError || !newPage) {
-        console.error("Error creating page:", createPageError);
-        return;
-      }
-      pageId = newPage.id;
-    } else {
-      pageId = pageData.id;
+      console.error("Error upserting page:", pageError);
+      return;
     }
 
     // Finally, store the screenshot
     await supabase.from("screenshots_new").insert({
-      page_id: pageId,
+      page_id: pageData.id,
       screenshot_url: uploadedUrl,
       image_hash: imageKey,
       size_in_bytes: imageSize,
@@ -314,12 +288,12 @@ export async function GET(request: NextRequest) {
           const protocol =
             process.env.NODE_ENV === "production" ? "https" : "http";
           const internalUrl = `${protocol}://${host}/api/prod-images/${imageKey}`;
-          return NextResponse.redirect(internalUrl);
+          return NextResponse.redirect(internalUrl, { status: 302 });
         }
       }
 
       // Redirect to the image URL instead of returning JSON
-      return NextResponse.redirect(cachedImageUrl);
+      return NextResponse.redirect(cachedImageUrl, { status: 302 });
     }
 
     console.log(`Database miss for ${url}, generating new screenshot`);
@@ -351,14 +325,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Store image metadata in database
+    // Store image metadata in database (don't await to improve response time)
     const imageSize = Buffer.from(imageBuffer).length;
-    await storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl);
+    storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl).catch(
+      (error) => console.error("Background database storage failed:", error)
+    );
 
     console.log(`Successfully uploaded screenshot for ${url} to R2`);
 
     // Redirect to the uploaded image
-    return NextResponse.redirect(uploadedUrl);
+    return NextResponse.redirect(uploadedUrl, { status: 302 });
   } catch (error) {
     console.error("OG Image API error:", error);
     return NextResponse.json(
