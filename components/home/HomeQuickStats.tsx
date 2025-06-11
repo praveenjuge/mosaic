@@ -9,12 +9,6 @@ import { getUserStats } from "@/lib/database-helpers";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Suspense } from "react";
-import { cache } from "react";
-
-// Cache the stats function for the duration of the request
-const getCachedUserStats = cache(async () => {
-  return await getUserStats();
-});
 
 // Loading skeleton component
 function StatsLoadingSkeleton() {

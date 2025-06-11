@@ -639,10 +639,7 @@ export async function getUserStatsCached(): Promise<{
   const { userId } = await auth();
   if (!userId) return null;
 
-  // Cache for 5 minutes (300 seconds)
-  const cacheKey = `user-stats-${userId}`;
-
-  try {
+    try {
     // Use Next.js cache with revalidation
     const cachedStats = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/stats/user`, {
       next: { revalidate: 300, tags: [`user-stats-${userId}`] },
@@ -651,7 +648,7 @@ export async function getUserStatsCached(): Promise<{
     if (cachedStats.ok) {
       return await cachedStats.json();
     }
-  } catch (cacheError) {
+  } catch {
     console.log("Cache miss, fetching fresh stats");
   }
 

@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Image from "next/image";
 import {
   Table,
   TableBody,
@@ -52,10 +53,12 @@ export default async function WebsitesTable() {
                 {data.map((website) => (
                   <TableRow key={website.id}>
                     <TableCell className="flex items-center gap-2">
-                      <img
+                      <Image
                         src={`https://www.google.com/s2/favicons?domain=https://${website.url_base}&sz=64`}
                         alt="Favicon"
                         className="size-3.5"
+                        width={14}
+                        height={14}
                       />
                       <Link
                         href={`/websites/${website.id}`}
