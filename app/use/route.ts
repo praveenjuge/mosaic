@@ -115,7 +115,6 @@ async function storeImageInDatabase(
 
     // Parse URL to get base and path using consistent parsing
     const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
-    const pageTitle = extractTitleFromUrl(pageUrl);
 
     // Get user ID from auth context (if available)
     let userId = "public"; // Default for public usage
@@ -176,7 +175,6 @@ async function storeImageInDatabase(
           website_id: websiteId,
           path: path,
           full_url: pageUrl,
-          title: pageTitle,
         })
         .select("id")
         .single();
@@ -199,28 +197,6 @@ async function storeImageInDatabase(
     });
   } catch (error) {
     console.error("Error storing image in database:", error);
-  }
-}
-
-// Extract a title from URL for display purposes
-function extractTitleFromUrl(url: string): string {
-  try {
-    const parsedUrl = new URL(url);
-    const pathname = parsedUrl.pathname;
-
-    if (pathname === "/" || pathname === "") {
-      return parsedUrl.hostname;
-    }
-
-    // Convert path to title (remove slashes, capitalize)
-    return pathname
-      .split("/")
-      .filter((segment) => segment)
-      .join(" ")
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  } catch {
-    return url;
   }
 }
 

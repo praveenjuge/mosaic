@@ -36,7 +36,6 @@ export interface PageNew {
   website_id: string;
   path: string;
   full_url: string;
-  title: string | null;
   created_at: string;
   updated_at: string;
 }

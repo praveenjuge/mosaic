@@ -129,7 +129,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={websitePage.screenshot_url}
-                          alt={websitePage.page_title || websitePage.page_url}
+                          alt={websitePage.page_url}
                           className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center object-cover"
                           width={56}
                           height={24}
@@ -144,9 +144,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
                           href={websitePage.page_url}
                           className="max-w-xs truncate font-medium text-primary"
                         >
-                          {websitePage.page_title
-                            ? websitePage.page_title
-                            : websitePage.page_url}
+                          {websitePage.page_url}
                         </Link>
                       </div>
                     </TableCell>

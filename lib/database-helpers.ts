@@ -181,7 +181,6 @@ export async function getLatestScreenshotsForWebsite(
         size_in_bytes,
         generated_at,
         pages_new!inner(
-          title,
           full_url,
           websites_new!inner(
             id,
@@ -209,13 +208,13 @@ export async function getLatestScreenshotsForWebsite(
           screenshot_url: string;
           size_in_bytes?: number;
           generated_at: string;
-          pages_new: { title?: string; full_url?: string }[];
+          pages_new: { full_url?: string }[];
         }) => ({
           id: screenshot.id,
           screenshot_url: screenshot.screenshot_url,
           size_in_bytes: screenshot.size_in_bytes || 0,
           generated_at: screenshot.generated_at,
-          page_title: screenshot.pages_new?.[0]?.title || null,
+          page_title: null,
           page_url: screenshot.pages_new?.[0]?.full_url || "",
         }),
       ) || [];
@@ -235,7 +234,6 @@ export async function getOrCreatePage(
   websiteId: string,
   path: string,
   fullUrl: string,
-  title?: string,
 ): Promise<PageNew | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
@@ -259,7 +257,6 @@ export async function getOrCreatePage(
         website_id: websiteId,
         path: path,
         full_url: fullUrl,
-        title: title,
       })
       .select()
       .single();
@@ -465,7 +462,6 @@ export async function getLatestScreenshotsForAllUserWebsites(
         generated_at,
         pages_new (
           id,
-          title,
           full_url,
           website_id,
           websites_new (
@@ -506,7 +502,7 @@ export async function getLatestScreenshotsForAllUserWebsites(
         screenshot_url: screenshot.screenshot_url,
         size_in_bytes: screenshot.size_in_bytes || 0,
         generated_at: screenshot.generated_at,
-        page_title: page?.title || null,
+        page_title: null,
         page_url: page?.full_url || "",
         website_name: website?.site_name || website?.url_base || "Unknown",
       };
