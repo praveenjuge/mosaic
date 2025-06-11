@@ -6,39 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
-// Generate direct R2 URL for public access
-function getDirectR2Url(imageKey: string): string {
-  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
-  const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
-
-  // Option 1: Use R2 custom domain (recommended for production)
-  const customDomain = process.env.R2_PUBLIC_DOMAIN;
-  if (customDomain) {
-    return `https://${customDomain}/${imageKey}`;
-  }
-
-  // Option 2: Use R2.dev public URL (if configured)
-  const r2DevUrl = process.env.R2_DEV_URL;
-  if (r2DevUrl) {
-    return `${r2DevUrl}/${imageKey}`;
-  }
-
-  // Option 3: Direct R2 URL (requires public bucket access)
-  return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${imageKey}`;
-}
-
-// Check if R2 public access is working by testing a URL
-async function testR2PublicAccess(testUrl: string): Promise<boolean> {
-  try {
-    const response = await fetch(testUrl, { method: 'HEAD' });
-    return response.ok;
-  } catch {
-    return false;
-  }
-}
-
-// Get fallback URL (internal API) when R2 public access is not available
-function getFallbackUrl(imageKey: string, request: NextRequest): string {
+// Get internal API URL for serving images
+function getInternalApiUrl(imageKey: string, request: NextRequest): string {
   const host = request.headers.get("host") || "localhost:3000";
   const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
   return `${protocol}://${host}/api/prod-images/${imageKey}`;
@@ -106,7 +75,7 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   }
 }
 
-// Upload image to R2 production bucket and return appropriate URL
+// Upload image to R2 production bucket and return internal API URL
 async function uploadToR2(
   imageBuffer: ArrayBuffer,
   cacheKey: string,
@@ -127,17 +96,8 @@ async function uploadToR2(
       })
       .promise();
 
-    // Check if R2 public access is configured
-    const directR2Url = getDirectR2Url(imageKey);
-    const isR2PublicAccessEnabled = await testR2PublicAccess(directR2Url);
-
-    if (isR2PublicAccessEnabled) {
-      console.log("Using direct R2 URL for better performance");
-      return directR2Url;
-    } else {
-      console.log("R2 public access not configured, falling back to internal API");
-      return getFallbackUrl(imageKey, request);
-    }
+    // Always use internal API URL
+    return getInternalApiUrl(imageKey, request);
   } catch (error) {
     console.error("Error uploading to R2:", error);
     return null;
