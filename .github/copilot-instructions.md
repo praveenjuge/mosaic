@@ -1,10 +1,4 @@
-# GitHub Copilot Instructions for Mosaic
-
-## Project Overview
-
 Mosaic is a SaaS platform that automatically generates Open Graph (OG) images for websites using screenshots. The application allows users to add their websites and automatically create beautiful social media preview images by taking screenshots of their web pages.
-
-## Tech Stack & Architecture
 
 ### Core Technologies
 - **Framework**: Next.js 15 (App Router) with React 19
@@ -27,7 +21,6 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 
 ```
 app/                    # Next.js App Router pages
-├── analytics/         # Analytics dashboard and charts
 ├── api/              # API routes
 ├── blog/             # Blog pages with markdown content
 ├── changelog/        # Changelog pages
@@ -71,14 +64,13 @@ hooks/              # Custom React hooks
 
 ### Authentication (Clerk)
 - Use `SignedIn`, `SignedOut`, `ClerkLoaded`, `ClerkLoading` for auth states
-- Use Supabase JWT tokens for backend API calls
 
 ### Database (Supabase)
 - Use server-side client for data fetching in Server Components
 - Handle errors gracefully with try/catch blocks
 - Use proper RLS (Row Level Security) policies
 - Follow the pattern: `createClient()` for server operations
-- For any db migrations or schema changes, use Supabase CLI
+- For any db migrations or schema changes, use Supabase MCP Server
 
 ### UI/UX Patterns
 - Use shadcn/ui components consistently
@@ -101,9 +93,8 @@ hooks/              # Custom React hooks
 
 ## Deployment & Build
 
-- Build command: `bun run build`
+- Build command: `bun run build --turbo`
 - Development: `bun dev --turbo`
-- Production optimized for Vercel platforms
 
 ## Important Notes
 

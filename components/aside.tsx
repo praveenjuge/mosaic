@@ -5,7 +5,6 @@ import {
   Config,
   Earth,
   Home,
-  Lightning,
   ListCheck,
   ShootingStar,
   Support,
@@ -30,7 +29,6 @@ import {
 const navItems = [
   { href: "/", icon: Home, label: "Home" },
   { href: "/websites", icon: Earth, label: "Websites" },
-  { href: "/analytics", icon: Lightning, label: "Analytics" },
   { href: "/subscription", icon: ShootingStar, label: "Subscription" },
   { href: "/settings", icon: Config, label: "Settings" },
 ];
