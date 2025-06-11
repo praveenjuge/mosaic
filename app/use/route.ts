@@ -114,12 +114,14 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
     console.log(`[DB_STORE_WEBSITE_SELECTED] Selected website: ${website.id}, user: ${website.user_id} (${websitesData.length} total websites)`);
 
     // Get or create page
-    let { data: page, error: pageSelectError } = await supabase
+    const { data: pageData, error: pageSelectError } = await supabase
       .from("pages_new")
       .select("id")
       .eq("website_id", website.id)
       .eq("path", path)
       .maybeSingle();
+
+    let page = pageData;
 
     if (pageSelectError) {
       console.error("[DB_STORE_PAGE_SELECT_ERROR] Failed to check existing page:", pageSelectError);
@@ -257,7 +259,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Validate URL
-    const { isValid, validatedUrl, error } = validateUrl(url);
+    const { isValid, error } = validateUrl(url);
     if (!isValid) {
       console.warn(`[API_REQUEST_VALIDATION_FAILED] URL validation failed: ${error}`);
       return NextResponse.json({ error }, { status: 400 });
