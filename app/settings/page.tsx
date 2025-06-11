@@ -165,129 +165,127 @@ export default function Page() {
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <div className="grid w-full max-w-4xl gap-8 pb-4">
-        <Card>
-          <CardHeader>
-            <CardTitle>Theme</CardTitle>
-            <CardDescription>Choose your preferred theme</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Suspense fallback={<div className="h-[45px] w-full"></div>}>
-              <ModeToggle />
-            </Suspense>
-          </CardContent>
-        </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Theme</CardTitle>
+          <CardDescription>Choose your preferred theme</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense fallback={<div className="h-[45px] w-full"></div>}>
+            <ModeToggle />
+          </Suspense>
+        </CardContent>
+      </Card>
 
-        {/* Pricing Plans */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Choose Your Plan</CardTitle>
-            <CardDescription>
-              Select the plan that best fits your needs
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-6 md:grid-cols-3">
-              {plans.map((plan, index) => (
-                <Card key={index} className="relative">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{plan.title}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                    <div className="text-2xl font-bold">{plan.price}</div>
-                    {plan.price !== "$0" && (
-                      <div className="text-sm text-muted-foreground">
-                        {plan.type === "pro-yearly" ? "per year" : "per month"}
-                      </div>
-                    )}
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-2">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center">
-                          <Check className="mr-2 h-4 w-4 text-primary" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </CardContent>
-                  <CardFooter>
-                    <Suspense
-                      fallback={<Skeleton className="h-10 w-full" />}
-                    >
-                      <PlanButton
-                        type={plan.type as
-                          | "free"
-                          | "pro"
-                          | "teams"
-                          | "pro-yearly"}
-                      />
-                    </Suspense>
-                  </CardFooter>
-                  {plan.title === "Pro Yearly" && (
-                    <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
-                      Best Value
-                    </Badge>
+      {/* Pricing Plans */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Choose Your Plan</CardTitle>
+          <CardDescription>
+            Select the plan that best fits your needs
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-3">
+            {plans.map((plan, index) => (
+              <Card key={index} className="relative">
+                <CardHeader>
+                  <CardTitle className="text-lg">{plan.title}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="text-2xl font-bold">{plan.price}</div>
+                  {plan.price !== "$0" && (
+                    <div className="text-sm text-muted-foreground">
+                      {plan.type === "pro-yearly" ? "per year" : "per month"}
+                    </div>
                   )}
-                </Card>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, featureIndex) => (
+                      <li key={featureIndex} className="flex items-center">
+                        <Check className="mr-2 h-4 w-4 text-primary" />
+                        <span className="text-sm">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+                <CardFooter>
+                  <Suspense
+                    fallback={<Skeleton className="h-10 w-full" />}
+                  >
+                    <PlanButton
+                      type={plan.type as
+                        | "free"
+                        | "pro"
+                        | "teams"
+                        | "pro-yearly"}
+                    />
+                  </Suspense>
+                </CardFooter>
+                {plan.title === "Pro Yearly" && (
+                  <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
+                    Best Value
+                  </Badge>
+                )}
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
-        {/* FAQ Section */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Frequently Asked Questions</CardTitle>
-            <CardDescription>
-              Find answers to common questions about our service
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq, index) => (
-                <AccordionItem key={index} value={`item-${index}`}>
-                  <AccordionTrigger className="text-left">
-                    {faq.question}
-                  </AccordionTrigger>
-                  <AccordionContent>{faq.answer}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </CardContent>
-        </Card>
+      {/* FAQ Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Frequently Asked Questions</CardTitle>
+          <CardDescription>
+            Find answers to common questions about our service
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((faq, index) => (
+              <AccordionItem key={index} value={`item-${index}`}>
+                <AccordionTrigger className="text-left">
+                  {faq.question}
+                </AccordionTrigger>
+                <AccordionContent>{faq.answer}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </CardContent>
+      </Card>
 
-        {/* Additional Resources */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Need Help?</CardTitle>
-            <CardDescription>
-              Get support and learn more about our service
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <h4 className="font-medium">Documentation</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Learn how to use our service effectively
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/help">View Guides</Link>
-                </Button>
-              </div>
-              <div>
-                <h4 className="font-medium">Legal</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  Terms of service and privacy policy
-                </p>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href="/legal">Legal Pages</Link>
-                </Button>
-              </div>
+      {/* Additional Resources */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Need Help?</CardTitle>
+          <CardDescription>
+            Get support and learn more about our service
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h4 className="font-medium">Documentation</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Learn how to use our service effectively
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/help">View Guides</Link>
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <h4 className="font-medium">Legal</h4>
+              <p className="text-sm text-muted-foreground mb-2">
+                Terms of service and privacy policy
+              </p>
+              <Button variant="outline" size="sm" asChild>
+                <Link href="/legal">Legal Pages</Link>
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </>
   );
 }

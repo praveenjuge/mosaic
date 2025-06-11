@@ -23,7 +23,7 @@ export default function Page() {
         <CardTitle>{metadata.title as string}</CardTitle>
         <CardDescription>{metadata.description}</CardDescription>
       </CardHeader>
-      <Card>
+      <Card id="privacy-policy">
         <CardHeader>
           <CardTitle>Privacy Policy</CardTitle>
           <CardDescription>Last updated: June 7, 2024</CardDescription>
@@ -108,7 +108,7 @@ export default function Page() {
           </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card id="terms-of-service">
         <CardHeader>
           <CardTitle>Terms of Service</CardTitle>
           <CardDescription>Last updated: June 7, 2024</CardDescription>
@@ -187,7 +187,7 @@ export default function Page() {
           </div>
         </CardContent>
       </Card>
-      <Card>
+      <Card id="refund-policy">
         <CardHeader>
           <CardTitle id="refund-policy">Refund Policy</CardTitle>
           <CardDescription>Last updated: June 7, 2024</CardDescription>
@@ -206,39 +206,43 @@ export default function Page() {
             <p>Refunds may be issued in the following cases:</p>
             <ul>
               <li>
-                <strong>Service Disruption:</strong> If our services are
-                unavailable or significantly disrupted due to technical issues
-                on our end for an extended period.
+                <strong>Service Disruption:</strong>{" "}
+                If our services are unavailable or significantly disrupted due
+                to technical issues on our end for an extended period.
               </li>
               <li>
-                <strong>Billing Errors:</strong> If you have been charged
-                incorrectly or for services you did not use.
+                <strong>Billing Errors:</strong>{" "}
+                If you have been charged incorrectly or for services you did not
+                use.
               </li>
               <li>
-                <strong>Unsatisfactory Service:</strong> If you are unsatisfied
-                with our services within the first 30 days of your subscription.
+                <strong>Unsatisfactory Service:</strong>{" "}
+                If you are unsatisfied with our services within the first 30
+                days of your subscription.
               </li>
             </ul>
 
             <h3>Requesting a Refund</h3>
             <p>
               To request a refund, please contact our support team at{" "}
-              <a href="mailto:hello@praveenjuge.com">hello@praveenjuge.com</a>{" "}
+              <a href="mailto:hello@praveenjuge.com">hello@praveenjuge.com</a>
+              {" "}
               with the following information:
             </p>
             <ul>
               <li>
-                <strong>Account Details:</strong> Your account username or email
-                address associated with your Mosaic account.
+                <strong>Account Details:</strong>{" "}
+                Your account username or email address associated with your
+                Mosaic account.
               </li>
               <li>
-                <strong>Reason for Refund:</strong> A brief description of the
-                reason for the refund request.
+                <strong>Reason for Refund:</strong>{" "}
+                A brief description of the reason for the refund request.
               </li>
               <li>
-                <strong>Transaction Information:</strong> Details of the
-                transaction for which you are requesting a refund, including the
-                date and amount charged.
+                <strong>Transaction Information:</strong>{" "}
+                Details of the transaction for which you are requesting a
+                refund, including the date and amount charged.
               </li>
             </ul>
 
@@ -258,16 +262,19 @@ export default function Page() {
             <p>Refunds will not be issued in the following cases:</p>
             <ul>
               <li>
-                <strong>Usage Beyond 30 Days:</strong> If more than 30 days have
-                passed since your subscription started.
+                <strong>Usage Beyond 30 Days:</strong>{" "}
+                If more than 30 days have passed since your subscription
+                started.
               </li>
               <li>
-                <strong>Violation of Terms:</strong> If your account has been
-                terminated due to a violation of our Terms of Service.
+                <strong>Violation of Terms:</strong>{" "}
+                If your account has been terminated due to a violation of our
+                Terms of Service.
               </li>
               <li>
-                <strong>Change of Mind:</strong> If you simply change your mind
-                after the subscription or purchase.
+                <strong>Change of Mind:</strong>{" "}
+                If you simply change your mind after the subscription or
+                purchase.
               </li>
             </ul>
 

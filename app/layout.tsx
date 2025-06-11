@@ -1,12 +1,7 @@
 import "@/app/globals.css";
-import Aside from "@/components/aside";
-import { OnboardingWrapper } from "@/components/onboarding-wrapper";
+import Footer from "@/components/footer";
+import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import {
   website_description,
@@ -18,7 +13,6 @@ import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 
 export const experimental_ppr = true;
 
@@ -56,7 +50,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className={`${GeistSans.variable} antialiased [font-family:var(--font-geist-sans)] [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility] touch-manipulation`}
       >
-        <body className="relative text-sm">
+        <body className="relative text-sm flex flex-col">
           <ThemeProvider
             enableSystem
             attribute="class"
@@ -68,16 +62,11 @@ export default function RootLayout({
               aria-hidden="true"
             >
             </div>
-            <SidebarProvider>
-              <Aside />
-              <SidebarInset>
-                <SidebarTrigger />
-                {children}
-              </SidebarInset>
-            </SidebarProvider>
-            <Suspense fallback={<></>}>
-              <OnboardingWrapper />
-            </Suspense>
+            <Header />
+            <main className="flex-1 space-y-6 px-4 py-6 md:px-10 max-w-6xl mx-auto w-full min-h-screen">
+              {children}
+            </main>
+            <Footer />
             <Toaster richColors />
           </ThemeProvider>
         </body>

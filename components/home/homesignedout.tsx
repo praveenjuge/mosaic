@@ -1,5 +1,4 @@
 import CTA from "@/components/home/cta";
-import Logo from "@/components/logo";
 import { Button } from "@/components/ui/button";
 import { website_description, website_subtitle } from "@/lib/constants";
 import {
@@ -53,8 +52,7 @@ const FeaturePoint = ({ children }: { children: React.ReactNode }) => (
 export default function HomeSignedOut() {
   return (
     <>
-      <section className="mx-auto flex max-w-xl flex-col items-center gap-6 py-6 text-center">
-        <Logo />
+      <section className="mx-auto flex max-w-xl flex-col items-center gap-6 py-10 text-center">
         <div className="space-y-3">
           <h1 className="text-balance text-4xl font-semibold tracking-tighter md:text-5xl">
             {website_subtitle}
