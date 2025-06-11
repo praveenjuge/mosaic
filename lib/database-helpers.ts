@@ -442,7 +442,7 @@ export async function getAllWebsitesWithStats(): Promise<Array<WebsiteWithStats>
 
 // Get latest screenshots for all user's websites
 export async function getLatestScreenshotsForAllUserWebsites(
-  limit: number = 5,
+  limit: number = 10,
 ): Promise<Array<ScreenshotWithDetails> | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();

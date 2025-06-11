@@ -158,6 +158,7 @@ async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize
         screenshot_url: uploadedUrl,
         image_hash: imageKey,
         size_in_bytes: imageSize,
+        user_id: website.user_id,
       });
 
       if (screenshotError) {

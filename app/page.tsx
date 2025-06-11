@@ -44,7 +44,7 @@ export default function Home() {
             <CardTitle>Latest Screenshots</CardTitle>
           </CardHeader>
           <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
-            <LatestScreenshots />
+            <LatestScreenshots limit={10} />
           </Suspense>
         </div>
       </SignedIn>
