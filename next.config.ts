@@ -21,6 +21,27 @@ const nextConfig: NextConfig = {
     reactCompiler: true,
     optimizePackageImports: ["@mynaui/icons-react"],
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "www.google.com",
+        pathname: "/s2/favicons**",
+      },
+      {
+        protocol: "https",
+        hostname: "img.clerk.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev",
+      },
+    ],
+  },
   async headers() {
     return [
       {
