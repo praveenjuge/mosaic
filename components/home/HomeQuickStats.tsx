@@ -72,15 +72,10 @@ async function StatsContent() {
   }
 
   try {
-    // Always fetch fresh data from Supabase - no caching
     const userStats = await getUserStats();
-
-    // Handle both null return and valid stats
     const totalImages = userStats?.total_images ?? 0;
     const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
     const formattedStorage = formatBytes(totalStorageBytes);
-
-    console.log("Fresh stats from getUserStats:", userStats);
 
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -107,7 +102,6 @@ async function StatsContent() {
   } catch (error) {
     console.error("Error loading user stats in HomeQuickStats:", error);
 
-    // Return fallback UI on error
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>

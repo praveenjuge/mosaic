@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -17,12 +17,13 @@ function getR2Client() {
     throw new Error("Missing Production R2 configuration");
   }
 
-  return new AWS.S3({
+  return new S3Client({
     endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
-    accessKeyId: r2AccessKeyId,
-    secretAccessKey: r2SecretAccessKey,
+    credentials: {
+      accessKeyId: r2AccessKeyId,
+      secretAccessKey: r2SecretAccessKey,
+    },
     region: "auto",
-    signatureVersion: "v4",
   });
 }
 
@@ -41,19 +42,26 @@ export async function GET(
     const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
 
     // Get the object from R2
-    const object = await s3
-      .getObject({
-        Bucket: bucketName,
-        Key: filename, // Direct key without subfolder for production
-      })
-      .promise();
+    const command = new GetObjectCommand({
+      Bucket: bucketName,
+      Key: filename, // Direct key without subfolder for production
+    });
 
-    if (!object.Body) {
+    const response = await s3.send(command);
+
+    if (!response.Body) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });
     }
 
+    // Convert stream to buffer for v3
+    const chunks = [];
+    for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+
     // Return the image with proper headers
-    return new NextResponse(object.Body as Buffer, {
+    return new NextResponse(buffer, {
       headers: {
         "Content-Type": "image/png",
         "Cache-Control": "public, max-age=31536000", // Cache for 1 year
@@ -64,8 +72,8 @@ export async function GET(
     if (
       error &&
       typeof error === "object" &&
-      "code" in error &&
-      error.code === "NoSuchKey"
+      "name" in error &&
+      error.name === "NoSuchKey"
     ) {
       return NextResponse.json({ error: "Image not found" }, { status: 404 });
     }

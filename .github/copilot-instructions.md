@@ -1,6 +1,7 @@
 Mosaic is a SaaS platform that automatically generates Open Graph (OG) images for websites using screenshots. The application allows users to add their websites and automatically create beautiful social media preview images by taking screenshots of their web pages.
 
 ### Core Technologies
+
 - **Framework**: Next.js 15 (App Router) with React 19
 - **Runtime**: Bun (package manager and runtime)
 - **TypeScript**: Full TypeScript implementation
@@ -10,12 +11,13 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Icons**: MynaUI Icons
 
 ### Key Dependencies
+
 - `@clerk/nextjs` - Authentication and user management
 - `@supabase/supabase-js` - Database operations
 - `@radix-ui/*` - UI primitives for shadcn/ui
 - `tailwindcss` - Styling
 - `cheerio` - HTML parsing
-- `aws-sdk` - AWS services integration
+- `@aws-sdk/client-s3` - AWS S3 services integration (v3)
 
 ## Project Structure
 
@@ -52,10 +54,12 @@ hooks/              # Custom React hooks
 ## Coding Standards & Best Practices
 
 ### TypeScript
+
 - Use strict TypeScript with proper type definitions
 - Export types from `lib/types.ts` for reusability
 
 ### React Components
+
 - Use functional components with hooks
 - Implement proper loading states with `<Skeleton>` components
 - Use `Suspense` boundaries for data fetching
@@ -63,9 +67,11 @@ hooks/              # Custom React hooks
 - Server components by default, use "use client" only when necessary
 
 ### Authentication (Clerk)
+
 - Use `SignedIn`, `SignedOut`, `ClerkLoaded`, `ClerkLoading` for auth states
 
 ### Database (Supabase)
+
 - Use server-side client for data fetching in Server Components
 - Handle errors gracefully with try/catch blocks
 - Use proper RLS (Row Level Security) policies
@@ -73,6 +79,7 @@ hooks/              # Custom React hooks
 - For any db migrations or schema changes, use Supabase MCP Server
 
 ### UI/UX Patterns
+
 - Use shadcn/ui components consistently
 - Implement responsive design with Tailwind CSS grid/flexbox
 - Show loading states during async operations

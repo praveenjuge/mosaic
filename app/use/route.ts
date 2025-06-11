@@ -1,6 +1,6 @@
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import AWS from "aws-sdk";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,12 +20,13 @@ const getR2Client = () => {
     throw new Error("Missing Production R2 configuration");
   }
   console.log("[R2_CLIENT_SUCCESS] R2 client initialized successfully");
-  return new AWS.S3({
+  return new S3Client({
     endpoint: `https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    accessKeyId: PROD_R2_ACCESS_KEY_ID,
-    secretAccessKey: PROD_R2_SECRET_ACCESS_KEY,
+    credentials: {
+      accessKeyId: PROD_R2_ACCESS_KEY_ID,
+      secretAccessKey: PROD_R2_SECRET_ACCESS_KEY,
+    },
     region: "auto",
-    signatureVersion: "v4",
   });
 };
 
@@ -67,13 +68,15 @@ async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, request: N
 
     console.log(`[R2_UPLOAD_CONFIG] Bucket: ${bucketName}, Key: ${imageKey}, Size: ${imageBuffer.byteLength} bytes`);
 
-    await s3.upload({
+    const command = new PutObjectCommand({
       Bucket: bucketName,
       Key: imageKey,
       Body: Buffer.from(imageBuffer),
       ContentType: "image/png",
       CacheControl: "public, max-age=31536000",
-    }).promise();
+    });
+
+    await s3.send(command);
 
     const internalUrl = getInternalApiUrl(imageKey, request);
     console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, internal URL: ${internalUrl}`);

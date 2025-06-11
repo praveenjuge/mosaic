@@ -1,4 +1,4 @@
-import AWS from "aws-sdk";
+import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -19,12 +19,13 @@ function getR2Client() {
     throw new Error("Missing Demo R2 configuration");
   }
 
-  return new AWS.S3({
+  return new S3Client({
     endpoint: `https://${r2AccountId}.r2.cloudflarestorage.com`,
-    accessKeyId: r2AccessKeyId,
-    secretAccessKey: r2SecretAccessKey,
+    credentials: {
+      accessKeyId: r2AccessKeyId,
+      secretAccessKey: r2SecretAccessKey,
+    },
     region: "auto",
-    signatureVersion: "v4",
   });
 }
 
@@ -37,12 +38,12 @@ async function checkImageInR2(
     const s3 = getR2Client();
     const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
 
-    await s3
-      .headObject({
-        Bucket: bucketName,
-        Key: `screenshots/${cacheKey}.png`,
-      })
-      .promise();
+    const command = new HeadObjectCommand({
+      Bucket: bucketName,
+      Key: `screenshots/${cacheKey}.png`,
+    });
+
+    await s3.send(command);
 
     // If no error, object exists - return our internal API URL
     const host = request.headers.get("host") || "localhost:3000";
@@ -52,8 +53,8 @@ async function checkImageInR2(
     if (
       error &&
       typeof error === "object" &&
-      "code" in error &&
-      error.code === "NotFound"
+      "name" in error &&
+      error.name === "NotFound"
     ) {
       return null;
     }
@@ -72,15 +73,15 @@ async function uploadToR2(
     const s3 = getR2Client();
     const bucketName = process.env.DEMO_R2_BUCKET_NAME || "mosaic-screenshots";
 
-    await s3
-      .upload({
-        Bucket: bucketName,
-        Key: `screenshots/${cacheKey}.png`,
-        Body: Buffer.from(imageBuffer),
-        ContentType: "image/png",
-        CacheControl: "public, max-age=31536000", // Cache for 1 year
-      })
-      .promise();
+    const command = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: `screenshots/${cacheKey}.png`,
+      Body: Buffer.from(imageBuffer),
+      ContentType: "image/png",
+      CacheControl: "public, max-age=31536000", // Cache for 1 year
+    });
+
+    await s3.send(command);
 
     // Return internal API URL instead of public R2 URL for better reliability
     const host = request.headers.get("host") || "localhost:3000";
