@@ -2,19 +2,31 @@ import { auth } from "@clerk/nextjs/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-export async function createClient() {
+export async function createClerkSupabaseServerClient() {
   const cookieStore = await cookies();
-
   const { getToken } = await auth();
-
-  const token = await getToken({ template: "supabase" });
-  const authToken = token ? { Authorization: `Bearer ${token}` } : null;
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      global: { headers: { "Cache-Control": "no-store", ...authToken } },
+      global: {
+        fetch: async (url, options = {}) => {
+          const clerkToken = await getToken({
+            template: "supabase",
+          });
+
+          const headers = new Headers(options?.headers);
+          if (clerkToken) {
+            headers.set("Authorization", `Bearer ${clerkToken}`);
+          }
+
+          return fetch(url, {
+            ...options,
+            headers,
+          });
+        },
+      },
       cookies: {
         get(name: string) {
           return cookieStore.get(name)?.value;
@@ -23,9 +35,6 @@ export async function createClient() {
           try {
             cookieStore.set({ name, value, ...options });
           } catch (error) {
-            // The `set` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
             console.log(error);
           }
         },
@@ -34,9 +43,37 @@ export async function createClient() {
             cookieStore.set({ name, value: "", ...options });
           } catch (error) {
             console.log(error);
-            // The `delete` method was called from a Server Component.
-            // This can be ignored if you have middleware refreshing
-            // user sessions.
+          }
+        },
+      },
+    },
+  );
+}
+
+// For non-authenticated requests or when you don't need user-specific data
+export async function createClient() {
+  const cookieStore = await cookies();
+
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value, ...options });
+          } catch (error) {
+            console.log(error);
+          }
+        },
+        remove(name: string, options: CookieOptions) {
+          try {
+            cookieStore.set({ name, value: "", ...options });
+          } catch (error) {
+            console.log(error);
           }
         },
       },

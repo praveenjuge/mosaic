@@ -46,7 +46,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             Showcase your beautiful website when sharing in social platforms.
           </DialogDescription>
         </DialogHeader>
-        <DialogDescription className="space-y-4 text-sm">
+        <div className="space-y-4 text-sm">
           <Tabs defaultValue="home" className="w-full">
             <TabsList className="w-full">
               <TabsTrigger className="w-full" value="home">
@@ -64,10 +64,12 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
           </Tabs>
 
           <div className="flex flex-wrap gap-2">
-            {guides.map((guide) => <GuideLink
-              key={guide.slug}
-              guide={guide}
-            />)}
+            {guides.map((guide) => (
+              <GuideLink
+                key={guide.slug}
+                guide={guide}
+              />
+            ))}
           </div>
 
           {["Learn more about Open Graph", "Validate your metadata"].map(
@@ -83,7 +85,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
               </a>
             ),
           )}
-        </DialogDescription>
+        </div>
       </DialogContent>
     </Dialog>
   );

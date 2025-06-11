@@ -2,7 +2,8 @@ export const author_name = "Praveen Juge";
 export const author_email = "hello@praveenjuge.com";
 
 export const website_url = "https://mosaicimg.com/";
-export const backend_url = "https://get.mosaicimg.com/api/";
+// Note: External backend service has been disabled
+// export const backend_url = "https://get.mosaicimg.com/api/";
 export const website_name = "Mosaic";
 export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 

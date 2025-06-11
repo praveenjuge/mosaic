@@ -53,8 +53,8 @@ export function EditWebsite({
             <Input
               id="website"
               name="website"
-              type="url"
-              placeholder="Enter new URL"
+              type="text"
+              placeholder="example.com or https://example.com"
               defaultValue={currentUrl}
               required
             />

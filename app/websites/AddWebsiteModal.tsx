@@ -54,8 +54,8 @@ export default function AddWebsiteModal() {
               <Input
                 id="website"
                 name="website"
-                type="url"
-                placeholder="Enter URL"
+                type="text"
+                placeholder="example.com or https://example.com"
                 required
               />
             </div>

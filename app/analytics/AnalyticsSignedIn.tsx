@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getAnalyticsData } from "@/lib/database-helpers";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import { notFound } from "next/navigation";
@@ -15,34 +16,14 @@ import AnalyticsQuickStats from "./AnalyticsQuickStats";
 import { MosaicAreaChart } from "./areaChart";
 import { MosaicBarChart } from "./barChart";
 
-async function fetchAnalyticsData(token: string) {
-  const url = "https://get.mosaicimg.com/api/analytics/";
-
-  const response = await fetch(url, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return data;
-}
-
 export default async function AnalyticsSignedIn() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let data: any = {};
   const userData = await auth();
 
   try {
-    const token = await userData.getToken({ template: "supabase" });
-    if (token) {
-      const response = await fetchAnalyticsData(token);
-      data = response;
+    if (userData?.userId) {
+      data = await getAnalyticsData();
     }
   } catch (error) {
     console.log(error);
