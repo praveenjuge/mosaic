@@ -17,7 +17,7 @@ function StatsLoadingSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-16" />
+            <Skeleton className="h-4.5 w-16" />
           </CardTitle>
           <CardDescription>Images Generated</CardDescription>
         </CardHeader>
@@ -25,7 +25,7 @@ function StatsLoadingSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-20" />
+            <Skeleton className="h-4.5 w-20" />
           </CardTitle>
           <CardDescription>Storage Used</CardDescription>
         </CardHeader>
@@ -33,7 +33,7 @@ function StatsLoadingSkeleton() {
       <Card>
         <CardHeader>
           <CardTitle>
-            <Skeleton className="h-6 w-24" />
+            <Skeleton className="h-4.5 w-24" />
           </CardTitle>
           <CardDescription>Subscription</CardDescription>
         </CardHeader>

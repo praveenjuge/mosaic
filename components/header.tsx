@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ClerkLoaded,
@@ -58,21 +58,12 @@ const Header = () => {
                 <nav className="flex items-center gap-2 md:gap-4">
                   <Link
                     href="/settings"
-                    className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm font-medium transition-colors"
+                    className={buttonVariants({ variant: "ghost", size: "sm" })}
                   >
-                    <Config className="size-4" />
+                    <Config className="size-4 stroke-2" />
                     <span className="hidden sm:inline">Settings</span>
                   </Link>
-                  <div className="ml-2">
-                    <UserButton
-                      appearance={{
-                        elements: {
-                          avatarBox: "size-8",
-                          userButtonBox: "size-8",
-                        },
-                      }}
-                    />
-                  </div>
+                  <UserButton />
                 </nav>
               </SignedIn>
             </ClerkLoaded>

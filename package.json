@@ -17,8 +17,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.826.0",
     "@clerk/nextjs": "^6.20.1",
-    "@cloudflare/workers-types": "^4.20250528.0",
-    "@hookform/resolvers": "^5.0.1",
     "@mynaui/icons-react": "^0.3.5",
     "@shikijs/markdown-it": "^3.4.2",
     "@supabase/ssr": "^0.6.1",
@@ -27,8 +25,6 @@
     "cheerio": "^1.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "dotenv": "^16.5.0",
-    "encoding": "^0.1.13",
     "feed": "^5.1.0",
     "geist": "^1.4.2",
     "gray-matter": "^4.0.3",
@@ -39,7 +35,6 @@
     "radix-ui": "^1.4.2",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "react-is": "19.1.0",
     "sonner": "^2.0.3",
     "tw-animate-css": "^1.3.0"
   },
