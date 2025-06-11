@@ -92,11 +92,6 @@ export default function Page() {
             <BrandX className="size-4 stroke-2" />
             Send a DM on X
           </Link>
-          {/* TODO */}
-          {/* <a href="#" className={buttonVariants({ variant: "outline" })}>
-            <Ticket className="size-4" />
-            Submit a Ticket
-          </a> */}
         </CardContent>
       </Card>
 
