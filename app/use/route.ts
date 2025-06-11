@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import AWS from "aws-sdk";
@@ -32,9 +32,10 @@ function getR2Client() {
 }
 
 // Check if image exists in database by page URL using optimized query
+// Uses service role client to bypass RLS and check cached images across all users
 async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   try {
-    const supabase = await createClient();
+    const supabase = await createServiceRoleClient();
 
     // Parse URL to get base and path
     const parsedUrl = new URL(pageUrl);
@@ -106,13 +107,8 @@ async function storeImageInDatabase(
   uploadedUrl: string,
 ): Promise<void> {
   try {
-    const supabase = await createClient();
-
-    // Parse URL to get base and path using consistent parsing
-    const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
-
     // Get user ID from auth context (if available)
-    let userId = "public"; // Default for public usage
+    let userId: string | null = null;
     try {
       const { userId: authUserId } = await auth();
       if (authUserId) {
@@ -120,8 +116,20 @@ async function storeImageInDatabase(
       }
     } catch {
       // Auth might not be available for public API usage
-      console.log("No auth context available, using public user");
+      console.log("No auth context available, skipping database storage for anonymous access");
     }
+
+    // Only store in database if there's an authenticated user
+    // This prevents duplicates between user-added websites and public API usage
+    if (!userId) {
+      console.log("Skipping database storage for anonymous image generation");
+      return;
+    }
+
+    const supabase = await createClient();
+
+    // Parse URL to get base and path using consistent parsing
+    const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
 
     // Use upsert operations for better performance and handle conflicts
     // First, upsert website
