@@ -1,4 +1,4 @@
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient, createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import AWS from "aws-sdk";
@@ -6,6 +6,44 @@ import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+// Generate direct R2 URL for public access
+function getDirectR2Url(imageKey: string): string {
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID;
+  const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
+
+  // Option 1: Use R2 custom domain (recommended for production)
+  const customDomain = process.env.R2_PUBLIC_DOMAIN;
+  if (customDomain) {
+    return `https://${customDomain}/${imageKey}`;
+  }
+
+  // Option 2: Use R2.dev public URL (if configured)
+  const r2DevUrl = process.env.R2_DEV_URL;
+  if (r2DevUrl) {
+    return `${r2DevUrl}/${imageKey}`;
+  }
+
+  // Option 3: Direct R2 URL (requires public bucket access)
+  return `https://${accountId}.r2.cloudflarestorage.com/${bucketName}/${imageKey}`;
+}
+
+// Check if R2 public access is working by testing a URL
+async function testR2PublicAccess(testUrl: string): Promise<boolean> {
+  try {
+    const response = await fetch(testUrl, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Get fallback URL (internal API) when R2 public access is not available
+function getFallbackUrl(imageKey: string, request: NextRequest): string {
+  const host = request.headers.get("host") || "localhost:3000";
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  return `${protocol}://${host}/api/prod-images/${imageKey}`;
+}
 
 // Generate a hash from URL for consistent cache keys
 function generateCacheKey(url: string): string {
@@ -42,12 +80,14 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
     const urlBase = `${parsedUrl.protocol}//${parsedUrl.host}`;
     const path = parsedUrl.pathname + parsedUrl.search + parsedUrl.hash;
 
-    // Optimized query with proper joins
+    // Optimized query with minimal data selection and proper indexing
     const { data, error } = await supabase
       .from("screenshots_new")
       .select(`
-        screenshot_url,
+        screenshot_url, 
+        image_hash,
         pages_new!inner(
+          path,
           websites_new!inner(url_base)
         )
       `)
@@ -61,6 +101,22 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
       return null;
     }
 
+    // Convert old internal API URLs to direct R2 URLs for better performance
+    if (data.screenshot_url.includes("/api/prod-images/")) {
+      const imageKey = data.image_hash || data.screenshot_url.split("/").pop();
+      if (imageKey) {
+        // For now, return the original URL since R2 public access may not be configured
+        // TODO: Enable R2 direct URLs after configuring public access
+        return data.screenshot_url;
+      }
+    }
+
+    // Return existing R2 URL if already direct
+    if (data.screenshot_url.includes(".r2.cloudflarestorage.com") ||
+      data.screenshot_url.includes(".r2.dev")) {
+      return data.screenshot_url;
+    }
+
     return data.screenshot_url;
   } catch (error) {
     console.error("Error checking database:", error);
@@ -68,7 +124,7 @@ async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
   }
 }
 
-// Upload image to R2 production bucket
+// Upload image to R2 production bucket and return appropriate URL
 async function uploadToR2(
   imageBuffer: ArrayBuffer,
   cacheKey: string,
@@ -89,10 +145,17 @@ async function uploadToR2(
       })
       .promise();
 
-    // Return internal API URL instead of direct R2 URL for better reliability
-    const host = request.headers.get("host") || "localhost:3000";
-    const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-    return `${protocol}://${host}/api/prod-images/${imageKey}`;
+    // Check if R2 public access is configured
+    const directR2Url = getDirectR2Url(imageKey);
+    const isR2PublicAccessEnabled = await testR2PublicAccess(directR2Url);
+
+    if (isR2PublicAccessEnabled) {
+      console.log("Using direct R2 URL for better performance");
+      return directR2Url;
+    } else {
+      console.log("R2 public access not configured, falling back to internal API");
+      return getFallbackUrl(imageKey, request);
+    }
   } catch (error) {
     console.error("Error uploading to R2:", error);
     return null;
@@ -113,10 +176,10 @@ async function storeImageInDatabase(
       const { userId: authUserId } = await auth();
       if (authUserId) {
         userId = authUserId;
+        console.log("Authenticated request from user:", userId);
       }
-    } catch {
-      // Auth might not be available for public API usage
-      console.log("No auth context available, skipping database storage for anonymous access");
+    } catch (authError) {
+      console.log("Auth error or no auth context:", authError);
     }
 
     // Only store in database if there's an authenticated user
@@ -126,7 +189,8 @@ async function storeImageInDatabase(
       return;
     }
 
-    const supabase = await createClient();
+    // Use authenticated client when user is authenticated
+    const supabase = await createClerkSupabaseServerClient();
 
     // Parse URL to get base and path using consistent parsing
     const { urlBase, path, hostname } = extractUrlPartsConsistent(pageUrl);
@@ -285,22 +349,8 @@ export async function GET(request: NextRequest) {
     // Check if image exists in database
     const cachedImageUrl = await checkImageInDatabase(url);
     if (cachedImageUrl) {
-      console.log(`Database hit for ${url}`);
-
-      // If the cached URL is a direct R2 URL, convert it to internal API URL
-      if (cachedImageUrl.includes(".r2.cloudflarestorage.com/")) {
-        // Extract the image key from the R2 URL
-        const imageKey = cachedImageUrl.split("/").pop();
-        if (imageKey) {
-          const host = request.headers.get("host") || "localhost:3000";
-          const protocol =
-            process.env.NODE_ENV === "production" ? "https" : "http";
-          const internalUrl = `${protocol}://${host}/api/prod-images/${imageKey}`;
-          return NextResponse.redirect(internalUrl, { status: 302 });
-        }
-      }
-
-      // Redirect to the image URL instead of returning JSON
+      console.log(`Database hit for ${url}, redirecting immediately`);
+      // Redirect directly to the cached image URL for fastest performance
       return NextResponse.redirect(cachedImageUrl, { status: 302 });
     }
 
@@ -341,7 +391,7 @@ export async function GET(request: NextRequest) {
 
     console.log(`Successfully uploaded screenshot for ${url} to R2`);
 
-    // Redirect to the uploaded image
+    // Redirect directly to the R2 URL (bypasses app server for better performance)
     return NextResponse.redirect(uploadedUrl, { status: 302 });
   } catch (error) {
     console.error("OG Image API error:", error);

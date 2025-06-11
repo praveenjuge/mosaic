@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+// Serves images from R2 through the app server
+// Used as fallback when R2 public access is not configured
+// or for backward compatibility with existing URLs
+
 // Initialize R2 client for production bucket
 function getR2Client() {
   const r2AccessKeyId = process.env.PROD_R2_ACCESS_KEY_ID;
