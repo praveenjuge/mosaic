@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 
 const cspHeader = `
   default-src 'self';
@@ -100,4 +101,6 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const sentryWebpackPluginOptions = { silent: true };
+
+export default withSentryConfig(nextConfig, sentryWebpackPluginOptions);
