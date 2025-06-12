@@ -1,7 +1,11 @@
 import { createClerkSupabaseServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { getRandomWebsiteByUrlBase } from "./websites";
 import { getOrCreatePageService } from "./pages";
-import { Screenshot, ScreenshotWithDetails } from "@/lib/types";
+import {
+  Screenshot,
+  ScreenshotWithDetails,
+  ScreenshotWithPage,
+} from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 
 export async function createScreenshot(
@@ -204,7 +208,7 @@ export async function getLatestScreenshotsForAllUserWebsites(
       return [];
     }
 
-    const formattedData = screenshots.map((screenshot: any) => {
+    const formattedData = screenshots.map((screenshot: ScreenshotWithPage) => {
       const page = screenshot.pages;
       const website = page?.sites;
 

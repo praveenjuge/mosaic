@@ -3,7 +3,7 @@ import { Site, SiteWithStats } from "@/lib/types";
 
 export async function getOrCreateWebsite(
   urlBase: string,
-  siteName: string,
+  _siteName: string,
 ): Promise<Site | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();

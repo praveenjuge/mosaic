@@ -80,11 +80,6 @@ export const handleDelete = async (websiteId: string) => {
         message: "Error deleting website.",
       };
     }
-  } else if (!functionSuccess) {
-    return {
-      status: "error",
-      message: "Website not found or access denied.",
-    };
   }
 
   console.log("Website deleted successfully");
