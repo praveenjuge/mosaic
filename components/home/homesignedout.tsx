@@ -5,6 +5,7 @@ import { ClerkLoaded, ClerkLoading, SignUpButton } from "@clerk/nextjs";
 import { ArrowLongRight, CheckHexagon } from "@mynaui/icons-react";
 import Image from "next/image";
 import { Suspense } from "react";
+import HowItWorks from "./how-it-works";
 import OGImageDemo from "./og-image-demo";
 
 const landingContent = [
@@ -85,6 +86,7 @@ export default function HomeSignedOut() {
         </div>
       </section>
       <OGImageDemo />
+      <HowItWorks />
       <section className="mx-auto my-14 flex max-w-5xl flex-col gap-24">
         {landingContent.map((content, index) => (
           <div
