@@ -24,7 +24,7 @@ export async function PlanButton({ type }: PlanButtonProps) {
 
   const loadingButton = commonButton("Loading...", true);
   const getStartedButton = (
-    <SignUpButton mode="modal">
+    <SignUpButton mode="modal" oauthFlow="popup">
       <Button className="w-full">
         {type === "free" ? "Start Free" : "Sign Up"}
       </Button>

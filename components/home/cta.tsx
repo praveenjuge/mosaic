@@ -30,7 +30,7 @@ export default function CTA() {
             </Button>
           </ClerkLoading>
           <ClerkLoaded>
-            <SignUpButton mode="modal">
+            <SignUpButton mode="modal" oauthFlow="popup">
               <Button>
                 Start for Free
                 <ArrowLongRight className="size-4" stroke={2} />

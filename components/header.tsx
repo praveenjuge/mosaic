@@ -43,12 +43,16 @@ const Header = () => {
             <ClerkLoaded>
               <SignedOut>
                 <div className="flex items-center gap-2">
-                  <SignInButton mode="modal">
+                  <SignInButton
+                    mode="modal"
+                    withSignUp={true}
+                    oauthFlow="popup"
+                  >
                     <Button variant="outline" size="sm">
                       Log In
                     </Button>
                   </SignInButton>
-                  <SignUpButton mode="modal">
+                  <SignUpButton mode="modal" oauthFlow="popup">
                     <Button size="sm">Sign Up</Button>
                   </SignUpButton>
                 </div>

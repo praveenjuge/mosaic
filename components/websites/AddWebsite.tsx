@@ -25,20 +25,17 @@ export async function AddWebsite() {
       </ClerkLoading>
       <ClerkLoaded>
         <SignedIn>
-          {preventSubmission
-            ? (
-              <Link
-                href="/settings"
-                className={buttonVariants({ size: "sm" })}
-              >
-                <Plus className="size-4" stroke={2} />
-                Upgrade to Pro
-              </Link>
-            )
-            : <AddWebsiteModal />}
+          {preventSubmission ? (
+            <Link href="/settings" className={buttonVariants({ size: "sm" })}>
+              <Plus className="size-4" stroke={2} />
+              Upgrade to Pro
+            </Link>
+          ) : (
+            <AddWebsiteModal />
+          )}
         </SignedIn>
         <SignedOut>
-          <SignInButton mode="modal">
+          <SignInButton mode="modal" withSignUp={true} oauthFlow="popup">
             <Button size="sm">
               <Plus className="size-4" stroke={2} />
               Add Website

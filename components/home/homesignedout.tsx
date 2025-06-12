@@ -39,7 +39,7 @@ export default function HomeSignedOut() {
               </Button>
             </ClerkLoading>
             <ClerkLoaded>
-              <SignUpButton mode="modal">
+              <SignUpButton mode="modal" oauthFlow="popup">
                 <Button size="lg">
                   Start for Free
                   <ArrowLongRight className="size-4" stroke={2} />
