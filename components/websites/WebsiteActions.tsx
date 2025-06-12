@@ -29,7 +29,7 @@ import { Label } from "@/components/ui/label";
 import { Dots, Edit, Repeat, Trash } from "@mynaui/icons-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { handleDelete, handleEdit } from "./actions";
+import { handleDelete, handleEdit, handleRefresh } from "./actions";
 import { SubmitButton } from "./submit-button";
 
 interface WebsiteActionsProps {
@@ -48,22 +48,19 @@ export function WebsiteActions({
   const [refreshOpen, setRefreshOpen] = useState(false);
   const [refreshLoading, setRefreshLoading] = useState(false);
 
-  const handleRefresh = async () => {
+  const handleRefreshAction = async () => {
     setRefreshLoading(true);
     try {
-      const response = await fetch(`/api/websites/${websiteId}/refresh`, {
-        method: "POST",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to refresh website");
+      const result = await handleRefresh(websiteId);
+      if (result.status === "error") {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setRefreshOpen(false);
       }
-
-      toast.success("Website refresh started successfully");
-      setRefreshOpen(false);
     } catch (error) {
       console.error("Error refreshing website:", error);
-      toast.error("Failed to refresh website");
+      toast.error("Failed to refresh website. Please try again.");
     } finally {
       setRefreshLoading(false);
     }
@@ -185,14 +182,14 @@ export function WebsiteActions({
               Refresh this site&apos;s OG images?
             </AlertDialogTitle>
             <AlertDialogDescription>
-              This will generate new OG images for this site. This will take a
-              little while to complete.
+              This will delete all existing OG images for this site. New images
+              will be generated automatically when you visit the pages again.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleRefresh}
+              onClick={handleRefreshAction}
               disabled={refreshLoading}
             >
               {refreshLoading ? "Refreshing..." : "Yes, Refresh OG Images"}

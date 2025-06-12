@@ -183,6 +183,97 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
   return { status: "success", message: "Website updated successfully", data };
 };
 
+export const handleRefresh = async (websiteId: string) => {
+  "use server";
+
+  const client = await createClerkSupabaseServerClient();
+
+  // Get the current user
+  const { userId } = await auth();
+  if (!userId) {
+    return {
+      status: "error",
+      message: "You must be logged in to refresh a website.",
+    };
+  }
+
+  console.log("Attempting to refresh website:", { websiteId, userId });
+
+  // Verify that the website belongs to the authenticated user
+  const { data: website, error: websiteError } = await client
+    .from("sites")
+    .select("id, url_base")
+    .eq("id", websiteId)
+    .eq("user_id", userId)
+    .single();
+
+  if (websiteError || !website) {
+    console.error("Website verification failed:", websiteError);
+    return {
+      status: "error",
+      message: "Website not found or access denied.",
+    };
+  }
+
+  // Get all pages for this website
+  const { data: pages, error: pagesError } = await client
+    .from("pages")
+    .select("id")
+    .eq("website_id", websiteId);
+
+  if (pagesError) {
+    console.error("Error fetching pages:", pagesError);
+    return {
+      status: "error",
+      message: "Error preparing to refresh website.",
+    };
+  }
+
+  if (!pages || pages.length === 0) {
+    return {
+      status: "success",
+      message: "No pages found for this website. Visit some pages to generate OG images.",
+    };
+  }
+
+  // Delete screenshots for all pages
+  const pageIds = pages.map(p => p.id);
+  const { error: screenshotsDeleteError } = await client
+    .from("screenshots")
+    .delete()
+    .in("page_id", pageIds);
+
+  if (screenshotsDeleteError) {
+    console.error("Error deleting screenshots:", screenshotsDeleteError);
+    return {
+      status: "error",
+      message: "Error deleting existing screenshots.",
+    };
+  }
+
+  // Delete pages
+  const { error: pagesDeleteError } = await client
+    .from("pages")
+    .delete()
+    .eq("website_id", websiteId);
+
+  if (pagesDeleteError) {
+    console.error("Error deleting pages:", pagesDeleteError);
+    return {
+      status: "error",
+      message: "Error deleting existing pages.",
+    };
+  }
+
+  console.log(`Successfully refreshed website ${website.url_base} - deleted ${pages.length} pages and their screenshots`);
+  revalidatePath("/");
+
+  return {
+    status: "success",
+    message: `Successfully refreshed ${website.url_base}. New OG images will be generated when you visit the pages again.`,
+  };
+};
+
 export const handleAdd = async (formData: FormData) => {
   "use server";
 
