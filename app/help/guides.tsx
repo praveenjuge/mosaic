@@ -82,18 +82,18 @@ export default function Page() {
     svgDark: "react_dark",
     steps: [
       {
-        title: "First, install React Helmet:",
-        code: `npm install react-helmet`,
+        title: "Install React Helmet Async:",
+        code: `npm install react-helmet-async`,
         codeLang: "bash",
       },
       {
-        title: "Then, you can use it in your React component like this:",
+        title: "Wrap your component with HelmetProvider and add the OG tags:",
         code: `import React from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
 
 export default function Page() {
   return (
-    <div>
+    <HelmetProvider>
       <Helmet>
         <meta property="og:title" content="Your Page Title" />
         <meta property="og:description" content="Your page description" />
@@ -102,7 +102,7 @@ export default function Page() {
       </Helmet>
       <h1>Your Page Content</h1>
       {/* Rest of your page content */}
-    </div>
+    </HelmetProvider>
   )
 }`,
         codeLang: "js",
@@ -122,7 +122,7 @@ export default function Page() {
       {
         title:
           "If you want to add OG metadata to all pages in your Remix app, you can create a root layout file (`app/root.tsx`) and define a `meta` export there:",
-        code: `import type { MetaFunction } from "@remix-run/node";
+        code: `import type { V2_MetaFunction } from "@remix-run/node";
 import {
   Links,
   LiveReload,
@@ -132,7 +132,7 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-export const meta: MetaFunction = () => {
+export const meta: V2_MetaFunction = () => {
   return [
     { charset: "utf-8" },
     { viewport: "width=device-width,initial-scale=1" },
@@ -168,7 +168,7 @@ export default function App() {
         title:
           "To add OG metadata to a specific route (e.g., `app/routes/your-page.tsx`), export a `meta` function that returns an array of meta objects.",
         code:
-          `import type { MetaFunction, LoaderFunction } from "@remix-run/node";
+          `import type { V2_MetaFunction, LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
 type LoaderData = {
@@ -186,7 +186,7 @@ export const loader: LoaderFunction = async () => {
   };
 };
 
-export const meta: MetaFunction = ({ data }) => {
+export const meta: V2_MetaFunction = ({ data }) => {
   const { title, description, imageUrl } = data as LoaderData;
   return [
     { title: title },
@@ -265,24 +265,14 @@ const { image } = Astro.props;
     slug: "nuxt",
     steps: [
       {
-        title: "In your Nuxt App, use useHead composable in your index page",
+        title: "In your Nuxt App, use useSeoMeta in your index page",
         code: `// pages/index.vue
 <script setup>
-useHead({
-  meta: [
-    {
-      property: 'og:image',
-      content: '${mosaicURL}/your_slug'
-    },
-    {
-      property: 'og:title',
-      content: 'Your Homepage Title'
-    },
-    {
-      property: 'og:description',
-      content: 'Your homepage description'
-    }
-  ]
+useSeoMeta({
+  ogImage: '${mosaicURL}/your_slug',
+  ogTitle: 'Your Homepage Title',
+  ogDescription: 'Your homepage description',
+  twitterCard: 'summary_large_image'
 })
 </script>`,
         codeLang: "vue",
@@ -295,22 +285,11 @@ const route = useRoute()
 
 const { data: post } = await useFetch(\`/api/posts/\${route.params.slug}\`)
 
-useHead({
-  meta: [
-    {
-      property: 'og:image',
-      // Using dynamic OG image based on the post
-      content: '${mosaicURL}/\${route.params.slug}'
-    },
-    {
-      property: 'og:title',
-      content: post.value?.title
-    },
-    {
-      property: 'og:description',
-      content: post.value?.description
-    }
-  ]
+useSeoMeta({
+  ogImage: '${mosaicURL}/\${route.params.slug}',
+  ogTitle: post.value?.title,
+  ogDescription: post.value?.description,
+  twitterCard: 'summary_large_image'
 })
 </script> `,
         codeLang: "vue",
