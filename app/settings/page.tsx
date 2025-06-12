@@ -37,14 +37,14 @@ const plans = [
     title: "Free",
     description: "For Trying Out",
     price: "$0",
-    features: ["500 Images", "1 Website", "No Support"],
+    features: ["500 OG Images", "1 Website", "No Support"],
     type: "free",
   },
   {
     title: "Pro",
     description: "For Individual Use",
     price: "$19",
-    features: ["5000 Images", "Unlimited Websites", "Priority Email Support"],
+    features: ["5000 OG Images", "Unlimited Websites", "Priority Email Support"],
     type: "pro",
   },
   {
@@ -52,7 +52,7 @@ const plans = [
     description: "For Larger Websites",
     price: "$199",
     features: [
-      "Unlimited Images",
+      "Unlimited OG Images",
       "Unlimited Websites",
       "Priority Email Support",
       "Save $29 vs monthly",

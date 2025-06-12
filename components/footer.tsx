@@ -30,7 +30,7 @@ export default function Footer() {
             <Logo />
             <p className="text-muted-foreground mt-4">
               Transform your website&apos;s Open Graph social images by
-              automating the process using screenshots.
+              automatically using your hero section as an OG Image.
             </p>
             <div className="flex space-x-6">
               {/* Add social links if needed */}

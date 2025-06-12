@@ -12,8 +12,8 @@ export default function WebsitesSignedOut() {
           Add your websites here
         </h3>
         <p className="mb-4 text-balance text-sm text-muted-foreground">
-          When you add a website you will get a special URL to get your OG
-          Images for that website.
+          When you add a website you will get a special URL to get your
+          OG Images for that website.
         </p>
       </div>
     </SignedOut>

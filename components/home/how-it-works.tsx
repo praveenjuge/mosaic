@@ -6,8 +6,9 @@ const steps = [
     description: "Connect your site to Mosaic with just a few clicks",
   },
   {
-    title: "We take a screenshot",
-    description: "Mosaic automatically grabs a beautiful shot of your page",
+    title: "We generate an OG Image",
+    description:
+      "Mosaic automatically grabs a beautiful OG Image of your website's hero section",
   },
   {
     title: "Add the OG image to your site",

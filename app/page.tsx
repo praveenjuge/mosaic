@@ -54,7 +54,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col gap-2">
           <CardHeader className="p-0">
-            <CardTitle>Latest Screenshots</CardTitle>
+            <CardTitle>Latest OG Images</CardTitle>
           </CardHeader>
           <Suspense fallback={<Skeleton className="h-24 w-full rounded-lg" />}>
             <LatestScreenshots limit={10} />

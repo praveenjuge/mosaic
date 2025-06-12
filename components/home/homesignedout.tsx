@@ -24,7 +24,7 @@ const landingContent = [
     points: [
       "Add your website to Mosaic in just a few clicks",
       "No coding skills required",
-      "Quick access to important metrics and recent screenshots",
+      "Quick access to important metrics and recent OG Images",
     ],
     image: "/images/landing-2.png",
   },

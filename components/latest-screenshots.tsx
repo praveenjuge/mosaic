@@ -55,9 +55,9 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
     if (!response) {
       return (
         <CardHeader className="py-6">
-          <CardTitle>Error loading screenshots</CardTitle>
+          <CardTitle>Error loading OG images</CardTitle>
           <CardDescription>
-            Unable to fetch screenshots from the database.
+            Unable to fetch OG images from the database.
           </CardDescription>
         </CardHeader>
       );
@@ -73,9 +73,9 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
     if (!response) {
       return (
         <CardHeader className="py-6">
-          <CardTitle>Error loading screenshots</CardTitle>
+          <CardTitle>Error loading OG images</CardTitle>
           <CardDescription>
-            Unable to fetch screenshots from the database.
+            Unable to fetch OG images from the database.
           </CardDescription>
         </CardHeader>
       );
@@ -92,7 +92,7 @@ const LatestScreenshots: React.FC<LatestScreenshotsProps> = async ({
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Image</TableHead>
+                  <TableHead>OG Image</TableHead>
                   <TableHead>URL</TableHead>
                   {!slug && <TableHead>Website</TableHead>}
                   <TableHead>Size</TableHead>
