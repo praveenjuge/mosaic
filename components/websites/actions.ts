@@ -1,14 +1,22 @@
 "use server";
 
-import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { cleanUrl } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
+import {
+  getWebsiteForUser,
+  getPagesForWebsite,
+  deleteScreenshotsForPages,
+  deletePagesForWebsite,
+  deleteWebsiteForUser,
+  websiteExistsForUser,
+  updateWebsiteForUser,
+  addWebsiteForUser,
+  deleteWebsiteUsingRpc,
+} from "@/lib/db";
 
 export const handleDelete = async (websiteId: string) => {
   "use server";
-
-  const client = await createClerkSupabaseServerClient();
 
   // Get the current user
   const { userId } = await auth();
@@ -22,22 +30,7 @@ export const handleDelete = async (websiteId: string) => {
 
   console.log("Attempting to delete website:", { websiteId, userId });
 
-  // First check if the website exists and belongs to the user
-  const { data: website, error: selectError } = await client
-    .from("sites")
-    .select("id, url_base")
-    .eq("id", websiteId)
-    .eq("user_id", userId)
-    .single();
-
-  if (selectError) {
-    console.error("Error checking website ownership:", selectError);
-    return {
-      status: "error",
-      message: "Website not found or access denied.",
-    };
-  }
-
+  const website = await getWebsiteForUser(websiteId, userId);
   if (!website) {
     console.error("Website not found or access denied");
     return {
@@ -49,77 +42,45 @@ export const handleDelete = async (websiteId: string) => {
   console.log("Website found, proceeding with delete:", website);
 
   // Try using the database function first (cleaner approach)
-  const { data: functionResult, error: functionError } = await client
-    .rpc('delete_user_site', {
-      site_id_param: websiteId,
-      user_id_param: userId
-    });
+  const functionSuccess = await deleteWebsiteUsingRpc(websiteId, userId);
 
-  if (functionError) {
-    console.error("Database function error:", functionError);
+  if (!functionSuccess) {
     console.log("Falling back to manual cascade delete...");
 
     // Fallback to manual cascade delete
-    // First, get all pages for this website
-    const { data: pages, error: pagesError } = await client
-      .from("pages")
-      .select("id")
-      .eq("website_id", websiteId);
-
-    if (pagesError) {
-      console.error("Error fetching pages:", pagesError);
+    const pages = await getPagesForWebsite(websiteId);
+    if (pages === null) {
       return {
         status: "error",
         message: "Error preparing to delete website.",
       };
     }
 
-    // Delete screenshots for all pages
-    if (pages && pages.length > 0) {
-      const pageIds = pages.map(p => p.id);
-      const { error: screenshotsDeleteError } = await client
-        .from("screenshots")
-        .delete()
-        .in("page_id", pageIds);
-
-      if (screenshotsDeleteError) {
-        console.error("Error deleting screenshots:", screenshotsDeleteError);
-        return {
-          status: "error",
-          message: "Error deleting website screenshots.",
-        };
-      }
-
-      // Delete pages
-      const { error: pagesDeleteError } = await client
-        .from("pages")
-        .delete()
-        .eq("website_id", websiteId);
-
-      if (pagesDeleteError) {
-        console.error("Error deleting pages:", pagesDeleteError);
-        return {
-          status: "error",
-          message: "Error deleting website pages.",
-        };
-      }
-    }
-
-    // Finally, delete the website
-    const { error } = await client
-      .from("sites")
-      .delete()
-      .eq("id", websiteId)
-      .eq("user_id", userId);
-
-    if (error) {
-      console.error("Delete error:", error);
+    const pageIds = pages.map((p) => p.id);
+    const screenshotsDeleted = await deleteScreenshotsForPages(pageIds);
+    if (!screenshotsDeleted) {
       return {
         status: "error",
-        message: error.message,
+        message: "Error deleting website screenshots.",
       };
     }
-  } else if (!functionResult) {
+
+    const pagesDeleted = await deletePagesForWebsite(websiteId);
+    if (!pagesDeleted) {
+      return {
+        status: "error",
+        message: "Error deleting website pages.",
+      };
+    }
+
+    const siteDeleted = await deleteWebsiteForUser(websiteId, userId);
+    if (!siteDeleted) {
+      return {
+        status: "error",
+        message: "Error deleting website.",
+      };
+    }
+  } else if (!functionSuccess) {
     return {
       status: "error",
       message: "Website not found or access denied.",
@@ -140,7 +101,6 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
 
   const url = formData.get("website")?.toString() || "";
   const cleanedUrl = cleanUrl(url);
-  const client = await createClerkSupabaseServerClient();
 
   // Get the current user
   const { userId } = await auth();
@@ -151,31 +111,18 @@ export const handleEdit = async (formData: FormData, websiteId: string) => {
     };
   }
 
-  // Check if the cleaned URL already exists for this user (excluding current website)
-  const { data: existingWebsite } = await client
-    .from("sites")
-    .select("id")
-    .eq("url_base", cleanedUrl)
-    .eq("user_id", userId)
-    .neq("id", websiteId)
-    .single();
+  const exists = await websiteExistsForUser(cleanedUrl, userId, websiteId);
 
-  if (existingWebsite) {
+  if (exists) {
     return {
       status: "error",
       message: "This website already exists in your list.",
     };
   }
 
-  const { data, error } = await client
-    .from("sites")
-    .update({ url_base: cleanedUrl })
-    .eq("id", websiteId)
-    .eq("user_id", userId) // Ensure user can only edit their own websites
-    .select();
-
-  if (error) {
-    return { status: "error", message: error.message };
+  const data = await updateWebsiteForUser(websiteId, cleanedUrl, userId);
+  if (!data) {
+    return { status: "error", message: "Failed to update website" };
   }
 
   revalidatePath("/");
@@ -188,7 +135,6 @@ export const handleAdd = async (formData: FormData) => {
 
   const url = formData.get("website")?.toString() || "";
   const cleanedUrl = cleanUrl(url);
-  const client = await createClerkSupabaseServerClient();
 
   // Get the current user
   const { userId } = await auth();
@@ -200,27 +146,18 @@ export const handleAdd = async (formData: FormData) => {
   }
 
   // Check if the cleaned URL already exists for this user
-  const { data: existingWebsite } = await client
-    .from("sites")
-    .select("id")
-    .eq("url_base", cleanedUrl)
-    .eq("user_id", userId)
-    .single();
+  const exists = await websiteExistsForUser(cleanedUrl, userId);
 
-  if (existingWebsite) {
+  if (exists) {
     return {
       status: "error",
       message: "This website already exists in your list.",
     };
   }
 
-  const { data, error } = await client
-    .from("sites")
-    .insert([{ url_base: cleanedUrl, user_id: userId }])
-    .select();
-
-  if (error) {
-    return { status: "error", message: error.message };
+  const data = await addWebsiteForUser(cleanedUrl, userId);
+  if (!data) {
+    return { status: "error", message: "Failed to add website" };
   }
 
   revalidatePath("/");

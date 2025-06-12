@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { getUserUsageInfo } from "@/lib/database-helpers";
+import { getUserUsageInfo } from "@/lib/db";
 import {
   ClerkLoaded,
   ClerkLoading,

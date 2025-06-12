@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
 import { auth } from "@clerk/nextjs/server";
+import { getWebsiteForUser, getPagesForWebsite } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -16,17 +16,10 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const supabase = await createClient();
-
     // Verify that the website belongs to the authenticated user
-    const { data: website, error: websiteError } = await supabase
-      .from("sites")
-      .select("id, url_base")
-      .eq("id", websiteId)
-      .eq("user_id", userId)
-      .single();
+    const website = await getWebsiteForUser(websiteId, userId);
 
-    if (websiteError || !website) {
+    if (!website) {
       return NextResponse.json(
         { error: "Website not found or access denied" },
         { status: 404 },
@@ -34,13 +27,10 @@ export async function POST(
     }
 
     // Get all pages for this website
-    const { data: pages, error: pagesError } = await supabase
-      .from("pages")
-      .select("id, full_url")
-      .eq("website_id", websiteId);
+    const pages = await getPagesForWebsite(websiteId);
 
-    if (pagesError) {
-      console.error("Error fetching pages:", pagesError);
+    if (pages === null) {
+      console.error("Error fetching pages");
       return NextResponse.json(
         { error: "Failed to fetch website pages" },
         { status: 500 },

@@ -14,7 +14,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
-import { getAllWebsitesWithStats } from "@/lib/database-helpers";
+import { getAllWebsitesWithStats } from "@/lib/db";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";

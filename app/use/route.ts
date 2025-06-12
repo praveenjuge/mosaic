@@ -1,4 +1,4 @@
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { getLatestScreenshot, storeScreenshotForUrl, websiteExists } from "@/lib/db";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
@@ -30,32 +30,9 @@ const getR2Client = () => {
   });
 };
 
-// Check cache and return URL if exists (database for production, R2 for demo)
+// Check cache using database helper
 async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
-  console.log(`[CACHE_CHECK_START] Checking cache for URL: ${pageUrl}`);
-  try {
-    const supabase = await createServiceRoleClient();
-    console.log("[CACHE_CHECK_DB] Supabase client created successfully");
-
-    const { data } = await supabase
-      .from("screenshots")
-      .select("screenshot_url, pages!inner(full_url)")
-      .eq("pages.full_url", pageUrl)
-      .order("generated_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (data?.screenshot_url) {
-      console.log(`[CACHE_CHECK_HIT] Cache hit! Found image: ${data.screenshot_url}`);
-      return data.screenshot_url;
-    } else {
-      console.log(`[CACHE_CHECK_MISS] No cached image found for ${pageUrl}`);
-      return null;
-    }
-  } catch (error) {
-    console.error("[CACHE_CHECK_ERROR] Cache check failed:", error);
-    return null;
-  }
+  return getLatestScreenshot(pageUrl);
 }
 
 // Check if demo image exists in R2
@@ -116,93 +93,13 @@ async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, isDemo = f
 }
 
 // Store image metadata in database
-async function storeImageInDatabase(pageUrl: string, imageKey: string, imageSize: number, uploadedUrl: string): Promise<void> {
-  console.log(`[DB_STORE_START] Starting database storage for URL: ${pageUrl}`);
-  try {
-    const supabase = await createServiceRoleClient();
-    console.log("[DB_STORE_CLIENT] Supabase client created successfully");
-
-    const { urlBase, path } = extractUrlPartsConsistent(pageUrl);
-    console.log(`[DB_STORE_URL_PARSED] URL base: ${urlBase}, path: ${path}`);
-
-    // Get random website for this URL base
-    const { data: websitesData, error: websiteError } = await supabase
-      .from("sites")
-      .select("id, user_id")
-      .eq("url_base", urlBase);
-
-    if (websiteError) {
-      console.error("[DB_STORE_WEBSITE_ERROR] Failed to fetch websites:", websiteError);
-      return;
-    }
-
-    if (!websitesData?.length) {
-      console.log(`[DB_STORE_NO_WEBSITES] No websites found for URL base: ${urlBase}`);
-      return;
-    }
-
-    const website = websitesData[Math.floor(Math.random() * websitesData.length)];
-    console.log(`[DB_STORE_WEBSITE_SELECTED] Selected website: ${website.id}, user: ${website.user_id} (${websitesData.length} total websites)`);
-
-    // Get or create page
-    const { data: pageData, error: pageSelectError } = await supabase
-      .from("pages")
-      .select("id")
-      .eq("website_id", website.id)
-      .eq("path", path)
-      .maybeSingle();
-
-    let page = pageData;
-
-    if (pageSelectError) {
-      console.error("[DB_STORE_PAGE_SELECT_ERROR] Failed to check existing page:", pageSelectError);
-      return;
-    }
-
-    if (!page) {
-      console.log(`[DB_STORE_PAGE_CREATE] Creating new page for path: ${path}`);
-      const { data: newPage, error: pageCreateError } = await supabase
-        .from("pages")
-        .insert({
-          website_id: website.id,
-          user_id: website.user_id,
-          path,
-          full_url: pageUrl,
-        })
-        .select("id")
-        .single();
-
-      if (pageCreateError) {
-        console.error("[DB_STORE_PAGE_CREATE_ERROR] Failed to create new page:", pageCreateError);
-        return;
-      }
-      page = newPage;
-      console.log(`[DB_STORE_PAGE_CREATED] Created new page with ID: ${page?.id}`);
-    } else {
-      console.log(`[DB_STORE_PAGE_EXISTS] Using existing page with ID: ${page.id}`);
-    }
-
-    if (page) {
-      console.log(`[DB_STORE_SCREENSHOT_START] Storing screenshot for page ID: ${page.id}`);
-      const { error: screenshotError } = await supabase.from("screenshots").insert({
-        page_id: page.id,
-        screenshot_url: uploadedUrl,
-        image_hash: imageKey,
-        size_in_bytes: imageSize,
-        user_id: website.user_id,
-      });
-
-      if (screenshotError) {
-        console.error("[DB_STORE_SCREENSHOT_ERROR] Failed to store screenshot:", screenshotError);
-        return;
-      }
-      console.log(`[DB_STORE_SUCCESS] Successfully stored screenshot for page ${page.id}`);
-    } else {
-      console.error("[DB_STORE_NO_PAGE] No page available for screenshot storage");
-    }
-  } catch (error) {
-    console.error("[DB_STORE_ERROR] Database storage error:", error);
-  }
+async function storeImageInDatabase(
+  pageUrl: string,
+  imageKey: string,
+  imageSize: number,
+  uploadedUrl: string,
+): Promise<void> {
+  await storeScreenshotForUrl(pageUrl, imageKey, imageSize, uploadedUrl);
 }
 
 // Take screenshot using Cloudflare Browser Rendering
@@ -321,22 +218,11 @@ export async function GET(request: NextRequest) {
 
       // Check if website exists (only for production mode)
       console.log("[API_REQUEST_WEBSITE_CHECK] Checking if website exists");
-      const supabase = await createServiceRoleClient();
       const { urlBase } = extractUrlPartsConsistent(url);
       console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
 
-      const { data: existingWebsites, error: websiteCheckError } = await supabase
-        .from("sites")
-        .select("id")
-        .eq("url_base", urlBase)
-        .limit(1);
-
-      if (websiteCheckError) {
-        console.error("[API_REQUEST_WEBSITE_CHECK_ERROR] Database error checking website:", websiteCheckError);
-        return NextResponse.json({ error: "Database error while checking website" }, { status: 500 });
-      }
-
-      if (!existingWebsites?.length) {
+      const exists = await websiteExists(urlBase);
+      if (!exists) {
         console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
         return NextResponse.json(
           { error: "Website must be added to your account before generating OG images" },

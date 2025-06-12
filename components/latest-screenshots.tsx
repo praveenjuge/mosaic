@@ -17,7 +17,7 @@ import {
 import {
   getLatestScreenshotsForAllUserWebsites,
   getLatestScreenshotsForWebsite,
-} from "@/lib/database-helpers";
+} from "@/lib/db";
 import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
