@@ -123,9 +123,14 @@ export default function OGImageDemo() {
     setError("");
 
     try {
-      // Fetch OG data using our own API
+      // Fetch OG data using our Supabase Edge Function
       const ogResponse = await fetch(
-        `/api/demo/metadata?url=${encodeURIComponent(normalizedUrl)}`,
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/metadata?url=${encodeURIComponent(normalizedUrl)}`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
+          },
+        },
       );
       if (!ogResponse.ok) {
         const errorData = await ogResponse.json();

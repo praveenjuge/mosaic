@@ -7,7 +7,8 @@
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "start": "next start",
-    "test": "vitest"
+    "test": "vitest",
+    "test:once": "vitest --run --coverage"
   },
   "prettier": {
     "plugins": [
@@ -58,6 +59,7 @@
     "@typescript-eslint/eslint-plugin": "^8.33.0",
     "@typescript-eslint/parser": "^8.33.0",
     "@vitejs/plugin-react": "^4.5.2",
+    "@vitest/coverage-v8": "3.2.3",
     "babel-plugin-react-compiler": "latest",
     "eslint": "^9.27.0",
     "eslint-config-next": "^15.3.2",

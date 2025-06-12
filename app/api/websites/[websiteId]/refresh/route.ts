@@ -72,7 +72,7 @@ export async function POST(
       const batchPromises = batch.map(async (page) => {
         try {
           const response = await fetch(
-            `${protocol}://${host}/api/use?url=${encodeURIComponent(page.full_url)}`,
+            `${protocol}://${host}/use?url=${encodeURIComponent(page.full_url)}`,
             {
               method: "GET",
               headers: {
