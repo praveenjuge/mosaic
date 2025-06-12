@@ -65,96 +65,42 @@ const faqs = [
   {
     question: "What is an OG Image?",
     answer:
-      "An OG Image, or Open Graph Image, is a preview image that appears when you share a link to your website on social media platforms. It enhances your shared content by displaying a visual representation of your webpage.",
+      "An OG Image, or Open Graph Image, is a preview image that appears when you share a link to your website on social media. It helps your posts stand out with a visual summary of the page.",
   },
   {
-    question: "What's included in each plan?",
+    question: "How does the Free plan work?",
     answer:
-      "Free Plan: Get 500 images for 1 website with no support at $0 per month. Pro Plan: Enjoy 5,000 images for unlimited websites with priority email support at $19 per month. Pro Yearly Plan: Receive unlimited images for unlimited websites with priority email support at $199 per year (save $29 vs monthly).",
+      "Every account can generate up to 500 images for a single website at no cost.",
   },
   {
-    question: "How many free OG Images do I get?",
-    answer: "With our Free plan, you receive up to 500 OG Images.",
-  },
-  {
-    question: "Why upgrade to Mosaic Pro?",
+    question: "Do you offer paid plans or upgrades?",
     answer:
-      "Upgrading to Mosaic Pro gives you more resources: 5,000 images per month, support for unlimited websites, and priority email support. It's ideal if you need more than what the Free plan offers.",
+      "Paid tiers with higher limits are in the works. For now everyone enjoys the Free plan.",
   },
   {
-    question: "What happens if I hit the free plan limit?",
+    question: "What happens when I hit the limit?",
     answer:
-      "If you reach your Free plan limit, no new images will be generated, but your existing OG Images will remain available. You can upgrade to a higher plan to continue generating new images.",
+      "New images won't be generated, but your existing ones stay available.",
   },
   {
-    question: "Can I switch or cancel plans?",
+    question: "Can I change or cancel a plan later?",
     answer:
-      "Yes, you can switch between plans or cancel your subscription at any time.",
+      "Once paid plans are live you'll be able to upgrade, downgrade or cancel at any time.",
   },
   {
-    question: "Is there a free trial or refund option?",
+    question: "How do I get help if I run into issues?",
     answer:
-      "We don't offer a free trial since our Free plan lets you try out our services at no cost. If you're unsatisfied within the first 30 days of your Pro subscription, you may be eligible for a refund as outlined in our Refund Policy.",
+      "Reach out via email or our social channels. Priority support will be part of the paid plans.",
   },
   {
-    question: "Are there any hidden fees or penalties?",
+    question: "Do you offer discounts or promo codes?",
     answer:
-      "No, there are no hidden fees or penalties. All our pricing is transparent.",
-  },
-  {
-    question: "Which plan is best for my team?",
-    answer:
-      "We recommend the Pro plan for most teams. It offers ample resources, supports unlimited websites, and includes priority email support. For larger teams or websites with high usage, the Pro Yearly plan might be more suitable and cost-effective.",
-  },
-  {
-    question: "How do I pick the right features?",
-    answer:
-      "Consider the number of images you need, the number of websites you manage, and the level of support you want. The Free plan is great for trying out the service, the Pro plan offers more resources and priority support, and the Pro Yearly plan provides unlimited images with better value for long-term usage.",
-  },
-  {
-    question: "Can I pay annually or get non-profit/student discounts?",
-    answer:
-      "Yes! We now offer a Pro Yearly plan at $199 per year, which saves you $29 compared to paying monthly. We don't currently offer specific discounts for non-profits or students.",
-  },
-  {
-    question: "What payment methods do you accept, and can I change them?",
-    answer:
-      "We accept major credit cards and PayPal. You can update your payment method anytime in your account settings.",
-  },
-  {
-    question: "How is payment processed, and can I use promo codes?",
-    answer:
-      "Payments are securely processed through our payment provider. Promo codes may be available during special promotions.",
-  },
-  {
-    question: "What happens if my payment fails?",
-    answer:
-      "If your payment fails, we'll notify you to update your payment information. Your account may be temporarily in free plan until the payment issue is resolved.",
-  },
-  {
-    question: "Do you offer price localization?",
-    answer:
-      "No, all our prices are listed in USD, and we do not offer price localization at this time.",
-  },
-  {
-    question: "Do all plans include support, and what is Priority Support?",
-    answer:
-      "The Free plan does not include support. Both Pro and Pro Yearly plans include Priority Email Support, meaning your inquiries are addressed promptly by our support team.",
-  },
-  {
-    question: "How fast is support response?",
-    answer:
-      "For plans with support, we aim to respond to inquiries as quickly as possible, typically within 24 hours on business days.",
-  },
-  {
-    question: "Is onboarding available for new users?",
-    answer:
-      "While we don't offer formal onboarding sessions, our platform is user-friendly, and our support team is ready to assist with any questions you may have.",
+      "Not at the moment, but we may run promotions when paid plans launch.",
   },
   {
     question: "How do you handle privacy and security?",
     answer:
-      "We take your privacy and security seriously, implementing industry-standard measures to protect your data. Please refer to our Privacy Policy for more details.",
+      "We take your privacy and security seriously, implementing industry-standard measures to protect your data. Check our Privacy Policy for details.",
   },
 ];
 
