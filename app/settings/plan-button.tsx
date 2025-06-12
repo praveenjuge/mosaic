@@ -25,7 +25,9 @@ export async function PlanButton({ type }: PlanButtonProps) {
   const loadingButton = commonButton("Loading...", true);
   const getStartedButton = (
     <SignUpButton mode="modal">
-      <Button className="w-full">Get Started {"-->"}</Button>
+      <Button className="w-full">
+        {type === "free" ? "Start Free" : "Sign Up"}
+      </Button>
     </SignUpButton>
   );
 
@@ -40,12 +42,8 @@ export async function PlanButton({ type }: PlanButtonProps) {
         );
       case "pro":
         return isActive
-          ? (
-            commonButton("You are on Pro Plan 🎉", true)
-          )
-          : (
-            commonButton("Coming Soon", true)
-          );
+          ? commonButton("You are on Pro Plan 🎉", true)
+          : commonButton("Coming Soon", true);
       case "teams":
         return commonButton("Coming Soon", true);
       case "pro-yearly":

@@ -1,26 +1,22 @@
+import PricingTable from "@/components/pricing-table";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
-import { Check } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { PlanButton } from "./plan-button";
 import { ModeToggle } from "./theme-toggler";
 
 export const metadata: Metadata = {
@@ -31,35 +27,6 @@ export const metadata: Metadata = {
     images: [getOgImageUrl("settings")],
   },
 };
-
-const plans = [
-  {
-    title: "Free",
-    description: "For Trying Out",
-    price: "$0",
-    features: ["500 OG Images", "1 Website", "No Support"],
-    type: "free",
-  },
-  {
-    title: "Pro",
-    description: "For Individual Use",
-    price: "$19",
-    features: ["5000 OG Images", "Unlimited Websites", "Priority Email Support"],
-    type: "pro",
-  },
-  {
-    title: "Pro Yearly",
-    description: "For Larger Websites",
-    price: "$199",
-    features: [
-      "Unlimited OG Images",
-      "Unlimited Websites",
-      "Priority Email Support",
-      "Save $29 vs monthly",
-    ],
-    type: "pro-yearly",
-  },
-];
 
 const faqs = [
   {
@@ -124,60 +91,13 @@ export default function Page() {
       </Card>
 
       {/* Pricing Plans */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Choose Your Plan</CardTitle>
-          <CardDescription>
-            Select the plan that best fits your needs
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-3">
-            {plans.map((plan, index) => (
-              <Card key={index} className="relative">
-                <CardHeader>
-                  <CardTitle className="text-lg">{plan.title}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="text-2xl font-bold">{plan.price}</div>
-                  {plan.price !== "$0" && (
-                    <div className="text-sm text-muted-foreground">
-                      {plan.type === "pro-yearly" ? "per year" : "per month"}
-                    </div>
-                  )}
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
-                        <Check className="mr-2 h-4 w-4 text-primary" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Suspense
-                    fallback={<Skeleton className="h-10 w-full" />}
-                  >
-                    <PlanButton
-                      type={plan.type as
-                        | "free"
-                        | "pro"
-                        | "teams"
-                        | "pro-yearly"}
-                    />
-                  </Suspense>
-                </CardFooter>
-                {plan.title === "Pro Yearly" && (
-                  <Badge className="absolute -top-2 left-1/2 -translate-x-1/2">
-                    Best Value
-                  </Badge>
-                )}
-              </Card>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <CardHeader>
+        <CardTitle>Choose Your Plan</CardTitle>
+        <CardDescription>
+          Select the plan that best fits your needs
+        </CardDescription>
+      </CardHeader>
+      <PricingTable />
 
       {/* FAQ Section */}
       <Card>
@@ -213,7 +133,7 @@ export default function Page() {
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <h4 className="font-medium">Documentation</h4>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-muted-foreground mb-2 text-sm">
                 Learn how to use our service effectively
               </p>
               <Button variant="outline" size="sm" asChild>
@@ -222,7 +142,7 @@ export default function Page() {
             </div>
             <div>
               <h4 className="font-medium">Legal</h4>
-              <p className="text-sm text-muted-foreground mb-2">
+              <p className="text-muted-foreground mb-2 text-sm">
                 Terms of service and privacy policy
               </p>
               <Button variant="outline" size="sm" asChild>

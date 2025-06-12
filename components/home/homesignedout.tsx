@@ -6,6 +6,7 @@ import { ArrowLongRight } from "@mynaui/icons-react";
 import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
+import LandingPricing from "./landing-pricing";
 import OGImageDemo from "./og-image-demo";
 
 export default function HomeSignedOut() {
@@ -51,6 +52,7 @@ export default function HomeSignedOut() {
       <OGImageDemo />
       <HowItWorks />
       <FeaturesBenefits />
+      <LandingPricing />
       <CTA />
     </>
   );

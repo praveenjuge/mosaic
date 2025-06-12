@@ -6,20 +6,20 @@ import { Button } from "../ui/button";
 export default function CTA() {
   return (
     <section className="py-10">
-      <div className="relative mx-auto flex h-96 max-w-5xl flex-col overflow-hidden rounded-lg border-[0.5px] bg-background px-2 py-16 text-center md:px-6">
+      <div className="bg-background relative mx-auto flex h-96 max-w-5xl flex-col overflow-hidden rounded-lg border-[0.5px] py-16 text-center md:px-6">
         <Image
           src="/images/cta.png"
           alt="CTA"
           width={1000}
           height={1000}
-          className="pointer-events-none absolute left-0 top-0 size-full select-none object-cover object-bottom"
+          className="pointer-events-none absolute top-0 left-0 size-full object-cover object-bottom select-none"
         />
         <div className="relative mx-auto flex max-w-xs flex-col items-center justify-center gap-6">
           <div className="space-y-2">
             <h2 className="text-xl font-semibold tracking-tight text-black md:text-2xl">
               Showcase your beautiful website in your OG images
             </h2>
-            <p className="text-balance text-base text-black/60">
+            <p className="text-base text-balance text-black/60">
               Generate click-worthy OG images in seconds, fully automated.
             </p>
           </div>
