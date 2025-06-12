@@ -43,7 +43,7 @@ export default async function WebsitesTable() {
               <TableRow>
                 <TableHead>Website</TableHead>
                 <TableHead>URL</TableHead>
-                <TableHead>Images</TableHead>
+                <TableHead>OG Images</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>

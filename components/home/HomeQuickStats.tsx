@@ -19,7 +19,7 @@ function StatsLoadingSkeleton() {
           <CardTitle>
             <Skeleton className="h-4.5 w-16" />
           </CardTitle>
-          <CardDescription>Images Generated</CardDescription>
+          <CardDescription>OG Images Generated</CardDescription>
         </CardHeader>
       </Card>
       <Card>
@@ -52,7 +52,7 @@ async function StatsContent() {
         <Card>
           <CardHeader>
             <CardTitle>0</CardTitle>
-            <CardDescription>Images Generated</CardDescription>
+            <CardDescription>OG Images Generated</CardDescription>
           </CardHeader>
         </Card>
         <Card>
@@ -82,7 +82,7 @@ async function StatsContent() {
         <Card>
           <CardHeader>
             <CardTitle>{totalImages.toLocaleString()}</CardTitle>
-            <CardDescription>Images Generated</CardDescription>
+            <CardDescription>OG Images Generated</CardDescription>
           </CardHeader>
         </Card>
         <Card>
@@ -107,7 +107,7 @@ async function StatsContent() {
         <Card>
           <CardHeader>
             <CardTitle>0</CardTitle>
-            <CardDescription>Images Generated</CardDescription>
+            <CardDescription>OG Images Generated</CardDescription>
           </CardHeader>
         </Card>
         <Card>

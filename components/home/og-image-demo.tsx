@@ -57,7 +57,7 @@ const ImageContainer = ({
       </>
     ) : (
       <div className="bg-primary-foreground flex size-full items-center justify-center">
-        <p>No image available</p>
+        <p>No OG image available</p>
       </div>
     )}
   </div>
@@ -170,7 +170,7 @@ export default function OGImageDemo() {
         }
       } catch (screenshotError) {
         console.error("Screenshot error:", screenshotError);
-        setError("Failed to generate screenshot. Using fallback image.");
+        setError("Failed to generate OG Image. Using fallback image.");
         // Keep the default fallback image
       }
     } catch (error) {

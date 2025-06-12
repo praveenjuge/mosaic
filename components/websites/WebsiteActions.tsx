@@ -82,7 +82,7 @@ export function WebsiteActions({
           {hasImages && (
             <DropdownMenuItem onClick={() => setRefreshOpen(true)}>
               <Repeat className="size-4 stroke-2" />
-              Refresh Images
+              Refresh OG Images
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
@@ -195,7 +195,7 @@ export function WebsiteActions({
               onClick={handleRefresh}
               disabled={refreshLoading}
             >
-              {refreshLoading ? "Refreshing..." : "Yes, Refresh Images"}
+              {refreshLoading ? "Refreshing..." : "Yes, Refresh OG Images"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
