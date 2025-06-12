@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Suspense } from "react";
 import HowItWorks from "./how-it-works";
 import OGImageDemo from "./og-image-demo";
+import FeaturesBenefits from "./features-benefits";
 
 const landingContent = [
   {
@@ -87,6 +88,7 @@ export default function HomeSignedOut() {
       </section>
       <OGImageDemo />
       <HowItWorks />
+      <FeaturesBenefits />
       <section className="mx-auto my-14 flex max-w-5xl flex-col gap-24">
         {landingContent.map((content, index) => (
           <div
