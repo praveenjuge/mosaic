@@ -192,7 +192,7 @@ export default function OGImageDemo() {
   };
 
   return (
-    <section className="relative -mt-10 py-16">
+    <section className="relative pb-16">
       <div className="pointer-events-none absolute inset-0 -z-10 border-b-[0.5px] select-none md:-mx-10">
         <Image
           src="/images/homebg.png"
