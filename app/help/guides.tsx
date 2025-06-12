@@ -114,6 +114,52 @@ export default function Page() {
     ],
   },
   {
+    title: "React Router",
+    slug: "react-router",
+    steps: [
+      {
+        title: "Install React Router DOM 7.6.2 and React Helmet Async:",
+        code: `npm install react-router-dom@7.6.2 react-helmet-async`,
+        codeLang: "bash",
+      },
+      {
+        title: "Add a dynamic route and set OG tags with Helmet:",
+        code: `import React from 'react'
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom'
+import { Helmet, HelmetProvider } from 'react-helmet-async'
+
+function Post() {
+  const { slug } = useParams()
+  return (
+    <HelmetProvider>
+      <Helmet>
+        <meta property="og:title" content={\`Post: \${slug}\`} />
+        <meta property="og:image" content={\`${mosaicURL}/\${slug}\`} />
+        <meta property="og:type" content="article" />
+      </Helmet>
+      {/* Your page content */}
+    </HelmetProvider>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/:slug" element={<Post />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}`,
+        codeLang: "js",
+      },
+      {
+        title:
+          "Remember to replace the placeholder value (like 'yourwebsite.com' and 'your_slug') with your actual website URL and slug.",
+      },
+    ],
+  },
+  {
     title: "Remix",
     slug: "remix",
     svgLight: "remix_light",
