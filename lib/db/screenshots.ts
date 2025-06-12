@@ -1,11 +1,7 @@
 import { createClerkSupabaseServerClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { getRandomWebsiteByUrlBase } from "./websites";
 import { getOrCreatePageService } from "./pages";
-import {
-  Screenshot,
-  ScreenshotWithDetails,
-  ScreenshotWithPage,
-} from "@/lib/types";
+import { Screenshot, ScreenshotWithDetails } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 
 export async function createScreenshot(
@@ -208,9 +204,41 @@ export async function getLatestScreenshotsForAllUserWebsites(
       return [];
     }
 
-    const formattedData = screenshots.map((screenshot: ScreenshotWithPage) => {
-      const page = screenshot.pages;
-      const website = page?.sites;
+    const formattedData = screenshots.map(
+      (
+        screenshot: {
+          id: string;
+          screenshot_url: string;
+          size_in_bytes?: number | null;
+          generated_at: string | null;
+          pages:
+            | {
+                id: string;
+                full_url?: string;
+                website_id: string;
+                sites:
+                  | { id: string; url_base: string }
+                  | Array<{ id: string; url_base: string }>;
+              }
+            | Array<{
+                id: string;
+                full_url?: string;
+                website_id: string;
+                sites:
+                  | { id: string; url_base: string }
+                  | Array<{ id: string; url_base: string }>;
+              }>;
+        },
+      ) => {
+        const page = Array.isArray(screenshot.pages)
+          ? screenshot.pages[0]
+          : screenshot.pages;
+        const website =
+          page && Array.isArray(page.sites) ? page.sites[0] : page?.sites;
+        const websiteName =
+          website && typeof website === "object" && "url_base" in website
+            ? (website as { url_base?: string }).url_base
+            : undefined;
 
       return {
         id: screenshot.id,
@@ -219,7 +247,7 @@ export async function getLatestScreenshotsForAllUserWebsites(
         generated_at: screenshot.generated_at,
         page_title: null,
         page_url: page?.full_url || "",
-        website_name: website?.url_base || "Unknown",
+        website_name: websiteName || "Unknown",
       } as ScreenshotWithDetails;
     });
 
