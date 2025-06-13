@@ -38,6 +38,7 @@ function ConfirmationContent({ checkoutId }: { checkoutId?: string }) {
           )}
           <div className="flex flex-col gap-2">
             <Button asChild className="w-full">
+              {/* Intentional a tag to make sure the page refreshes */}
               <a href="/">Go to Dashboard</a>
             </Button>
             <Button variant="outline" asChild className="w-full">

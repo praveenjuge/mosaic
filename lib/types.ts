@@ -71,6 +71,20 @@ export interface MarkdownContent {
 }
 
 // Polar API types
+export interface PolarBenefit {
+  id: string;
+  type: string;
+  description?: string;
+  properties?: Record<string, string | number | boolean>;
+}
+
+export interface PolarMeter {
+  id: string;
+  name: string;
+  slug: string;
+  // Add other meter properties as needed
+}
+
 export interface PolarCustomerStateSubscription {
   id: string;
   created_at: string;
@@ -93,7 +107,7 @@ export interface PolarCustomerState {
   id: string;
   created_at: string;
   modified_at: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, string | number | boolean>;
   external_id: string | null;
   email: string;
   email_verified: boolean;
@@ -101,8 +115,8 @@ export interface PolarCustomerState {
   organization_id: string;
   deleted_at: string | null;
   active_subscriptions: PolarCustomerStateSubscription[];
-  granted_benefits: any[];
-  active_meters: any[];
+  granted_benefits: PolarBenefit[];
+  active_meters: PolarMeter[];
   avatar_url: string;
 }
 

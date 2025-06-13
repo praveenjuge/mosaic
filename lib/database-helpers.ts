@@ -5,7 +5,7 @@ import {
   ScreenshotWithDetails,
   Site,
   SiteWithStats,
-  UserSubscriptionInfo,
+  UserSubscriptionInfo
 } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
@@ -570,7 +570,7 @@ export async function getUserStats(): Promise<{
 }
 
 // Polar API helper function
-async function getPolarCustomerState(userId: string): Promise<any> {
+async function getPolarCustomerState(userId: string): Promise<unknown> {
   try {
     const polarAccessToken = process.env.POLAR_ACCESS_TOKEN;
 
@@ -589,9 +589,10 @@ async function getPolarCustomerState(userId: string): Promise<any> {
     });
 
     return response || null;
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle 404 as customer not found (normal case)
-    if (error?.statusCode === 404 || error?.status === 404) {
+    const errorObj = error as { statusCode?: number; status?: number };
+    if (errorObj?.statusCode === 404 || errorObj?.status === 404) {
       return null;
     }
 
@@ -617,8 +618,15 @@ export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
     }
 
     const customerState = await getPolarCustomerState(userId);
+    const customerStateTyped = customerState as {
+      activeSubscriptions?: Array<{
+        status: string;
+        cancelAtPeriodEnd?: boolean;
+        productId?: string;
+      }>;
+    } | null;
 
-    if (!customerState || !customerState.activeSubscriptions?.length) {
+    if (!customerStateTyped || !customerStateTyped.activeSubscriptions?.length) {
       return {
         plan: "free",
         plan_properties: {
@@ -630,8 +638,8 @@ export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
     }
 
     // Find active subscription
-    const activeSubscription = customerState.activeSubscriptions?.find(
-      (sub: any) => sub.status === "active" && !sub.cancelAtPeriodEnd
+    const activeSubscription = customerStateTyped.activeSubscriptions?.find(
+      (sub: { status: string; cancelAtPeriodEnd?: boolean }) => sub.status === "active" && !sub.cancelAtPeriodEnd
     );
 
     if (!activeSubscription) {
@@ -646,7 +654,6 @@ export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
     }
 
     // Determine plan type based on product ID and interval
-    const proProductId = process.env.POLAR_PRO_PRODUCT_ID;
     const proYearlyProductId = process.env.POLAR_PRO_YEARLY_PRODUCT_ID;
 
     let planType = "pro";
@@ -669,7 +676,6 @@ export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
       plan: planType,
       plan_properties: planProperties,
       is_active: true,
-      subscription_details: activeSubscription,
     };
   } catch (error) {
     console.error("Error in getUserSubscriptionInfo:", error);

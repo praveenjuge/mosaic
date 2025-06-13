@@ -32,11 +32,12 @@ export async function GET() {
 
     // Redirect to the customer portal URL
     return NextResponse.redirect(response.customerPortalUrl);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error creating customer portal session:", error);
 
     // Handle case where customer doesn't exist in Polar yet
-    if (error?.statusCode === 404 || error?.status === 404) {
+    const errorObj = error as { statusCode?: number; status?: number };
+    if (errorObj?.statusCode === 404 || errorObj?.status === 404) {
       return NextResponse.json(
         { error: "Customer not found. Please contact support." },
         { status: 404 }
