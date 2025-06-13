@@ -139,9 +139,9 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
           </Suspense>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="py-0">
         {website.screenshot_count === 0 ? (
-          <Suspense fallback={<Skeleton className="h-6 w-16" />}>
+          <Suspense fallback={<Skeleton className="h-4 w-16" />}>
             <WebsiteInfoModal websiteUrl={website.url_base} />
           </Suspense>
         ) : (

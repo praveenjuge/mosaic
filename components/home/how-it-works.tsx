@@ -19,7 +19,7 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="mx-auto my-26 max-w-3xl md:text-center">
+    <section className="mx-auto my-26 max-w-4xl md:text-center">
       <h2 className="mb-10 text-4xl font-semibold tracking-tight">
         How it Works
       </h2>
@@ -34,7 +34,7 @@ export default function HowItWorks() {
               {index + 1}
             </span>
             <div className="space-y-1">
-              <h3 className="text-base font-semibold">{step.title}</h3>
+              <h3 className="text-lg font-semibold">{step.title}</h3>
               <p className="text-muted-foreground text-sm">
                 {step.description}
               </p>

@@ -1,8 +1,8 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
-import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+import { useEffect } from "react";
 
 export default function Error({
   error,
@@ -18,6 +18,12 @@ export default function Error({
 
   return (
     <div className="flex flex-col items-center justify-center gap-4 p-4">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/illustrations/error.png"
+        alt="Error occurred"
+        style={{ width: "350px" }}
+      />
       <h2 className="font-medium">Something went wrong!</h2>
       <button
         onClick={() => reset()}

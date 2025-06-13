@@ -23,6 +23,13 @@ export function DeleteWebsite({ websiteId }: { websiteId: string }) {
       <AlertDialogTrigger>Delete</AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/illustrations/delete-website.png"
+            alt="Delete Website Illustration"
+            width={225}
+            height={225}
+          />
           <AlertDialogTitle>Delete Website</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete this website? This action cannot be

@@ -31,7 +31,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline">
+        <Button size="sm" variant="outline" className="h-7">
           <Code className="size-4 stroke-2" />
           Add to Your Website
         </Button>

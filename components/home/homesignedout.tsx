@@ -1,9 +1,9 @@
 import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
-import { website_description, website_subtitle } from "@/lib/constants";
 import { ClerkLoaded, ClerkLoading, SignUpButton } from "@clerk/nextjs";
 import { ArrowLongRight } from "@mynaui/icons-react";
+import Image from "next/image";
 import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
@@ -42,34 +42,30 @@ function AuthButton() {
 // Hero section component
 function HeroSection() {
   return (
-    <section className="mx-auto flex max-w-xl flex-col items-center gap-6 pt-10 text-center">
-      <div className="space-y-3">
-        <h1 className="text-4xl font-semibold tracking-tighter text-balance md:text-5xl">
-          {website_subtitle}
-        </h1>
-        <p className="text-muted-foreground text-base text-balance">
-          {website_description}
-        </p>
-      </div>
-      <div className="flex gap-2">
+    <section className="mx-auto grid w-full max-w-4xl grid-cols-1 items-start gap-8 pt-6 md:-mb-20 md:grid-cols-2">
+      <div className="flex flex-col items-start gap-6">
+        <div className="space-y-3">
+          <h1 className="text-4xl font-semibold tracking-tighter text-balance">
+            Why design OG images when your website already converts?
+          </h1>
+          <p className="text-muted-foreground text-lg text-balance">
+            Instantly turn your website’s hero sections into stunning OG
+            images—no design skills needed. Boost brand visibility and drive
+            clicks with automated, high-converting social previews.
+          </p>
+        </div>
         <Suspense fallback={<AuthButtonSkeleton />}>
           <AuthButton />
         </Suspense>
       </div>
+      <Image
+        src="/illustrations/home.png"
+        alt="Hero Image"
+        width={1000}
+        height={1000}
+        className="hidden size-full object-cover object-center select-none md:block"
+      />
     </section>
-  );
-}
-
-// Demo section component
-function DemoSection() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-muted h-96 w-full animate-pulse rounded-lg" />
-      }
-    >
-      <OGImageDemo />
-    </Suspense>
   );
 }
 
@@ -82,19 +78,6 @@ function FeaturesSection() {
       }
     >
       <FeaturesBenefits />
-    </Suspense>
-  );
-}
-
-// How it works section component
-function HowItWorksSection() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
-      }
-    >
-      <HowItWorks />
     </Suspense>
   );
 }
@@ -129,7 +112,7 @@ function CTASection() {
 function FAQSection() {
   return (
     <section className="mx-auto max-w-4xl pt-10">
-      <div className="mb-12 text-center">
+      <div className="mb-12 md:text-center">
         <h2 className="mb-3 text-3xl font-semibold tracking-tighter">
           Frequently Asked Questions
         </h2>
@@ -152,9 +135,9 @@ export default function HomeSignedOut() {
   return (
     <>
       <HeroSection />
-      <DemoSection />
+      <OGImageDemo />
       <FeaturesSection />
-      <HowItWorksSection />
+      <HowItWorks />
       <PricingSection />
       <FAQSection />
       <CTASection />

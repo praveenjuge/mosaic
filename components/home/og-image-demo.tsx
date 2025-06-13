@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowDown, ArrowRight, FatCornerRightDown } from "@mynaui/icons-react";
-import Image from "next/image";
 import { useCallback, useState } from "react";
 
 interface OGData {
@@ -196,79 +195,71 @@ export default function OGImageDemo() {
   };
 
   return (
-    <section className="relative pb-16">
-      <div className="pointer-events-none absolute inset-0 -z-10 border-b-[0.5px] select-none md:-mx-10">
-        <Image
-          src="/images/homebg.png"
-          alt=""
-          width={1000}
-          height={1000}
-          className="hidden size-full object-cover object-top select-none md:block dark:hidden"
+    <div className="relative mx-auto max-w-4xl pb-16">
+      <form
+        onSubmit={handleSubmit}
+        className="mb-6 flex flex-col gap-4 md:flex-row"
+      >
+        <Input
+          value={inputUrl}
+          onChange={(e) => setInputUrl(e.target.value)}
+          placeholder="Enter your website URL"
+          aria-label="Enter URL for OG image preview"
+          className="bg-background dark:bg-background"
         />
-      </div>
-      <div className="relative mx-auto max-w-4xl sm:px-4">
-        <form
-          onSubmit={handleSubmit}
-          className="mb-6 flex flex-col gap-4 md:flex-row"
+        <Button
+          type="submit"
+          variant="outline"
+          disabled={isLoading}
+          className="bg-background dark:bg-background"
         >
-          <Input
-            value={inputUrl}
-            onChange={(e) => setInputUrl(e.target.value)}
-            placeholder="Enter your website URL"
-            aria-label="Enter URL for OG image preview"
-            className="bg-background"
+          Get a Live Demo of your new OG Image
+          <FatCornerRightDown className="size-4" />
+        </Button>
+      </form>
+      {error && (
+        <p className="text-destructive mb-6 text-center" role="alert">
+          {error}
+        </p>
+      )}
+      <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
+        <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+          <ImageContainer
+            isLoading={isLoading}
+            src={
+              ogData ? ogData.image || null : "/images/original-example-og.jpg"
+            }
+            alt="Original Open Graph Image"
           />
-          <Button type="submit" variant="outline" disabled={isLoading}>
-            Get a Live Demo of your new OG Image
-            <FatCornerRightDown className="size-4" />
-          </Button>
-        </form>
-        {error && (
-          <p className="text-destructive mb-6 text-center" role="alert">
-            {error}
-          </p>
-        )}
-        <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
-          <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <ImageContainer
-              isLoading={isLoading}
-              src={
-                ogData
-                  ? ogData.image || null
-                  : "/images/original-example-og.jpg"
-              }
-              alt="Original Open Graph Image"
-            />
-            <ContentContainer
-              isLoading={isLoading}
-              title={ogData?.title || defaultData.title}
-              description={ogData?.description || defaultData.description}
-              url={submittedUrl || defaultData.url}
-            />
-          </div>
-          <span
-            className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
-            aria-hidden="true"
-          >
-            <ArrowRight className="hidden size-7 md:block" />
-            <ArrowDown className="size-7 md:hidden" />
-          </span>
-          <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
-            <ImageContainer
-              isLoading={isLoading}
-              src={mosaicImageUrl}
-              alt="Mosaic Open Graph Image"
-              isScreenshotLoading={isScreenshotLoading}
-            />
-            <ContentContainer
-              isLoading={isLoading}
-              title={ogData?.title || defaultData.title}
-              description={ogData?.description || defaultData.description}
-              url={submittedUrl || defaultData.url}
-            />
-          </div>
+          <ContentContainer
+            isLoading={isLoading}
+            title={ogData?.title || defaultData.title}
+            description={ogData?.description || defaultData.description}
+            url={submittedUrl || defaultData.url}
+          />
+        </div>
+        <span
+          className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
+          aria-hidden="true"
+        >
+          <ArrowRight className="hidden size-7 md:block" />
+          <ArrowDown className="size-7 md:hidden" />
+        </span>
+        <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+          <ImageContainer
+            isLoading={isLoading}
+            src={mosaicImageUrl}
+            alt="Mosaic Open Graph Image"
+            isScreenshotLoading={isScreenshotLoading}
+          />
+          <ContentContainer
+            isLoading={isLoading}
+            title={ogData?.title || defaultData.title}
+            description={ogData?.description || defaultData.description}
+            url={submittedUrl || defaultData.url}
+          />
         </div>
       </div>
-    </section>
+    </div>
   );
 }

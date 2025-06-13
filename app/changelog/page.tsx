@@ -27,7 +27,14 @@ const allPosts = getMarkDownData("content/changelog/");
 // Changelog header component
 function ChangelogHeader() {
   return (
-    <CardHeader className="p-0">
+    <CardHeader className="p-0 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/illustrations/changelog.png"
+        alt="Changelog"
+        className="mx-auto mb-4"
+        style={{ width: "350px" }}
+      />
       <CardTitle>{metadata.title as string}</CardTitle>
       <CardDescription>{metadata.description}</CardDescription>
     </CardHeader>
@@ -63,16 +70,6 @@ function ChangelogEntries() {
   );
 }
 
-// Loading skeletons
-function ChangelogHeaderSkeleton() {
-  return (
-    <div className="p-0">
-      <Skeleton className="mb-2 h-8 w-32" />
-      <Skeleton className="h-4 w-64" />
-    </div>
-  );
-}
-
 function ChangelogEntriesSkeleton() {
   return (
     <div className="space-y-4">
@@ -94,10 +91,8 @@ function ChangelogEntriesSkeleton() {
 
 export default function Page() {
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-4 md:py-10">
-      <Suspense fallback={<ChangelogHeaderSkeleton />}>
-        <ChangelogHeader />
-      </Suspense>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-4 md:pb-10">
+      <ChangelogHeader />
 
       <Suspense fallback={<ChangelogEntriesSkeleton />}>
         <ChangelogEntries />

@@ -3,7 +3,7 @@ import PricingTable from "@/components/pricing-table";
 export default function LandingPricing() {
   return (
     <section className="mx-auto max-w-6xl py-10">
-      <div className="mb-8 text-center">
+      <div className="mb-8 md:text-center">
         <h2 className="mb-4 text-4xl font-semibold tracking-tighter">
           Simple, Transparent Pricing
         </h2>

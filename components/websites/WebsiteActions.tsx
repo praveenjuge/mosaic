@@ -136,14 +136,22 @@ export function WebsiteActions({
       {/* Delete Alert Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Website</AlertDialogTitle>
-            <AlertDialogDescription>
+          <AlertDialogHeader className="items-center text-center">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/illustrations/delete-website.png"
+              alt="Delete Website"
+              style={{ width: "350px" }}
+            />
+            <AlertDialogTitle className="text-center text-balance">
+              Delete Website {currentUrl}?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-center text-balance">
               Are you sure you want to delete this website? This action cannot
               be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="sm:justify-between">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <form
               action={async () => {
@@ -173,10 +181,9 @@ export function WebsiteActions({
           <AlertDialogHeader className="items-center text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/refresh-image.png"
-              alt="OG Image Refresh"
-              width={250}
-              height={250}
+              src="/illustrations/refresh-image.png"
+              alt="Refresh OG Images"
+              style={{ width: "350px" }}
             />
             <AlertDialogTitle>
               Refresh this site&apos;s OG images?
