@@ -132,7 +132,7 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
                   <img
                     src={item.screenshot_url}
                     alt={item.page_url}
-                    className="h-6 w-14 rounded border-[0.5px] bg-cover bg-center object-cover"
+                    className="h-6 w-12 rounded border-[0.5px] bg-cover bg-center object-cover"
                     width={56}
                     height={24}
                   />

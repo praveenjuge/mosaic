@@ -148,7 +148,7 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
           website.screenshot_count
         )}
       </TableCell>
-      <TableCell>
+      <TableCell className="flex p-0.5">
         <Suspense fallback={<Skeleton className="h-8 w-16" />}>
           <WebsiteActions
             websiteId={website.id}

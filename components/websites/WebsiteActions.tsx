@@ -170,7 +170,7 @@ export function WebsiteActions({
       {/* Refresh Alert Dialog */}
       <AlertDialog open={refreshOpen} onOpenChange={setRefreshOpen}>
         <AlertDialogContent>
-          <AlertDialogHeader>
+          <AlertDialogHeader className="items-center text-center">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/images/refresh-image.png"
@@ -181,12 +181,12 @@ export function WebsiteActions({
             <AlertDialogTitle>
               Refresh this site&apos;s OG images?
             </AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogDescription className="text-center">
               This will delete all existing OG images for this site. New images
               will be generated automatically when you visit the pages again.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="sm:justify-between">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRefreshAction}
