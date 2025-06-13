@@ -1,11 +1,12 @@
 import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { Site, SiteWithStats } from "@/lib/types";
+import { cache } from "react";
 
 /**
  * Website/Site operations
  */
 
-export async function getOrCreateWebsite(
+async function _getOrCreateWebsite(
   urlBase: string,
 ): Promise<Site | null> {
   try {
@@ -45,7 +46,7 @@ export async function getOrCreateWebsite(
   }
 }
 
-export async function getWebsiteWithStats(
+export async function _getWebsiteWithStats(
   websiteId: string,
 ): Promise<{
   website: Site | null;
@@ -116,7 +117,7 @@ export async function getWebsiteWithStats(
   }
 }
 
-export async function getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> {
+async function _getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
@@ -181,3 +182,8 @@ export async function getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | 
     return null;
   }
 }
+
+// Cached exports
+export const getOrCreateWebsite = cache(_getOrCreateWebsite);
+export const getWebsiteWithStats = cache(_getWebsiteWithStats);
+export const getAllWebsitesWithStats = cache(_getAllWebsitesWithStats);

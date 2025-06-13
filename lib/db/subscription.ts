@@ -1,11 +1,12 @@
 import { UserSubscriptionInfo } from "@/lib/types";
 import { Polar } from "@polar-sh/sdk";
+import { cache } from "react";
 
 /**
  * Subscription and user limits operations
  */
 
-async function getPolarCustomerState(userId: string): Promise<unknown> {
+const _getPolarCustomerState = cache(async (userId: string): Promise<unknown> => {
   try {
     const polarAccessToken = process.env.POLAR_ACCESS_TOKEN;
 
@@ -34,9 +35,9 @@ async function getPolarCustomerState(userId: string): Promise<unknown> {
     console.error("Error fetching Polar customer state:", error);
     return null;
   }
-}
+});
 
-export async function getUserSubscriptionInfo(userId: string | null): Promise<UserSubscriptionInfo> {
+async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubscriptionInfo> {
   try {
     if (!userId) {
       return {
@@ -49,7 +50,7 @@ export async function getUserSubscriptionInfo(userId: string | null): Promise<Us
       };
     }
 
-    const customerState = await getPolarCustomerState(userId);
+    const customerState = await _getPolarCustomerState(userId);
     const customerStateTyped = customerState as {
       activeSubscriptions?: Array<{
         status: string;
@@ -122,3 +123,7 @@ export async function getUserSubscriptionInfo(userId: string | null): Promise<Us
     };
   }
 }
+
+// Cached exports
+export const getPolarCustomerState = _getPolarCustomerState;
+export const getUserSubscriptionInfo = cache(_getUserSubscriptionInfo);

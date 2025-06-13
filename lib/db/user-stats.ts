@@ -1,10 +1,11 @@
 import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { cache } from "react";
 
 /**
  * User statistics operations
  */
 
-export async function getUserStats(): Promise<{
+async function _getUserStats(): Promise<{
   total_images: number;
   total_storage_bytes: number;
   total_websites: number;
@@ -67,3 +68,6 @@ export async function getUserStats(): Promise<{
     };
   }
 }
+
+// Cached exports
+export const getUserStats = cache(_getUserStats);

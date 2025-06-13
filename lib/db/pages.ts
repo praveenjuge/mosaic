@@ -1,11 +1,12 @@
 import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { Page } from "@/lib/types";
+import { cache } from "react";
 
 /**
  * Page operations
  */
 
-export async function getOrCreatePage(
+async function _getOrCreatePage(
   websiteId: string,
   path: string,
   fullUrl: string,
@@ -47,3 +48,6 @@ export async function getOrCreatePage(
     return null;
   }
 }
+
+// Cached exports
+export const getOrCreatePage = cache(_getOrCreatePage);

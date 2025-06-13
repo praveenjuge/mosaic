@@ -1,12 +1,13 @@
 import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
 import { Screenshot, ScreenshotWithDetails } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
+import { cache } from "react";
 
 /**
  * Screenshot operations
  */
 
-export async function createScreenshot(
+async function _createScreenshot(
   pageId: string,
   screenshotUrl: string,
   imageHash?: string,
@@ -38,7 +39,7 @@ export async function createScreenshot(
   }
 }
 
-export async function getLatestScreenshot(
+async function _getLatestScreenshot(
   pageUrl: string,
 ): Promise<string | null> {
   try {
@@ -78,7 +79,7 @@ export async function getLatestScreenshot(
   }
 }
 
-export async function getLatestScreenshotsForWebsite(
+async function _getLatestScreenshotsForWebsite(
   websiteId: string,
   page: number = 1,
   limit: number = 10,
@@ -174,7 +175,7 @@ export async function getLatestScreenshotsForWebsite(
   }
 }
 
-export async function getLatestScreenshotsForAllUserWebsites(
+async function _getLatestScreenshotsForAllUserWebsites(
   limit: number = 10,
 ): Promise<Array<ScreenshotWithDetails> | null> {
   try {
@@ -236,3 +237,9 @@ export async function getLatestScreenshotsForAllUserWebsites(
     return null;
   }
 }
+
+// Cached exports
+export const createScreenshot = cache(_createScreenshot);
+export const getLatestScreenshot = cache(_getLatestScreenshot);
+export const getLatestScreenshotsForWebsite = cache(_getLatestScreenshotsForWebsite);
+export const getLatestScreenshotsForAllUserWebsites = cache(_getLatestScreenshotsForAllUserWebsites);
