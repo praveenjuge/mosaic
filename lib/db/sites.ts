@@ -187,7 +187,7 @@ async function _getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> 
  * Website management operations
  */
 
-export async function addWebsite(urlBase: string, userId: string): Promise<{
+async function _addWebsite(urlBase: string, userId: string): Promise<{
   status: "success" | "error";
   message: string;
   data?: Site[];
@@ -226,7 +226,7 @@ export async function addWebsite(urlBase: string, userId: string): Promise<{
   }
 }
 
-export async function editWebsite(websiteId: string, urlBase: string, userId: string): Promise<{
+async function _editWebsite(websiteId: string, urlBase: string, userId: string): Promise<{
   status: "success" | "error";
   message: string;
   data?: Site[];
@@ -268,7 +268,7 @@ export async function editWebsite(websiteId: string, urlBase: string, userId: st
   }
 }
 
-export async function deleteWebsite(websiteId: string, userId: string): Promise<{
+async function _deleteWebsite(websiteId: string, userId: string): Promise<{
   status: "success" | "error";
   message: string;
 }> {
@@ -382,7 +382,7 @@ export async function deleteWebsite(websiteId: string, userId: string): Promise<
   }
 }
 
-export async function refreshWebsite(websiteId: string, userId: string): Promise<{
+async function _refreshWebsite(websiteId: string, userId: string): Promise<{
   status: "success" | "error";
   message: string;
 }> {
@@ -469,7 +469,7 @@ export async function refreshWebsite(websiteId: string, userId: string): Promise
   }
 }
 
-export async function checkWebsiteExists(urlBase: string): Promise<boolean> {
+async function _checkWebsiteExists(urlBase: string): Promise<boolean> {
   try {
     const supabase = await createClerkSupabaseServerClient();
 
@@ -495,3 +495,8 @@ export async function checkWebsiteExists(urlBase: string): Promise<boolean> {
 export const getOrCreateWebsite = cache(_getOrCreateWebsite);
 export const getWebsiteWithStats = cache(_getWebsiteWithStats);
 export const getAllWebsitesWithStats = cache(_getAllWebsitesWithStats);
+export const addWebsite = cache(_addWebsite);
+export const editWebsite = cache(_editWebsite);
+export const deleteWebsite = cache(_deleteWebsite);
+export const refreshWebsite = cache(_refreshWebsite);
+export const checkWebsiteExists = cache(_checkWebsiteExists);

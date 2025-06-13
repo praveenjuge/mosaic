@@ -1,5 +1,6 @@
 import { createServiceRoleClient } from "@/lib/db/supabase/server";
 import { extractUrlPartsConsistent } from "@/lib/utils";
+import { cache } from "react";
 
 /**
  * OG Image operations for public API
@@ -8,7 +9,7 @@ import { extractUrlPartsConsistent } from "@/lib/utils";
 /**
  * Check if an image exists in the database for a given page URL
  */
-export async function checkImageInDatabase(pageUrl: string): Promise<string | null> {
+async function _checkImageInDatabase(pageUrl: string): Promise<string | null> {
   console.log(`[CACHE_CHECK_START] Checking cache for URL: ${pageUrl}`);
   try {
     const supabase = await createServiceRoleClient();
@@ -38,7 +39,7 @@ export async function checkImageInDatabase(pageUrl: string): Promise<string | nu
 /**
  * Store image metadata in database
  */
-export async function storeImageInDatabase(
+async function _storeImageInDatabase(
   pageUrl: string,
   imageKey: string,
   imageSize: number,
@@ -135,7 +136,7 @@ export async function storeImageInDatabase(
 /**
  * Check if a website exists by URL base (for public API validation)
  */
-export async function checkWebsiteExistsForUrl(urlBase: string): Promise<boolean> {
+async function _checkWebsiteExistsForUrl(urlBase: string): Promise<boolean> {
   try {
     const supabase = await createServiceRoleClient();
 
@@ -156,3 +157,8 @@ export async function checkWebsiteExistsForUrl(urlBase: string): Promise<boolean
     return false;
   }
 }
+
+// Cached exports
+export const checkImageInDatabase = cache(_checkImageInDatabase);
+export const storeImageInDatabase = cache(_storeImageInDatabase);
+export const checkWebsiteExistsForUrl = cache(_checkWebsiteExistsForUrl);
