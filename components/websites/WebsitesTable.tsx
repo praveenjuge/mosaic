@@ -15,7 +15,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
-import { getAllWebsitesWithStats } from "@/lib/database-helpers";
+import { getAllWebsitesWithStats } from "@/lib/db";
 import { SiteWithStats } from "@/lib/types";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
@@ -148,7 +148,7 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
           website.screenshot_count
         )}
       </TableCell>
-      <TableCell className="flex p-0.5">
+      <TableCell className="flex items-center p-0.5">
         <Suspense fallback={<Skeleton className="h-8 w-16" />}>
           <WebsiteActions
             websiteId={website.id}

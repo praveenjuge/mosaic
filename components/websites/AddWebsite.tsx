@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { getUserStats, getUserSubscriptionInfo } from "@/lib/database-helpers";
+import { getUserStats, getUserSubscriptionInfo } from "@/lib/db";
 import {
   ClerkLoaded,
   ClerkLoading,

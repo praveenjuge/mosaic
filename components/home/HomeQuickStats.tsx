@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserStats, getUserSubscriptionInfo } from "@/lib/database-helpers";
+import { getUserStats, getUserSubscriptionInfo } from "@/lib/db";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Suspense } from "react";

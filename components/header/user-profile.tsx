@@ -15,6 +15,11 @@ export default function UserProfile() {
           userButtonPopoverFooter: "!hidden",
         },
       }}
+      userProfileProps={{
+        appearance: {
+          baseTheme: resolvedTheme === "dark" ? dark : undefined,
+        },
+      }}
     />
   );
 }
