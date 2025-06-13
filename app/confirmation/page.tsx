@@ -7,6 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { CheckCircle } from "@mynaui/icons-react";
+import Link from "next/link";
 import { Suspense } from "react";
 
 interface ConfirmationPageProps {
@@ -38,11 +39,10 @@ function ConfirmationContent({ checkoutId }: { checkoutId?: string }) {
           )}
           <div className="flex flex-col gap-2">
             <Button asChild className="w-full">
-              {/* Intentional a tag to make sure the page refreshes */}
-              <a href="/">Go to Dashboard</a>
+              <Link href="/">Go to Dashboard</Link>
             </Button>
             <Button variant="outline" asChild className="w-full">
-              <a href="/settings">View Settings</a>
+              <Link href="/settings">View Settings</Link>
             </Button>
           </div>
         </CardContent>

@@ -352,27 +352,6 @@ export function extractUrlParts(fullUrl: string): {
   return extractUrlPartsConsistent(fullUrl);
 }
 
-export function extractTitleFromUrl(url: string): string {
-  try {
-    const parsedUrl = new URL(url);
-    const pathname = parsedUrl.pathname;
-
-    if (pathname === "/" || pathname === "") {
-      return parsedUrl.hostname;
-    }
-
-    // Convert path to title (remove slashes, capitalize)
-    return pathname
-      .split("/")
-      .filter((segment) => segment)
-      .join(" ")
-      .replace(/-/g, " ")
-      .replace(/\b\w/g, (l) => l.toUpperCase());
-  } catch {
-    return url;
-  }
-}
-
 // Get all websites for a user with screenshot counts
 export async function getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> {
   try {
@@ -504,7 +483,7 @@ export async function getLatestScreenshotsForAllUserWebsites(
   }
 }
 
-// Get user statistics from new tables - simplified direct query version
+// Get user statistics
 export async function getUserStats(): Promise<{
   total_images: number;
   total_storage_bytes: number;
