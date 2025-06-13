@@ -94,7 +94,7 @@ function ChangelogEntriesSkeleton() {
 
 export default function Page() {
   return (
-    <div className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-4 md:py-10">
       <Suspense fallback={<ChangelogHeaderSkeleton />}>
         <ChangelogHeader />
       </Suspense>

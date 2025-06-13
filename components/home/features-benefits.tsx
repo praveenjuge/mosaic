@@ -6,8 +6,9 @@ const features = [
   "Beautiful social previews that boost engagement",
   "High-quality, retina-ready OG Images",
   "Global CDN for fast OG Image delivery",
-  "Simple dashboard for managing your sites",
-  '"Refresh OG Images" option when your site design has been updated',
+  "Simple dashboard for managing multiple websites",
+  '"Refresh OG Images" option when your site design changes',
+  "Advanced analytics and usage tracking for Pro users",
 ];
 
 export default function FeaturesBenefits() {

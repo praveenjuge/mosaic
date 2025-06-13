@@ -38,17 +38,22 @@ const faqs = [
   {
     question: "How does the Free plan work?",
     answer:
-      "Every account can generate up to 500 images for a single website at no cost.",
+      "The Free plan gives you 500 OG images per month for one website. Perfect for personal projects or trying out the service.",
   },
   {
-    question: "Do you offer paid plans or upgrades?",
+    question: "What are the benefits of upgrading to Pro?",
     answer:
-      "Paid tiers with higher limits are in the works. For now everyone enjoys the Free plan.",
+      "Pro plans offer higher limits (5,000 images/month or unlimited for yearly), unlimited websites, priority email support, and advanced analytics. Pro Yearly also includes custom branding options.",
   },
   {
-    question: "What happens when I hit the limit?",
+    question: "What happens when I hit my plan limit?",
     answer:
-      "New images won't be generated, but your existing ones stay available.",
+      "New images won't be generated until your next billing cycle, but your existing ones stay available. You can upgrade to a higher plan anytime for more capacity.",
+  },
+  {
+    question: "Can I cancel my subscription anytime?",
+    answer:
+      "Yes, you can cancel your Pro subscription at any time. You'll continue to have access to Pro features until the end of your current billing period.",
   },
   {
     question: "How often are OG images refreshed?",
@@ -107,7 +112,8 @@ function PlanAndBilling() {
       <CardHeader>
         <CardTitle>Plan & Billing</CardTitle>
         <CardDescription>
-          Currently all users are on the free plan while we are in beta.
+          Manage your subscription and billing preferences. Upgrade or downgrade
+          your plan anytime.
         </CardDescription>
       </CardHeader>
       <CardContent>

@@ -8,8 +8,8 @@ export default function LandingPricing() {
           Simple, Transparent Pricing
         </h2>
         <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-          Start for free and upgrade when you need more. No hidden fees, no
-          surprises.
+          Start for free and upgrade when you need more. No hidden fees, cancel
+          anytime.
         </p>
       </div>
       <PricingTable />

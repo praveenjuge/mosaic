@@ -16,17 +16,17 @@ import { Button } from "./ui/button";
 const plans = [
   {
     title: "Free",
-    description: "For Trying Out",
+    description: "Perfect for Getting Started",
     price: "$0",
-    features: ["500 OG Images", "1 Website", "No Support"],
+    features: ["500 OG Images", "1 Website", "Community Forum Support"],
     type: "free",
   },
   {
     title: "Pro",
-    description: "For Individual Use",
+    description: "For Growing Websites",
     price: "$19",
     features: [
-      "5000 OG Images",
+      "5,000 OG Images",
       "Unlimited Websites",
       "Priority Email Support",
     ],
@@ -34,7 +34,7 @@ const plans = [
   },
   {
     title: "Pro Yearly",
-    description: "For Larger Websites",
+    description: "Best Value for Power Users",
     price: "$199",
     features: [
       "Unlimited OG Images",
@@ -42,7 +42,7 @@ const plans = [
       "Priority Email Support",
     ],
     type: "pro-yearly",
-    badge: "Best Value - Save $29",
+    badge: "Save $29/year",
   },
 ];
 
@@ -94,7 +94,9 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
         <CardDescription>{plan.description}</CardDescription>
         <div className="mt-4 flex items-baseline">
           <span className="text-3xl font-bold">{plan.price}</span>
-          <span className="text-muted-foreground ml-1">/month</span>
+          <span className="text-muted-foreground ml-1">
+            {plan.type === "pro-yearly" ? "/year" : "/month"}
+          </span>
         </div>
       </CardHeader>
       <CardContent className="flex-1">

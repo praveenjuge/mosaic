@@ -109,7 +109,7 @@ export default async function Page(props: {
   if (!changelog) notFound();
 
   return (
-    <article className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
+    <article className="mx-auto flex w-full max-w-2xl flex-col gap-4 py-4 md:py-10">
       <meta
         itemProp="image"
         content={getOgImageUrl("changelog/" + params.slug)}
