@@ -18,31 +18,31 @@ export function ModeToggle() {
       type="single"
       disabled={!defaultValue}
       value={defaultValue}
-      className="border-[0.5px] bg-muted p-0.5 w-full"
+      className="bg-muted w-full border-[0.5px] p-0.5"
     >
       <ToggleGroupItem
         value="system"
         onClick={() => setTheme("system")}
-        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="data-[state=on]:bg-background w-full gap-1 data-[state=on]:border-[0.5px]"
       >
-        <Desktop className="size-5" />
-        System
+        <Desktop className="size-4 stroke-2" />
+        <span className="sr-only">System</span>
       </ToggleGroupItem>
       <ToggleGroupItem
         value="light"
         onClick={() => setTheme("light")}
-        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="data-[state=on]:bg-background w-full gap-1 data-[state=on]:border-[0.5px]"
       >
-        <Sun className="size-5" />
-        Light
+        <Sun className="size-4 stroke-2" />
+        <span className="sr-only">Light</span>
       </ToggleGroupItem>
       <ToggleGroupItem
         value="dark"
         onClick={() => setTheme("dark")}
-        className="w-full gap-2 data-[state=on]:border-[0.5px] data-[state=on]:bg-background"
+        className="data-[state=on]:bg-background w-full gap-1 data-[state=on]:border-[0.5px]"
       >
-        <Moon className="size-5" />
-        Dark
+        <Moon className="size-4 stroke-2" />
+        <span className="sr-only">Dark</span>
       </ToggleGroupItem>
     </ToggleGroup>
   );

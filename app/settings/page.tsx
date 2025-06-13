@@ -3,6 +3,7 @@ import PricingTable from "@/components/pricing-table";
 import { Button } from "@/components/ui/button";
 import {
   Card,
+  CardAction,
   CardContent,
   CardDescription,
   CardHeader,
@@ -52,12 +53,12 @@ function ThemeSettings() {
         <CardDescription>
           Choose how you want the application to look.
         </CardDescription>
+        <CardAction>
+          <Suspense fallback={<ThemeToggleSkeleton />}>
+            <ModeToggle />
+          </Suspense>
+        </CardAction>
       </CardHeader>
-      <CardContent>
-        <Suspense fallback={<ThemeToggleSkeleton />}>
-          <ModeToggle />
-        </Suspense>
-      </CardContent>
     </Card>
   );
 }
@@ -91,19 +92,19 @@ function SupportSection() {
         <CardDescription>
           Have questions or need support? We&rsquo;re here to help.
         </CardDescription>
+        <CardAction>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Link href="/help">
+              <Button variant="outline" className="w-full sm:w-auto">
+                View Help Articles
+              </Button>
+            </Link>
+            <Link href="mailto:hello@praveenjuge.com">
+              <Button className="w-full sm:w-auto">Contact Support</Button>
+            </Link>
+          </div>
+        </CardAction>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-col gap-4 sm:flex-row">
-          <Link href="/help">
-            <Button variant="outline" className="w-full sm:w-auto">
-              View Help Articles
-            </Button>
-          </Link>
-          <Link href="mailto:hello@praveenjuge.com">
-            <Button className="w-full sm:w-auto">Contact Support</Button>
-          </Link>
-        </div>
-      </CardContent>
     </Card>
   );
 }
