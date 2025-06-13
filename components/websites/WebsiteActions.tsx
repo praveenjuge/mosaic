@@ -27,6 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dots, Edit, Repeat, Trash } from "@mynaui/icons-react";
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 import { handleDelete, handleEdit, handleRefresh } from "./actions";
@@ -137,11 +138,11 @@ export function WebsiteActions({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/illustrations/delete-website.png"
               alt="Delete Website"
-              style={{ width: "350px" }}
+              width={300}
+              height={300}
             />
             <AlertDialogTitle className="text-center text-balance">
               Delete Website {currentUrl}?
@@ -179,11 +180,11 @@ export function WebsiteActions({
       <AlertDialog open={refreshOpen} onOpenChange={setRefreshOpen}>
         <AlertDialogContent>
           <AlertDialogHeader className="items-center text-center">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/illustrations/refresh-image.png"
               alt="Refresh OG Images"
-              style={{ width: "350px" }}
+              width={300}
+              height={300}
             />
             <AlertDialogTitle>
               Refresh this site&apos;s OG images?

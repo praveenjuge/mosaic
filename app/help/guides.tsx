@@ -2,6 +2,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "@mynaui/icons-react";
+import Image from "next/image";
 import Link from "next/link";
 
 const mosaicURL = "https://mosaicimg.com/use?url=yourwebsite.com";
@@ -342,8 +343,7 @@ export function GuideLink({ guide }: { guide: Guide }) {
       href={`/help/guides/${guide.slug}`}
       className={cn(buttonVariants({ variant: "outline" }), "gap-2")}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         alt={`${guide.title} icon`}
         className={cn(
           "shrink-0 select-none not-dark:block dark:hidden",
@@ -355,8 +355,7 @@ export function GuideLink({ guide }: { guide: Guide }) {
             : `https://svgl.app/library/${guide.slug}.svg`
         }
       />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         alt={`${guide.title} icon`}
         className={cn(
           "shrink-0 select-none not-dark:hidden dark:block",

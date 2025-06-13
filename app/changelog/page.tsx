@@ -10,6 +10,7 @@ import { getMarkDownData } from "@/lib/getMarkdown";
 import { MarkdownContent } from "@/lib/types";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
+import Image from "next/image";
 import { Suspense } from "react";
 
 export const experimental_ppr = true;
@@ -28,12 +29,12 @@ const allPosts = getMarkDownData("content/changelog/");
 function ChangelogHeader() {
   return (
     <CardHeader className="p-0 text-center">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src="/illustrations/changelog.png"
         alt="Changelog"
         className="mx-auto mb-4"
-        style={{ width: "350px" }}
+        width={300}
+        height={300}
       />
       <CardTitle>{metadata.title as string}</CardTitle>
       <CardDescription>{metadata.description}</CardDescription>

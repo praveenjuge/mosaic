@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { handleAdd } from "@/components/websites/actions";
 import { SubmitButton } from "@/components/websites/submit-button";
+import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -21,11 +22,12 @@ export default function WelcomeEmptyState() {
     <div className="flex min-h-[60vh] items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center text-center">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
+          <Image
             src="/illustrations/welcome.png"
             alt="Welcome to Mosaic"
-            style={{ width: "350px" }}
+            width={300}
+            height={300}
+            className="mb-3"
           />
           <CardTitle>Welcome to Mosaic</CardTitle>
           <CardDescription className="text-balance">
