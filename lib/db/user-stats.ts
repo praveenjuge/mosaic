@@ -1,4 +1,4 @@
-import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { createClerkSupabaseServerClient } from "@/lib/db/supabase/server";
 import { cache } from "react";
 
 /**

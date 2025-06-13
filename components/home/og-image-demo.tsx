@@ -123,7 +123,6 @@ export default function OGImageDemo() {
     setError("");
 
     try {
-      // Fetch OG data using our Supabase Edge Function
       const ogResponse = await fetch(
         `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/metadata?url=${encodeURIComponent(normalizedUrl)}`,
         {

@@ -1,4 +1,4 @@
-import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { createClerkSupabaseServerClient } from "@/lib/db/supabase/server";
 import { Screenshot, ScreenshotWithDetails } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { cache } from "react";

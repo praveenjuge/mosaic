@@ -1,4 +1,4 @@
-import { createClerkSupabaseServerClient } from "@/lib/supabase/server";
+import { createClerkSupabaseServerClient } from "@/lib/db/supabase/server";
 import { Site, SiteWithStats } from "@/lib/types";
 import { cache } from "react";
 
@@ -180,6 +180,314 @@ async function _getAllWebsitesWithStats(): Promise<Array<SiteWithStats> | null> 
   } catch (error) {
     console.error("Error in getAllWebsitesWithStats:", error);
     return null;
+  }
+}
+
+/**
+ * Website management operations
+ */
+
+export async function addWebsite(urlBase: string, userId: string): Promise<{
+  status: "success" | "error";
+  message: string;
+  data?: Site[];
+}> {
+  try {
+    const supabase = await createClerkSupabaseServerClient();
+
+    // Check if the URL already exists for this user
+    const { data: existingWebsite } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("url_base", urlBase)
+      .eq("user_id", userId)
+      .single();
+
+    if (existingWebsite) {
+      return {
+        status: "error",
+        message: "This website already exists in your list.",
+      };
+    }
+
+    const { data, error } = await supabase
+      .from("sites")
+      .insert([{ url_base: urlBase, user_id: userId }])
+      .select();
+
+    if (error) {
+      return { status: "error", message: error.message };
+    }
+
+    return { status: "success", message: "Website added successfully", data };
+  } catch (error) {
+    console.error("Error in addWebsite:", error);
+    return { status: "error", message: "Failed to add website" };
+  }
+}
+
+export async function editWebsite(websiteId: string, urlBase: string, userId: string): Promise<{
+  status: "success" | "error";
+  message: string;
+  data?: Site[];
+}> {
+  try {
+    const supabase = await createClerkSupabaseServerClient();
+
+    // Check if the cleaned URL already exists for this user (excluding current website)
+    const { data: existingWebsite } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("url_base", urlBase)
+      .eq("user_id", userId)
+      .neq("id", websiteId)
+      .single();
+
+    if (existingWebsite) {
+      return {
+        status: "error",
+        message: "This website already exists in your list.",
+      };
+    }
+
+    const { data, error } = await supabase
+      .from("sites")
+      .update({ url_base: urlBase })
+      .eq("id", websiteId)
+      .eq("user_id", userId) // Ensure user can only edit their own websites
+      .select();
+
+    if (error) {
+      return { status: "error", message: error.message };
+    }
+
+    return { status: "success", message: "Website updated successfully", data };
+  } catch (error) {
+    console.error("Error in editWebsite:", error);
+    return { status: "error", message: "Failed to update website" };
+  }
+}
+
+export async function deleteWebsite(websiteId: string, userId: string): Promise<{
+  status: "success" | "error";
+  message: string;
+}> {
+  try {
+    const supabase = await createClerkSupabaseServerClient();
+
+    // First check if the website exists and belongs to the user
+    const { data: website, error: selectError } = await supabase
+      .from("sites")
+      .select("id, url_base")
+      .eq("id", websiteId)
+      .eq("user_id", userId)
+      .single();
+
+    if (selectError || !website) {
+      console.error("Error checking website ownership:", selectError);
+      return {
+        status: "error",
+        message: "Website not found or access denied.",
+      };
+    }
+
+    console.log("Website found, proceeding with delete:", website);
+
+    // Try using the database function first (cleaner approach)
+    const { data: functionResult, error: functionError } = await supabase
+      .rpc('delete_user_site', {
+        site_id_param: websiteId,
+        user_id_param: userId
+      });
+
+    if (functionError) {
+      console.error("Database function error:", functionError);
+      console.log("Falling back to manual cascade delete...");
+
+      // Fallback to manual cascade delete
+      // First, get all pages for this website
+      const { data: pages, error: pagesError } = await supabase
+        .from("pages")
+        .select("id")
+        .eq("website_id", websiteId);
+
+      if (pagesError) {
+        console.error("Error fetching pages:", pagesError);
+        return {
+          status: "error",
+          message: "Error preparing to delete website.",
+        };
+      }
+
+      // Delete screenshots for all pages
+      if (pages && pages.length > 0) {
+        const pageIds = pages.map(p => p.id);
+        const { error: screenshotsDeleteError } = await supabase
+          .from("screenshots")
+          .delete()
+          .in("page_id", pageIds);
+
+        if (screenshotsDeleteError) {
+          console.error("Error deleting screenshots:", screenshotsDeleteError);
+          return {
+            status: "error",
+            message: "Error deleting website screenshots.",
+          };
+        }
+
+        // Delete pages
+        const { error: pagesDeleteError } = await supabase
+          .from("pages")
+          .delete()
+          .eq("website_id", websiteId);
+
+        if (pagesDeleteError) {
+          console.error("Error deleting pages:", pagesDeleteError);
+          return {
+            status: "error",
+            message: "Error deleting website pages.",
+          };
+        }
+      }
+
+      // Finally, delete the website
+      const { error } = await supabase
+        .from("sites")
+        .delete()
+        .eq("id", websiteId)
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Delete error:", error);
+        return {
+          status: "error",
+          message: error.message,
+        };
+      }
+    } else if (!functionResult) {
+      return {
+        status: "error",
+        message: "Website not found or access denied.",
+      };
+    }
+
+    console.log("Website deleted successfully");
+    return {
+      status: "success",
+      message: "Website deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error in deleteWebsite:", error);
+    return { status: "error", message: "Failed to delete website" };
+  }
+}
+
+export async function refreshWebsite(websiteId: string, userId: string): Promise<{
+  status: "success" | "error";
+  message: string;
+}> {
+  try {
+    const supabase = await createClerkSupabaseServerClient();
+
+    console.log("Attempting to refresh website:", { websiteId, userId });
+
+    // Verify that the website belongs to the authenticated user
+    const { data: website, error: websiteError } = await supabase
+      .from("sites")
+      .select("id, url_base")
+      .eq("id", websiteId)
+      .eq("user_id", userId)
+      .single();
+
+    if (websiteError || !website) {
+      console.error("Website verification failed:", websiteError);
+      return {
+        status: "error",
+        message: "Website not found or access denied.",
+      };
+    }
+
+    // Get all pages for this website
+    const { data: pages, error: pagesError } = await supabase
+      .from("pages")
+      .select("id")
+      .eq("website_id", websiteId);
+
+    if (pagesError) {
+      console.error("Error fetching pages:", pagesError);
+      return {
+        status: "error",
+        message: "Error preparing to refresh website.",
+      };
+    }
+
+    if (!pages || pages.length === 0) {
+      return {
+        status: "success",
+        message: "No pages found for this website. Visit some pages to generate OG images.",
+      };
+    }
+
+    // Delete screenshots for all pages
+    const pageIds = pages.map(p => p.id);
+    const { error: screenshotsDeleteError } = await supabase
+      .from("screenshots")
+      .delete()
+      .in("page_id", pageIds);
+
+    if (screenshotsDeleteError) {
+      console.error("Error deleting screenshots:", screenshotsDeleteError);
+      return {
+        status: "error",
+        message: "Error deleting existing screenshots.",
+      };
+    }
+
+    // Delete pages
+    const { error: pagesDeleteError } = await supabase
+      .from("pages")
+      .delete()
+      .eq("website_id", websiteId);
+
+    if (pagesDeleteError) {
+      console.error("Error deleting pages:", pagesDeleteError);
+      return {
+        status: "error",
+        message: "Error deleting existing pages.",
+      };
+    }
+
+    console.log(`Successfully refreshed website ${website.url_base} - deleted ${pages.length} pages and their screenshots`);
+
+    return {
+      status: "success",
+      message: `Successfully refreshed ${website.url_base}. New OG images will be generated when you visit the pages again.`,
+    };
+  } catch (error) {
+    console.error("Error in refreshWebsite:", error);
+    return { status: "error", message: "Failed to refresh website" };
+  }
+}
+
+export async function checkWebsiteExists(urlBase: string): Promise<boolean> {
+  try {
+    const supabase = await createClerkSupabaseServerClient();
+
+    const { data: existingWebsites, error } = await supabase
+      .from("sites")
+      .select("id")
+      .eq("url_base", urlBase)
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking website exists:", error);
+      return false;
+    }
+
+    return existingWebsites && existingWebsites.length > 0;
+  } catch (error) {
+    console.error("Error in checkWebsiteExists:", error);
+    return false;
   }
 }
 
