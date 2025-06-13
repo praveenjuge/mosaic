@@ -1,15 +1,3 @@
-// Current table structure types (legacy)
-export interface Website {
-  id: string;
-  website_url: string;
-  cleaned_website_url: string;
-  title?: string | null;
-  favicon_url?: string | null;
-  total_count?: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
 // New table structure types
 export interface Site {
   id: string;
