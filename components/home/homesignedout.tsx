@@ -1,3 +1,4 @@
+import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
 import { website_description, website_subtitle } from "@/lib/constants";
@@ -124,21 +125,38 @@ function CTASection() {
   );
 }
 
-export default function HomeSignedOut() {
+// FAQ section component
+function FAQSection() {
   return (
-    <>
+    <section className="mx-auto max-w-4xl pt-10">
+      <div className="mb-12 text-center">
+        <h2 className="mb-3 text-3xl font-semibold tracking-tighter">
+          Frequently Asked Questions
+        </h2>
+        <p className="text-muted-foreground text-lg">
+          Common questions about OG Images and our service.
+        </p>
+      </div>
       <Suspense
         fallback={
           <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
         }
       >
-        <HeroSection />
+        <FAQ showCard={false} />
       </Suspense>
+    </section>
+  );
+}
 
+export default function HomeSignedOut() {
+  return (
+    <>
+      <HeroSection />
       <DemoSection />
       <FeaturesSection />
       <HowItWorksSection />
       <PricingSection />
+      <FAQSection />
       <CTASection />
     </>
   );

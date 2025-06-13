@@ -49,7 +49,7 @@ function SignedInNav() {
         className={buttonVariants({ variant: "ghost", size: "sm" })}
       >
         <Config className="size-4 stroke-2" />
-        <span className="hidden sm:inline">Settings</span>
+        Settings
       </Link>
       <Suspense fallback={<Skeleton className="size-8 rounded-full" />}>
         <UserProfile />
