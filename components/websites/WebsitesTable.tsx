@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -15,13 +16,176 @@ import {
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
 import { getAllWebsitesWithStats } from "@/lib/database-helpers";
+import { SiteWithStats } from "@/lib/types";
 import { SignedIn } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
+import { Suspense } from "react";
 import { WebsiteActions } from "./WebsiteActions";
 import { WebsiteInfoModal } from "./WebsiteInfoModal";
 
-export default async function WebsitesTable() {
+// Loading skeleton for table
+function WebsitesTableSkeleton() {
+  return (
+    <Card className="p-0">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>
+              <Skeleton className="h-4 w-16" />
+            </TableHead>
+            <TableHead>
+              <Skeleton className="h-4 w-12" />
+            </TableHead>
+            <TableHead>
+              <Skeleton className="h-4 w-20" />
+            </TableHead>
+            <TableHead>
+              <Skeleton className="h-4 w-16" />
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell>
+                <div className="flex items-center gap-2">
+                  <Skeleton className="size-3.5 rounded-sm" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <div className="flex items-center gap-1">
+                  <Skeleton className="h-4 w-48" />
+                  <Skeleton className="size-4" />
+                </div>
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-4 w-8" />
+              </TableCell>
+              <TableCell>
+                <Skeleton className="h-8 w-16" />
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
+// Error state component
+function WebsitesError() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Error Loading Websites</CardTitle>
+        <CardDescription>
+          Unable to fetch websites from the database.
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Empty state component
+function WebsitesEmpty() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>No websites added yet</CardTitle>
+        <CardDescription>
+          Add your first website to start generating OG images.
+        </CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Website table row component
+function WebsiteRow({ website }: { website: SiteWithStats }) {
+  return (
+    <TableRow className="items-center">
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Suspense fallback={<Skeleton className="size-3.5 rounded-sm" />}>
+            <Image
+              src={`https://www.google.com/s2/favicons?domain=https://${website.url_base}&sz=64`}
+              alt="Favicon"
+              className="size-3.5"
+              width={14}
+              height={14}
+            />
+          </Suspense>
+          <a
+            href={`https://${website.url_base}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary max-w-xs truncate font-medium"
+          >
+            {website.url_base}
+          </a>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-1">
+          <span className="max-w-lg items-center truncate font-medium">
+            {`${website_url}use?url=https://${website.url_base}`}
+          </span>
+          <Suspense fallback={<Skeleton className="size-4" />}>
+            <CopyButton
+              text={`${website_url}use?url=https://${website.url_base}`}
+            />
+          </Suspense>
+        </div>
+      </TableCell>
+      <TableCell>
+        {website.screenshot_count === 0 ? (
+          <Suspense fallback={<Skeleton className="h-6 w-16" />}>
+            <WebsiteInfoModal websiteUrl={website.url_base} />
+          </Suspense>
+        ) : (
+          website.screenshot_count
+        )}
+      </TableCell>
+      <TableCell>
+        <Suspense fallback={<Skeleton className="h-8 w-16" />}>
+          <WebsiteActions
+            websiteId={website.id}
+            currentUrl={website.url_base}
+            hasImages={website.screenshot_count > 0}
+          />
+        </Suspense>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// Websites table component
+function WebsitesTableContent({ data }: { data: SiteWithStats[] }) {
+  return (
+    <Card className="p-0">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Website</TableHead>
+            <TableHead>URL</TableHead>
+            <TableHead>OG Images</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((website) => (
+            <WebsiteRow key={website.id} website={website} />
+          ))}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+}
+
+// Main websites content component
+async function WebsitesContent() {
   const { userId } = await auth();
 
   if (!userId) {
@@ -31,79 +195,22 @@ export default async function WebsitesTable() {
   const data = await getAllWebsitesWithStats();
 
   if (!data) {
-    return <p>Error loading websites. Please try again.</p>;
+    return <WebsitesError />;
   }
 
+  if (data.length === 0) {
+    return <WebsitesEmpty />;
+  }
+
+  return <WebsitesTableContent data={data} />;
+}
+
+export default function WebsitesTable() {
   return (
     <SignedIn>
-      <Card className="p-0">
-        {data.length > 0 ? (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Website</TableHead>
-                <TableHead>URL</TableHead>
-                <TableHead>OG Images</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.map((website) => (
-                <TableRow key={website.id} className="items-center">
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      <Image
-                        src={`https://www.google.com/s2/favicons?domain=https://${website.url_base}&sz=64`}
-                        alt="Favicon"
-                        className="size-3.5"
-                        width={14}
-                        height={14}
-                      />
-                      <a
-                        href={`https://${website.url_base}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary max-w-xs truncate font-medium"
-                      >
-                        {website.url_base}
-                      </a>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <span className="max-w-lg items-center truncate font-medium">
-                        {`${website_url}use?url=https://${website.url_base}`}
-                      </span>
-                      <CopyButton
-                        text={`${website_url}use?url=https://${website.url_base}`}
-                      />
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {website.screenshot_count === 0 ? (
-                      <WebsiteInfoModal websiteUrl={website.url_base} />
-                    ) : (
-                      website.screenshot_count
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <WebsiteActions
-                      websiteId={website.id}
-                      currentUrl={website.url_base}
-                      hasImages={website.screenshot_count > 0}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        ) : (
-          <CardHeader className="py-6">
-            <CardTitle>No websites yet</CardTitle>
-            <CardDescription>Add a new website to get started.</CardDescription>
-          </CardHeader>
-        )}
-      </Card>
+      <Suspense fallback={<WebsitesTableSkeleton />}>
+        <WebsitesContent />
+      </Suspense>
     </SignedIn>
   );
 }

@@ -5,9 +5,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getMarkDownData } from "@/lib/getMarkdown";
+import { MarkdownContent } from "@/lib/types";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
+import { Suspense } from "react";
+
+export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Changelog",
@@ -19,28 +24,84 @@ export const metadata: Metadata = {
 
 const allPosts = getMarkDownData("content/changelog/");
 
-export default function Page() {
+// Changelog header component
+function ChangelogHeader() {
   return (
-    <div className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
-      <CardHeader className="p-0">
-        <CardTitle>{metadata.title as string}</CardTitle>
-        <CardDescription>{metadata.description}</CardDescription>
-      </CardHeader>
+    <CardHeader className="p-0">
+      <CardTitle>{metadata.title as string}</CardTitle>
+      <CardDescription>{metadata.description}</CardDescription>
+    </CardHeader>
+  );
+}
 
+// Changelog entry component
+function ChangelogEntry({ item }: { item: MarkdownContent }) {
+  return (
+    <Card key={item.slug} className="gap-0 pb-0">
+      <CardHeader className="pb-0">
+        <CardTitle>{item.title}</CardTitle>
+      </CardHeader>
+      <CardContent className="prose prose-sm prose-zinc dark:prose-invert max-w-none">
+        <div
+          dangerouslySetInnerHTML={{
+            __html: item.content,
+          }}
+        ></div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Changelog entries list component
+function ChangelogEntries() {
+  return (
+    <>
       {allPosts.map((item) => (
-        <Card key={item.slug} className="gap-0 pb-0">
+        <ChangelogEntry key={item.slug} item={item} />
+      ))}
+    </>
+  );
+}
+
+// Loading skeletons
+function ChangelogHeaderSkeleton() {
+  return (
+    <div className="p-0">
+      <Skeleton className="mb-2 h-8 w-32" />
+      <Skeleton className="h-4 w-64" />
+    </div>
+  );
+}
+
+function ChangelogEntriesSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Card key={i} className="gap-0 pb-0">
           <CardHeader className="pb-0">
-            <CardTitle>{item.title}</CardTitle>
+            <Skeleton className="h-6 w-3/4" />
           </CardHeader>
-          <CardContent className="prose prose-sm prose-zinc dark:prose-invert max-w-none">
-            <div
-              dangerouslySetInnerHTML={{
-                __html: item.content,
-              }}
-            ></div>
+          <CardContent className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+            <Skeleton className="h-4 w-1/2" />
           </CardContent>
         </Card>
       ))}
+    </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <div className="mx-auto grid w-full max-w-2xl gap-4 py-4 md:py-10">
+      <Suspense fallback={<ChangelogHeaderSkeleton />}>
+        <ChangelogHeader />
+      </Suspense>
+
+      <Suspense fallback={<ChangelogEntriesSkeleton />}>
+        <ChangelogEntries />
+      </Suspense>
     </div>
   );
 }

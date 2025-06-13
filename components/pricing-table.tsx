@@ -45,45 +45,104 @@ const plans = [
   },
 ];
 
-export default function PricingTable() {
+// Plan card loading skeleton
+function PlanCardSkeleton() {
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      {plans.map((plan, index) => (
-        <Card key={index} className="relative">
-          {plan.badge && (
-            <Badge className="absolute top-3 right-3">{plan.badge}</Badge>
-          )}
-          <CardHeader>
-            <CardTitle className="text-lg">{plan.title}</CardTitle>
-            <CardDescription>{plan.description}</CardDescription>
-            <div className="mt-4 flex items-center gap-2">
-              <div className="text-4xl font-bold">{plan.price}</div>
-              {plan.price !== "$0" && (
-                <div className="text-muted-foreground text-sm">
-                  {plan.type === "pro-yearly" ? "per year" : "per month"}
-                </div>
-              )}
+    <Card className="flex flex-col">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-6 w-12 rounded-full" />
+        </div>
+        <Skeleton className="h-4 w-24" />
+        <div className="flex items-baseline">
+          <Skeleton className="h-8 w-12" />
+          <Skeleton className="ml-1 h-4 w-8" />
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <div className="space-y-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Skeleton className="size-4 rounded-full" />
+              <Skeleton className="h-4 w-24" />
             </div>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {plan.features.map((feature, featureIndex) => (
-                <li key={featureIndex} className="flex items-center">
-                  <Check className="text-primary mr-2 h-4 w-4" />
-                  <span className="text-sm">{feature}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-          <CardFooter>
-            <Suspense fallback={<Skeleton className="h-10 w-full" />}>
-              <PlanButton
-                type={plan.type as "free" | "pro" | "teams" | "pro-yearly"}
-              />
-            </Suspense>
-          </CardFooter>
-        </Card>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Skeleton className="h-10 w-full" />
+      </CardFooter>
+    </Card>
+  );
+}
+
+// Individual plan card component
+function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
+  return (
+    <Card className="flex flex-col">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>{plan.title}</CardTitle>
+          {plan.type === "pro" && (
+            <Badge variant="secondary" className="text-xs">
+              Popular
+            </Badge>
+          )}
+        </div>
+        <CardDescription>{plan.description}</CardDescription>
+        <div className="flex items-baseline">
+          <span className="text-3xl font-bold">{plan.price}</span>
+          <span className="text-muted-foreground ml-1">/month</span>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1">
+        <ul className="space-y-3">
+          {plan.features.map((feature) => (
+            <li key={feature} className="flex items-center gap-2">
+              <Check className="text-primary size-4 stroke-2" />
+              <span className="text-sm">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </CardContent>
+      <CardFooter>
+        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+          <PlanButton
+            type={plan.type as "free" | "pro" | "teams" | "pro-yearly"}
+          />
+        </Suspense>
+      </CardFooter>
+    </Card>
+  );
+}
+
+// Pricing table content component
+function PricingTableContent() {
+  return (
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      {plans.map((plan) => (
+        <Suspense key={plan.type} fallback={<PlanCardSkeleton />}>
+          <PlanCard plan={plan} />
+        </Suspense>
       ))}
     </div>
+  );
+}
+
+// Main pricing table component
+export default function PricingTable() {
+  return (
+    <Suspense
+      fallback={
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <PlanCardSkeleton key={i} />
+          ))}
+        </div>
+      }
+    >
+      <PricingTableContent />
+    </Suspense>
   );
 }

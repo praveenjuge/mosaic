@@ -42,7 +42,81 @@ function StatsLoadingSkeleton() {
   );
 }
 
-// Stats content component
+// Individual stat card components for better granularity
+function ImagesStatCard({ count }: { count: number }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{count.toLocaleString()}</CardTitle>
+        <CardDescription>OG Images Generated</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+function StorageStatCard({ bytes }: { bytes: number }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{formatBytes(bytes)}</CardTitle>
+        <CardDescription>Storage Used</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+function SubscriptionStatCard() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Free Plan</CardTitle>
+        <CardDescription>Subscription</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Individual loading skeletons for each stat
+function ImageStatSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <Skeleton className="h-4.5 w-16" />
+        </CardTitle>
+        <CardDescription>OG Images Generated</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+function StorageStatSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <Skeleton className="h-4.5 w-20" />
+        </CardTitle>
+        <CardDescription>Storage Used</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+function SubscriptionStatSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <Skeleton className="h-4.5 w-24" />
+        </CardTitle>
+        <CardDescription>Subscription</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
+// Stats content component with granular loading
 async function StatsContent() {
   const { userId } = await auth();
 
@@ -75,28 +149,20 @@ async function StatsContent() {
     const userStats = await getUserStats();
     const totalImages = userStats?.total_images ?? 0;
     const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
-    const formattedStorage = formatBytes(totalStorageBytes);
 
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>{totalImages.toLocaleString()}</CardTitle>
-            <CardDescription>OG Images Generated</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{formattedStorage}</CardTitle>
-            <CardDescription>Storage Used</CardDescription>
-          </CardHeader>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Free Plan</CardTitle>
-            <CardDescription>Subscription</CardDescription>
-          </CardHeader>
-        </Card>
+        <Suspense fallback={<ImageStatSkeleton />}>
+          <ImagesStatCard count={totalImages} />
+        </Suspense>
+
+        <Suspense fallback={<StorageStatSkeleton />}>
+          <StorageStatCard bytes={totalStorageBytes} />
+        </Suspense>
+
+        <Suspense fallback={<SubscriptionStatSkeleton />}>
+          <SubscriptionStatCard />
+        </Suspense>
       </div>
     );
   } catch (error) {
@@ -134,6 +200,3 @@ export default function HomeQuickStats() {
     </Suspense>
   );
 }
-
-// Force dynamic rendering to ensure fresh data
-export const dynamic = "force-dynamic";

@@ -59,3 +59,13 @@ export interface ScreenshotWithDetails {
   page_url: string;
   website_name?: string; // Optional for when used with specific website
 }
+
+// Markdown content types
+export interface MarkdownContent {
+  content: string;
+  title: string;
+  slug: string;
+  publishedAt: Date;
+  description: string;
+  category?: string;
+}

@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 import Link from "next/link";
@@ -50,108 +51,149 @@ const faqs = [
       "New images won't be generated, but your existing ones stay available.",
   },
   {
-    question: "Can I change or cancel a plan later?",
+    question: "How often are OG images refreshed?",
     answer:
-      "Once paid plans are live you'll be able to upgrade, downgrade or cancel at any time.",
+      "Images are generated once per page and cached. You can manually refresh them from your dashboard if needed.",
   },
   {
-    question: "How do I get help if I run into issues?",
+    question: "What image format is used?",
     answer:
-      "Reach out via email or our social channels. Priority support will be part of the paid plans.",
-  },
-  {
-    question: "Do you offer discounts or promo codes?",
-    answer:
-      "Not at the moment, but we may run promotions when paid plans launch.",
-  },
-  {
-    question: "How do you handle privacy and security?",
-    answer:
-      "We take your privacy and security seriously, implementing industry-standard measures to protect your data. Check our Privacy Policy for details.",
+      "All OG images are generated as high-quality PNG files at 1200x630 pixels, the standard size for social media previews.",
   },
 ];
 
-export default function Page() {
-  return (
-    <>
-      <CardHeader className="p-0">
-        <CardTitle>{metadata.title as string}</CardTitle>
-        <CardDescription>{metadata.description}</CardDescription>
-      </CardHeader>
-      <Card>
-        <CardHeader>
-          <CardTitle>Theme</CardTitle>
-          <CardDescription>Choose your preferred theme</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Suspense fallback={<div className="h-[45px] w-full"></div>}>
-            <ModeToggle />
-          </Suspense>
-        </CardContent>
-      </Card>
+// Loading skeletons
+function ThemeToggleSkeleton() {
+  return <Skeleton className="h-10 w-32" />;
+}
 
-      {/* Pricing Plans */}
+function PricingTableSkeleton() {
+  return <Skeleton className="h-64 w-full rounded-lg" />;
+}
+
+function FAQSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 3 }).map((_, i) => (
+        <Skeleton key={i} className="h-16 w-full rounded-lg" />
+      ))}
+    </div>
+  );
+}
+
+// Theme settings component
+function ThemeSettings() {
+  return (
+    <Card>
       <CardHeader>
-        <CardTitle>Choose Your Plan</CardTitle>
+        <CardTitle>Theme</CardTitle>
         <CardDescription>
-          Select the plan that best fits your needs
+          Choose how you want the application to look.
         </CardDescription>
       </CardHeader>
-      <PricingTable />
+      <CardContent>
+        <Suspense fallback={<ThemeToggleSkeleton />}>
+          <ModeToggle />
+        </Suspense>
+      </CardContent>
+    </Card>
+  );
+}
 
-      {/* FAQ Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Frequently Asked Questions</CardTitle>
-          <CardDescription>
-            Find answers to common questions about our service
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full">
-            {faqs.map((faq, index) => (
-              <AccordionItem key={index} value={`item-${index}`}>
-                <AccordionTrigger className="text-left">
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent>{faq.answer}</AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </CardContent>
-      </Card>
+// Plan and billing component
+function PlanAndBilling() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Plan & Billing</CardTitle>
+        <CardDescription>
+          Currently all users are on the free plan while we are in beta.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Suspense fallback={<PricingTableSkeleton />}>
+          <PricingTable />
+        </Suspense>
+      </CardContent>
+    </Card>
+  );
+}
 
-      {/* Additional Resources */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Need Help?</CardTitle>
-          <CardDescription>
-            Get support and learn more about our service
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <h4 className="font-medium">Documentation</h4>
-              <p className="text-muted-foreground mb-2 text-sm">
-                Learn how to use our service effectively
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/help">View Guides</Link>
-              </Button>
-            </div>
-            <div>
-              <h4 className="font-medium">Legal</h4>
-              <p className="text-muted-foreground mb-2 text-sm">
-                Terms of service and privacy policy
-              </p>
-              <Button variant="outline" size="sm" asChild>
-                <Link href="/legal">Legal Pages</Link>
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </>
+// FAQ component
+function FAQ() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Frequently Asked Questions</CardTitle>
+        <CardDescription>
+          Common questions about OG Images and our service.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Accordion type="single" collapsible>
+          {faqs.map((faq, index) => (
+            <AccordionItem key={index} value={`item-${index}`}>
+              <AccordionTrigger>{faq.question}</AccordionTrigger>
+              <AccordionContent>{faq.answer}</AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </CardContent>
+    </Card>
+  );
+}
+
+// Support section component
+function SupportSection() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Need Help?</CardTitle>
+        <CardDescription>
+          Have questions or need support? We&rsquo;re here to help.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <Link href="/help">
+            <Button variant="outline" className="w-full sm:w-auto">
+              View Help Articles
+            </Button>
+          </Link>
+          <Link href="mailto:hello@praveenjuge.com">
+            <Button className="w-full sm:w-auto">Contact Support</Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <div className="space-y-10">
+      <CardHeader>
+        <CardTitle>Settings</CardTitle>
+        <CardDescription>
+          Manage your account settings and preferences.
+        </CardDescription>
+      </CardHeader>
+
+      <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
+        <ThemeSettings />
+      </Suspense>
+
+      <Suspense fallback={<PricingTableSkeleton />}>
+        <PlanAndBilling />
+      </Suspense>
+
+      <Suspense fallback={<FAQSkeleton />}>
+        <FAQ />
+      </Suspense>
+
+      <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
+        <SupportSection />
+      </Suspense>
+    </div>
   );
 }

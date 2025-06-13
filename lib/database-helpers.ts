@@ -16,7 +16,6 @@ import { extractUrlPartsConsistent } from "@/lib/utils";
 // Website operations
 export async function getOrCreateWebsite(
   urlBase: string,
-  siteName: string,
 ): Promise<Site | null> {
   try {
     const supabase = await createClerkSupabaseServerClient();

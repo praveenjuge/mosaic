@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
   experimental: {
     ppr: true,
     reactCompiler: true,
+    nodeMiddleware: true,
     optimizePackageImports: ["@mynaui/icons-react"],
   },
   images: {
