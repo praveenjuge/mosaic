@@ -8,7 +8,6 @@ import {
   UserSubscriptionInfo
 } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
 import { Polar } from "@polar-sh/sdk";
 
 /**
@@ -581,10 +580,8 @@ async function getPolarCustomerState(userId: string): Promise<unknown> {
 }
 
 // User subscription and limits helper functions
-export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
+export async function getUserSubscriptionInfo(userId: string | null): Promise<UserSubscriptionInfo> {
   try {
-    const { userId } = await auth();
-
     if (!userId) {
       return {
         plan: "free",

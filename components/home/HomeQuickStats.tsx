@@ -206,7 +206,7 @@ async function StatsContent() {
   try {
     const [userStats, subscriptionInfo] = await Promise.all([
       getUserStats(),
-      getUserSubscriptionInfo(),
+      getUserSubscriptionInfo(userId),
     ]);
 
     const totalWebsites = userStats?.total_websites ?? 0;

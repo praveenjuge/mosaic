@@ -7,14 +7,16 @@ import {
   SignedOut,
   SignInButton,
 } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 import { Plus } from "@mynaui/icons-react";
 import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
 export async function AddWebsite() {
+  const { userId } = await auth();
   const [userStats, subscriptionInfo] = await Promise.all([
     getUserStats(),
-    getUserSubscriptionInfo(),
+    getUserSubscriptionInfo(userId),
   ]);
   const currentWebsiteCount = userStats?.total_websites || 0;
   const preventSubmission =

@@ -17,8 +17,8 @@ const proProductId = process.env.POLAR_PRO_PRODUCT_ID!;
 const proYearlyProductId = process.env.POLAR_PRO_YEARLY_PRODUCT_ID!;
 
 export async function PlanButton({ type }: PlanButtonProps) {
-  const subscriptionInfo = await getUserSubscriptionInfo();
   const { userId } = await auth();
+  const subscriptionInfo = await getUserSubscriptionInfo(userId);
   const { is_active: isActive, plan: currentPlan } = subscriptionInfo;
 
   // Helper to create checkout URL
