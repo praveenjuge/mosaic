@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Check } from "@mynaui/icons-react";
 import { Suspense } from "react";
+import { Button } from "./ui/button";
 
 const plans = [
   {
@@ -91,7 +92,7 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
           )}
         </div>
         <CardDescription>{plan.description}</CardDescription>
-        <div className="flex items-baseline">
+        <div className="mt-4 flex items-baseline">
           <span className="text-3xl font-bold">{plan.price}</span>
           <span className="text-muted-foreground ml-1">/month</span>
         </div>
@@ -107,7 +108,13 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
         </ul>
       </CardContent>
       <CardFooter>
-        <Suspense fallback={<Skeleton className="h-10 w-full" />}>
+        <Suspense
+          fallback={
+            <Button variant="outline" className="w-full" disabled>
+              Loading...
+            </Button>
+          }
+        >
           <PlanButton type={plan.type as "free" | "pro" | "pro-yearly"} />
         </Suspense>
       </CardFooter>

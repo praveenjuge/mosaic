@@ -1,5 +1,5 @@
 import { Button, buttonVariants } from "@/components/ui/button";
-import { getUserUsageInfo } from "@/lib/database-helpers";
+import { getUserStats, getUserSubscriptionInfo } from "@/lib/database-helpers";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -12,8 +12,13 @@ import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
 export async function AddWebsite() {
-  const usageInfo = await getUserUsageInfo();
-  const preventSubmission = usageInfo.websites_used >= usageInfo.websites_limit;
+  const [userStats, subscriptionInfo] = await Promise.all([
+    getUserStats(),
+    getUserSubscriptionInfo(),
+  ]);
+  const currentWebsiteCount = userStats?.total_websites || 0;
+  const preventSubmission =
+    currentWebsiteCount >= subscriptionInfo.plan_properties.websites_limit;
 
   return (
     <>

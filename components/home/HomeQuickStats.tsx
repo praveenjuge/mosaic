@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserStats } from "@/lib/database-helpers";
+import { getUserStats, getUserSubscriptionInfo } from "@/lib/database-helpers";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { Suspense } from "react";
@@ -13,7 +13,15 @@ import { Suspense } from "react";
 // Loading skeleton component
 function StatsLoadingSkeleton() {
   return (
-    <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Skeleton className="h-4.5 w-16" />
+          </CardTitle>
+          <CardDescription>Websites</CardDescription>
+        </CardHeader>
+      </Card>
       <Card>
         <CardHeader>
           <CardTitle>
@@ -43,6 +51,17 @@ function StatsLoadingSkeleton() {
 }
 
 // Individual stat card components for better granularity
+function WebsitesStatCard({ count }: { count: number }) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{count.toLocaleString()}</CardTitle>
+        <CardDescription>Websites</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
 function ImagesStatCard({ count }: { count: number }) {
   return (
     <Card>
@@ -65,11 +84,31 @@ function StorageStatCard({ bytes }: { bytes: number }) {
   );
 }
 
-function SubscriptionStatCard() {
+function SubscriptionStatCard({
+  plan,
+  isActive,
+}: {
+  plan: string;
+  isActive: boolean;
+}) {
+  const getPlanDisplayName = (plan: string) => {
+    switch (plan) {
+      case "pro":
+        return "Pro Plan";
+      case "pro-yearly":
+        return "Pro Yearly";
+      case "free":
+      default:
+        return "Free Plan";
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Free Plan</CardTitle>
+        <CardTitle className={isActive ? "text-green-600" : ""}>
+          {getPlanDisplayName(plan)}
+        </CardTitle>
         <CardDescription>Subscription</CardDescription>
       </CardHeader>
     </Card>
@@ -77,6 +116,19 @@ function SubscriptionStatCard() {
 }
 
 // Individual loading skeletons for each stat
+function WebsiteStatSkeleton() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>
+          <Skeleton className="h-4.5 w-16" />
+        </CardTitle>
+        <CardDescription>Websites</CardDescription>
+      </CardHeader>
+    </Card>
+  );
+}
+
 function ImageStatSkeleton() {
   return (
     <Card>
@@ -122,7 +174,13 @@ async function StatsContent() {
 
   if (!userId) {
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>0</CardTitle>
+            <CardDescription>Websites</CardDescription>
+          </CardHeader>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>0</CardTitle>
@@ -146,12 +204,21 @@ async function StatsContent() {
   }
 
   try {
-    const userStats = await getUserStats();
+    const [userStats, subscriptionInfo] = await Promise.all([
+      getUserStats(),
+      getUserSubscriptionInfo(),
+    ]);
+
+    const totalWebsites = userStats?.total_websites ?? 0;
     const totalImages = userStats?.total_images ?? 0;
     const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
 
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Suspense fallback={<WebsiteStatSkeleton />}>
+          <WebsitesStatCard count={totalWebsites} />
+        </Suspense>
+
         <Suspense fallback={<ImageStatSkeleton />}>
           <ImagesStatCard count={totalImages} />
         </Suspense>
@@ -161,7 +228,10 @@ async function StatsContent() {
         </Suspense>
 
         <Suspense fallback={<SubscriptionStatSkeleton />}>
-          <SubscriptionStatCard />
+          <SubscriptionStatCard
+            plan={subscriptionInfo.plan}
+            isActive={subscriptionInfo.is_active}
+          />
         </Suspense>
       </div>
     );
@@ -169,7 +239,13 @@ async function StatsContent() {
     console.error("Error loading user stats in HomeQuickStats:", error);
 
     return (
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>0</CardTitle>
+            <CardDescription>Websites</CardDescription>
+          </CardHeader>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>0</CardTitle>

@@ -5,8 +5,11 @@ import {
   ScreenshotWithDetails,
   Site,
   SiteWithStats,
+  UserSubscriptionInfo,
 } from "@/lib/types";
 import { extractUrlPartsConsistent } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
+import { Polar } from "@polar-sh/sdk";
 
 /**
  * Helper functions for working with the new database structure
@@ -566,70 +569,118 @@ export async function getUserStats(): Promise<{
   }
 }
 
-// User subscription and limits helper functions - simplified for free plan only
-export async function getUserSubscriptionInfo(): Promise<{
-  plan: string;
-  plan_properties: {
-    websites_limit: number;
-    images_limit: number;
-    storage_limit: string;
-  };
-}> {
-  // For now, all users are on free plan
-  return {
-    plan: "free",
-    plan_properties: {
-      websites_limit: 1,
-      images_limit: 500,
-      storage_limit: "50 MB",
-    },
-  };
+// Polar API helper function
+async function getPolarCustomerState(userId: string): Promise<any> {
+  try {
+    const polarAccessToken = process.env.POLAR_ACCESS_TOKEN;
+
+    if (!polarAccessToken) {
+      console.error("POLAR_ACCESS_TOKEN not configured");
+      return null;
+    }
+
+    const polar = new Polar({
+      accessToken: polarAccessToken,
+      server: process.env.NODE_ENV === 'development' ? "sandbox" : "production",
+    });
+
+    const response = await polar.customers.getStateExternal({
+      externalId: userId,
+    });
+
+    return response || null;
+  } catch (error: any) {
+    // Handle 404 as customer not found (normal case)
+    if (error?.statusCode === 404 || error?.status === 404) {
+      return null;
+    }
+
+    console.error("Error fetching Polar customer state:", error);
+    return null;
+  }
 }
 
-// Get current usage vs limits for a user
-export async function getUserUsageInfo(): Promise<{
-  images_used: number;
-  images_limit: number;
-  websites_used: number;
-  websites_limit: number;
-  storage_used_bytes: number;
-  storage_limit: string;
-}> {
+// User subscription and limits helper functions
+export async function getUserSubscriptionInfo(): Promise<UserSubscriptionInfo> {
   try {
-    const [userStats, subscriptionInfo] = await Promise.all([
-      getUserStats(),
-      getUserSubscriptionInfo(),
-    ]);
+    const { userId } = await auth();
 
-    if (!userStats) {
+    if (!userId) {
       return {
-        images_used: 0,
-        images_limit: subscriptionInfo.plan_properties.images_limit,
-        websites_used: 0,
-        websites_limit: subscriptionInfo.plan_properties.websites_limit,
-        storage_used_bytes: 0,
-        storage_limit: subscriptionInfo.plan_properties.storage_limit,
+        plan: "free",
+        plan_properties: {
+          websites_limit: 1,
+          images_limit: 500,
+        },
+        is_active: false,
+      };
+    }
+
+    const customerState = await getPolarCustomerState(userId);
+
+    if (!customerState || !customerState.activeSubscriptions?.length) {
+      return {
+        plan: "free",
+        plan_properties: {
+          websites_limit: 1,
+          images_limit: 500,
+        },
+        is_active: false,
+      };
+    }
+
+    // Find active subscription
+    const activeSubscription = customerState.activeSubscriptions?.find(
+      (sub: any) => sub.status === "active" && !sub.cancelAtPeriodEnd
+    );
+
+    if (!activeSubscription) {
+      return {
+        plan: "free",
+        plan_properties: {
+          websites_limit: 1,
+          images_limit: 500,
+        },
+        is_active: false,
+      };
+    }
+
+    // Determine plan type based on product ID and interval
+    const proProductId = process.env.POLAR_PRO_PRODUCT_ID;
+    const proYearlyProductId = process.env.POLAR_PRO_YEARLY_PRODUCT_ID;
+
+    let planType = "pro";
+    let planProperties;
+
+    if (activeSubscription.productId === proYearlyProductId) {
+      planType = "pro-yearly";
+      planProperties = {
+        websites_limit: 999999, // Unlimited for pro yearly
+        images_limit: 999999,   // Unlimited for pro yearly
+      };
+    } else {
+      planProperties = {
+        websites_limit: 999999, // Unlimited for pro monthly
+        images_limit: 5000,     // 5000 for pro monthly
       };
     }
 
     return {
-      images_used: userStats.total_images,
-      images_limit: subscriptionInfo.plan_properties.images_limit,
-      websites_used: userStats.total_websites,
-      websites_limit: subscriptionInfo.plan_properties.websites_limit,
-      storage_used_bytes: userStats.total_storage_bytes,
-      storage_limit: subscriptionInfo.plan_properties.storage_limit,
+      plan: planType,
+      plan_properties: planProperties,
+      is_active: true,
+      subscription_details: activeSubscription,
     };
   } catch (error) {
-    console.error("Error in getUserUsageInfo:", error);
+    console.error("Error in getUserSubscriptionInfo:", error);
     // Return safe defaults
     return {
-      images_used: 0,
-      images_limit: 500,
-      websites_used: 0,
-      websites_limit: 1,
-      storage_used_bytes: 0,
-      storage_limit: "50 MB",
+      plan: "free",
+      plan_properties: {
+        websites_limit: 1,
+        images_limit: 500,
+      },
+      is_active: false,
     };
   }
 }
