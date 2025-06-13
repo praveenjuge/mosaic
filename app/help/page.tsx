@@ -6,16 +6,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { BrandX, Envelope } from "@mynaui/icons-react";
 import { Metadata } from "next";
 import Link from "next/link";
-import { Suspense } from "react";
 import Guides from "./guides";
-
-export const experimental_ppr = true;
 
 export const metadata: Metadata = {
   title: "Help & Support",
@@ -59,16 +55,16 @@ function HelpCategories() {
   return (
     <>
       {Object.entries(groupedPosts).map(([category, posts]) => (
-        <Card key={category}>
+        <Card key={category} className="gap-2">
           <CardHeader>
-            <CardTitle className="text-lg">{category}</CardTitle>
+            <CardTitle>{category}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent>
             {posts.map((post) => (
               <Link
                 key={post.slug}
                 href={`/help/${post.slug}`}
-                className="hover:bg-muted/50 block rounded-lg p-3 transition-colors"
+                className="hover:bg-muted/50 block rounded-lg p-2 transition-colors"
               >
                 <p className="font-medium">{post.title}</p>
               </Link>
@@ -77,23 +73,6 @@ function HelpCategories() {
         </Card>
       ))}
     </>
-  );
-}
-
-// Guides section component
-function GuidesSection() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">User Guides</CardTitle>
-        <CardDescription>
-          Step-by-step guides to help you get the most out of our platform.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Guides />
-      </CardContent>
-    </Card>
   );
 }
 
@@ -132,67 +111,13 @@ function ContactSection() {
   );
 }
 
-// Loading skeletons
-function HelpHeaderSkeleton() {
-  return (
-    <div className="p-0">
-      <Skeleton className="mb-2 h-8 w-32" />
-      <Skeleton className="h-4 w-64" />
-    </div>
-  );
-}
-
-function HelpCategoriesSkeleton() {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Card key={i}>
-          <CardHeader>
-            <Skeleton className="h-6 w-32" />
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {Array.from({ length: 3 }).map((_, j) => (
-              <Skeleton key={j} className="h-12 w-full rounded-lg" />
-            ))}
-          </CardContent>
-        </Card>
-      ))}
-    </div>
-  );
-}
-
-function CardSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <Skeleton className="mb-2 h-6 w-32" />
-        <Skeleton className="h-4 w-48" />
-      </CardHeader>
-      <CardContent>
-        <Skeleton className="h-24 w-full" />
-      </CardContent>
-    </Card>
-  );
-}
-
 export default function Page() {
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">
-      <Suspense fallback={<HelpHeaderSkeleton />}>
-        <HelpHeader />
-      </Suspense>
-
-      <Suspense fallback={<HelpCategoriesSkeleton />}>
-        <HelpCategories />
-      </Suspense>
-
-      <Suspense fallback={<CardSkeleton />}>
-        <GuidesSection />
-      </Suspense>
-
-      <Suspense fallback={<CardSkeleton />}>
-        <ContactSection />
-      </Suspense>
+      <HelpHeader />
+      <Guides />
+      <HelpCategories />
+      <ContactSection />
     </div>
   );
 }

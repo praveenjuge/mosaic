@@ -44,6 +44,7 @@ const highlighter = await createHighlighterCore({
     import("shiki/langs/markdown.mjs"),
     import("shiki/langs/svelte.mjs"),
     import("shiki/langs/php.mjs"),
+    import("shiki/langs/jsx.mjs"),
   ],
   engine: createOnigurumaEngine(() => import("shiki/wasm")),
 });

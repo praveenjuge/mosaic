@@ -9,8 +9,11 @@ import {
 } from "@clerk/nextjs";
 
 export interface PlanButtonProps {
-  type: "free" | "pro" | "teams" | "pro-yearly";
+  type: "free" | "pro" | "pro-yearly";
 }
+
+// const proProductId = "9fc3933e-2d85-43c5-8fbc-9e2ab40c96e8";
+// const proYearlyProductId = "7832aa83-4d3d-4ce3-b5c9-801e453ff420";
 
 export async function PlanButton({ type }: PlanButtonProps) {
   const subscriptionInfo = await getUserSubscriptionInfo();
@@ -44,8 +47,6 @@ export async function PlanButton({ type }: PlanButtonProps) {
         return isActive
           ? commonButton("You are on Pro Plan 🎉", true)
           : commonButton("Coming Soon", true);
-      case "teams":
-        return commonButton("Coming Soon", true);
       case "pro-yearly":
         return commonButton("Coming Soon", true);
       default:

@@ -108,9 +108,7 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
       </CardContent>
       <CardFooter>
         <Suspense fallback={<Skeleton className="h-10 w-full" />}>
-          <PlanButton
-            type={plan.type as "free" | "pro" | "teams" | "pro-yearly"}
-          />
+          <PlanButton type={plan.type as "free" | "pro" | "pro-yearly"} />
         </Suspense>
       </CardFooter>
     </Card>
