@@ -12,26 +12,26 @@ export default function CTA() {
           alt="CTA"
           width={1000}
           height={1000}
-          className="pointer-events-none absolute top-0 left-0 size-full object-cover object-center select-none"
+          className="pointer-events-none absolute top-0 left-0 size-full object-cover object-bottom select-none"
         />
         <div className="relative mx-auto flex max-w-xs flex-col items-center justify-center gap-6">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+            <h2 className="text-xl font-semibold tracking-tight md:text-2xl">
               Showcase your beautiful website in your OG images
             </h2>
-            <p className="text-base text-balance text-white">
+            <p className="text-base font-medium text-balance">
               Generate click-worthy OG images in seconds, fully automated.
             </p>
           </div>
           <ClerkLoading>
-            <Button disabled>
+            <Button size="lg" disabled>
               Start for Free
               <ArrowLongRight className="size-4" stroke={2} />
             </Button>
           </ClerkLoading>
           <ClerkLoaded>
             <SignUpButton mode="modal" oauthFlow="popup">
-              <Button>
+              <Button size="lg">
                 Start for Free
                 <ArrowLongRight className="size-4" stroke={2} />
               </Button>
