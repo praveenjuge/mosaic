@@ -22,7 +22,6 @@ import {
 import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
-import Image from "next/image";
 import Link from "next/link";
 import React, { Suspense } from "react";
 import { LocalTime } from "./local-time";
@@ -129,7 +128,8 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
                   rel="noopener noreferrer"
                   href={item.screenshot_url}
                 >
-                  <Image
+                  {/* eslint-disable @next/next/no-img-element */}
+                  <img
                     src={item.screenshot_url}
                     alt={item.page_url}
                     className="h-6 w-12 rounded border-[0.5px] bg-cover bg-center object-cover"

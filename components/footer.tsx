@@ -1,4 +1,3 @@
-import { ModeToggle } from "@/app/settings/theme-toggler";
 import { website_name } from "@/lib/constants";
 import Link from "next/link";
 import Logo from "./logo";
@@ -33,7 +32,6 @@ export default function Footer() {
               Transform your website&apos;s Open Graph social images by
               automatically using your hero section as an OG Image.
             </p>
-            <ModeToggle />
             <div className="flex space-x-6">
               {/* Add social links if needed */}
             </div>
