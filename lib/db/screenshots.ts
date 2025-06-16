@@ -46,7 +46,8 @@ async function _getLatestScreenshot(
     const supabase = await createClerkSupabaseServerClient();
 
     // Parse URL to get base and path using consistent parsing
-    const { urlBase, path } = extractUrlPartsConsistent(pageUrl);
+    const sanitizedUrl = pageUrl.trim().replace(/\\+$/, "");
+    const { urlBase, path } = extractUrlPartsConsistent(sanitizedUrl);
 
     // Query the new table structure
     const { data, error } = await supabase
