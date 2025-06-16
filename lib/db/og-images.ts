@@ -14,11 +14,11 @@ async function _checkImageInDatabase(pageUrl: string): Promise<string | null> {
   try {
     const supabase = await createServiceRoleClient();
     console.log("[CACHE_CHECK_DB] Supabase client created successfully");
-
+    const sanitizedUrl = pageUrl.trim().replace(/\\+$/, "");
     const { data } = await supabase
       .from("screenshots")
       .select("screenshot_url, pages!inner(full_url)")
-      .eq("pages.full_url", pageUrl)
+      .eq("pages.full_url", sanitizedUrl)
       .order("generated_at", { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -49,8 +49,8 @@ async function _storeImageInDatabase(
   try {
     const supabase = await createServiceRoleClient();
     console.log("[DB_STORE_CLIENT] Supabase client created successfully");
-
-    const { urlBase, path } = extractUrlPartsConsistent(pageUrl);
+    const sanitizedUrl = pageUrl.trim().replace(/\\+$/, "");
+    const { urlBase, path } = extractUrlPartsConsistent(sanitizedUrl);
     console.log(`[DB_STORE_URL_PARSED] URL base: ${urlBase}, path: ${path}`);
 
     // Get random website for this URL base
@@ -95,7 +95,7 @@ async function _storeImageInDatabase(
           website_id: website.id,
           user_id: website.user_id,
           path,
-          full_url: pageUrl,
+          full_url: sanitizedUrl,
         })
         .select("id")
         .single();

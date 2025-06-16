@@ -140,12 +140,14 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
               </TableCell>
               <TableCell>
                 <a
-                  href={item.page_url}
+                  href={item.page_url.replace(/\\+$/, "")}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary max-w-xs truncate font-medium hover:underline"
                 >
-                  {item.page_url.replace(/^https?:\/\//, "")}
+                  {item.page_url
+                    .replace(/^https?:\/\//, "")
+                    .replace(/\\+$/, "")}
                 </a>
               </TableCell>
               <TableCell>

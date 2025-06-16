@@ -92,8 +92,11 @@ export function extractUrlPartsConsistent(fullUrl: string): {
   path: string;
   hostname: string;
 } {
+  // Trim whitespace and remove trailing backslashes which can appear
+  // if URLs are copied incorrectly.
+  const sanitized = fullUrl.trim().replace(/\\+$/, "");
   try {
-    const parsedUrl = new URL(fullUrl);
+    const parsedUrl = new URL(sanitized);
     return {
       urlBase: parsedUrl.hostname, // Just hostname, no protocol
       path: parsedUrl.pathname + parsedUrl.search + parsedUrl.hash,
