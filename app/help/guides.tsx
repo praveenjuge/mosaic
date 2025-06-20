@@ -354,6 +354,10 @@ export function GuideLink({ guide }: { guide: Guide }) {
             ? `https://svgl.app/library/${guide.svgLight}.svg`
             : `https://svgl.app/library/${guide.slug}.svg`
         }
+        width={100}
+        height={100}
+        unoptimized
+        priority
       />
       <Image
         alt={`${guide.title} icon`}
@@ -366,6 +370,10 @@ export function GuideLink({ guide }: { guide: Guide }) {
             ? `https://svgl.app/library/${guide.svgDark}.svg`
             : `https://svgl.app/library/${guide.slug}.svg`
         }
+        width={100}
+        height={100}
+        unoptimized
+        priority
       />
       {guide.title}
       <ChevronRight className="text-muted-foreground size-4 stroke-2" />

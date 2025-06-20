@@ -51,8 +51,8 @@ function BlogNavigation() {
 function BlogHeader({ blog }: { blog: MarkdownContent }) {
   return (
     <CardHeader>
-      <CardTitle className="text-balance">{blog.title}</CardTitle>
-      <CardDescription className="text-balance">
+      <CardTitle className="text-pretty text-4xl">{blog.title}</CardTitle>
+      <CardDescription className="text-pretty text-lg">
         {blog.description}
       </CardDescription>
       <CardDescription>
