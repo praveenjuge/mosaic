@@ -8,7 +8,7 @@ const cspHeader = `
   img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;
   font-src 'self' https://fonts.gstatic.com;
   worker-src 'self' blob:;
-  style-src 'self' 'unsafe-inline';
+  style-src 'self' 'unsafe-inline' https://www.gstatic.com;
   frame-src 'self' https://challenges.cloudflare.com;
   form-action 'self';
   frame-ancestors 'none';
