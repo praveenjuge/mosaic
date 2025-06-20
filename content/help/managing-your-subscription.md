@@ -1,6 +1,8 @@
 ---
 title: "Managing Your Subscription"
 description: "Learn how to upgrade, downgrade, or cancel your Mosaic subscription plan."
+category: "Guides"
+publishedAt: "2025-06-13T11:30:36.000Z"
 ---
 
 # Managing Your Subscription
