@@ -3,7 +3,6 @@ import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
 import { ClerkLoaded, ClerkLoading, SignUpButton } from "@clerk/nextjs";
 import { ArrowLongRight } from "@mynaui/icons-react";
-import Image from "next/image";
 import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
@@ -42,29 +41,20 @@ function AuthButton() {
 // Hero section component
 function HeroSection() {
   return (
-    <section className="mx-auto grid w-full max-w-4xl grid-cols-1 items-start gap-8 pt-6 md:-mb-20 md:grid-cols-2">
-      <div className="flex flex-col items-start gap-6">
-        <div className="space-y-3">
-          <h1 className="text-4xl font-semibold tracking-tighter text-balance">
-            Why design OG images when your website already converts?
-          </h1>
-          <p className="text-muted-foreground text-lg text-balance">
-            Instantly turn your website’s hero sections into stunning OG
-            images—no design skills needed. Boost brand visibility and drive
-            clicks with automated, high-converting social previews.
-          </p>
-        </div>
-        <Suspense fallback={<AuthButtonSkeleton />}>
-          <AuthButton />
-        </Suspense>
+    <section className="mx-auto w-full max-w-2xl flex flex-col items-center gap-4 text-center">
+      <div className="space-y-2">
+        <h1 className="text-4xl md:text-5xl font-semibold tracking-tighter text-balance">
+          Instant beautiful OG images from your website. <span className="text-primary">No design needed.</span>
+        </h1>
+        <p className="text-muted-foreground text-base md:text-lg text-balance">
+          Instantly turn your website’s hero sections into stunning OG
+          images—no design skills needed. Boost brand visibility and drive
+          clicks with automated, high-converting social previews.
+        </p>
       </div>
-      <Image
-        src="/illustrations/home.png"
-        alt="Hero Image"
-        width={1000}
-        height={1000}
-        className="hidden size-full object-cover object-center select-none md:block"
-      />
+      <Suspense fallback={<AuthButtonSkeleton />}>
+        <AuthButton />
+      </Suspense>
     </section>
   );
 }
