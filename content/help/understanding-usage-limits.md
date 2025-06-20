@@ -1,6 +1,8 @@
 ---
 title: "Understanding Usage Limits"
 description: "Learn about the OG image and website limits for each Mosaic plan."
+category: "Guides"
+publishedAt: "2025-06-13T11:30:36.000Z"
 ---
 
 # Understanding Usage Limits
