@@ -5,9 +5,9 @@
 import * as Sentry from "@sentry/nextjs";
 
 // Only initialize Sentry in production environments
-if (process.env.NODE_ENV === "production") {
+if (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_SENTRY_DSN) {
   Sentry.init({
-    dsn: "https://140fb460c04aa6ae65f80ff720512a4c@o4509483678236672.ingest.us.sentry.io/4509483680268288",
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
 
     // Set environment for filtering in Sentry dashboard
     environment: process.env.NODE_ENV || "development",
