@@ -1,6 +1,7 @@
 import { withSentryConfig } from "@sentry/nextjs";
 import type { NextConfig } from "next";
 
+const sentryReportEndpoint = process.env.SENTRY_REPORT_ENDPOINT;
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.mosaicimg.com https://challenges.cloudflare.com https://exotic-lionfish-96.clerk.accounts.dev https://fonts.gstatic.com https://counterscale.praveenjuge.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev;
@@ -13,8 +14,7 @@ const cspHeader = `
   form-action 'self';
   frame-ancestors 'none';
   block-all-mixed-content;
-  report-uri https://o4509483678236672.ingest.us.sentry.io/api/4509483680268288/security/?sentry_key=140fb460c04aa6ae65f80ff720512a4c&sentry_environment=${process.env.NODE_ENV || 'development'};
-  report-to csp-endpoint;
+  ${sentryReportEndpoint ? `report-uri ${sentryReportEndpoint};\n  report-to csp-endpoint;` : ''}
   ${process.env.NODE_ENV === "production" ? "upgrade-insecure-requests;" : ""}
 `;
 
@@ -66,8 +66,6 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
-    const sentryReportEndpoint = `https://o4509483678236672.ingest.us.sentry.io/api/4509483680268288/security/?sentry_key=140fb460c04aa6ae65f80ff720512a4c&sentry_environment=${process.env.NODE_ENV || 'development'}`;
-
     return [
       {
         source: "/(.*)",
@@ -76,19 +74,23 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: cspHeader.replace(/\n/g, "").replace(/\s{2,}/g, " "),
           },
-          {
-            key: "Report-To",
-            value: JSON.stringify({
-              group: "csp-endpoint",
-              max_age: 10886400,
-              endpoints: [{ url: sentryReportEndpoint }],
-              include_subdomains: true,
-            }),
-          },
-          {
-            key: "Reporting-Endpoints",
-            value: `csp-endpoint="${sentryReportEndpoint}"`,
-          },
+          ...(sentryReportEndpoint
+            ? [
+                {
+                  key: "Report-To",
+                  value: JSON.stringify({
+                    group: "csp-endpoint",
+                    max_age: 10886400,
+                    endpoints: [{ url: sentryReportEndpoint }],
+                    include_subdomains: true,
+                  }),
+                },
+                {
+                  key: "Reporting-Endpoints",
+                  value: `csp-endpoint="${sentryReportEndpoint}"`,
+                },
+              ]
+            : []),
           {
             key: "X-Frame-Options",
             value: "DENY",
