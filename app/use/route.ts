@@ -1,5 +1,6 @@
 import { checkImageInDatabase, checkWebsiteExistsForUrl, storeImageInDatabase } from "@/lib/db/og-images";
 import { extractUrlPartsConsistent } from "@/lib/utils";
+import { redis } from "@/lib/redis";
 import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
@@ -10,6 +11,14 @@ const getDirectR2Url = (imageKey: string, isDemo = false): string =>
 
 const generateCacheKey = (url: string): string =>
   crypto.createHash("sha256").update(url).digest("hex");
+
+const redirectToImage = (url: string) =>
+  NextResponse.redirect(url, {
+    status: 301,
+    headers: {
+      "Cache-Control": "public, max-age=31536000, immutable",
+    },
+  });
 
 const getR2Client = () => {
   const { PROD_R2_ACCESS_KEY_ID, PROD_R2_SECRET_ACCESS_KEY, CLOUDFLARE_ACCOUNT_ID } = process.env;
@@ -178,6 +187,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error }, { status: 400 });
     }
 
+    // Check Upstash Redis cache first using the full URL
+    const redisKey = `og:${url}`;
+    const redisUrl = await redis.get<string>(redisKey);
+    if (redisUrl) {
+      console.log(`[REDIS_CACHE_HIT] Redirecting to cached image: ${redisUrl}`);
+      return redirectToImage(redisUrl);
+    }
+
     const cacheKey = generateCacheKey(url);
     console.log(`[API_REQUEST_CACHE_KEY] Generated cache key: ${cacheKey}`);
 
@@ -196,7 +213,9 @@ export async function GET(request: NextRequest) {
       cachedImageUrl = await checkImageInDatabase(url);
       if (cachedImageUrl) {
         console.log(`[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedImageUrl}`);
-        return NextResponse.redirect(cachedImageUrl, { status: 302 });
+        // Save to Upstash Redis so future requests can skip the database
+        await redis.set(redisKey, cachedImageUrl, { ex: 60 * 60 * 24 * 30 });
+        return redirectToImage(cachedImageUrl);
       }
 
       // Check if website exists (only for production mode)
@@ -265,8 +284,11 @@ export async function GET(request: NextRequest) {
         console.error("[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:", error)
       );
 
+      // Cache the image URL in Upstash Redis for quick lookups
+      await redis.set(redisKey, uploadedUrl, { ex: 60 * 60 * 24 * 30 });
+
       console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadedUrl}`);
-      return NextResponse.redirect(uploadedUrl, { status: 302 });
+      return redirectToImage(uploadedUrl);
     }
   } catch (error) {
     console.error("[API_REQUEST_ERROR] Unexpected error in OG Image API:", error);
