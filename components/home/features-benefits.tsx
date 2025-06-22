@@ -1,33 +1,33 @@
 import {
-  ChartLineSolid,
+  ChartBarIncreasingSolid,
   GlobeSolid,
   HeartCircleSolid,
   ImageRectangleSolid,
   LayoutSolid,
-  LinkSolid,
-  RefreshSolid,
+  PuzzleSolid,
+  RefreshAltSolid,
   ImageSolid,
 } from "@mynaui/icons-react";
 
 const features = [
   {
     icon: ImageRectangleSolid,
-    title: "Automated OG image generation",
+    title: "Automated OG Image Generation",
     description: "Create OG images automatically as soon as you publish.",
   },
   {
-    icon: LinkSolid,
-    title: "Seamless integration",
+    icon: PuzzleSolid,
+    title: "Seamless Integrations",
     description: "Add a single script tag to get started in minutes.",
   },
   {
     icon: HeartCircleSolid,
-    title: "Beautiful social previews",
+    title: "Beautiful Social Previews",
     description: "Engage your audience with eye‑catching OG images.",
   },
   {
     icon: ImageSolid,
-    title: "Retina‑ready quality",
+    title: "Retina‑Ready Quality",
     description: "Crisp images delivered in high resolution.",
   },
   {
@@ -37,17 +37,17 @@ const features = [
   },
   {
     icon: LayoutSolid,
-    title: "Simple dashboard",
+    title: "Simple Dashboard",
     description: "Manage multiple websites in one place.",
   },
   {
-    icon: RefreshSolid,
-    title: "Refresh OG images",
+    icon: RefreshAltSolid,
+    title: "Refresh OG Images",
     description: "Update previews whenever your design changes.",
   },
   {
-    icon: ChartLineSolid,
-    title: "Advanced analytics",
+    icon: ChartBarIncreasingSolid,
+    title: "Advanced Analytics",
     description: "Track impressions and usage on every image.",
   },
 ];
