@@ -3,17 +3,17 @@ import {
   GlobeSolid,
   HeartCircleSolid,
   ImageRectangleSolid,
+  ImageSolid,
   LayoutSolid,
   PuzzleSolid,
   RefreshAltSolid,
-  ImageSolid,
 } from "@mynaui/icons-react";
 
 const features = [
   {
     icon: ImageRectangleSolid,
-    title: "Automated OG Image Generation",
-    description: "Create OG images automatically as soon as you publish.",
+    title: "Automated OG Images",
+    description: "Create Images automatically as soon as you publish.",
   },
   {
     icon: PuzzleSolid,
@@ -23,11 +23,11 @@ const features = [
   {
     icon: HeartCircleSolid,
     title: "Beautiful Social Previews",
-    description: "Engage your audience with eye‑catching OG images.",
+    description: "Engage your audience with eye-catching OG images.",
   },
   {
     icon: ImageSolid,
-    title: "Retina‑Ready Quality",
+    title: "Retina-Ready Quality",
     description: "Crisp images delivered in high resolution.",
   },
   {
@@ -58,9 +58,9 @@ export default function FeaturesBenefits() {
       <h2 className="mb-10 text-4xl font-semibold tracking-tight">
         Features & Benefits
       </h2>
-      <ul className="grid gap-8 md:grid-cols-2">
+      <ul className="grid gap-8 md:gap-12 md:grid-cols-4">
         {features.map(({ icon: Icon, title, description }) => (
-          <li key={title} className="flex gap-3 md:items-start">
+          <li key={title} className="flex md:flex-col gap-2 md:items-center">
             <Icon className="text-primary size-6 shrink-0" />
             <div className="space-y-1">
               <h3 className="font-medium">{title}</h3>
