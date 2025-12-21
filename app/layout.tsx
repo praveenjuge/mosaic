@@ -1,4 +1,5 @@
 import "@/app/globals.css";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
 import Footer from "@/components/footer";
 import Header from "@/components/header/header";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -11,10 +12,7 @@ import {
 } from "@/lib/constants";
 import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
-import { GeistSans } from "geist/font/sans";
 import type { Metadata, Viewport } from "next";
-
-export const experimental_ppr = true;
 
 export const viewport: Viewport = { themeColor: "#059669" };
 
@@ -44,32 +42,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider telemetry={false}>
-      <html
-        lang="en"
-        suppressHydrationWarning
-        className={`${GeistSans.variable} touch-manipulation [font-family:var(--font-geist-sans)] antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
-      >
-        <body className="relative flex flex-col text-sm">
-          <ThemeProvider
-            enableSystem
-            attribute="class"
-            defaultTheme="light"
-            disableTransitionOnChange
-          >
-            <div
-              className="bg-primary pointer-events-none fixed -top-48 -right-48 size-96 opacity-15 blur-3xl select-none"
-              aria-hidden="true"
-            ></div>
-            <Header />
-            <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 pt-10 pb-6 md:px-10">
-              {children}
-            </main>
-            <Footer />
-            <Toaster richColors />
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`touch-manipulation antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
+    >
+      <body className="relative flex flex-col text-sm">
+        <ClerkProvider telemetry={false}>
+          <ConvexClientProvider>
+            <ThemeProvider
+              enableSystem
+              attribute="class"
+              defaultTheme="light"
+              disableTransitionOnChange
+            >
+              <div
+                className="bg-primary pointer-events-none fixed -top-48 -right-48 size-96 opacity-15 blur-3xl select-none"
+                aria-hidden="true"
+              ></div>
+              <Header />
+              <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 pt-10 pb-6 md:px-10">
+                {children}
+              </main>
+              <Footer />
+              <Toaster richColors />
+            </ThemeProvider>
+          </ConvexClientProvider>
+        </ClerkProvider>
+      </body>
+    </html>
   );
 }

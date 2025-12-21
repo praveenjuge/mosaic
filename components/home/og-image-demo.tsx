@@ -4,7 +4,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowDown, ArrowRight, FatCornerRightDown } from "@mynaui/icons-react";
+import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface OGData {
@@ -214,7 +214,7 @@ export default function OGImageDemo() {
           className="bg-background dark:bg-background"
         >
           Get a Live Demo of your new OG Image
-          <FatCornerRightDown className="size-4" />
+          <CornerDownRight className="size-4" />
         </Button>
       </form>
       {error && (

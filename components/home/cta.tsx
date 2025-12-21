@@ -1,5 +1,5 @@
 import { ClerkLoaded, ClerkLoading, SignUpButton } from "@clerk/nextjs";
-import { ArrowLongRight } from "@mynaui/icons-react";
+import { MoveRight } from "lucide-react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 
@@ -26,14 +26,14 @@ export default function CTA() {
           <ClerkLoading>
             <Button size="lg" disabled>
               Start for Free
-              <ArrowLongRight className="size-4" stroke={2} />
+              <MoveRight className="size-4" strokeWidth={2} />
             </Button>
           </ClerkLoading>
           <ClerkLoaded>
             <SignUpButton mode="modal" oauthFlow="popup">
               <Button size="lg">
                 Start for Free
-                <ArrowLongRight className="size-4" stroke={2} />
+                <MoveRight className="size-4" strokeWidth={2} />
               </Button>
             </SignUpButton>
           </ClerkLoaded>

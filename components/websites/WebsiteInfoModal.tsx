@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Code, ExternalLink, SmileGhost } from "@mynaui/icons-react";
+import { Code, ExternalLink, Ghost } from "lucide-react";
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
@@ -38,7 +38,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <SmileGhost className="mb-2 size-8 shrink-0 text-orange-500 dark:text-orange-300" />
+          <Ghost className="mb-2 size-8 shrink-0 text-orange-500 dark:text-orange-300" />
           <DialogTitle className="text-left">
             Let&apos;s add to your website!
           </DialogTitle>

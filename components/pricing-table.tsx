@@ -9,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check } from "@mynaui/icons-react";
+import { Check } from "lucide-react";
 import { Suspense } from "react";
 import { Button } from "./ui/button";
 

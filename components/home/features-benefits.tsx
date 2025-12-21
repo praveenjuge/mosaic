@@ -1,52 +1,52 @@
 import {
-  ChartBarIncreasingSolid,
-  GlobeSolid,
-  HeartCircleSolid,
-  ImageRectangleSolid,
-  ImageSolid,
-  LayoutSolid,
-  PuzzleSolid,
-  RefreshAltSolid,
-} from "@mynaui/icons-react";
+  ChartBarIncreasing,
+  Globe,
+  Heart,
+  Image,
+  ImagePlus,
+  LayoutDashboard,
+  Puzzle,
+  RefreshCcw,
+} from "lucide-react";
 
 const features = [
   {
-    icon: ImageRectangleSolid,
+    icon: ImagePlus,
     title: "Automated OG Images",
     description: "Create Images automatically as soon as you publish.",
   },
   {
-    icon: PuzzleSolid,
+    icon: Puzzle,
     title: "Seamless Integrations",
     description: "Add a single script tag to get started in minutes.",
   },
   {
-    icon: HeartCircleSolid,
+    icon: Heart,
     title: "Beautiful Social Previews",
     description: "Engage your audience with eye-catching OG images.",
   },
   {
-    icon: ImageSolid,
+    icon: Image,
     title: "Retina-Ready Quality",
     description: "Crisp images delivered in high resolution.",
   },
   {
-    icon: GlobeSolid,
+    icon: Globe,
     title: "Global CDN",
     description: "Fast delivery from edge locations worldwide.",
   },
   {
-    icon: LayoutSolid,
+    icon: LayoutDashboard,
     title: "Simple Dashboard",
     description: "Manage multiple websites in one place.",
   },
   {
-    icon: RefreshAltSolid,
+    icon: RefreshCcw,
     title: "Refresh OG Images",
     description: "Update previews whenever your design changes.",
   },
   {
-    icon: ChartBarIncreasingSolid,
+    icon: ChartBarIncreasing,
     title: "Advanced Analytics",
     description: "Track impressions and usage on every image.",
   },

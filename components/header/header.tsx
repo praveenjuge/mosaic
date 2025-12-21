@@ -8,7 +8,7 @@ import {
   SignInButton,
   SignUpButton,
 } from "@clerk/nextjs";
-import { Config } from "@mynaui/icons-react";
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 import Logo from "../logo";
@@ -48,7 +48,7 @@ function SignedInNav() {
         href="/settings"
         className={buttonVariants({ variant: "ghost", size: "sm" })}
       >
-        <Config className="size-4 stroke-2" />
+        <Settings className="size-4 stroke-2" />
         Settings
       </Link>
       <Suspense fallback={<Skeleton className="size-8 rounded-full" />}>

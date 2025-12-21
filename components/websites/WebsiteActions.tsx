@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dots, Edit, Repeat, Trash } from "@mynaui/icons-react";
+import { Ellipsis, Pencil, Repeat, Trash } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -72,7 +72,7 @@ export function WebsiteActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="size-8">
-            <Dots className="size-8 stroke-2" />
+            <Ellipsis className="size-8 stroke-2" />
             <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
@@ -84,7 +84,7 @@ export function WebsiteActions({
             </DropdownMenuItem>
           )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <Edit className="size-4 stroke-2" />
+            <Pencil className="size-4 stroke-2" />
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem

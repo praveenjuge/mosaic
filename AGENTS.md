@@ -2,7 +2,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 
 ### Core Technologies
 
-- **Framework**: Next.js 15 (App Router) with React 19 TypeScript
+- **Framework**: Next.js (App Router) with React 19 TypeScript
 - **Runtime**: Bun (package manager and runtime)
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Database**: Supabase (PostgreSQL)

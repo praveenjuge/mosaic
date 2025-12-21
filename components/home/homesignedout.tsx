@@ -2,7 +2,7 @@ import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
 import { ClerkLoaded, ClerkLoading, SignUpButton } from "@clerk/nextjs";
-import { ArrowLongRight } from "@mynaui/icons-react";
+import { MoveRight } from "lucide-react";
 import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
@@ -14,7 +14,7 @@ function AuthButtonSkeleton() {
   return (
     <Button size="lg" disabled>
       Start for Free
-      <ArrowLongRight className="size-4" stroke={2} />
+      <MoveRight className="size-4" strokeWidth={2} />
     </Button>
   );
 }
@@ -30,7 +30,7 @@ function AuthButton() {
         <SignUpButton mode="modal" oauthFlow="popup">
           <Button size="lg">
             Start for Free
-            <ArrowLongRight className="size-4" stroke={2} />
+            <MoveRight className="size-4" strokeWidth={2} />
           </Button>
         </SignUpButton>
       </ClerkLoaded>

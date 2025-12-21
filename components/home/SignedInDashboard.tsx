@@ -8,9 +8,8 @@ import { AddWebsite } from "@/components/websites/AddWebsite";
 import WebsitesTable from "@/components/websites/WebsitesTable";
 import { getAllWebsitesWithStats } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
-import { Plus } from "@mynaui/icons-react";
+import { Plus } from "lucide-react";
 import { Suspense } from "react";
-import { LoadingSpinner } from "../spinner";
 
 // Content wrapper that shows either empty state or dashboard
 async function DashboardContent() {
@@ -44,7 +43,7 @@ async function DashboardContent() {
           <Suspense
             fallback={
               <Button size="sm" disabled>
-                <Plus className="size-4" stroke={2} />
+                <Plus className="size-4" strokeWidth={2} />
                 Add Website
               </Button>
             }
@@ -69,9 +68,5 @@ async function DashboardContent() {
 }
 
 export default function SignedInDashboard() {
-  return (
-    <Suspense fallback={<LoadingSpinner />}>
-      <DashboardContent />
-    </Suspense>
-  );
+  return <DashboardContent />;
 }

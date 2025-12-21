@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Check, Copy } from "@mynaui/icons-react";
+import { Check, Copy } from "lucide-react";
 import { useCallback, useState } from "react";
 
 interface CopyButtonProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Desktop, Moon, Sun } from "@mynaui/icons-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
@@ -25,7 +25,7 @@ export function ModeToggle() {
         onClick={() => setTheme("system")}
         className="data-[state=on]:bg-background w-full gap-1 data-[state=on]:border-[0.5px]"
       >
-        <Desktop className="size-4 stroke-2" />
+        <Monitor className="size-4 stroke-2" />
         <span className="sr-only">System</span>
       </ToggleGroupItem>
       <ToggleGroupItem

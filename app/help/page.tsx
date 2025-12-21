@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
-import { BrandX, Envelope } from "@mynaui/icons-react";
+import { Mail, Twitter } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import Guides from "./guides";
@@ -93,7 +93,7 @@ function ContactSection() {
             href="mailto:hello@praveenjuge.com"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <Envelope className="size-4" />
+            <Mail className="size-4" />
             Email Support
           </Link>
           <Link
@@ -102,7 +102,7 @@ function ContactSection() {
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <BrandX className="size-4" />
+            <Twitter className="size-4" />
             Twitter Support
           </Link>
         </div>

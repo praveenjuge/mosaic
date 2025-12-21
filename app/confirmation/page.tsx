@@ -6,7 +6,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle } from "@mynaui/icons-react";
+import { CircleCheck } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
 
@@ -22,7 +22,7 @@ function ConfirmationContent({ checkoutId }: { checkoutId?: string }) {
       <Card>
         <CardHeader className="text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900">
-            <CheckCircle className="h-8 w-8 text-green-600 dark:text-green-400" />
+            <CircleCheck className="h-8 w-8 text-green-600 dark:text-green-400" />
           </div>
           <CardTitle className="text-2xl">Payment Successful!</CardTitle>
           <CardDescription>

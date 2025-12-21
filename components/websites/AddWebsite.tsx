@@ -8,7 +8,7 @@ import {
   SignInButton,
 } from "@clerk/nextjs";
 import { auth } from "@clerk/nextjs/server";
-import { Plus } from "@mynaui/icons-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
@@ -26,7 +26,7 @@ export async function AddWebsite() {
     <>
       <ClerkLoading>
         <Button size="sm" disabled>
-          <Plus className="size-4" stroke={2} />
+          <Plus className="size-4" strokeWidth={2} />
           Add Website
         </Button>
       </ClerkLoading>
@@ -34,7 +34,7 @@ export async function AddWebsite() {
         <SignedIn>
           {preventSubmission ? (
             <Link href="/settings" className={buttonVariants({ size: "sm" })}>
-              <Plus className="size-4" stroke={2} />
+              <Plus className="size-4" strokeWidth={2} />
               Upgrade to Pro
             </Link>
           ) : (
@@ -44,7 +44,7 @@ export async function AddWebsite() {
         <SignedOut>
           <SignInButton mode="modal" withSignUp={true} oauthFlow="popup">
             <Button size="sm">
-              <Plus className="size-4" stroke={2} />
+              <Plus className="size-4" strokeWidth={2} />
               Add Website
             </Button>
           </SignInButton>
