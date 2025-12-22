@@ -12,38 +12,13 @@ export const checkImageInDatabase = internalQuery({
   },
   handler: async (ctx, args) => {
     const { sanitizedUrl } = extractUrlParts(args.pageUrl);
-    const pages = await ctx.db
-      .query("pages")
-      .withIndex("by_full_url", (q) => q.eq("full_url", sanitizedUrl))
-      .collect();
-
-    if (!pages.length) {
-      return null;
-    }
-
-    let latestScreenshot: {
-      screenshot_url: string;
-      generated_at: string | number;
-    } | null = null;
-
-    for (const page of pages) {
-      const pageLatest = await ctx.db
-        .query("screenshots")
-        .withIndex("by_page_id_generated_at", (q) =>
-          q.eq("page_id", page._id),
-        )
-        .order("desc")
-        .first();
-
-      if (
-        pageLatest &&
-        (!latestScreenshot ||
-          toTimestamp(pageLatest.generated_at) >
-            toTimestamp(latestScreenshot.generated_at))
-      ) {
-        latestScreenshot = pageLatest;
-      }
-    }
+    const latestScreenshot = await ctx.db
+      .query("screenshots")
+      .withIndex("by_page_url_generated_at", (q) =>
+        q.eq("page_url", sanitizedUrl),
+      )
+      .order("desc")
+      .first();
 
     return latestScreenshot?.screenshot_url ?? null;
   },
@@ -86,8 +61,9 @@ export const storeImageInDatabase = internalMutation({
       };
     }
 
-    const website =
-      matchingSites[Math.floor(Math.random() * matchingSites.length)];
+    const website = matchingSites.sort(
+      (a, b) => toTimestamp(a.created_at) - toTimestamp(b.created_at),
+    )[0];
 
     const existingPage = await ctx.db
       .query("pages")
@@ -115,6 +91,8 @@ export const storeImageInDatabase = internalMutation({
         website_id: website._id,
         user_id: website.user_id,
         screenshot_url: args.uploadedUrl,
+        page_url: sanitizedUrl,
+        website_name: website.url_base,
         image_hash: args.imageKey,
         size_in_bytes: args.imageSize,
         generated_at: timestamp,
@@ -132,11 +110,12 @@ export const storeImageInDatabase = internalMutation({
       website_id: website._id,
       user_id: website.user_id,
       screenshot_url: args.uploadedUrl,
+      page_url: sanitizedUrl,
+      website_name: website.url_base,
       image_hash: args.imageKey,
       size_in_bytes: args.imageSize,
       generated_at: timestamp,
     });
-
     return { status: "success" as const };
   },
 });

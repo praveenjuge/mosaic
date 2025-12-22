@@ -4,9 +4,8 @@ import { normalizeUrlBase } from "./utils/url";
 
 const siteInput = v.object({
   url_base: v.string(),
-  created_at: v.optional(v.union(v.number(), v.string())),
-  updated_at: v.optional(v.union(v.number(), v.string())),
-  id: v.optional(v.string()),
+  created_at: v.optional(v.number()),
+  updated_at: v.optional(v.number()),
 });
 
 const nowTimestamp = () => Date.now();
@@ -126,7 +125,6 @@ export const addSite = mutation({
     };
 
     const siteId = await ctx.db.insert("sites", site);
-
     return {
       status: "success" as const,
       message: "Website added successfully",
@@ -216,8 +214,7 @@ export const deleteSite = mutation({
       };
     }
 
-    const legacyWebsiteId = existing.id;
-    const deleteByWebsiteId = async (websiteId: string | typeof args.siteId) => {
+    const deleteByWebsiteId = async (websiteId: typeof args.siteId) => {
       let cursor: string | null = null;
       do {
         const page = await ctx.db
@@ -245,15 +242,11 @@ export const deleteSite = mutation({
         cursor = page.continueCursor;
         if (page.isDone) break;
       } while (cursor);
+
     };
 
     await deleteByWebsiteId(args.siteId);
-    if (legacyWebsiteId) {
-      await deleteByWebsiteId(legacyWebsiteId);
-    }
-
     await ctx.db.delete(existing._id);
-
     return {
       status: "success" as const,
       message: "Website deleted successfully",
@@ -287,7 +280,6 @@ export const importSites = mutation({
         await ctx.db.patch(existing._id, {
           url_base: normalizedUrl,
           updated_at: site.updated_at ?? nowTimestamp(),
-          id: site.id ?? existing.id,
         });
         updated += 1;
       } else {
@@ -296,7 +288,6 @@ export const importSites = mutation({
           url_base: normalizedUrl,
           created_at: site.created_at ?? nowTimestamp(),
           updated_at: site.updated_at ?? nowTimestamp(),
-          id: site.id,
         });
         inserted += 1;
       }

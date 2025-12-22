@@ -27,7 +27,7 @@ import { LocalTime } from "./local-time";
 
 interface LatestScreenshotsProps {
   slug?: Id<"sites">;
-  page?: number;
+  cursor?: string;
   limit?: number;
   showPagination?: boolean;
 }
@@ -174,17 +174,17 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
 
 // Pagination component
 function ScreenshotsPagination({
-  page,
+  cursor,
   hasMore,
 }: {
-  page: number;
+  cursor: string | null;
   hasMore: boolean;
 }) {
-  if (!hasMore) return null;
+  if (!hasMore || !cursor) return null;
 
   return (
     <CardFooter className="flex justify-center">
-      <Link href={`?page=${page + 1}`}>
+      <Link href={`?cursor=${encodeURIComponent(cursor)}`}>
         <Button variant="outline">Load More</Button>
       </Link>
     </CardFooter>
@@ -194,7 +194,7 @@ function ScreenshotsPagination({
 // Screenshots content component
 async function ScreenshotsContent({
   slug,
-  page,
+  cursor,
   limit,
   showPagination,
 }: LatestScreenshotsProps) {
@@ -204,6 +204,7 @@ async function ScreenshotsContent({
 
   let websitePagesData: Array<ScreenshotWithDetails> = [];
   let hasMore = false;
+  let nextCursor: string | null = cursor ?? null;
   const token = await getToken({ template: "convex" });
   const queryOptions = token ? { token } : {};
 
@@ -214,7 +215,7 @@ async function ScreenshotsContent({
         api.screenshots.listLatestForWebsite,
         {
           websiteId: slug,
-          page: page || 1,
+          cursor: cursor ?? undefined,
           limit: limit || 10,
         },
         queryOptions,
@@ -222,6 +223,7 @@ async function ScreenshotsContent({
 
       websitePagesData = response.data;
       hasMore = response.hasMore;
+      nextCursor = response.cursor ?? null;
     } catch (error) {
       console.error("Error fetching website screenshots:", error);
       return <ScreenshotsError />;
@@ -251,7 +253,7 @@ async function ScreenshotsContent({
       <ScreenshotsTable data={websitePagesData} />
       {showPagination && (
         <Suspense fallback={<div className="h-12" />}>
-          <ScreenshotsPagination page={page || 1} hasMore={hasMore} />
+          <ScreenshotsPagination cursor={nextCursor} hasMore={hasMore} />
         </Suspense>
       )}
     </>

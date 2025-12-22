@@ -223,7 +223,7 @@ export async function GET(request: NextRequest) {
       if (!websiteExists) {
         console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
         return NextResponse.json(
-          { error: "Website must be added to your account before generating OG images" },
+          { error: "Website must be added to Mosaic before generating OG images" },
           { status: 404 }
         );
       }
