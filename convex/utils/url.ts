@@ -1,6 +1,6 @@
 const sanitizeUrl = (url: string) => url.trim().replace(/\\+$/, "");
 
-const cleanUrl = (url: string): string => {
+export const cleanUrl = (url: string): string => {
   if (!url) return "";
   const trimmed = url.trim();
 

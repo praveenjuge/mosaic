@@ -81,3 +81,30 @@ export const listLatestForUser = query({
     }));
   },
 });
+
+export const countForWebsites = query({
+  args: {
+    websiteIds: v.array(v.id("sites")),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {};
+    }
+
+    const counts: Record<string, number> = {};
+
+    for (const websiteId of args.websiteIds) {
+      const screenshots = await ctx.db
+        .query("screenshots")
+        .withIndex("by_user_id_website_id_generated_at", (q) =>
+          q.eq("user_id", identity.subject).eq("website_id", websiteId),
+        )
+        .collect();
+
+      counts[websiteId] = screenshots.length;
+    }
+
+    return counts;
+  },
+});

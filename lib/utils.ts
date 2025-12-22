@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { website_url } from "./constants";
+import { cleanUrl, extractUrlParts } from "@/convex/utils/url";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -54,34 +55,7 @@ export function getOgImageUrl(slug: string) {
  * Centralized URL cleaning function to ensure consistency across the application
  * Returns just the hostname without protocol (e.g., "example.com")
  */
-export function cleanUrl(url: string): string {
-  if (!url) return "";
-
-  // Remove whitespace
-  url = url.trim();
-
-  try {
-    // Try parsing as-is first
-    const parsedUrl = new URL(url);
-    return parsedUrl.hostname;
-  } catch {
-    try {
-      // If parsing fails, try adding https:// protocol
-      const urlWithProtocol =
-        url.startsWith("http://") || url.startsWith("https://")
-          ? url
-          : `https://${url}`;
-      const parsedUrl = new URL(urlWithProtocol);
-      return parsedUrl.hostname;
-    } catch {
-      // If parsing still fails, attempt to extract domain using regex
-      const domainMatch = url.match(
-        /^(?:https?:\/\/)?(?:[^@\n]+@)?(?:www\.)?([^:/\n?]+)/,
-      );
-      return domainMatch ? domainMatch[1] : url;
-    }
-  }
-}
+export { cleanUrl };
 
 /**
  * Extract URL parts consistently for database storage
@@ -92,23 +66,10 @@ export function extractUrlPartsConsistent(fullUrl: string): {
   path: string;
   hostname: string;
 } {
-  // Trim whitespace and remove trailing backslashes which can appear
-  // if URLs are copied incorrectly.
-  const sanitized = fullUrl.trim().replace(/\\+$/, "");
-  try {
-    const parsedUrl = new URL(sanitized);
-    return {
-      urlBase: parsedUrl.hostname, // Just hostname, no protocol
-      path: parsedUrl.pathname + parsedUrl.search + parsedUrl.hash,
-      hostname: parsedUrl.hostname,
-    };
-  } catch {
-    // Fallback for malformed URLs
-    const cleaned = cleanUrl(fullUrl);
-    return {
-      urlBase: cleaned,
-      path: "/",
-      hostname: cleaned,
-    };
-  }
+  const { urlBase, path } = extractUrlParts(fullUrl);
+  return {
+    urlBase,
+    path,
+    hostname: urlBase,
+  };
 }

@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
 import { CopyButton } from "@/components/copy-button";
 import {
   Card,
@@ -17,10 +16,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { api } from "@/convex/_generated/api";
 import { website_url } from "@/lib/constants";
 import { Site } from "@/lib/types";
-import { Authenticated } from "convex/react";
-import { useQuery } from "convex/react";
+import { Authenticated, useQuery } from "convex/react";
 import Image from "next/image";
 import { Suspense } from "react";
 import { WebsiteActions } from "./WebsiteActions";
@@ -91,9 +90,13 @@ function WebsitesEmpty() {
 }
 
 // Website table row component
-function WebsiteRow({ website }: { website: Site }) {
-  const screenshotCount: number | null = null;
-
+function WebsiteRow({
+  website,
+  screenshotCount,
+}: {
+  website: Site;
+  screenshotCount: number | null;
+}) {
   return (
     <TableRow className="items-center">
       <TableCell>
@@ -154,6 +157,10 @@ function WebsiteRow({ website }: { website: Site }) {
 
 // Websites table component
 function WebsitesTableContent({ data }: { data: Site[] }) {
+  const screenshotCounts = useQuery(api.screenshots.countForWebsites, {
+    websiteIds: data.map((website) => website._id),
+  });
+
   return (
     <Card className="p-0">
       <Table>
@@ -167,7 +174,13 @@ function WebsitesTableContent({ data }: { data: Site[] }) {
         </TableHeader>
         <TableBody>
           {data.map((website) => (
-            <WebsiteRow key={website._id} website={website} />
+            <WebsiteRow
+              key={website._id}
+              website={website}
+              screenshotCount={
+                screenshotCounts ? (screenshotCounts[website._id] ?? 0) : null
+              }
+            />
           ))}
         </TableBody>
       </Table>
