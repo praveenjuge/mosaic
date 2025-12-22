@@ -14,8 +14,6 @@ import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 
-export const dynamic = "force-static";
-
 export const viewport: Viewport = { themeColor: "#059669" };
 
 export const metadata: Metadata = {
