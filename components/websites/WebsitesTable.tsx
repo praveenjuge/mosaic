@@ -1,3 +1,6 @@
+"use client";
+
+import { api } from "@/convex/_generated/api";
 import { CopyButton } from "@/components/copy-button";
 import {
   Card,
@@ -15,10 +18,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { website_url } from "@/lib/constants";
-import { getAllWebsitesWithStats } from "@/lib/db";
-import { SiteWithStats } from "@/lib/types";
-import { SignedIn } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
+import { Site } from "@/lib/types";
+import { Authenticated } from "convex/react";
+import { useQuery } from "convex/react";
 import Image from "next/image";
 import { Suspense } from "react";
 import { WebsiteActions } from "./WebsiteActions";
@@ -74,20 +76,6 @@ function WebsitesTableSkeleton() {
   );
 }
 
-// Error state component
-function WebsitesError() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Error Loading Websites</CardTitle>
-        <CardDescription>
-          Unable to fetch websites from the database.
-        </CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
-
 // Empty state component
 function WebsitesEmpty() {
   return (
@@ -103,7 +91,9 @@ function WebsitesEmpty() {
 }
 
 // Website table row component
-function WebsiteRow({ website }: { website: SiteWithStats }) {
+function WebsiteRow({ website }: { website: Site }) {
+  const screenshotCount: number | null = null;
+
   return (
     <TableRow className="items-center">
       <TableCell>
@@ -140,12 +130,14 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
         </div>
       </TableCell>
       <TableCell className="py-0">
-        {website.screenshot_count === 0 ? (
+        {typeof screenshotCount !== "number" ? (
+          <span className="text-muted-foreground">—</span>
+        ) : screenshotCount === 0 ? (
           <Suspense fallback={<Skeleton className="h-4 w-16" />}>
             <WebsiteInfoModal websiteUrl={website.url_base} />
           </Suspense>
         ) : (
-          website.screenshot_count
+          screenshotCount
         )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
@@ -153,7 +145,6 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
           <WebsiteActions
             websiteId={website.id}
             currentUrl={website.url_base}
-            hasImages={website.screenshot_count > 0}
           />
         </Suspense>
       </TableCell>
@@ -162,7 +153,7 @@ function WebsiteRow({ website }: { website: SiteWithStats }) {
 }
 
 // Websites table component
-function WebsitesTableContent({ data }: { data: SiteWithStats[] }) {
+function WebsitesTableContent({ data }: { data: Site[] }) {
   return (
     <Card className="p-0">
       <Table>
@@ -184,33 +175,18 @@ function WebsitesTableContent({ data }: { data: SiteWithStats[] }) {
   );
 }
 
-// Main websites content component
-async function WebsitesContent() {
-  const { userId } = await auth();
-
-  if (!userId) {
-    return null;
-  }
-
-  const data = await getAllWebsitesWithStats();
-
-  if (!data) {
-    return <WebsitesError />;
-  }
-
-  if (data.length === 0) {
-    return <WebsitesEmpty />;
-  }
-
-  return <WebsitesTableContent data={data} />;
-}
-
 export default function WebsitesTable() {
+  const data = useQuery(api.sites.listForUser);
+
   return (
-    <SignedIn>
-      <Suspense fallback={<WebsitesTableSkeleton />}>
-        <WebsitesContent />
-      </Suspense>
-    </SignedIn>
+    <Authenticated>
+      {data === undefined ? (
+        <WebsitesTableSkeleton />
+      ) : data.length === 0 ? (
+        <WebsitesEmpty />
+      ) : (
+        <WebsitesTableContent data={data} />
+      )}
+    </Authenticated>
   );
 }

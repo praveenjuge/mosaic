@@ -20,7 +20,7 @@ export async function GET() {
 
     // Create customer portal session using external ID
     const response = await polar.customerSessions.create({
-      customerExternalId: userId,
+      externalCustomerId: userId,
     });
 
     if (!response || !response.customerPortalUrl) {

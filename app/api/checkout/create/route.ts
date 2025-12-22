@@ -52,12 +52,12 @@ export async function GET(request: NextRequest) {
     const isLocalDevelopment = process.env.NODE_ENV === 'development';
     const billingAddress = isLocalDevelopment ? {
       country: 'IN', // India for local development
-    } : undefined;
+    } as const : undefined;
 
     // Create checkout session with external ID and pre-filled customer data
     const checkout = await polar.checkouts.create({
       products: [productId],
-      customerExternalId: userId,
+      externalCustomerId: userId,
       customerEmail: primaryEmail,
       customerName: customerName,
       customerBillingAddress: billingAddress,

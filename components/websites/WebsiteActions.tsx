@@ -1,8 +1,9 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { LoadingSpinner } from "@/components/spinner";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -26,44 +27,78 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Ellipsis, Pencil, Repeat, Trash } from "lucide-react";
+import { cleanUrl } from "@/lib/utils";
+import { useMutation } from "convex/react";
+import { Ellipsis, Pencil, Trash } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { toast } from "sonner";
-import { handleDelete, handleEdit, handleRefresh } from "./actions";
-import { SubmitButton } from "./submit-button";
 
 interface WebsiteActionsProps {
   websiteId: string;
   currentUrl: string;
-  hasImages?: boolean;
 }
 
 export function WebsiteActions({
   websiteId,
   currentUrl,
-  hasImages = false,
 }: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [refreshOpen, setRefreshOpen] = useState(false);
-  const [refreshLoading, setRefreshLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
+  const editSite = useMutation(api.sites.editSite);
+  const deleteSite = useMutation(api.sites.deleteSite);
 
-  const handleRefreshAction = async () => {
-    setRefreshLoading(true);
+  const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const url = formData.get("website")?.toString() || "";
+    const cleanedUrl = cleanUrl(url);
+
+    if (!cleanedUrl) {
+      toast.error("Please enter a valid website URL.");
+      return;
+    }
+
+    setIsSaving(true);
     try {
-      const result = await handleRefresh(websiteId);
+      const result = await editSite({
+        siteId: websiteId,
+        url_base: cleanedUrl,
+      });
       if (result.status === "error") {
         toast.error(result.message);
       } else {
         toast.success(result.message);
-        setRefreshOpen(false);
+        setEditOpen(false);
       }
     } catch (error) {
-      console.error("Error refreshing website:", error);
-      toast.error("Failed to refresh website. Please try again.");
+      console.error("Error editing website:", error);
+      toast.error("Failed to update website. Please try again.");
     } finally {
-      setRefreshLoading(false);
+      setIsSaving(false);
+    }
+  };
+
+  const handleDeleteAction = async () => {
+    setIsDeleting(true);
+    try {
+      const result = await deleteSite({ siteId: websiteId });
+      if (result.status === "error") {
+        toast.error(result.message);
+      } else {
+        toast.success(result.message);
+        setDeleteOpen(false);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast.error("Failed to delete website. Please try again.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -77,12 +112,6 @@ export function WebsiteActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {hasImages && (
-            <DropdownMenuItem onClick={() => setRefreshOpen(true)}>
-              <Repeat className="size-4 stroke-2" />
-              Refresh OG Images
-            </DropdownMenuItem>
-          )}
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             <Pencil className="size-4 stroke-2" />
             Edit
@@ -108,15 +137,7 @@ export function WebsiteActions({
           </DialogHeader>
           <form
             className="grid gap-4"
-            action={async (formData) => {
-              const { status, message } = await handleEdit(formData, websiteId);
-              if (status === "error") {
-                toast.error(message);
-              } else {
-                setEditOpen(false);
-                toast.success(message);
-              }
-            }}
+            onSubmit={handleEditSubmit}
           >
             <div className="grid gap-2">
               <Label htmlFor="website">Website</Label>
@@ -127,9 +148,12 @@ export function WebsiteActions({
                 placeholder="example.com or https://example.com"
                 defaultValue={currentUrl}
                 required
+                disabled={isSaving}
               />
             </div>
-            <SubmitButton text="Save" />
+            <Button type="submit" className="w-full" disabled={isSaving}>
+              {isSaving ? <LoadingSpinner size={18} /> : "Save"}
+            </Button>
           </form>
         </DialogContent>
       </Dialog>
@@ -153,55 +177,14 @@ export function WebsiteActions({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="sm:justify-between">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <form
-              action={async () => {
-                try {
-                  const result = await handleDelete(websiteId);
-                  if (result.status === "error") {
-                    toast.error(result.message);
-                  } else {
-                    setDeleteOpen(false);
-                    toast.success(result.message);
-                  }
-                } catch (error) {
-                  console.error("Delete error:", error);
-                  toast.error("Failed to delete website. Please try again.");
-                }
-              }}
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteAction}
+              disabled={isDeleting}
             >
-              <SubmitButton text="Yes, Delete" variant="destructive" />
-            </form>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Refresh Alert Dialog */}
-      <AlertDialog open={refreshOpen} onOpenChange={setRefreshOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader className="items-center text-center">
-            <Image
-              src="/illustrations/refresh-image.png"
-              alt="Refresh OG Images"
-              width={300}
-              height={300}
-            />
-            <AlertDialogTitle>
-              Refresh this site&apos;s OG images?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-              This will delete all existing OG images for this site. New images
-              will be generated automatically when you visit the pages again.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-between">
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleRefreshAction}
-              disabled={refreshLoading}
-            >
-              {refreshLoading ? "Refreshing..." : "Yes, Refresh OG Images"}
-            </AlertDialogAction>
+              {isDeleting ? <LoadingSpinner size={18} /> : "Yes, Delete"}
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

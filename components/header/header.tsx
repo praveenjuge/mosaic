@@ -1,13 +1,7 @@
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignedIn,
-  SignedOut,
-  SignInButton,
-  SignUpButton,
-} from "@clerk/nextjs";
+import { SignInButton, SignUpButton } from "@clerk/nextjs";
+import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -62,23 +56,21 @@ function SignedInNav() {
 function AuthenticationSection() {
   return (
     <>
-      <ClerkLoading>
+      <AuthLoading>
         <AuthLoadingSkeleton />
-      </ClerkLoading>
+      </AuthLoading>
 
-      <ClerkLoaded>
-        <SignedOut>
-          <Suspense fallback={<AuthLoadingSkeleton />}>
-            <SignedOutButtons />
-          </Suspense>
-        </SignedOut>
+      <Unauthenticated>
+        <Suspense fallback={<AuthLoadingSkeleton />}>
+          <SignedOutButtons />
+        </Suspense>
+      </Unauthenticated>
 
-        <SignedIn>
-          <Suspense fallback={<AuthLoadingSkeleton />}>
-            <SignedInNav />
-          </Suspense>
-        </SignedIn>
-      </ClerkLoaded>
+      <Authenticated>
+        <Suspense fallback={<AuthLoadingSkeleton />}>
+          <SignedInNav />
+        </Suspense>
+      </Authenticated>
     </>
   );
 }

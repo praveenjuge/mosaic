@@ -6,23 +6,34 @@ import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AddWebsite } from "@/components/websites/AddWebsite";
 import WebsitesTable from "@/components/websites/WebsitesTable";
-import { getAllWebsitesWithStats } from "@/lib/db";
+import { api } from "@/convex/_generated/api";
 import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
 import { Plus } from "lucide-react";
 import { Suspense } from "react";
 
 // Content wrapper that shows either empty state or dashboard
 async function DashboardContent() {
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) {
     return null;
   }
 
-  const websites = await getAllWebsitesWithStats();
+  let websitesCount = 0;
+  try {
+    const token = await getToken({ template: "convex" });
+    websitesCount = await fetchQuery(
+      api.sites.countForUser,
+      {},
+      token ? { token } : {},
+    );
+  } catch (error) {
+    console.error("Error fetching website count:", error);
+  }
 
   // Show empty state if no websites
-  if (!websites || websites.length === 0) {
+  if (!websitesCount) {
     return <WelcomeEmptyState />;
   }
 

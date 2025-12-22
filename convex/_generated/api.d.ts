@@ -8,13 +8,27 @@
  * @module
  */
 
+import type * as metadata from "../metadata.js";
+import type * as ogImages from "../ogImages.js";
+import type * as pages from "../pages.js";
+import type * as screenshots from "../screenshots.js";
+import type * as sites from "../sites.js";
+import type * as stats from "../stats.js";
+
 import type {
   ApiFromModules,
   FilterApi,
   FunctionReference,
 } from "convex/server";
 
-declare const fullApi: ApiFromModules<{}>;
+declare const fullApi: ApiFromModules<{
+  metadata: typeof metadata;
+  ogImages: typeof ogImages;
+  pages: typeof pages;
+  screenshots: typeof screenshots;
+  sites: typeof sites;
+  stats: typeof stats;
+}>;
 
 /**
  * A utility for referencing Convex functions in your app's public API.

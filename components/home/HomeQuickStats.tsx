@@ -5,10 +5,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getUserStats, getUserSubscriptionInfo } from "@/lib/db";
+import { api } from "@/convex/_generated/api";
+import { getUserSubscriptionInfo } from "@/lib/subscription";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
 import { Suspense } from "react";
+import WebsitesStatCardClient from "./WebsitesStatCardClient";
 
 // Loading skeleton component
 function StatsLoadingSkeleton() {
@@ -47,18 +50,6 @@ function StatsLoadingSkeleton() {
         </CardHeader>
       </Card>
     </div>
-  );
-}
-
-// Individual stat card components for better granularity
-function WebsitesStatCard({ count }: { count: number }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{count.toLocaleString()}</CardTitle>
-        <CardDescription>Websites</CardDescription>
-      </CardHeader>
-    </Card>
   );
 }
 
@@ -115,20 +106,6 @@ function SubscriptionStatCard({
   );
 }
 
-// Individual loading skeletons for each stat
-function WebsiteStatSkeleton() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Skeleton className="h-4.5 w-16" />
-        </CardTitle>
-        <CardDescription>Websites</CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
-
 function ImageStatSkeleton() {
   return (
     <Card>
@@ -170,7 +147,7 @@ function SubscriptionStatSkeleton() {
 
 // Stats content component with granular loading
 async function StatsContent() {
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) {
     return (
@@ -204,20 +181,18 @@ async function StatsContent() {
   }
 
   try {
+    const token = await getToken({ template: "convex" });
     const [userStats, subscriptionInfo] = await Promise.all([
-      getUserStats(),
+      fetchQuery(api.stats.getUserStats, {}, token ? { token } : {}),
       getUserSubscriptionInfo(userId),
     ]);
 
-    const totalWebsites = userStats?.total_websites ?? 0;
     const totalImages = userStats?.total_images ?? 0;
     const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
 
     return (
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <Suspense fallback={<WebsiteStatSkeleton />}>
-          <WebsitesStatCard count={totalWebsites} />
-        </Suspense>
+        <WebsitesStatCardClient />
 
         <Suspense fallback={<ImageStatSkeleton />}>
           <ImagesStatCard count={totalImages} />

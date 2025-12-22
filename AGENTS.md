@@ -5,10 +5,10 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Framework**: Next.js (App Router) with React 19 TypeScript
 - **Runtime**: Bun (package manager and runtime)
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **Database**: Supabase (PostgreSQL)
+- **Database**: Convex
 - **Authentication**: Clerk
 - **Icons**: MynaUI Icons
-- `@supabase/supabase-js` - Database operations
+- `convex` - Database and backend functions
 - `@aws-sdk/client-s3` - AWS S3 services integration (v3)
 - Build command: `bun run build`
 - Development command: `bun dev`
@@ -36,10 +36,11 @@ content/             # Markdown content
 └── help/           # Help articles
 
 lib/                # Utility functions and configurations
-├── supabase/       # Supabase client and server utilities
 ├── constants.ts    # Application constants
 ├── types.ts        # TypeScript type definitions
 └── utils.ts        # Utility functions
+
+convex/             # Convex schema, queries, mutations, actions
 ```
 
 ## Coding Standards & Best Practices
@@ -54,8 +55,8 @@ lib/                # Utility functions and configurations
 - Use `SignedIn`, `SignedOut`, `ClerkLoaded`, `ClerkLoading` for auth states
 - Use server-side client for data fetching in Server Components
 - Handle errors gracefully with try/catch blocks
-- Use proper RLS (Row Level Security) policies
-- For any db migrations or schema changes, use Supabase MCP Server
+- Use Convex auth checks (ctx.auth) to enforce data access
+- For any db schema changes, update Convex schema and regenerate codegen
 - Use shadcn/ui components consistently
 - Show loading states during async operations
 - Follow the card-based layout pattern
@@ -68,7 +69,7 @@ lib/                # Utility functions and configurations
 - Use ESLint with Next.js configuration
 - Format code with Prettier (organize imports, Tailwind class sorting)
 - Uses Bun as the runtime and package manager
-- All database operations should go through Supabase
+- All database operations should go through Convex
 - Authentication is handled entirely by Clerk
 - OG image generation is handled internally via Cloudflare Browser Rendering API
 - Website URL format: always clean and normalize URLs before storage

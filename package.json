@@ -2,9 +2,11 @@
   "name": "mosaic",
   "scripts": {
     "build": "next build",
-    "dev": "next dev",
-    "lint": "next lint",
-    "lint:fix": "next lint --fix",
+    "predev": "bunx convex dev --until-success",
+    "dev": "pkill -f 'port 3000' || true && concurrently \"bun run dev:backend\" \"bun run dev:frontend\"",
+    "dev:backend": "bunx convex dev",
+    "dev:frontend": "next dev",
+    "lint": "bunx eslint --fix",
     "start": "next start"
   },
   "prettier": {
@@ -22,10 +24,9 @@
     "@polar-sh/sdk": "0.42.1",
     "@radix-ui/react-tabs": "^1.1.13",
     "@shikijs/markdown-it": "^3.20.0",
-    "@supabase/ssr": "^0.8.0",
-    "@supabase/supabase-js": "^2.89.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "concurrently": "^9.2.1",
     "convex": "^1.31.2",
     "feed": "^5.1.0",
     "gray-matter": "^4.0.3",
@@ -62,5 +63,10 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "typescript": "^5.9.3"
+  },
+  "postcss": {
+    "plugins": [
+      "@tailwindcss/postcss"
+    ]
   }
 }

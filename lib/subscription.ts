@@ -17,7 +17,7 @@ const _getPolarCustomerState = cache(async (userId: string): Promise<unknown> =>
 
     const polar = new Polar({
       accessToken: polarAccessToken,
-      server: process.env.NODE_ENV === 'development' ? "sandbox" : "production",
+      server: process.env.NODE_ENV === "development" ? "sandbox" : "production",
     });
 
     const response = await polar.customers.getStateExternal({
@@ -72,7 +72,7 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
 
     // Find active subscription
     const activeSubscription = customerStateTyped.activeSubscriptions?.find(
-      (sub: { status: string; cancelAtPeriodEnd?: boolean }) => sub.status === "active" && !sub.cancelAtPeriodEnd
+      (sub: { status: string; cancelAtPeriodEnd?: boolean }) => sub.status === "active" && !sub.cancelAtPeriodEnd,
     );
 
     if (!activeSubscription) {
@@ -96,12 +96,12 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
       planType = "pro-yearly";
       planProperties = {
         websites_limit: 999999, // Unlimited for pro yearly
-        images_limit: 999999,   // Unlimited for pro yearly
+        images_limit: 999999, // Unlimited for pro yearly
       };
     } else {
       planProperties = {
         websites_limit: 999999, // Unlimited for pro monthly
-        images_limit: 5000,     // 5000 for pro monthly
+        images_limit: 5000, // 5000 for pro monthly
       };
     }
 

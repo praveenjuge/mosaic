@@ -15,13 +15,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  getLatestScreenshotsForAllUserWebsites,
-  getLatestScreenshotsForWebsite,
-} from "@/lib/db";
+import { api } from "@/convex/_generated/api";
 import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
+import { fetchQuery } from "convex/nextjs";
 import Link from "next/link";
 import React, { Suspense } from "react";
 import { LocalTime } from "./local-time";
@@ -199,36 +197,48 @@ async function ScreenshotsContent({
   limit,
   showPagination,
 }: LatestScreenshotsProps) {
-  const { userId } = await auth();
+  const { userId, getToken } = await auth();
 
   if (!userId) return null;
 
   let websitePagesData: Array<ScreenshotWithDetails> = [];
   let hasMore = false;
+  const token = await getToken({ template: "convex" });
+  const queryOptions = token ? { token } : {};
 
   if (slug) {
-    // Get screenshots for a specific website
-    const response = await getLatestScreenshotsForWebsite(
-      slug,
-      page || 1,
-      limit || 10,
-    );
+    try {
+      // Get screenshots for a specific website
+      const response = await fetchQuery(
+        api.screenshots.listLatestForWebsite,
+        {
+          websiteId: slug,
+          page: page || 1,
+          limit: limit || 10,
+        },
+        queryOptions,
+      );
 
-    if (!response) {
+      websitePagesData = response.data;
+      hasMore = response.total > (page || 1) * (limit || 10);
+    } catch (error) {
+      console.error("Error fetching website screenshots:", error);
       return <ScreenshotsError />;
     }
-
-    websitePagesData = response.data;
-    hasMore = response.total > (page || 1) * (limit || 10);
   } else {
-    // Get latest screenshots from all user's websites (for homepage)
-    const response = await getLatestScreenshotsForAllUserWebsites(limit || 10);
+    try {
+      // Get latest screenshots from all user's websites (for homepage)
+      const response = await fetchQuery(
+        api.screenshots.listLatestForUser,
+        { limit: limit || 10 },
+        queryOptions,
+      );
 
-    if (!response) {
+      websitePagesData = response;
+    } catch (error) {
+      console.error("Error fetching latest screenshots:", error);
       return <ScreenshotsError />;
     }
-
-    websitePagesData = response;
   }
 
   if (websitePagesData.length === 0) {

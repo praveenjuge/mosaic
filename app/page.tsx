@@ -2,8 +2,10 @@ import HomeSignedOut from "@/components/home/homesignedout";
 import SignedInDashboard from "@/components/home/SignedInDashboard";
 import { website_description, website_subtitle } from "@/lib/constants";
 import { getOgImageUrl } from "@/lib/utils";
-import { SignedIn, SignedOut } from "@clerk/nextjs";
+import { Authenticated, Unauthenticated } from "convex/react";
 import { Metadata } from "next";
+
+export const dynamic = "force-static";
 
 export const metadata: Metadata = {
   title: website_subtitle,
@@ -14,12 +16,12 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <>
-      <SignedOut>
+      <Unauthenticated>
         <HomeSignedOut />
-      </SignedOut>
-      <SignedIn>
+      </Unauthenticated>
+      <Authenticated>
         <SignedInDashboard />
-      </SignedIn>
+      </Authenticated>
     </>
   );
 }

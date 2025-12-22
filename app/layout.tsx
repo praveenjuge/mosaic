@@ -14,6 +14,8 @@ import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 
+export const dynamic = "force-static";
+
 export const viewport: Viewport = { themeColor: "#059669" };
 
 export const metadata: Metadata = {
@@ -48,14 +50,14 @@ export default function RootLayout({
       className={`touch-manipulation antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
     >
       <body className="relative flex flex-col text-sm">
-        <ClerkProvider telemetry={false}>
-          <ConvexClientProvider>
-            <ThemeProvider
-              enableSystem
-              attribute="class"
-              defaultTheme="light"
-              disableTransitionOnChange
-            >
+        <ThemeProvider
+          enableSystem
+          attribute="class"
+          defaultTheme="light"
+          disableTransitionOnChange
+        >
+          <ClerkProvider telemetry={false}>
+            <ConvexClientProvider>
               <div
                 className="bg-primary pointer-events-none fixed -top-48 -right-48 size-96 opacity-15 blur-3xl select-none"
                 aria-hidden="true"
@@ -66,9 +68,9 @@ export default function RootLayout({
               </main>
               <Footer />
               <Toaster richColors />
-            </ThemeProvider>
-          </ConvexClientProvider>
-        </ClerkProvider>
+            </ConvexClientProvider>
+          </ClerkProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

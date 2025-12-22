@@ -1,5 +1,8 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { LoadingSpinner } from "@/components/spinner";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,10 +13,11 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { cleanUrl } from "@/lib/utils";
+import { useMutation } from "convex/react";
+import { FormEvent, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { handleEdit } from "./actions";
-import { SubmitButton } from "./submit-button";
 
 export function EditWebsite({
   websiteId,
@@ -23,6 +27,41 @@ export function EditWebsite({
   currentUrl?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const router = useRouter();
+  const editSite = useMutation(api.sites.editSite);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const url = formData.get("website")?.toString() || "";
+    const cleanedUrl = cleanUrl(url);
+
+    if (!cleanedUrl) {
+      toast.error("Please enter a valid website URL.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { status, message } = await editSite({
+        siteId: websiteId,
+        url_base: cleanedUrl,
+      });
+      if (status === "error") {
+        toast.error(message);
+      } else {
+        toast.success(message);
+        setOpen(false);
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Error editing website:", error);
+      toast.error("Failed to update website. Please try again.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -35,19 +74,7 @@ export function EditWebsite({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          className="grid gap-4"
-          action={async (formData) => {
-            const { status, message } = await handleEdit(formData, websiteId);
-            if (status === "error") {
-              toast.error(message);
-            } else {
-              setOpen(false);
-              toast.success(message);
-            }
-            setOpen(false);
-          }}
-        >
+        <form className="grid gap-4" onSubmit={handleSubmit}>
           <div className="grid gap-2">
             <Label htmlFor="website">Website</Label>
             <Input
@@ -57,9 +84,12 @@ export function EditWebsite({
               placeholder="example.com or https://example.com"
               defaultValue={currentUrl}
               required
+              disabled={isSaving}
             />
           </div>
-          <SubmitButton text="Save" />
+          <Button type="submit" className="w-full" disabled={isSaving}>
+            {isSaving ? <LoadingSpinner size={18} /> : "Save"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

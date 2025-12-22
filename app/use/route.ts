@@ -1,6 +1,7 @@
-import { checkImageInDatabase, checkWebsiteExistsForUrl, storeImageInDatabase } from "@/lib/db/og-images";
+import { api } from "@/convex/_generated/api";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { fetchMutation, fetchQuery } from "convex/nextjs";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -201,7 +202,9 @@ export async function GET(request: NextRequest) {
         });
       }
     } else {
-      cachedImageUrl = await checkImageInDatabase(url);
+      cachedImageUrl = await fetchQuery(api.ogImages.checkImageInDatabase, {
+        pageUrl: url,
+      });
       if (cachedImageUrl) {
         console.log(`[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedImageUrl}`);
         return redirectToImage(cachedImageUrl);
@@ -212,7 +215,10 @@ export async function GET(request: NextRequest) {
       const { urlBase } = extractUrlPartsConsistent(url);
       console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
 
-      const websiteExists = await checkWebsiteExistsForUrl(urlBase);
+      const websiteExists = await fetchQuery(
+        api.ogImages.checkWebsiteExistsForUrl,
+        { url_base: urlBase },
+      );
 
       if (!websiteExists) {
         console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
@@ -269,8 +275,16 @@ export async function GET(request: NextRequest) {
       // Store in database (background task) - only for production mode
       const imageSize = Buffer.from(imageBuffer).length;
       console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
-      storeImageInDatabase(url, `${cacheKey}.png`, imageSize, uploadedUrl).catch((error) =>
-        console.error("[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:", error)
+      fetchMutation(api.ogImages.storeImageInDatabase, {
+        pageUrl: url,
+        imageKey: `${cacheKey}.png`,
+        imageSize,
+        uploadedUrl,
+      }).catch((error) =>
+        console.error(
+          "[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:",
+          error,
+        ),
       );
 
       console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadedUrl}`);

@@ -1,5 +1,7 @@
 "use client";
 
+import { api } from "@/convex/_generated/api";
+import { LoadingSpinner } from "@/components/spinner";
 import {
   Card,
   CardContent,
@@ -7,16 +9,49 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { handleAdd } from "@/components/websites/actions";
-import { SubmitButton } from "@/components/websites/submit-button";
+import { cleanUrl } from "@/lib/utils";
+import { useMutation } from "convex/react";
 import Image from "next/image";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
 export default function WelcomeEmptyState() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
+  const addSite = useMutation(api.sites.addSite);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const url = formData.get("website")?.toString() || "";
+    const cleanedUrl = cleanUrl(url);
+
+    if (!cleanedUrl) {
+      toast.error("Please enter a valid website URL.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const { status, message } = await addSite({ url_base: cleanedUrl });
+      if (status === "error") {
+        toast.error(message);
+      } else {
+        toast.success(message);
+        event.currentTarget.reset();
+        router.refresh();
+      }
+    } catch (error) {
+      console.error("Error adding website:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center">
@@ -36,25 +71,7 @@ export default function WelcomeEmptyState() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form
-            className="grid gap-4"
-            action={async (formData) => {
-              setIsSubmitting(true);
-              try {
-                const { status, message } = await handleAdd(formData);
-                if (status === "error") {
-                  toast.error(message);
-                } else {
-                  toast.success(message);
-                  // The page will automatically refresh due to revalidation
-                }
-              } catch {
-                toast.error("Something went wrong. Please try again.");
-              } finally {
-                setIsSubmitting(false);
-              }
-            }}
-          >
+          <form className="grid gap-4" onSubmit={handleSubmit}>
             <div className="grid gap-2">
               <Label htmlFor="website">Website URL</Label>
               <Input
@@ -66,7 +83,13 @@ export default function WelcomeEmptyState() {
                 disabled={isSubmitting}
               />
             </div>
-            <SubmitButton text="Add Website & Generate OG Images" />
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <LoadingSpinner size={18} />
+              ) : (
+                "Add Website & Generate OG Images"
+              )}
+            </Button>
           </form>
           <div className="mt-6 text-center">
             <p className="text-muted-foreground text-sm">
