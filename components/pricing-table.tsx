@@ -1,3 +1,5 @@
+"use client";
+
 import { PlanButton } from "@/app/settings/plan-button";
 import { Badge } from "@/components/ui/badge";
 import {

@@ -1,29 +1,9 @@
+import type { Doc, Id } from "@/convex/_generated/dataModel";
+
 // New table structure types
-export interface Site {
-  id: string;
-  user_id: string;
-  url_base: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Page {
-  id: string;
-  website_id: string;
-  path: string;
-  full_url: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface Screenshot {
-  id: string;
-  page_id: string;
-  screenshot_url: string;
-  image_hash: string | null;
-  size_in_bytes: number | null;
-  generated_at: string;
-}
+export type Site = Doc<"sites">;
+export type Page = Doc<"pages">;
+export type Screenshot = Doc<"screenshots">;
 
 // Extended types with relations
 export interface PageWithSite extends Page {
@@ -39,10 +19,10 @@ export interface SiteWithStats extends Site {
 }
 
 export interface ScreenshotWithDetails {
-  id: string;
+  id: Id<"screenshots">;
   screenshot_url: string;
   size_in_bytes: number;
-  generated_at: string | null;
+  generated_at: number | string | null;
   page_title: string | null;
   page_url: string;
   website_name?: string; // Optional for when used with specific website

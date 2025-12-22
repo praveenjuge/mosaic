@@ -9,11 +9,13 @@
  */
 
 import type * as metadata from "../metadata.js";
+import type * as migrations from "../migrations.js";
 import type * as ogImages from "../ogImages.js";
 import type * as pages from "../pages.js";
 import type * as screenshots from "../screenshots.js";
 import type * as sites from "../sites.js";
 import type * as stats from "../stats.js";
+import type * as utils_url from "../utils/url.js";
 
 import type {
   ApiFromModules,
@@ -23,11 +25,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   metadata: typeof metadata;
+  migrations: typeof migrations;
   ogImages: typeof ogImages;
   pages: typeof pages;
   screenshots: typeof screenshots;
   sites: typeof sites;
   stats: typeof stats;
+  "utils/url": typeof utils_url;
 }>;
 
 /**

@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
@@ -25,7 +26,7 @@ import React, { Suspense } from "react";
 import { LocalTime } from "./local-time";
 
 interface LatestScreenshotsProps {
-  slug?: string;
+  slug?: Id<"sites">;
   page?: number;
   limit?: number;
   showPagination?: boolean;
@@ -220,7 +221,7 @@ async function ScreenshotsContent({
       );
 
       websitePagesData = response.data;
-      hasMore = response.total > (page || 1) * (limit || 10);
+      hasMore = response.hasMore;
     } catch (error) {
       console.error("Error fetching website screenshots:", error);
       return <ScreenshotsError />;

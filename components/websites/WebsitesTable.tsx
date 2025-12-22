@@ -143,7 +143,7 @@ function WebsiteRow({ website }: { website: Site }) {
       <TableCell className="flex items-center p-0.5">
         <Suspense fallback={<Skeleton className="h-8 w-16" />}>
           <WebsiteActions
-            websiteId={website.id}
+            websiteId={website._id}
             currentUrl={website.url_base}
           />
         </Suspense>
@@ -167,7 +167,7 @@ function WebsitesTableContent({ data }: { data: Site[] }) {
         </TableHeader>
         <TableBody>
           {data.map((website) => (
-            <WebsiteRow key={website.id} website={website} />
+            <WebsiteRow key={website._id} website={website} />
           ))}
         </TableBody>
       </Table>

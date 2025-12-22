@@ -1,31 +1,77 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { getUserSubscriptionInfo } from "@/lib/subscription";
+import { UserSubscriptionInfo } from "@/lib/types";
 import {
   ClerkLoaded,
   ClerkLoading,
   SignedIn,
   SignedOut,
   SignUpButton,
+  useAuth,
 } from "@clerk/nextjs";
-import { auth } from "@clerk/nextjs/server";
+import { useEffect, useState } from "react";
 
 export interface PlanButtonProps {
   type: "free" | "pro" | "pro-yearly";
 }
 
-const proProductId = process.env.POLAR_PRO_PRODUCT_ID!;
-const proYearlyProductId = process.env.POLAR_PRO_YEARLY_PRODUCT_ID!;
+const defaultSubscriptionInfo: UserSubscriptionInfo = {
+  plan: "free",
+  plan_properties: {
+    websites_limit: 1,
+    images_limit: 500,
+  },
+  is_active: false,
+};
 
-export async function PlanButton({ type }: PlanButtonProps) {
-  const { userId } = await auth();
-  const subscriptionInfo = await getUserSubscriptionInfo(userId);
-  const { is_active: isActive, plan: currentPlan } = subscriptionInfo;
+export function PlanButton({ type }: PlanButtonProps) {
+  const { isLoaded, isSignedIn } = useAuth();
+  const [subscriptionInfo, setSubscriptionInfo] =
+    useState<UserSubscriptionInfo | null>(null);
+  const [isFetching, setIsFetching] = useState(false);
+
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    let isMounted = true;
+
+    const fetchSubscription = async () => {
+      setIsFetching(true);
+      try {
+        const response = await fetch("/api/subscription/info", {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch subscription info");
+        }
+        const data = (await response.json()) as UserSubscriptionInfo;
+        if (isMounted) {
+          setSubscriptionInfo(data);
+        }
+      } catch (error) {
+        console.error("Error fetching subscription info:", error);
+        if (isMounted) {
+          setSubscriptionInfo(defaultSubscriptionInfo);
+        }
+      } finally {
+        if (isMounted) {
+          setIsFetching(false);
+        }
+      }
+    };
+
+    fetchSubscription();
+    return () => {
+      isMounted = false;
+    };
+  }, [isLoaded, isSignedIn]);
+
+  const { is_active: isActive, plan: currentPlan } =
+    subscriptionInfo ?? defaultSubscriptionInfo;
 
   // Helper to create checkout URL
-  const checkoutUrl = (productId: string) =>
-    userId
-      ? `/api/checkout/create?product_id=${productId}&customer_external_id=${userId}`
-      : "#";
+  const checkoutUrl = (plan: PlanButtonProps["type"]) =>
+    isSignedIn ? `/api/checkout/create?plan=${plan}` : "#";
 
   // Helper to capitalize plan name
   const capitalizePlan = (plan: string) =>
@@ -68,12 +114,11 @@ export async function PlanButton({ type }: PlanButtonProps) {
     }
 
     // User doesn't have active subscription - show upgrade
-    const productId = type === "pro" ? proProductId : proYearlyProductId;
     const upgradeText =
       type === "pro" ? "Upgrade to Pro" : "Upgrade to Pro Yearly";
     return (
       <Button className="w-full" asChild>
-        <a href={checkoutUrl(productId)}>{upgradeText}</a>
+        <a href={checkoutUrl(type)}>{upgradeText}</a>
       </Button>
     );
   };
@@ -93,7 +138,16 @@ export async function PlanButton({ type }: PlanButtonProps) {
             </Button>
           </SignUpButton>
         </SignedOut>
-        <SignedIn>{renderButton()}</SignedIn>
+        <SignedIn>
+          <Button
+            variant="outline"
+            className={`w-full ${!isFetching ? "hidden" : ""}`}
+            disabled
+          >
+            Loading...
+          </Button>
+          {!isFetching && renderButton()}
+        </SignedIn>
       </ClerkLoaded>
     </>
   );

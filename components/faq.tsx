@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const faqs = [
+export const faqs = [
   {
     question: "What is an OG Image?",
     answer:

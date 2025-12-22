@@ -20,12 +20,20 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get product_id and customer_external_id from search params
+    // Get product_id, plan, and customer_external_id from search params
     const searchParams = request.nextUrl.searchParams;
     const productId = searchParams.get("product_id");
+    const plan = searchParams.get("plan");
     const customerExternalId = searchParams.get("customer_external_id");
 
-    if (!productId) {
+    const planToProductId: Record<string, string | undefined> = {
+      pro: process.env.POLAR_PRO_PRODUCT_ID,
+      "pro-yearly": process.env.POLAR_PRO_YEARLY_PRODUCT_ID,
+    };
+
+    const resolvedProductId = productId ?? (plan ? planToProductId[plan] : null);
+
+    if (!resolvedProductId) {
       return NextResponse.json(
         { error: "Missing product_id" },
         { status: 400 }
@@ -33,7 +41,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Verify that the external ID matches the authenticated user
-    if (customerExternalId !== userId) {
+    const resolvedCustomerExternalId = customerExternalId ?? userId;
+    if (resolvedCustomerExternalId !== userId) {
       return NextResponse.json(
         { error: "Invalid customer_external_id" },
         { status: 400 }
@@ -56,7 +65,7 @@ export async function GET(request: NextRequest) {
 
     // Create checkout session with external ID and pre-filled customer data
     const checkout = await polar.checkouts.create({
-      products: [productId],
+      products: [resolvedProductId],
       externalCustomerId: userId,
       customerEmail: primaryEmail,
       customerName: customerName,

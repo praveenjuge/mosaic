@@ -1,11 +1,10 @@
 "use client";
 
 import { api } from "@/convex/_generated/api";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { SignInButton } from "@clerk/nextjs";
+import { Button } from "@/components/ui/button";
+import { SignInButton, useClerk } from "@clerk/nextjs";
 import { Authenticated, AuthLoading, Unauthenticated, useQuery } from "convex/react";
 import { Plus } from "lucide-react";
-import Link from "next/link";
 import AddWebsiteModal from "./AddWebsiteModal";
 
 export default function AddWebsiteClient({
@@ -13,6 +12,7 @@ export default function AddWebsiteClient({
 }: {
   websitesLimit: number;
 }) {
+  const { openUserProfile } = useClerk();
   const websiteCount = useQuery(api.sites.countForUser);
   const isLimitLoading = websiteCount === undefined;
   const preventSubmission =
@@ -34,10 +34,13 @@ export default function AddWebsiteClient({
             Add Website
           </Button>
         ) : preventSubmission ? (
-          <Link href="/settings" className={buttonVariants({ size: "sm" })}>
+          <Button
+            size="sm"
+            onClick={() => openUserProfile()}
+          >
             <Plus className="size-4" strokeWidth={2} />
             Upgrade to Pro
-          </Link>
+          </Button>
         ) : (
           <AddWebsiteModal />
         )}

@@ -7,6 +7,7 @@ const footerSections = [
     title: "Resources",
     links: [
       { href: "/help", label: "Help & Guides" },
+      { href: "/faq", label: "FAQ" },
       { href: "/blog", label: "Blog" },
       { href: "/changelog", label: "Changelog" },
     ],

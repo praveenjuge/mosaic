@@ -6,55 +6,68 @@ const clampPositive = (value: number, fallback: number) =>
 
 export const listLatestForWebsite = query({
   args: {
-    websiteId: v.string(),
+    websiteId: v.id("sites"),
     page: v.optional(v.number()),
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return { data: [], total: 0 };
+      return { data: [], hasMore: false };
     }
 
     const pageNumber = clampPositive(args.page ?? 1, 1);
     const limit = clampPositive(args.limit ?? 10, 10);
-    const offset = (pageNumber - 1) * limit;
 
-    const site = await ctx.db
-      .query("sites")
-      .withIndex("by_site_id", (q) => q.eq("id", args.websiteId))
-      .unique();
+    const site = await ctx.db.get(args.websiteId);
 
     if (!site || site.user_id !== identity.subject) {
-      return { data: [], total: 0 };
+      return { data: [], hasMore: false };
     }
 
-    const allScreenshots = await ctx.db
-      .query("screenshots")
-      .withIndex("by_user_id_website_id_generated_at", (q) =>
-        q.eq("user_id", identity.subject).eq("website_id", args.websiteId),
-      )
-      .order("desc")
-      .collect();
+    const fetchPage = async (websiteId: string | typeof args.websiteId) => {
+      let cursor: string | null = null;
+      let pageResult;
+      for (let i = 1; i <= pageNumber; i += 1) {
+        pageResult = await ctx.db
+          .query("screenshots")
+          .withIndex("by_user_id_website_id_generated_at", (q) =>
+            q.eq("user_id", identity.subject).eq("website_id", websiteId),
+          )
+          .order("desc")
+          .paginate({ cursor, numItems: limit });
+        cursor = pageResult.continueCursor;
+        if (pageResult.isDone) break;
+      }
+      return pageResult;
+    };
 
-    const total = allScreenshots.length;
-    const pageItems = allScreenshots.slice(offset, offset + limit);
+    let pageResult = await fetchPage(args.websiteId);
+    if ((!pageResult || pageResult.page.length === 0) && site.id) {
+      pageResult = await fetchPage(site.id);
+    }
 
-    const pageCache = new Map<string, { full_url?: string } | null>();
+    const pageItems = pageResult?.page ?? [];
+
+    const pageCache = new Map();
     const data = [];
 
     for (const screenshot of pageItems) {
       let page = pageCache.get(screenshot.page_id);
       if (page === undefined) {
-        page = await ctx.db
-          .query("pages")
-          .withIndex("by_page_id", (q) => q.eq("id", screenshot.page_id))
-          .unique();
+        if (typeof screenshot.page_id === "string") {
+          page = await ctx.db
+            .query("pages")
+            .withIndex("by_legacy_id", (q) => q.eq("id", screenshot.page_id))
+            .unique();
+        } else {
+          page = await ctx.db.get(screenshot.page_id);
+        }
         pageCache.set(screenshot.page_id, page);
       }
 
       data.push({
-        id: screenshot.id,
+        id: screenshot._id,
         screenshot_url: screenshot.screenshot_url,
         size_in_bytes: screenshot.size_in_bytes ?? 0,
         generated_at: screenshot.generated_at,
@@ -64,7 +77,7 @@ export const listLatestForWebsite = query({
       });
     }
 
-    return { data, total };
+    return { data, hasMore: !(pageResult?.isDone ?? true) };
   },
 });
 
@@ -88,31 +101,41 @@ export const listLatestForUser = query({
       .order("desc")
       .take(limit);
 
-    const pageCache = new Map<string, { full_url?: string } | null>();
-    const siteCache = new Map<string, { url_base?: string } | null>();
+    const pageCache = new Map();
+    const siteCache = new Map();
     const data = [];
 
     for (const screenshot of screenshots) {
       let page = pageCache.get(screenshot.page_id);
       if (page === undefined) {
-        page = await ctx.db
-          .query("pages")
-          .withIndex("by_page_id", (q) => q.eq("id", screenshot.page_id))
-          .unique();
+        if (typeof screenshot.page_id === "string") {
+          page = await ctx.db
+            .query("pages")
+            .withIndex("by_legacy_id", (q) => q.eq("id", screenshot.page_id))
+            .unique();
+        } else {
+          page = await ctx.db.get(screenshot.page_id);
+        }
         pageCache.set(screenshot.page_id, page);
       }
 
       let site = siteCache.get(screenshot.website_id);
       if (site === undefined) {
-        site = await ctx.db
-          .query("sites")
-          .withIndex("by_site_id", (q) => q.eq("id", screenshot.website_id))
-          .unique();
+        if (typeof screenshot.website_id === "string") {
+          site = await ctx.db
+            .query("sites")
+            .withIndex("by_legacy_id", (q) =>
+              q.eq("id", screenshot.website_id),
+            )
+            .unique();
+        } else {
+          site = await ctx.db.get(screenshot.website_id);
+        }
         siteCache.set(screenshot.website_id, site);
       }
 
       data.push({
-        id: screenshot.id,
+        id: screenshot._id,
         screenshot_url: screenshot.screenshot_url,
         size_in_bytes: screenshot.size_in_bytes ?? 0,
         generated_at: screenshot.generated_at,

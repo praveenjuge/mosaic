@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cleanUrl } from "@/lib/utils";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,7 @@ export function EditWebsite({
   websiteId,
   currentUrl,
 }: {
-  websiteId: string;
+  websiteId: Id<"sites">;
   currentUrl?: string;
 }) {
   const [open, setOpen] = useState(false);

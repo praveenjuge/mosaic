@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cleanUrl } from "@/lib/utils";
+import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
 import Image from "next/image";
@@ -36,7 +37,7 @@ import { FormEvent, useState } from "react";
 import { toast } from "sonner";
 
 interface WebsiteActionsProps {
-  websiteId: string;
+  websiteId: Id<"sites">;
   currentUrl: string;
 }
 

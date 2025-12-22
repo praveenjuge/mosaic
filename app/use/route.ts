@@ -202,7 +202,7 @@ export async function GET(request: NextRequest) {
         });
       }
     } else {
-      cachedImageUrl = await fetchQuery(api.ogImages.checkImageInDatabase, {
+      cachedImageUrl = await fetchQuery(api.internal.ogImages.checkImageInDatabase, {
         pageUrl: url,
       });
       if (cachedImageUrl) {
@@ -216,7 +216,7 @@ export async function GET(request: NextRequest) {
       console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
 
       const websiteExists = await fetchQuery(
-        api.ogImages.checkWebsiteExistsForUrl,
+        api.internal.ogImages.checkWebsiteExistsForUrl,
         { url_base: urlBase },
       );
 
@@ -275,7 +275,7 @@ export async function GET(request: NextRequest) {
       // Store in database (background task) - only for production mode
       const imageSize = Buffer.from(imageBuffer).length;
       console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
-      fetchMutation(api.ogImages.storeImageInDatabase, {
+      fetchMutation(api.internal.ogImages.storeImageInDatabase, {
         pageUrl: url,
         imageKey: `${cacheKey}.png`,
         imageSize,

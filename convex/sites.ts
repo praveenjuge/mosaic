@@ -1,23 +1,17 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import { normalizeUrlBase } from "./utils/url";
 
 const siteInput = v.object({
-  id: v.string(),
-  user_id: v.string(),
   url_base: v.string(),
-  created_at: v.string(),
-  updated_at: v.string(),
+  created_at: v.optional(v.union(v.number(), v.string())),
+  updated_at: v.optional(v.union(v.number(), v.string())),
+  id: v.optional(v.string()),
 });
 
-const createSiteId = () => {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-
-  return `site_${Date.now()}_${Math.random().toString(16).slice(2)}`;
-};
-
-const nowIso = () => new Date().toISOString();
+const nowTimestamp = () => Date.now();
+const toTimestamp = (value: number | string) =>
+  typeof value === "number" ? value : Date.parse(value) || 0;
 
 export const listForUser = query({
   args: {},
@@ -32,7 +26,9 @@ export const listForUser = query({
       .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
       .collect();
 
-    return sites.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return sites.sort(
+      (a, b) => toTimestamp(b.created_at) - toTimestamp(a.created_at),
+    );
   },
 });
 
@@ -55,7 +51,7 @@ export const countForUser = query({
 
 export const getById = query({
   args: {
-    siteId: v.string(),
+    siteId: v.id("sites"),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -63,10 +59,7 @@ export const getById = query({
       return null;
     }
 
-    const site = await ctx.db
-      .query("sites")
-      .withIndex("by_site_id", (q) => q.eq("id", args.siteId))
-      .unique();
+    const site = await ctx.db.get(args.siteId);
 
     if (!site || site.user_id !== identity.subject) {
       return null;
@@ -86,10 +79,11 @@ export const getByUrlBase = query({
       return null;
     }
 
+    const normalizedUrl = normalizeUrlBase(args.url_base);
     return await ctx.db
       .query("sites")
       .withIndex("by_user_id_url_base", (q) =>
-        q.eq("user_id", identity.subject).eq("url_base", args.url_base),
+        q.eq("user_id", identity.subject).eq("url_base", normalizedUrl),
       )
       .unique();
   },
@@ -108,10 +102,11 @@ export const addSite = mutation({
       };
     }
 
+    const normalizedUrl = normalizeUrlBase(args.url_base);
     const existing = await ctx.db
       .query("sites")
       .withIndex("by_user_id_url_base", (q) =>
-        q.eq("user_id", identity.subject).eq("url_base", args.url_base),
+        q.eq("user_id", identity.subject).eq("url_base", normalizedUrl),
       )
       .unique();
 
@@ -122,28 +117,27 @@ export const addSite = mutation({
       };
     }
 
-    const timestamp = nowIso();
+    const timestamp = nowTimestamp();
     const site = {
-      id: createSiteId(),
       user_id: identity.subject,
-      url_base: args.url_base,
+      url_base: normalizedUrl,
       created_at: timestamp,
       updated_at: timestamp,
     };
 
-    await ctx.db.insert("sites", site);
+    const siteId = await ctx.db.insert("sites", site);
 
     return {
       status: "success" as const,
       message: "Website added successfully",
-      data: [site],
+      data: [{ ...site, _id: siteId }],
     };
   },
 });
 
 export const editSite = mutation({
   args: {
-    siteId: v.string(),
+    siteId: v.id("sites"),
     url_base: v.string(),
   },
   handler: async (ctx, args) => {
@@ -155,10 +149,7 @@ export const editSite = mutation({
       };
     }
 
-    const existing = await ctx.db
-      .query("sites")
-      .withIndex("by_site_id", (q) => q.eq("id", args.siteId))
-      .unique();
+    const existing = await ctx.db.get(args.siteId);
 
     if (!existing || existing.user_id !== identity.subject) {
       return {
@@ -167,23 +158,24 @@ export const editSite = mutation({
       };
     }
 
+    const normalizedUrl = normalizeUrlBase(args.url_base);
     const duplicate = await ctx.db
       .query("sites")
       .withIndex("by_user_id_url_base", (q) =>
-        q.eq("user_id", identity.subject).eq("url_base", args.url_base),
+        q.eq("user_id", identity.subject).eq("url_base", normalizedUrl),
       )
       .unique();
 
-    if (duplicate && duplicate.id !== args.siteId) {
+    if (duplicate && duplicate._id !== args.siteId) {
       return {
         status: "error" as const,
         message: "This website already exists in your list.",
       };
     }
 
-    const timestamp = nowIso();
+    const timestamp = nowTimestamp();
     await ctx.db.patch(existing._id, {
-      url_base: args.url_base,
+      url_base: normalizedUrl,
       updated_at: timestamp,
     });
 
@@ -192,9 +184,8 @@ export const editSite = mutation({
       message: "Website updated successfully",
       data: [
         {
-          id: existing.id,
-          user_id: existing.user_id,
-          url_base: args.url_base,
+          ...existing,
+          url_base: normalizedUrl,
           created_at: existing.created_at,
           updated_at: timestamp,
         },
@@ -205,7 +196,7 @@ export const editSite = mutation({
 
 export const deleteSite = mutation({
   args: {
-    siteId: v.string(),
+    siteId: v.id("sites"),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -216,10 +207,7 @@ export const deleteSite = mutation({
       };
     }
 
-    const existing = await ctx.db
-      .query("sites")
-      .withIndex("by_site_id", (q) => q.eq("id", args.siteId))
-      .unique();
+    const existing = await ctx.db.get(args.siteId);
 
     if (!existing || existing.user_id !== identity.subject) {
       return {
@@ -228,24 +216,40 @@ export const deleteSite = mutation({
       };
     }
 
-    const screenshots = await ctx.db
-      .query("screenshots")
-      .withIndex("by_website_id_generated_at", (q) =>
-        q.eq("website_id", args.siteId),
-      )
-      .collect();
+    const legacyWebsiteId = existing.id;
+    const deleteByWebsiteId = async (websiteId: string | typeof args.siteId) => {
+      let cursor: string | null = null;
+      do {
+        const page = await ctx.db
+          .query("screenshots")
+          .withIndex("by_website_id_generated_at", (q) =>
+            q.eq("website_id", websiteId),
+          )
+          .paginate({ cursor, numItems: 100 });
+        for (const screenshot of page.page) {
+          await ctx.db.delete(screenshot._id);
+        }
+        cursor = page.continueCursor;
+        if (page.isDone) break;
+      } while (cursor);
 
-    for (const screenshot of screenshots) {
-      await ctx.db.delete(screenshot._id);
-    }
+      cursor = null;
+      do {
+        const page = await ctx.db
+          .query("pages")
+          .withIndex("by_website_id", (q) => q.eq("website_id", websiteId))
+          .paginate({ cursor, numItems: 100 });
+        for (const pageDoc of page.page) {
+          await ctx.db.delete(pageDoc._id);
+        }
+        cursor = page.continueCursor;
+        if (page.isDone) break;
+      } while (cursor);
+    };
 
-    const pages = await ctx.db
-      .query("pages")
-      .withIndex("by_website_id", (q) => q.eq("website_id", args.siteId))
-      .collect();
-
-    for (const page of pages) {
-      await ctx.db.delete(page._id);
+    await deleteByWebsiteId(args.siteId);
+    if (legacyWebsiteId) {
+      await deleteByWebsiteId(legacyWebsiteId);
     }
 
     await ctx.db.delete(existing._id);
@@ -262,20 +266,38 @@ export const importSites = mutation({
     sites: v.array(siteInput),
   },
   handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to import websites.");
+    }
+
     let inserted = 0;
     let updated = 0;
 
     for (const site of args.sites) {
+      const normalizedUrl = normalizeUrlBase(site.url_base);
       const existing = await ctx.db
         .query("sites")
-        .withIndex("by_site_id", (q) => q.eq("id", site.id))
+        .withIndex("by_user_id_url_base", (q) =>
+          q.eq("user_id", identity.subject).eq("url_base", normalizedUrl),
+        )
         .unique();
 
       if (existing) {
-        await ctx.db.patch(existing._id, site);
+        await ctx.db.patch(existing._id, {
+          url_base: normalizedUrl,
+          updated_at: site.updated_at ?? nowTimestamp(),
+          id: site.id ?? existing.id,
+        });
         updated += 1;
       } else {
-        await ctx.db.insert("sites", site);
+        await ctx.db.insert("sites", {
+          user_id: identity.subject,
+          url_base: normalizedUrl,
+          created_at: site.created_at ?? nowTimestamp(),
+          updated_at: site.updated_at ?? nowTimestamp(),
+          id: site.id,
+        });
         inserted += 1;
       }
     }

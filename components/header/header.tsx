@@ -1,11 +1,9 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SignInButton, SignUpButton } from "@clerk/nextjs";
 import { Authenticated, AuthLoading, Unauthenticated } from "convex/react";
-import { Settings } from "lucide-react";
-import Link from "next/link";
 import { Suspense } from "react";
 import Logo from "../logo";
 import UserProfile from "./user-profile";
@@ -40,13 +38,6 @@ function SignedOutButtons() {
 function SignedInNav() {
   return (
     <nav className="flex items-center gap-2 md:gap-4">
-      <Link
-        href="/settings"
-        className={buttonVariants({ variant: "ghost", size: "sm" })}
-      >
-        <Settings className="size-4 stroke-2" />
-        Settings
-      </Link>
       <Suspense fallback={<Skeleton className="size-8 rounded-full" />}>
         <UserProfile />
       </Suspense>

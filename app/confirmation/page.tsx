@@ -41,8 +41,10 @@ function ConfirmationContent({ checkoutId }: { checkoutId?: string }) {
             <Button asChild className="w-full">
               <Link href="/">Go to Dashboard</Link>
             </Button>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/settings">View Settings</Link>
+            <Button variant="outline" className="w-full" asChild>
+              <a href="/api/customer-portal" target="_blank" rel="noreferrer">
+                Manage Subscription
+              </a>
             </Button>
           </div>
         </CardContent>
