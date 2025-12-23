@@ -1,7 +1,8 @@
 import { Polar } from "@convex-dev/polar";
 import { components, api } from "./_generated/api";
-import { query, action } from "./_generated/server";
+import { query, internalQuery, action } from "./_generated/server";
 import { v } from "convex/values";
+import { PLAN_LIMITS } from "./constants";
 
 // Helper function to get user info from Clerk identity
 async function getUserInfoFromIdentity(
@@ -49,7 +50,6 @@ type SubscriptionInfo = {
   plan: "free" | "pro" | "pro-yearly";
   is_active: boolean;
   plan_properties: {
-    websites_limit: number;
     images_limit: number;
   };
 };
@@ -63,7 +63,9 @@ export const getCurrentSubscription = query({
       return {
         plan: "free",
         is_active: false,
-        plan_properties: { websites_limit: 999999, images_limit: 500 },
+        plan_properties: {
+          images_limit: PLAN_LIMITS.FREE.IMAGES
+        },
       };
     }
 
@@ -75,7 +77,9 @@ export const getCurrentSubscription = query({
       return {
         plan: "free",
         is_active: false,
-        plan_properties: { websites_limit: 999999, images_limit: 500 },
+        plan_properties: {
+          images_limit: PLAN_LIMITS.FREE.IMAGES
+        },
       };
     }
 
@@ -84,8 +88,39 @@ export const getCurrentSubscription = query({
       plan: isYearly ? "pro-yearly" : "pro",
       is_active: subscription.status === "active",
       plan_properties: {
-        websites_limit: 999999,
-        images_limit: isYearly ? 999999 : 5000,
+        images_limit: isYearly ? PLAN_LIMITS.PRO_YEARLY.IMAGES : PLAN_LIMITS.PRO.IMAGES,
+      },
+    };
+  },
+});
+
+// Internal query to get subscription for a specific user (by user_id)
+// This is used internally to check website owner's limits for public API
+export const getSubscriptionByUserId = internalQuery({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args): Promise<SubscriptionInfo> => {
+    const subscription = await polar.getCurrentSubscription(ctx, {
+      userId: args.userId,
+    });
+
+    if (!subscription) {
+      return {
+        plan: "free",
+        is_active: false,
+        plan_properties: {
+          images_limit: PLAN_LIMITS.FREE.IMAGES
+        },
+      };
+    }
+
+    const isYearly = subscription.productKey === "premiumYearly";
+    return {
+      plan: isYearly ? "pro-yearly" : "pro",
+      is_active: subscription.status === "active",
+      plan_properties: {
+        images_limit: isYearly ? PLAN_LIMITS.PRO_YEARLY.IMAGES : PLAN_LIMITS.PRO.IMAGES,
       },
     };
   },

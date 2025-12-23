@@ -1,5 +1,9 @@
 Mosaic is a SaaS platform that automatically generates Open Graph (OG) images for websites using screenshots. The application allows users to add their websites and automatically create beautiful social media preview images by taking screenshots of their web pages.
 
+## Rules
+
+- After generating code do `npm run predev` and `npm run build` to check if everything works.
+
 ### Core Technologies
 
 - **Framework**: Next.js (App Router) with React 19 TypeScript

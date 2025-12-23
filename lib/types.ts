@@ -81,7 +81,6 @@ export interface PolarCustomerState {
 export interface UserSubscriptionInfo {
   plan: string;
   plan_properties: {
-    websites_limit: number;
     images_limit: number;
     storage_limit?: string;
   };

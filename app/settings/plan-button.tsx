@@ -20,7 +20,6 @@ export interface PlanButtonProps {
 const defaultSubscriptionInfo = {
   plan: "free",
   plan_properties: {
-    websites_limit: 1,
     images_limit: 500,
   },
   is_active: false,

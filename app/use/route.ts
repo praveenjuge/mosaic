@@ -199,6 +199,25 @@ export async function GET(request: NextRequest) {
       }
 
       console.log(`[API_REQUEST_WEBSITE_FOUND] Website exists, proceeding with screenshot`);
+
+      // Check the website owner's image limit (public endpoint, but owner's limit applies)
+      try {
+        const limitCheckResult = await fetchMutation(api.ogImages.checkWebsiteOwnerLimit, {
+          urlBase,
+        });
+        if (!limitCheckResult.canGenerate) {
+          console.warn(`[API_REQUEST_LIMIT_EXCEEDED] All website owners have exceeded their image limits`);
+          return NextResponse.json(
+            {
+              error: "OG image limit exceeded for this plan. Please upgrade your subscription.",
+            },
+            { status: 403 }
+          );
+        }
+      } catch (limitError) {
+        console.error("[API_REQUEST_LIMIT_CHECK_ERROR] Limit check failed:", limitError);
+        // Proceed with generation on error (fail open)
+      }
     }
 
     // Generate screenshot

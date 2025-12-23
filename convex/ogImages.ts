@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
+import { PLAN_LIMITS, PLAN_TYPE_MAPPING } from "./constants";
+import { api, internal } from "./_generated/api";
 
 const nowTimestamp = () => Date.now();
 export const checkImageInDatabase = query({
@@ -55,22 +57,43 @@ export const storeImageInDatabase = mutation({
       };
     }
 
-    const website = matchingSites.sort(
+    // Find a website owner who has capacity (fallback to oldest)
+    let selectedWebsite = matchingSites.sort(
       (a, b) => a._creationTime - b._creationTime,
     )[0];
+
+    for (const site of matchingSites) {
+      const subscription = await ctx.runQuery(internal.billing.getSubscriptionByUserId, {
+        userId: site.user_id,
+      });
+      const planType: keyof typeof PLAN_LIMITS =
+        PLAN_TYPE_MAPPING[subscription.plan as keyof typeof PLAN_TYPE_MAPPING] ||
+        "FREE";
+      const limit = PLAN_LIMITS[planType].IMAGES;
+
+      const screenshots = await ctx.db
+        .query("screenshots")
+        .withIndex("by_user_id", (q) => q.eq("user_id", site.user_id))
+        .collect();
+
+      if (screenshots.length < limit) {
+        selectedWebsite = site;
+        break;
+      }
+    }
 
     const existingPage = await ctx.db
       .query("screenshots")
       .withIndex("by_website_id_path", (q) =>
-        q.eq("website_id", website._id).eq("path", path),
+        q.eq("website_id", selectedWebsite._id).eq("path", path),
       )
       .order("desc")
       .first();
 
     if (!existingPage) {
       await ctx.db.insert("screenshots", {
-        website_id: website._id,
-        user_id: website.user_id,
+        website_id: selectedWebsite._id,
+        user_id: selectedWebsite.user_id,
         path,
         full_url: sanitizedUrl,
         screenshot_url: args.uploadedUrl,
@@ -104,5 +127,54 @@ export const deleteImage = mutation({
     }
 
     await ctx.db.delete(args.imageId);
+  },
+});
+
+// Check if any user with this website has capacity (for public API endpoint)
+// Returns true if ANY user with this website can accept more images
+export const checkWebsiteOwnerLimit = mutation({
+  args: {
+    urlBase: v.string(),
+  },
+  handler: async (ctx, args): Promise<{
+    canGenerate: boolean;
+  }> => {
+    // Normalize the url_base to match how it's stored
+    const normalizedUrlBase = normalizeUrlBase(args.urlBase);
+
+    // Find all sites with matching url_base
+    const matchingSites = await ctx.db
+      .query("sites")
+      .withIndex("by_url_base", (q) => q.eq("url_base", normalizedUrlBase))
+      .collect();
+
+    if (!matchingSites.length) {
+      return { canGenerate: false };
+    }
+
+    // Check each site owner's limit - return true if ANY has capacity
+    for (const site of matchingSites) {
+      const subscription = await ctx.runQuery(internal.billing.getSubscriptionByUserId, {
+        userId: site.user_id,
+      });
+      const planType: keyof typeof PLAN_LIMITS =
+        PLAN_TYPE_MAPPING[subscription.plan as keyof typeof PLAN_TYPE_MAPPING] ||
+        "FREE";
+      const limit = PLAN_LIMITS[planType].IMAGES;
+
+      // Count this user's images
+      const screenshots = await ctx.db
+        .query("screenshots")
+        .withIndex("by_user_id", (q) => q.eq("user_id", site.user_id))
+        .collect();
+
+      if (screenshots.length < limit) {
+        // This user has capacity!
+        return { canGenerate: true };
+      }
+    }
+
+    // All users with this website are at their limit
+    return { canGenerate: false };
   },
 });
