@@ -3,12 +3,6 @@ import { v } from "convex/values";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
 
 const nowTimestamp = () => Date.now();
-const toTimestamp = (value?: number | string | null) => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Date.parse(value) || 0;
-  return 0;
-};
-
 export const checkImageInDatabase = query({
   args: {
     pageUrl: v.string(),
@@ -65,7 +59,7 @@ export const storeImageInDatabase = mutation({
     }
 
     const website = matchingSites.sort(
-      (a, b) => toTimestamp(a.created_at) - toTimestamp(b.created_at),
+      (a, b) => a._creationTime - b._creationTime,
     )[0];
 
     const existingPage = await ctx.db

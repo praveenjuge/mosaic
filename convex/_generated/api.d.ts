@@ -9,7 +9,6 @@
  */
 
 import type * as metadata from "../metadata.js";
-import type * as migrations from "../migrations.js";
 import type * as ogImages from "../ogImages.js";
 import type * as pages from "../pages.js";
 import type * as screenshots from "../screenshots.js";
@@ -25,7 +24,6 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   metadata: typeof metadata;
-  migrations: typeof migrations;
   ogImages: typeof ogImages;
   pages: typeof pages;
   screenshots: typeof screenshots;

@@ -6,16 +6,8 @@ import { normalizeUrlBase } from "./utils/url";
 
 const siteInput = v.object({
   url_base: v.string(),
-  created_at: v.optional(v.number()),
-  updated_at: v.optional(v.number()),
 });
 
-const nowTimestamp = () => Date.now();
-const toTimestamp = (value?: number | string | null) => {
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Date.parse(value) || 0;
-  return 0;
-};
 
 export const listForUser = query({
   args: {},
@@ -30,9 +22,7 @@ export const listForUser = query({
       .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
       .collect();
 
-    return sites.sort(
-      (a, b) => toTimestamp(b.created_at) - toTimestamp(a.created_at),
-    );
+    return sites.sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 
@@ -121,12 +111,9 @@ export const addSite = mutation({
       };
     }
 
-    const timestamp = nowTimestamp();
     const site = {
       user_id: identity.subject,
       url_base: normalizedUrl,
-      created_at: timestamp,
-      updated_at: timestamp,
     };
 
     const siteId = await ctx.db.insert("sites", site);
@@ -176,10 +163,8 @@ export const editSite = mutation({
       };
     }
 
-    const timestamp = nowTimestamp();
     await ctx.db.patch(existing._id, {
       url_base: normalizedUrl,
-      updated_at: timestamp,
     });
 
     return {
@@ -189,8 +174,6 @@ export const editSite = mutation({
         {
           ...existing,
           url_base: normalizedUrl,
-          created_at: existing.created_at,
-          updated_at: timestamp,
         },
       ],
     };
@@ -297,15 +280,12 @@ export const importSites = mutation({
       if (existing) {
         await ctx.db.patch(existing._id, {
           url_base: normalizedUrl,
-          updated_at: site.updated_at ?? nowTimestamp(),
         });
         updated += 1;
       } else {
         await ctx.db.insert("sites", {
           user_id: identity.subject,
           url_base: normalizedUrl,
-          created_at: site.created_at ?? nowTimestamp(),
-          updated_at: site.updated_at ?? nowTimestamp(),
         });
         inserted += 1;
       }
