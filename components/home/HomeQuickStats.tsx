@@ -7,14 +7,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/convex/_generated/api";
+import type { DashboardStats } from "@/convex/stats";
 import { formatBytes } from "@/lib/utils";
-import {
-  Authenticated,
-  Unauthenticated,
-  useQuery,
-} from "convex/react";
-import WebsitesStatCardClient from "./WebsitesStatCardClient";
+import { Authenticated, Unauthenticated } from "convex/react";
 
 function ImagesStatCard({ count }: { count: number }) {
   return (
@@ -39,29 +34,17 @@ function StorageStatCard({ bytes }: { bytes: number }) {
 }
 
 function SubscriptionStatCard({
-  plan,
+  planDisplayName,
   isActive,
 }: {
-  plan: string;
+  planDisplayName: string;
   isActive: boolean;
 }) {
-  const getPlanDisplayName = (plan: string) => {
-    switch (plan) {
-      case "pro":
-        return "Pro Plan";
-      case "pro-yearly":
-        return "Pro Yearly";
-      case "free":
-      default:
-        return "Free Plan";
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
         <CardTitle className={isActive ? "text-green-600" : ""}>
-          {getPlanDisplayName(plan)}
+          {planDisplayName}
         </CardTitle>
         <CardDescription>Subscription</CardDescription>
       </CardHeader>
@@ -148,17 +131,11 @@ function StatsLoadingSkeleton() {
   );
 }
 
-export default function HomeQuickStats() {
-  const userStats = useQuery(api.stats.getUserStats);
-  const subscriptionInfo = useQuery(api.billing.getCurrentSubscription);
-
-  const totalImages = userStats?.total_images ?? 0;
-  const totalStorageBytes = userStats?.total_storage_bytes ?? 0;
-  const plan = subscriptionInfo?.plan ?? "free";
-  const isActive = subscriptionInfo?.is_active ?? false;
-
-  const isLoading = userStats === undefined || subscriptionInfo === undefined;
-
+export default function HomeQuickStats({
+  stats,
+}: {
+  stats: DashboardStats | null | undefined;
+}) {
   return (
     <>
       <Unauthenticated>
@@ -190,14 +167,22 @@ export default function HomeQuickStats() {
         </div>
       </Unauthenticated>
       <Authenticated>
-        {isLoading ? (
+        {!stats ? (
           <StatsLoadingSkeleton />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <WebsitesStatCardClient />
-            <ImagesStatCard count={totalImages} />
-            <StorageStatCard bytes={totalStorageBytes} />
-            <SubscriptionStatCard plan={plan} isActive={isActive} />
+            <Card>
+              <CardHeader>
+                <CardTitle>{stats.total_websites.toLocaleString()}</CardTitle>
+                <CardDescription>Websites</CardDescription>
+              </CardHeader>
+            </Card>
+            <ImagesStatCard count={stats.total_images} />
+            <StorageStatCard bytes={stats.total_storage_bytes} />
+            <SubscriptionStatCard
+              planDisplayName={stats.plan_display_name}
+              isActive={stats.is_active}
+            />
           </div>
         )}
       </Authenticated>

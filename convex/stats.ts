@@ -104,3 +104,70 @@ export const getUserStats = query({
     };
   },
 });
+
+// Consolidated dashboard stats query - returns all dashboard data in a single request
+export type DashboardStats = {
+  total_websites: number;
+  total_images: number;
+  total_storage_bytes: number;
+  plan: "free" | "pro" | "pro-yearly";
+  plan_display_name: string;
+  is_active: boolean;
+  can_generate_more: boolean;
+  has_exceeded_limit: boolean;
+  images_limit: number;
+};
+
+const PLAN_DISPLAY_NAMES: Record<string, string> = {
+  free: "Free Plan",
+  pro: "Pro Plan",
+  "pro-yearly": "Pro Yearly",
+};
+
+export const getUserDashboardStats = query({
+  args: {},
+  handler: async (ctx): Promise<DashboardStats> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        total_websites: 0,
+        total_images: 0,
+        total_storage_bytes: 0,
+        plan: "free",
+        plan_display_name: PLAN_DISPLAY_NAMES.free,
+        is_active: false,
+        can_generate_more: false,
+        has_exceeded_limit: false,
+        images_limit: PLAN_LIMITS.FREE.IMAGES,
+      };
+    }
+
+    const userId = identity.subject;
+
+    // Fetch all data in parallel
+    const [sites, screenshots, subscription] = await Promise.all([
+      ctx.db.query("sites").withIndex("by_user_id", (q) => q.eq("user_id", userId)).collect(),
+      ctx.db.query("screenshots").withIndex("by_user_id", (q) => q.eq("user_id", userId)).collect(),
+      ctx.runQuery(internal.billing.getSubscriptionByUserId, { userId }),
+    ]);
+
+    const totalImages = screenshots.length;
+    const totalStorageBytes = screenshots.reduce((sum, shot) => sum + (shot.size_in_bytes ?? 0), 0);
+    const totalWebsites = sites.length;
+    const plan = subscription.plan;
+    const imagesLimit = subscription.plan_properties.images_limit;
+    const hasExceededLimit = totalImages >= imagesLimit;
+
+    return {
+      total_websites: totalWebsites,
+      total_images: totalImages,
+      total_storage_bytes: totalStorageBytes,
+      plan,
+      plan_display_name: PLAN_DISPLAY_NAMES[plan] ?? PLAN_DISPLAY_NAMES.free,
+      is_active: subscription.is_active,
+      can_generate_more: !hasExceededLimit,
+      has_exceeded_limit: hasExceededLimit,
+      images_limit: imagesLimit,
+    };
+  },
+});
