@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,10 +21,13 @@ import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { ScreenshotWithDetails } from "@/lib/types";
 import { formatBytes } from "@/lib/utils";
-import { auth } from "@clerk/nextjs/server";
-import { fetchQuery } from "convex/nextjs";
+import {
+  Authenticated,
+  Unauthenticated,
+  useQuery,
+} from "convex/react";
 import Link from "next/link";
-import React, { Suspense } from "react";
+import { useEffect, useState } from "react";
 import { LocalTime } from "./local-time";
 
 interface LatestScreenshotsProps {
@@ -155,21 +160,21 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
                     <span className="text-muted-foreground">Unknown page</span>
                   )}
                 </TableCell>
-              <TableCell>
-                <span className="text-muted-foreground">
-                  {item.website_name ?? "Unknown website"}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className="text-muted-foreground text-sm">
-                  {formatBytes(item.size_in_bytes)}
-                </span>
-              </TableCell>
-              <TableCell>
-                <span className="text-muted-foreground text-sm">
-                  <LocalTime timeString={item.generated_at} />
-                </span>
-              </TableCell>
+                <TableCell>
+                  <span className="text-muted-foreground">
+                    {item.website_name ?? "Unknown website"}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-muted-foreground text-sm">
+                    {formatBytes(item.size_in_bytes)}
+                  </span>
+                </TableCell>
+                <TableCell>
+                  <span className="text-muted-foreground text-sm">
+                    <LocalTime timeString={item.generated_at} />
+                  </span>
+                </TableCell>
               </TableRow>
             );
           })}
@@ -198,80 +203,75 @@ function ScreenshotsPagination({
   );
 }
 
-// Screenshots content component
-async function ScreenshotsContent({
+const LatestScreenshots: React.FC<LatestScreenshotsProps> = ({
   slug,
-  cursor,
+  cursor: initialCursor,
   limit,
   showPagination,
-}: LatestScreenshotsProps) {
-  const { userId, getToken } = await auth();
+}) => {
+  const [cursor, setCursor] = useState(initialCursor);
 
-  if (!userId) return null;
+  useEffect(() => {
+    setCursor(initialCursor);
+  }, [initialCursor]);
 
-  let websitePagesData: Array<ScreenshotWithDetails> = [];
-  let hasMore = false;
-  let nextCursor: string | null = cursor ?? null;
-  const token = await getToken({ template: "convex" });
-  const queryOptions = token ? { token } : {};
-
-  if (slug) {
-    try {
-      // Get screenshots for a specific website
-      const response = await fetchQuery(
-        api.screenshots.listLatestForWebsite,
-        {
+  // Get screenshots for a specific website
+  const websiteScreenshotsQuery = useQuery(
+    api.screenshots.listLatestForWebsite,
+    slug
+      ? {
           websiteId: slug,
           cursor: cursor ?? undefined,
           limit: limit || 10,
-        },
-        queryOptions,
-      );
+        }
+      : "skip"
+  );
 
-      websitePagesData = response.data;
-      hasMore = response.hasMore;
-      nextCursor = response.cursor ?? null;
-    } catch (error) {
-      console.error("Error fetching website screenshots:", error);
-      return <ScreenshotsError />;
+  // Get latest screenshots from all user's websites (for homepage)
+  const userScreenshotsQuery = useQuery(
+    api.screenshots.listLatestForUser,
+    slug ? "skip" : { limit: limit || 10 }
+  );
+
+  const renderWebsiteScreenshots = () => {
+    if (!websiteScreenshotsQuery || websiteScreenshotsQuery === null) {
+      return websiteScreenshotsQuery === null ? <ScreenshotsError /> : <ScreenshotsTableSkeleton />;
     }
-  } else {
-    try {
-      // Get latest screenshots from all user's websites (for homepage)
-      const response = await fetchQuery(
-        api.screenshots.listLatestForUser,
-        { limit: limit || 10 },
-        queryOptions,
-      );
-
-      websitePagesData = response;
-    } catch (error) {
-      console.error("Error fetching latest screenshots:", error);
-      return <ScreenshotsError />;
+    if (websiteScreenshotsQuery.data.length === 0) {
+      return <ScreenshotsEmpty />;
     }
-  }
+    return (
+      <>
+        <ScreenshotsTable data={websiteScreenshotsQuery.data} />
+        {showPagination && (
+          <ScreenshotsPagination
+            cursor={websiteScreenshotsQuery.cursor ?? null}
+            hasMore={websiteScreenshotsQuery.hasMore}
+          />
+        )}
+      </>
+    );
+  };
 
-  if (websitePagesData.length === 0) {
-    return <ScreenshotsEmpty />;
-  }
+  const renderUserScreenshots = () => {
+    if (!userScreenshotsQuery || userScreenshotsQuery === null) {
+      return userScreenshotsQuery === null ? <ScreenshotsError /> : <ScreenshotsTableSkeleton />;
+    }
+    if (userScreenshotsQuery.length === 0) {
+      return <ScreenshotsEmpty />;
+    }
+    return <ScreenshotsTable data={userScreenshotsQuery} />;
+  };
 
   return (
     <>
-      <ScreenshotsTable data={websitePagesData} />
-      {showPagination && (
-        <Suspense fallback={<div className="h-12" />}>
-          <ScreenshotsPagination cursor={nextCursor} hasMore={hasMore} />
-        </Suspense>
-      )}
+      <Unauthenticated>
+        <div className="text-muted-foreground">Please sign in to view screenshots.</div>
+      </Unauthenticated>
+      <Authenticated>
+        {slug ? renderWebsiteScreenshots() : renderUserScreenshots()}
+      </Authenticated>
     </>
-  );
-}
-
-const LatestScreenshots: React.FC<LatestScreenshotsProps> = (props) => {
-  return (
-    <Suspense fallback={<ScreenshotsTableSkeleton />}>
-      <ScreenshotsContent {...props} />
-    </Suspense>
   );
 };
 

@@ -35,12 +35,11 @@ export default function WelcomeEmptyState() {
 
     setIsSubmitting(true);
     try {
-      const { status, message } = await addSite({ url_base: url });
-      if (status === "error") {
-        toast.error(message);
+      const result = await addSite({ url_base: url });
+      if (result?.status === "error") {
+        toast.error(result?.message ?? "Failed to add website");
       } else {
-        toast.success(message);
-        event.currentTarget.reset();
+        toast.success(result?.message ?? "Website added successfully");
         router.refresh();
       }
     } catch (error) {

@@ -7,9 +7,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Database**: Convex
 - **Authentication**: Clerk
-- **Icons**: MynaUI Icons
 - `convex` - Database and backend functions
-- `@aws-sdk/client-s3` - AWS S3 services integration (v3)
 - Build command: `bun run build`
 - Development command: `bun dev`
 - Linting command: `bun lint`
@@ -23,7 +21,6 @@ app/                  # Next.js App Router pages
 ├── changelog/        # Changelog pages
 ├── help/             # Help and documentation
 ├── legal/            # Legal pages
-└── settings/         # User settings, theme preferences, and subscription management
 
 components/           # Reusable React components
 ├── home/            # Homepage-specific components
@@ -52,7 +49,6 @@ convex/             # Convex schema, queries, mutations, actions
 - Use `Suspense` boundaries for data fetching
 - Follow the pattern: SignedIn/SignedOut components for authentication states
 - Server components by default, use "use client" only when necessary
-- Use `SignedIn`, `SignedOut`, `ClerkLoaded`, `ClerkLoading` for auth states
 - Use server-side client for data fetching in Server Components
 - Handle errors gracefully with try/catch blocks
 - Use Convex auth checks (ctx.auth) to enforce data access
