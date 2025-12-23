@@ -119,36 +119,42 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item) => (
-            <TableRow key={item.id}>
-              <TableCell className="py-0">
-                <Link
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  href={item.screenshot_url}
-                >
-                  {/* eslint-disable @next/next/no-img-element */}
-                  <img
-                    src={item.screenshot_url}
-                    alt={item.page_url}
-                    className="h-6 w-12 rounded border-[0.5px] bg-cover bg-center object-cover"
-                    width={56}
-                    height={24}
-                  />
-                </Link>
-              </TableCell>
-              <TableCell>
-                <a
-                  href={item.page_url.replace(/\\+$/, "")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary max-w-xs truncate font-medium hover:underline"
-                >
-                  {item.page_url
-                    .replace(/^https?:\/\//, "")
-                    .replace(/\\+$/, "")}
-                </a>
-              </TableCell>
+          {data.map((item) => {
+            const pageUrl = item.page_url?.replace(/\\+$/, "") ?? "";
+            const displayUrl = pageUrl.replace(/^https?:\/\//, "");
+
+            return (
+              <TableRow key={item.id}>
+                <TableCell className="py-0">
+                  <Link
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={item.screenshot_url}
+                  >
+                    {/* eslint-disable @next/next/no-img-element */}
+                    <img
+                      src={item.screenshot_url}
+                      alt={pageUrl || "Screenshot"}
+                      className="h-6 w-12 rounded border-[0.5px] bg-cover bg-center object-cover"
+                      width={56}
+                      height={24}
+                    />
+                  </Link>
+                </TableCell>
+                <TableCell>
+                  {pageUrl ? (
+                    <a
+                      href={pageUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary max-w-xs truncate font-medium hover:underline"
+                    >
+                      {displayUrl}
+                    </a>
+                  ) : (
+                    <span className="text-muted-foreground">Unknown page</span>
+                  )}
+                </TableCell>
               <TableCell>
                 <span className="text-muted-foreground">
                   {item.website_name}
@@ -164,8 +170,9 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
                   <LocalTime timeString={item.generated_at} />
                 </span>
               </TableCell>
-            </TableRow>
-          ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </Card>

@@ -22,9 +22,9 @@ export interface ScreenshotWithDetails {
   id: Id<"screenshots">;
   screenshot_url: string;
   size_in_bytes: number;
-  generated_at: number | null;
+  generated_at: number | string | null;
   page_title: string | null;
-  page_url: string;
+  page_url?: string;
   website_name?: string; // Optional for when used with specific website
 }
 
