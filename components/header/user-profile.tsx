@@ -2,8 +2,7 @@
 
 import { UserButton } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import PricingTable from "@/components/pricing-table";
-import { CreditCard, LifeBuoy, Monitor, Moon, Sun } from "lucide-react";
+import { LifeBuoy, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 
 export default function UserProfile() {
@@ -36,21 +35,6 @@ export default function UserProfile() {
         },
       }}
     >
-      <UserButton.UserProfilePage
-        label="Plan & Billing"
-        labelIcon={<CreditCard className="size-4" />}
-        url="plan"
-      >
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-xl font-semibold">Plan & Billing</h2>
-            <p className="text-muted-foreground text-sm">
-              Manage your subscription and billing preferences.
-            </p>
-          </div>
-          <PricingTable />
-        </div>
-      </UserButton.UserProfilePage>
       <UserButton.MenuItems>
         <UserButton.Action
           label={`Theme: ${currentTheme[0]?.toUpperCase()}${currentTheme.slice(1)}`}

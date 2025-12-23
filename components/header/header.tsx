@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense } from "react";
 import Logo from "../logo";
 import HeaderAuth from "./header-auth";
@@ -9,7 +10,13 @@ const Header = () => {
         <Logo />
 
         {/* Right side - Navigation and Auth */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-4 md:gap-6">
+          <Link
+            href="/pricing"
+            className="text-muted-foreground hover:text-foreground text-sm font-medium transition-colors"
+          >
+            Pricing
+          </Link>
           <Suspense fallback={<div className="h-8 w-16" />}>
             <HeaderAuth />
           </Suspense>
