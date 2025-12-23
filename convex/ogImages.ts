@@ -43,7 +43,7 @@ export const storeImageInDatabase = mutation({
     uploadedUrl: v.string(),
   },
   handler: async (ctx, args) => {
-    const { urlBase, path, sanitizedUrl } = extractUrlParts(args.pageUrl);
+    const { urlBase, sanitizedUrl } = extractUrlParts(args.pageUrl);
 
     const matchingSites = await ctx.db
       .query("sites")
@@ -84,17 +84,13 @@ export const storeImageInDatabase = mutation({
 
     const existingPage = await ctx.db
       .query("screenshots")
-      .withIndex("by_website_id_path", (q) =>
-        q.eq("website_id", selectedWebsite._id).eq("path", path),
-      )
-      .order("desc")
+      .withIndex("by_full_url", (q) => q.eq("full_url", sanitizedUrl))
       .first();
 
     if (!existingPage) {
       await ctx.db.insert("screenshots", {
         website_id: selectedWebsite._id,
         user_id: selectedWebsite.user_id,
-        path,
         full_url: sanitizedUrl,
         screenshot_url: args.uploadedUrl,
         size_in_bytes: args.imageSize,

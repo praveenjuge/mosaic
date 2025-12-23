@@ -12,7 +12,7 @@ export default defineSchema({
   screenshots: defineTable({
     website_id: v.id("sites"),
     user_id: v.string(),
-    path: v.string(),
+    path: v.optional(v.string()),
     full_url: v.string(),
     screenshot_url: v.string(),
     size_in_bytes: v.optional(v.number()),
