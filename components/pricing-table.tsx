@@ -69,11 +69,15 @@ function PlanCard({
   product: {
     name: string;
     description: string | null;
-    prices: Array<{ priceAmount: number | null; priceCurrency?: string }>;
-  };
+    prices: Array<{ priceAmount?: number | null; priceCurrency?: string }>;
+  } | null | undefined;
 }) {
-  const price = product.prices[0]?.priceAmount
-    ? `$${(product.prices[0].priceAmount / 100).toFixed(0)}`
+  if (!product) {
+    return null;
+  }
+
+  const price = product?.prices?.[0]?.priceAmount
+    ? `$${(product.prices[0].priceAmount! / 100).toFixed(0)}`
     : "$0";
 
   const isYearly = productKey === "premiumYearly";
@@ -89,7 +93,7 @@ function PlanCard({
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>{product.name}</CardTitle>
+          <CardTitle>{product?.name}</CardTitle>
           {productKey === "premiumMonthly" && (
             <Badge variant="secondary" className="text-xs">
               Popular
@@ -101,7 +105,7 @@ function PlanCard({
             </Badge>
           )}
         </div>
-        <CardDescription>{product.description ?? ""}</CardDescription>
+        <CardDescription>{product?.description ?? ""}</CardDescription>
         <div className="mt-4 flex items-baseline">
           <span className="text-3xl font-bold">{price}</span>
           <span className="text-muted-foreground ml-1">{period}</span>
