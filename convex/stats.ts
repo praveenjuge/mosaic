@@ -1,4 +1,74 @@
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
+import { internal } from "./_generated/api";
+import { v } from "convex/values";
+import { PLAN_LIMITS } from "./constants";
+import type { SubscriptionInfo } from "./billing";
+
+type QuotaStatus = {
+  canGenerateMore: boolean;
+  used: number;
+  limit: number;
+  plan: "free" | "pro" | "pro-yearly";
+  isFreePlan: boolean;
+  hasExceededLimit: boolean;
+};
+
+// Internal query to get quota status for a specific user
+export const getUserQuotaStatusInternal = internalQuery({
+  args: { userId: v.string() },
+  handler: async (ctx, args): Promise<QuotaStatus> => {
+    // Get current subscription/plan using the existing billing internal query
+    const subscription: SubscriptionInfo = await ctx.runQuery(
+      internal.billing.getSubscriptionByUserId,
+      {
+        userId: args.userId,
+      }
+    );
+
+    const plan = subscription.plan;
+    const limit: number = subscription.plan_properties.images_limit;
+
+    // Count total images
+    const screenshots = await ctx.db
+      .query("screenshots")
+      .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
+      .collect();
+
+    const used = screenshots.length;
+    const hasExceededLimit: boolean = used >= limit;
+
+    return {
+      canGenerateMore: !hasExceededLimit,
+      used,
+      limit,
+      plan,
+      isFreePlan: plan === "free",
+      hasExceededLimit,
+    };
+  },
+});
+
+// Quota status for the current user
+export const getUserQuotaStatus = query({
+  args: {},
+  handler: async (ctx): Promise<QuotaStatus> => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return {
+        canGenerateMore: false,
+        used: 0,
+        limit: PLAN_LIMITS.FREE.IMAGES,
+        plan: "free",
+        isFreePlan: true,
+        hasExceededLimit: false,
+      };
+    }
+
+    return await ctx.runQuery(internal.stats.getUserQuotaStatusInternal, {
+      userId: identity.subject,
+    });
+  },
+});
 
 export const getUserStats = query({
   args: {},

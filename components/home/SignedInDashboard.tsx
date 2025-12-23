@@ -16,14 +16,8 @@ import { useRouter } from "next/navigation";
 
 export default function SignedInDashboard() {
   const websitesCount = useQuery(api.sites.countForUser);
-  const subscriptionInfo = useQuery(api.billing.getCurrentSubscription);
-  const userStats = useQuery(api.stats.getUserStats);
+  const quotaStatus = useQuery(api.stats.getUserQuotaStatus);
   const router = useRouter();
-
-  const imagesLimit = subscriptionInfo?.plan_properties?.images_limit ?? 500;
-  const currentImages = userStats?.total_images ?? 0;
-  const isFreePlan = subscriptionInfo?.plan === "free";
-  const hasExceededLimit = currentImages >= imagesLimit;
 
   const handleUpgradeClick = () => {
     router.push("/pricing");
@@ -44,16 +38,14 @@ export default function SignedInDashboard() {
         ) : (
           <>
             {/* Limit Alert - shown above stats section */}
-            {isFreePlan &&
-              hasExceededLimit &&
-              subscriptionInfo &&
-              userStats && (
+            {quotaStatus?.isFreePlan &&
+              quotaStatus?.hasExceededLimit && (
                 <Alert variant="destructive" className="mb-8">
                   <AlertTriangle />
                   <AlertTitle>Free Plan Limit Exceeded</AlertTitle>
                   <AlertDescription className="flex items-center justify-between gap-4">
                     <span>
-                      You've reached the limit of {imagesLimit} OG images.
+                      You've reached the limit of {quotaStatus.limit} OG images.
                       Upgrade to continue generating images.
                     </span>
                     <Button

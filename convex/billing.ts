@@ -46,7 +46,7 @@ export const {
 } = polar.api();
 
 // Type for subscription info
-type SubscriptionInfo = {
+export type SubscriptionInfo = {
   plan: "free" | "pro" | "pro-yearly";
   is_active: boolean;
   plan_properties: {
