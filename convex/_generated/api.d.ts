@@ -12,7 +12,6 @@ import type * as billing from "../billing.js";
 import type * as constants from "../constants.js";
 import type * as http from "../http.js";
 import type * as metadata from "../metadata.js";
-import type * as migrations_removePath from "../migrations/removePath.js";
 import type * as ogImages from "../ogImages.js";
 import type * as r2 from "../r2.js";
 import type * as screenshots from "../screenshots.js";
@@ -31,7 +30,6 @@ declare const fullApi: ApiFromModules<{
   constants: typeof constants;
   http: typeof http;
   metadata: typeof metadata;
-  "migrations/removePath": typeof migrations_removePath;
   ogImages: typeof ogImages;
   r2: typeof r2;
   screenshots: typeof screenshots;
