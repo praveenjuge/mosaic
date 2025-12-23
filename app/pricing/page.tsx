@@ -7,7 +7,8 @@ import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Pricing",
-  description: "Simple, transparent pricing for Mosaic. Choose the plan that fits your needs.",
+  description:
+    "Simple, transparent pricing for Mosaic. Choose the plan that fits your needs.",
   openGraph: {
     images: [getOgImageUrl("pricing")],
   },
@@ -23,7 +24,14 @@ function FAQSkeleton() {
   );
 }
 
-export default function PricingPage() {
+interface PricingPageProps {
+  searchParams: Promise<{
+    customer_session_token?: string;
+  }>;
+}
+
+export default async function PricingPage({ searchParams }: PricingPageProps) {
+  const params = await searchParams;
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",

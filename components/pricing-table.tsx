@@ -11,42 +11,22 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 import { Check } from "lucide-react";
 import { Suspense } from "react";
 import { Button } from "./ui/button";
 
-const plans = [
-  {
-    title: "Free",
-    description: "Perfect for Getting Started",
-    price: "$0",
-    features: ["500 OG Images", "Unlimited Websites", "Community Forum Support"],
-    type: "free",
-  },
-  {
-    title: "Pro",
-    description: "For Growing Websites",
-    price: "$19",
-    features: [
-      "5,000 OG Images",
-      "Unlimited Websites",
-      "Priority Email Support",
-    ],
-    type: "pro",
-  },
-  {
-    title: "Pro Yearly",
-    description: "Best Value for Power Users",
-    price: "$199",
-    features: [
-      "Unlimited OG Images",
-      "Unlimited Websites",
-      "Priority Email Support",
-    ],
-    type: "pro-yearly",
-    badge: "Save $29/year",
-  },
-];
+// Define plan features
+const planFeatures: Record<"free" | "pro" | "pro-yearly", string[]> = {
+  free: ["500 OG Images", "Unlimited Websites", "Community Forum Support"],
+  pro: ["5,000 OG Images", "Unlimited Websites", "Priority Email Support"],
+  "pro-yearly": [
+    "Unlimited OG Images",
+    "Unlimited Websites",
+    "Priority Email Support",
+  ],
+};
 
 // Plan card loading skeleton
 function PlanCardSkeleton() {
@@ -81,34 +61,62 @@ function PlanCardSkeleton() {
 }
 
 // Individual plan card component
-function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
+function PlanCard({
+  productKey,
+  product,
+}: {
+  productKey: string;
+  product: {
+    name: string;
+    description: string | null;
+    prices: Array<{ priceAmount: number | null; priceCurrency?: string }>;
+  };
+}) {
+  const price = product.prices[0]?.priceAmount
+    ? `$${(product.prices[0].priceAmount / 100).toFixed(0)}`
+    : "$0";
+
+  const isYearly = productKey === "premiumYearly";
+  const planType = isYearly
+    ? "pro-yearly"
+    : productKey === "premiumMonthly"
+      ? "pro"
+      : "free";
+  const badge = isYearly ? "Save $29/year" : null;
+  const period = isYearly ? "/year" : "/month";
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>{plan.title}</CardTitle>
-          {plan.type === "pro" && (
+          <CardTitle>{product.name}</CardTitle>
+          {productKey === "premiumMonthly" && (
             <Badge variant="secondary" className="text-xs">
               Popular
             </Badge>
           )}
+          {badge && (
+            <Badge variant="secondary" className="text-xs">
+              {badge}
+            </Badge>
+          )}
         </div>
-        <CardDescription>{plan.description}</CardDescription>
+        <CardDescription>{product.description ?? ""}</CardDescription>
         <div className="mt-4 flex items-baseline">
-          <span className="text-3xl font-bold">{plan.price}</span>
-          <span className="text-muted-foreground ml-1">
-            {plan.type === "pro-yearly" ? "/year" : "/month"}
-          </span>
+          <span className="text-3xl font-bold">{price}</span>
+          <span className="text-muted-foreground ml-1">{period}</span>
         </div>
       </CardHeader>
       <CardContent className="flex-1">
         <ul className="space-y-3">
-          {plan.features.map((feature) => (
-            <li key={feature} className="flex items-center gap-2">
-              <Check className="text-primary size-4 stroke-2" />
-              <span className="text-sm">{feature}</span>
-            </li>
-          ))}
+          {planFeatures[planType as keyof typeof planFeatures]?.map(
+            (feature) => (
+              <li key={feature} className="flex items-center gap-2">
+                <Check className="text-primary size-4 stroke-2" />
+                <span className="text-sm">{feature}</span>
+              </li>
+            ),
+          )}
         </ul>
       </CardContent>
       <CardFooter>
@@ -119,7 +127,7 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
             </Button>
           }
         >
-          <PlanButton type={plan.type as "free" | "pro" | "pro-yearly"} />
+          <PlanButton type={planType as "free" | "pro" | "pro-yearly"} />
         </Suspense>
       </CardFooter>
     </Card>
@@ -128,11 +136,35 @@ function PlanCard({ plan }: { plan: (typeof plans)[0] }) {
 
 // Pricing table content component
 function PricingTableContent() {
+  const products = useQuery(api.billing.getConfiguredProducts);
+
+  if (!products) {
+    return (
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <PlanCardSkeleton key={i} />
+        ))}
+      </div>
+    );
+  }
+
+  // Always show free plan + configured products
+  const freePlan = {
+    name: "Free",
+    description: "Perfect for Getting Started",
+    prices: [{ priceAmount: 0 }],
+  };
+
+  const productEntries = Object.entries(products).filter(
+    ([key]) => key === "premiumMonthly" || key === "premiumYearly",
+  );
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {plans.map((plan) => (
-        <Suspense key={plan.type} fallback={<PlanCardSkeleton />}>
-          <PlanCard plan={plan} />
+      <PlanCard productKey="free" product={freePlan} />
+      {productEntries.map(([key, product]) => (
+        <Suspense key={key} fallback={<PlanCardSkeleton />}>
+          <PlanCard productKey={key} product={product} />
         </Suspense>
       ))}
     </div>

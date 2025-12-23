@@ -6,7 +6,6 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
-import { getUserSubscriptionInfo } from "@/lib/subscription";
 import { formatBytes } from "@/lib/utils";
 import { auth } from "@clerk/nextjs/server";
 import { fetchQuery } from "convex/nextjs";
@@ -184,7 +183,11 @@ async function StatsContent() {
     const token = await getToken({ template: "convex" });
     const [userStats, subscriptionInfo] = await Promise.all([
       fetchQuery(api.stats.getUserStats, {}, token ? { token } : {}),
-      getUserSubscriptionInfo(userId),
+      fetchQuery(
+        api.billing.getCurrentSubscription,
+        {},
+        token ? { token } : {},
+      ),
     ]);
 
     const totalImages = userStats?.total_images ?? 0;
