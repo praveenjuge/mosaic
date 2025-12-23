@@ -1,6 +1,5 @@
 "use client";
 
-import { api } from "@/convex/_generated/api";
 import { LoadingSpinner } from "@/components/spinner";
 import {
   AlertDialog,
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useAction, useMutation } from "convex/react";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
@@ -40,10 +40,7 @@ interface WebsiteActionsProps {
   currentUrl: string;
 }
 
-export function WebsiteActions({
-  websiteId,
-  currentUrl,
-}: WebsiteActionsProps) {
+export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -106,20 +103,20 @@ export function WebsiteActions({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost" size="sm" className="size-8">
-            <Ellipsis className="size-8 stroke-2" />
+            <Ellipsis className="stroke-2" />
             <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
-            <Pencil className="size-4 stroke-2" />
+            <Pencil className="stroke-2" />
             Edit
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setDeleteOpen(true)}
           >
-            <Trash className="size-4 stroke-2" />
+            <Trash className="stroke-2" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
@@ -134,10 +131,7 @@ export function WebsiteActions({
               Enter the new URL for the website.
             </DialogDescription>
           </DialogHeader>
-          <form
-            className="grid gap-4"
-            onSubmit={handleEditSubmit}
-          >
+          <form className="grid gap-4" onSubmit={handleEditSubmit}>
             <div className="grid gap-2">
               <Label htmlFor="website">Website</Label>
               <Input
