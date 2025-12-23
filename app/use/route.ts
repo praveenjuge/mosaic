@@ -1,7 +1,6 @@
 import { api } from "@/convex/_generated/api";
 import { extractUrlPartsConsistent } from "@/lib/utils";
-import { HeadObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { fetchMutation, fetchQuery } from "convex/nextjs";
+import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,46 +19,24 @@ const redirectToImage = (url: string) =>
     },
   });
 
-const getR2Client = () => {
-  const { PROD_R2_ACCESS_KEY_ID, PROD_R2_SECRET_ACCESS_KEY, CLOUDFLARE_ACCOUNT_ID } = process.env;
-  if (!PROD_R2_ACCESS_KEY_ID || !PROD_R2_SECRET_ACCESS_KEY || !CLOUDFLARE_ACCOUNT_ID) {
-    console.error("[R2_CLIENT_ERROR] Missing R2 configuration - check environment variables");
-    throw new Error("Missing Production R2 configuration");
-  }
-  console.log("[R2_CLIENT_SUCCESS] R2 client initialized successfully");
-  return new S3Client({
-    endpoint: `https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: PROD_R2_ACCESS_KEY_ID,
-      secretAccessKey: PROD_R2_SECRET_ACCESS_KEY,
-    },
-    region: "auto",
-  });
-};
-
 // Check if demo image exists in R2
 async function checkDemoImageInR2(cacheKey: string): Promise<string | null> {
   console.log(`[DEMO_CACHE_CHECK_START] Checking R2 cache for key: ${cacheKey}`);
   try {
-    const s3 = getR2Client();
-    const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
-
-    const command = new HeadObjectCommand({
-      Bucket: bucketName,
-      Key: `demo/${cacheKey}.png`,
+    const exists = await fetchAction(api.r2.checkObjectExists, {
+      key: `demo/${cacheKey}.png`,
     });
 
-    await s3.send(command);
-
     // If no error, object exists - return direct R2 URL
-    const cachedUrl = getDirectR2Url(`${cacheKey}.png`, true);
-    console.log(`[DEMO_CACHE_CHECK_HIT] Cache hit! Found demo image: ${cachedUrl}`);
-    return cachedUrl;
-  } catch (error: unknown) {
-    if (error && typeof error === "object" && "name" in error && error.name === "NotFound") {
-      console.log(`[DEMO_CACHE_CHECK_MISS] No cached demo image found for key: ${cacheKey}`);
-      return null;
+    if (exists) {
+      const cachedUrl = getDirectR2Url(`${cacheKey}.png`, true);
+      console.log(`[DEMO_CACHE_CHECK_HIT] Cache hit! Found demo image: ${cachedUrl}`);
+      return cachedUrl;
     }
+
+    console.log(`[DEMO_CACHE_CHECK_MISS] No cached demo image found for key: ${cacheKey}`);
+    return null;
+  } catch (error: unknown) {
     console.error("[DEMO_CACHE_CHECK_ERROR] Error checking R2:", error);
     return null;
   }
@@ -69,21 +46,14 @@ async function checkDemoImageInR2(cacheKey: string): Promise<string | null> {
 async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, isDemo = false): Promise<string | null> {
   console.log(`[R2_UPLOAD_START] Starting R2 upload for cache key: ${cacheKey} (demo: ${isDemo})`);
   try {
-    const s3 = getR2Client();
     const imageKey = isDemo ? `demo/${cacheKey}.png` : `${cacheKey}.png`;
-    const bucketName = process.env.PROD_R2_BUCKET_NAME || "mosaic-og-prod";
+    console.log(`[R2_UPLOAD_CONFIG] Key: ${imageKey}, Size: ${imageBuffer.byteLength} bytes`);
 
-    console.log(`[R2_UPLOAD_CONFIG] Bucket: ${bucketName}, Key: ${imageKey}, Size: ${imageBuffer.byteLength} bytes`);
-
-    const command = new PutObjectCommand({
-      Bucket: bucketName,
-      Key: imageKey,
-      Body: Buffer.from(imageBuffer),
-      ContentType: "image/png",
-      CacheControl: "public, max-age=31536000",
+    await fetchAction(api.r2.storeImage, {
+      key: imageKey,
+      contentType: "image/png",
+      dataBase64: Buffer.from(imageBuffer).toString("base64"),
     });
-
-    await s3.send(command);
 
     const directUrl = getDirectR2Url(isDemo ? `${cacheKey}.png` : imageKey, isDemo);
     console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, direct URL: ${directUrl}`);
