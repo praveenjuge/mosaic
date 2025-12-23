@@ -67,8 +67,6 @@ export const storeImageInDatabase = mutation({
       .order("desc")
       .first();
 
-    const timestamp = nowTimestamp();
-
     if (!existingPage) {
       await ctx.db.insert("screenshots", {
         website_id: website._id,
