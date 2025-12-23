@@ -13,6 +13,7 @@ import {
 import { getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 
 export const viewport: Viewport = { themeColor: "#059669" };
 
@@ -61,9 +62,11 @@ export default function RootLayout({
                 aria-hidden="true"
               ></div>
               <Header />
-              <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 pt-10 pb-6 md:px-10">
-                {children}
-              </main>
+              <Suspense>
+                <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 pt-10 pb-6 md:px-10">
+                  {children}
+                </main>
+              </Suspense>
               <Footer />
               <Toaster richColors />
             </ConvexClientProvider>

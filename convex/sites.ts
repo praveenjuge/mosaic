@@ -1,5 +1,7 @@
-import { mutation, query } from "./_generated/server";
+import { action, mutation, query } from "./_generated/server";
+import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import { normalizeUrlBase } from "./utils/url";
 
 const siteInput = v.object({
@@ -192,7 +194,7 @@ export const editSite = mutation({
   },
 });
 
-export const deleteSite = mutation({
+export const deleteSite = action({
   args: {
     siteId: v.id("sites"),
   },
@@ -205,52 +207,65 @@ export const deleteSite = mutation({
       };
     }
 
-    const existing = await ctx.db.get(args.siteId);
+    const existing = await ctx.runQuery(api.sites.getById, { siteId: args.siteId });
 
-    if (!existing || existing.user_id !== identity.subject) {
+    if (!existing) {
       return {
         status: "error" as const,
-        message: "Website not found or access denied.",
+        message: "Website not found.",
       };
     }
 
     const deleteByWebsiteId = async (websiteId: typeof args.siteId) => {
       let cursor: string | null = null;
       do {
-        const page = await ctx.db
-          .query("screenshots")
-          .withIndex("by_website_id_generated_at", (q) =>
-            q.eq("website_id", websiteId),
-          )
-          .paginate({ cursor, numItems: 100 });
-        for (const screenshot of page.page) {
-          await ctx.db.delete(screenshot._id);
+        const result: {
+          data: Array<{ id: Id<"screenshots"> }>;
+          cursor: string | null;
+          hasMore: boolean;
+        } = await ctx.runQuery(api.screenshots.listLatestForWebsite, {
+          websiteId,
+          cursor: cursor ?? undefined,
+          limit: 100,
+        });
+        for (const screenshot of result.data) {
+          await ctx.runMutation(api.ogImages.deleteImage, { imageId: screenshot.id });
         }
-        cursor = page.continueCursor;
-        if (page.isDone) break;
+        cursor = result.cursor;
+        if (!result.hasMore) break;
       } while (cursor);
 
-      cursor = null;
-      do {
-        const page = await ctx.db
-          .query("pages")
-          .withIndex("by_website_id", (q) => q.eq("website_id", websiteId))
-          .paginate({ cursor, numItems: 100 });
-        for (const pageDoc of page.page) {
-          await ctx.db.delete(pageDoc._id);
-        }
-        cursor = page.continueCursor;
-        if (page.isDone) break;
-      } while (cursor);
-
+      const allPages = await ctx.runQuery(api.pages.listForWebsite, { websiteId });
+      for (const pageDoc of allPages) {
+        await ctx.runMutation(api.pages.deletePage, { pageId: pageDoc._id });
+      }
     };
 
     await deleteByWebsiteId(args.siteId);
-    await ctx.db.delete(existing._id);
+    await ctx.runMutation(api.sites.deleteSiteInternal, { siteId: args.siteId });
     return {
       status: "success" as const,
       message: "Website deleted successfully",
     };
+  },
+});
+
+export const deleteSiteInternal = mutation({
+  args: {
+    siteId: v.id("sites"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to delete a website.");
+    }
+
+    const site = await ctx.db.get(args.siteId);
+    if (!site || site.user_id !== identity.subject) {
+      throw new Error("Website not found or access denied.");
+    }
+
+    await ctx.db.delete(args.siteId);
   },
 });
 

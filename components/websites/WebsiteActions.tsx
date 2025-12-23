@@ -27,9 +27,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cleanUrl } from "@/lib/utils";
 import type { Id } from "@/convex/_generated/dataModel";
-import { useMutation } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -51,15 +50,14 @@ export function WebsiteActions({
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
   const editSite = useMutation(api.sites.editSite);
-  const deleteSite = useMutation(api.sites.deleteSite);
+  const deleteSite = useAction(api.sites.deleteSite);
 
   const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const url = formData.get("website")?.toString() || "";
-    const cleanedUrl = cleanUrl(url);
 
-    if (!cleanedUrl) {
+    if (!url) {
       toast.error("Please enter a valid website URL.");
       return;
     }
@@ -68,7 +66,7 @@ export function WebsiteActions({
     try {
       const result = await editSite({
         siteId: websiteId,
-        url_base: cleanedUrl,
+        url_base: url,
       });
       if (result.status === "error") {
         toast.error(result.message);

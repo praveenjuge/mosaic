@@ -9,12 +9,10 @@ We're excited to announce the launch of our Pro subscription plans! 🚀
 
 - **Pro Monthly Plan ($19/month)**
   - 5,000 OG images per month
-  - Unlimited websites
   - Priority email support
 
 - **Pro Yearly Plan ($199/year)**
   - Unlimited OG images
-  - Unlimited websites
   - Priority email support
   - Save $29 compared to monthly billing
 
@@ -30,5 +28,5 @@ We're excited to announce the launch of our Pro subscription plans! 🚀
 Don't worry - our free plan isn't going anywhere! You can still:
 
 - Generate 500 OG images per month
-- Add 1 website
+- Add unlimited websites
 - Access community forum support

@@ -1,4 +1,4 @@
-import { internalMutation, internalQuery } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
 
@@ -6,7 +6,7 @@ const nowTimestamp = () => Date.now();
 const toTimestamp = (value: number | string) =>
   typeof value === "number" ? value : Date.parse(value) || 0;
 
-export const checkImageInDatabase = internalQuery({
+export const checkImageInDatabase = query({
   args: {
     pageUrl: v.string(),
   },
@@ -24,7 +24,7 @@ export const checkImageInDatabase = internalQuery({
   },
 });
 
-export const checkWebsiteExistsForUrl = internalQuery({
+export const checkWebsiteExistsForUrl = query({
   args: {
     url_base: v.string(),
   },
@@ -39,7 +39,7 @@ export const checkWebsiteExistsForUrl = internalQuery({
   },
 });
 
-export const storeImageInDatabase = internalMutation({
+export const storeImageInDatabase = mutation({
   args: {
     pageUrl: v.string(),
     imageKey: v.string(),
@@ -117,5 +117,24 @@ export const storeImageInDatabase = internalMutation({
       generated_at: timestamp,
     });
     return { status: "success" as const };
+  },
+});
+
+export const deleteImage = mutation({
+  args: {
+    imageId: v.id("screenshots"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to delete images.");
+    }
+
+    const screenshot = await ctx.db.get(args.imageId);
+    if (!screenshot || screenshot.user_id !== identity.subject) {
+      throw new Error("Image not found or access denied.");
+    }
+
+    await ctx.db.delete(args.imageId);
   },
 });

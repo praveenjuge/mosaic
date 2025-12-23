@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cleanUrl } from "@/lib/utils";
 import type { Id } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { FormEvent, useState } from "react";
@@ -35,10 +34,10 @@ export function EditWebsite({
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const url = formData.get("website")?.toString() || "";
-    const cleanedUrl = cleanUrl(url);
+    const rawUrl = formData.get("website")?.toString() || "";
+    const url = rawUrl.trim();
 
-    if (!cleanedUrl) {
+    if (!url) {
       toast.error("Please enter a valid website URL.");
       return;
     }
@@ -47,7 +46,7 @@ export function EditWebsite({
     try {
       const { status, message } = await editSite({
         siteId: websiteId,
-        url_base: cleanedUrl,
+        url_base: url,
       });
       if (status === "error") {
         toast.error(message);

@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { website_url } from "./constants";
-import { cleanUrl, extractUrlParts } from "@/convex/utils/url";
+import { extractUrlParts } from "@/convex/utils/url";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -50,12 +50,6 @@ export function formatBytes(bytes: number, decimals = 2) {
 export function getOgImageUrl(slug: string) {
   return `${website_url}use?url=https://mosaicimg.com/${slug}`;
 }
-
-/**
- * Centralized URL cleaning function to ensure consistency across the application
- * Returns just the hostname without protocol (e.g., "example.com")
- */
-export { cleanUrl };
 
 /**
  * Extract URL parts consistently for database storage

@@ -69,3 +69,53 @@ export const getOrCreate = mutation({
     return { ...page, _id: pageId };
   },
 });
+
+export const listForWebsite = query({
+  args: {
+    websiteId: v.id("sites"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      return [];
+    }
+
+    const site = await ctx.db.get(args.websiteId);
+    if (!site || site.user_id !== identity.subject) {
+      return [];
+    }
+
+    return await ctx.db
+      .query("pages")
+      .withIndex("by_website_id", (q) => q.eq("website_id", args.websiteId))
+      .collect();
+  },
+});
+
+export const deletePage = mutation({
+  args: {
+    pageId: v.id("pages"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new Error("You must be logged in to delete pages.");
+    }
+
+    const page = await ctx.db.get(args.pageId);
+    if (!page || page.user_id !== identity.subject) {
+      throw new Error("Page not found or access denied.");
+    }
+
+    const screenshots = await ctx.db
+      .query("screenshots")
+      .withIndex("by_page_id", (q) => q.eq("page_id", args.pageId))
+      .collect();
+
+    for (const screenshot of screenshots) {
+      await ctx.db.delete(screenshot._id);
+    }
+
+    await ctx.db.delete(args.pageId);
+  },
+});

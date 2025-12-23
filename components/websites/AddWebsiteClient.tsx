@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cleanUrl } from "@/lib/utils";
 import { SignInButton, useClerk } from "@clerk/nextjs";
 import {
   Authenticated,
@@ -44,23 +43,24 @@ export default function AddWebsiteClient({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const url = formData.get("website")?.toString() || "";
-    const cleanedUrl = cleanUrl(url);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const rawUrl = formData.get("website")?.toString() || "";
+    const url = rawUrl.trim();
 
-    if (!cleanedUrl) {
+    if (!url) {
       toast.error("Please enter a valid website URL.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const result = await addSite({ url_base: cleanedUrl });
+      const result = await addSite({ url_base: url });
       if (result.status === "error") {
         toast.error(result.message);
       } else {
         toast.success(result.message);
-        event.currentTarget.reset();
+        form.reset();
         setOpen(false);
         router.refresh();
       }

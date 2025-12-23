@@ -15,7 +15,7 @@ management. Here's what you need to know.
 | Feature         | Free Plan | Pro Plan       | Pro Yearly     |
 | --------------- | --------- | -------------- | -------------- |
 | OG Images/Month | 500       | 5,000          | Unlimited      |
-| Websites        | 1         | Unlimited      | Unlimited      |
+| Websites        | Unlimited | Unlimited      | Unlimited      |
 | Support         | Community | Priority Email | Priority Email |
 | Analytics       | Basic     | Advanced       | Advanced       |
 | Custom Branding | ❌        | ❌             | ✅             |
@@ -30,8 +30,7 @@ management. Here's what you need to know.
 
 ### Website Management
 
-- Free plan users can add 1 website
-- Pro plan users can add unlimited websites
+- All plans allow unlimited websites
 - Each website can have unlimited pages
 
 ## What Happens When You Hit Your Limit
@@ -64,7 +63,7 @@ You can track your usage in your dashboard:
 
 Need more capacity? You can upgrade anytime:
 
-- **Free → Pro**: Get 5,000 images/month + unlimited websites
+- **Free → Pro**: Get 5,000 images/month
 - **Pro → Pro Yearly**: Get unlimited images + custom branding
 - Upgrades take effect immediately
 

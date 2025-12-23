@@ -15,13 +15,12 @@ manage your subscription.
 ### Free Plan
 
 - 500 OG images per month
-- 1 website
+- Unlimited websites
 - Community forum support
 
 ### Pro Plan ($19/month)
 
 - 5,000 OG images per month
-- Unlimited websites
 - Priority email support
 - Advanced analytics
 

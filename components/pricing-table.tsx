@@ -20,7 +20,7 @@ const plans = [
     title: "Free",
     description: "Perfect for Getting Started",
     price: "$0",
-    features: ["500 OG Images", "1 Website", "Community Forum Support"],
+    features: ["500 OG Images", "Unlimited Websites", "Community Forum Support"],
     type: "free",
   },
   {

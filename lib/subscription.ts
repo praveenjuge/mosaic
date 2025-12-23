@@ -43,7 +43,7 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
       return {
         plan: "free",
         plan_properties: {
-          websites_limit: 1,
+          websites_limit: 999999,
           images_limit: 500,
         },
         is_active: false,
@@ -63,7 +63,7 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
       return {
         plan: "free",
         plan_properties: {
-          websites_limit: 1,
+          websites_limit: 999999,
           images_limit: 500,
         },
         is_active: false,
@@ -79,7 +79,7 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
       return {
         plan: "free",
         plan_properties: {
-          websites_limit: 1,
+          websites_limit: 999999,
           images_limit: 500,
         },
         is_active: false,
@@ -116,7 +116,7 @@ async function _getUserSubscriptionInfo(userId: string | null): Promise<UserSubs
     return {
       plan: "free",
       plan_properties: {
-        websites_limit: 1,
+        websites_limit: 999999,
         images_limit: 500,
       },
       is_active: false,

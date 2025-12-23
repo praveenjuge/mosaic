@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { cleanUrl } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -28,16 +27,15 @@ export default function WelcomeEmptyState() {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const url = formData.get("website")?.toString() || "";
-    const cleanedUrl = cleanUrl(url);
 
-    if (!cleanedUrl) {
+    if (!url) {
       toast.error("Please enter a valid website URL.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const { status, message } = await addSite({ url_base: cleanedUrl });
+      const { status, message } = await addSite({ url_base: url });
       if (status === "error") {
         toast.error(message);
       } else {
