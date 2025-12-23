@@ -1,7 +1,6 @@
 "use client";
 
 import { buttonVariants } from "@/components/ui/button";
-import * as Sentry from "@sentry/nextjs";
 import Image from "next/image";
 import { useEffect } from "react";
 
@@ -13,7 +12,6 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    Sentry.captureException(error);
     console.error(error);
   }, [error]);
 
