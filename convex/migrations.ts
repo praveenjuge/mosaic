@@ -107,3 +107,31 @@ export const backfillScreenshots = internalMutation({
     };
   },
 });
+
+export const clearSiteLegacyFields = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    let cursor: string | null = null;
+    let updated = 0;
+
+    do {
+      const page = await ctx.db
+        .query("sites")
+        .paginate({ cursor, numItems: 100 });
+
+      for (const site of page.page) {
+        await ctx.db.patch(site._id, {
+          created_at: undefined,
+          updated_at: undefined,
+          id: undefined,
+        });
+        updated += 1;
+      }
+
+      cursor = page.continueCursor;
+      if (page.isDone) break;
+    } while (cursor);
+
+    return { updated };
+  },
+});

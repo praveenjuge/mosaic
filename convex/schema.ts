@@ -5,8 +5,8 @@ export default defineSchema({
   sites: defineTable({
     user_id: v.string(),
     url_base: v.string(),
-    created_at: v.union(v.number(), v.string()),
-    updated_at: v.union(v.number(), v.string()),
+    created_at: v.optional(v.union(v.number(), v.string())),
+    updated_at: v.optional(v.union(v.number(), v.string())),
     // Legacy Supabase ID; kept optional until migration runs.
     id: v.optional(v.string()),
   })

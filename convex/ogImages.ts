@@ -3,8 +3,11 @@ import { v } from "convex/values";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
 
 const nowTimestamp = () => Date.now();
-const toTimestamp = (value: number | string) =>
-  typeof value === "number" ? value : Date.parse(value) || 0;
+const toTimestamp = (value?: number | string | null) => {
+  if (typeof value === "number") return value;
+  if (typeof value === "string") return Date.parse(value) || 0;
+  return 0;
+};
 
 export const checkImageInDatabase = query({
   args: {
