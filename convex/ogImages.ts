@@ -11,9 +11,7 @@ export const checkImageInDatabase = query({
     const { sanitizedUrl } = extractUrlParts(args.pageUrl);
     const latestScreenshot = await ctx.db
       .query("screenshots")
-      .withIndex("by_page_url_generated_at", (q) =>
-        q.eq("page_url", sanitizedUrl),
-      )
+      .withIndex("by_full_url", (q) => q.eq("full_url", sanitizedUrl))
       .order("desc")
       .first();
 
@@ -39,7 +37,6 @@ export const checkWebsiteExistsForUrl = query({
 export const storeImageInDatabase = mutation({
   args: {
     pageUrl: v.string(),
-    imageKey: v.string(),
     imageSize: v.number(),
     uploadedUrl: v.string(),
   },
@@ -63,55 +60,31 @@ export const storeImageInDatabase = mutation({
     )[0];
 
     const existingPage = await ctx.db
-      .query("pages")
+      .query("screenshots")
       .withIndex("by_website_id_path", (q) =>
         q.eq("website_id", website._id).eq("path", path),
       )
-      .unique();
+      .order("desc")
+      .first();
 
     const timestamp = nowTimestamp();
-    const pageId = existingPage?._id;
 
     if (!existingPage) {
-      const page = {
+      await ctx.db.insert("screenshots", {
         website_id: website._id,
         user_id: website.user_id,
         path,
         full_url: sanitizedUrl,
-        created_at: timestamp,
-        updated_at: timestamp,
-      };
-
-      const newPageId = await ctx.db.insert("pages", page);
-      await ctx.db.insert("screenshots", {
-        page_id: newPageId,
-        website_id: website._id,
-        user_id: website.user_id,
         screenshot_url: args.uploadedUrl,
-        page_url: sanitizedUrl,
-        website_name: website.url_base,
-        image_hash: args.imageKey,
         size_in_bytes: args.imageSize,
-        generated_at: timestamp,
       });
       return { status: "success" as const };
-    } else if (existingPage.full_url !== sanitizedUrl) {
-      await ctx.db.patch(existingPage._id, {
-        full_url: sanitizedUrl,
-        updated_at: timestamp,
-      });
     }
 
-    await ctx.db.insert("screenshots", {
-      page_id: pageId!,
-      website_id: website._id,
-      user_id: website.user_id,
+    await ctx.db.patch(existingPage._id, {
+      full_url: sanitizedUrl,
       screenshot_url: args.uploadedUrl,
-      page_url: sanitizedUrl,
-      website_name: website.url_base,
-      image_hash: args.imageKey,
       size_in_bytes: args.imageSize,
-      generated_at: timestamp,
     });
     return { status: "success" as const };
   },

@@ -277,7 +277,6 @@ export async function GET(request: NextRequest) {
       console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
       fetchMutation(api.ogImages.storeImageInDatabase, {
         pageUrl: url,
-        imageKey: `${cacheKey}.png`,
         imageSize,
         uploadedUrl,
       }).catch((error) =>

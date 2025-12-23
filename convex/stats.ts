@@ -14,9 +14,7 @@ export const getUserStats = query({
 
     const screenshots = await ctx.db
       .query("screenshots")
-      .withIndex("by_user_id_generated_at", (q) =>
-        q.eq("user_id", identity.subject),
-      )
+      .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
       .collect();
 
     const totalImages = screenshots.length;

@@ -120,7 +120,7 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
         </TableHeader>
         <TableBody>
           {data.map((item) => {
-            const pageUrl = item.page_url?.replace(/\\+$/, "") ?? "";
+            const pageUrl = item.page_url.replace(/\\+$/, "");
             const displayUrl = pageUrl.replace(/^https?:\/\//, "");
 
             return (
@@ -157,7 +157,7 @@ function ScreenshotsTable({ data }: { data: ScreenshotWithDetails[] }) {
                 </TableCell>
               <TableCell>
                 <span className="text-muted-foreground">
-                  {item.website_name}
+                  {item.website_name ?? "Unknown website"}
                 </span>
               </TableCell>
               <TableCell>

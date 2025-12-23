@@ -1,5 +1,6 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 
 const clampPositive = (value: number, fallback: number) =>
   Number.isFinite(value) && value > 0 ? value : fallback;
@@ -26,7 +27,7 @@ export const listLatestForWebsite = query({
 
     const pageResult = await ctx.db
       .query("screenshots")
-      .withIndex("by_user_id_website_id_generated_at", (q) =>
+      .withIndex("by_user_id_website_id", (q) =>
         q.eq("user_id", identity.subject).eq("website_id", args.websiteId),
       )
       .order("desc")
@@ -36,10 +37,10 @@ export const listLatestForWebsite = query({
       id: screenshot._id,
       screenshot_url: screenshot.screenshot_url,
       size_in_bytes: screenshot.size_in_bytes ?? 0,
-      generated_at: screenshot.generated_at,
+      generated_at: screenshot._creationTime,
       page_title: null,
-      page_url: screenshot.page_url,
-      website_name: screenshot.website_name,
+      page_url: screenshot.full_url,
+      website_name: site.url_base,
     }));
 
     return {
@@ -64,21 +65,36 @@ export const listLatestForUser = query({
 
     const screenshots = await ctx.db
       .query("screenshots")
-      .withIndex("by_user_id_generated_at", (q) =>
-        q.eq("user_id", identity.subject),
-      )
+      .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
       .order("desc")
       .take(limit);
 
-    return screenshots.map((screenshot) => ({
-      id: screenshot._id,
-      screenshot_url: screenshot.screenshot_url,
-      size_in_bytes: screenshot.size_in_bytes ?? 0,
-      generated_at: screenshot.generated_at,
-      page_title: null,
-      page_url: screenshot.page_url,
-      website_name: screenshot.website_name,
-    }));
+    const websiteCache = new Map<Id<"sites">, string | null>();
+    const websiteNameFor = async (websiteId: Id<"sites">) => {
+      if (websiteCache.has(websiteId)) {
+        return websiteCache.get(websiteId) ?? null;
+      }
+      const site = await ctx.db.get(websiteId);
+      const name = site?.url_base ?? null;
+      websiteCache.set(websiteId, name);
+      return name;
+    };
+
+    const items = [];
+    for (const screenshot of screenshots) {
+      const websiteName = await websiteNameFor(screenshot.website_id);
+      items.push({
+        id: screenshot._id,
+        screenshot_url: screenshot.screenshot_url,
+        size_in_bytes: screenshot.size_in_bytes ?? 0,
+        generated_at: screenshot._creationTime,
+        page_title: null,
+        page_url: screenshot.full_url,
+        website_name: websiteName,
+      });
+    }
+
+    return items;
   },
 });
 
@@ -97,7 +113,7 @@ export const countForWebsites = query({
     for (const websiteId of args.websiteIds) {
       const screenshots = await ctx.db
         .query("screenshots")
-        .withIndex("by_user_id_website_id_generated_at", (q) =>
+        .withIndex("by_user_id_website_id", (q) =>
           q.eq("user_id", identity.subject).eq("website_id", websiteId),
         )
         .collect();

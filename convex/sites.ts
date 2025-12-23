@@ -221,10 +221,6 @@ export const deleteSite = action({
         if (!result.hasMore) break;
       } while (cursor);
 
-      const allPages = await ctx.runQuery(api.pages.listForWebsite, { websiteId });
-      for (const pageDoc of allPages) {
-        await ctx.runMutation(api.pages.deletePage, { pageId: pageDoc._id });
-      }
     };
 
     await deleteByWebsiteId(args.siteId);
