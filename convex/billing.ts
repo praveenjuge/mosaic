@@ -37,7 +37,6 @@ export const polar = new Polar(components.polar, {
 
 // Export Polar API functions
 export const {
-  getConfiguredProducts,
   generateCheckoutLink,
   generateCustomerPortalUrl,
   changeCurrentSubscription,
@@ -165,6 +164,41 @@ export const linkExistingCustomer = action({
   },
 });
 
+// Helper function to find existing customer by email in Polar
+async function findCustomerByEmail(email: string): Promise<string | null> {
+  const { Polar } = await import("@polar-sh/sdk");
+
+  const polar = new Polar({
+    accessToken: process.env.POLAR_ACCESS_TOKEN ?? "",
+    server: (process.env.POLAR_SERVER ?? "sandbox") as "sandbox" | "production",
+  });
+
+  // Search through customers using async iterator
+  try {
+    const iterator = await polar.customers.list({ limit: 100 });
+    let count = 0;
+    const maxPages = 20;
+
+    for await (const page of iterator) {
+      // @ts-ignore
+      const items = page.items || page || [];
+      if (Array.isArray(items)) {
+        const customer = items.find((c: any) => c.email?.toLowerCase() === email.toLowerCase());
+        if (customer) {
+          return customer.id;
+        }
+      }
+
+      count++;
+      if (count >= maxPages) break;
+    }
+  } catch (e) {
+    console.error("[findCustomerByEmail] Error:", e);
+  }
+
+  return null;
+}
+
 // Custom checkout link generator that handles existing Polar customers
 // If a customer with this email already exists in Polar, we'll link it automatically
 export const createCheckoutLink = action({
@@ -183,53 +217,75 @@ export const createCheckoutLink = action({
       { userId }
     );
 
-    if (!dbCustomer) {
-      // Try to find existing customer in Polar by email
-      const { PolarCore } = await import("@polar-sh/sdk/core.js");
-      const { customersList } = await import("@polar-sh/sdk/funcs/customersList.js");
+    // Initialize Polar SDK
+    const { Polar } = await import("@polar-sh/sdk");
+    const polar = new Polar({
+      accessToken: process.env.POLAR_ACCESS_TOKEN ?? "",
+      server: (process.env.POLAR_SERVER ?? "sandbox") as "sandbox" | "production",
+    });
 
-      const polar = new PolarCore({
-        accessToken: process.env.POLAR_ORGANIZATION_TOKEN ?? "",
-        server: (process.env.POLAR_SERVER ?? "sandbox") as "sandbox" | "production",
-      });
-
-      // Search for customer by email
-      let foundCustomerId: string | null = null;
-      let page = 1;
-      while (page <= 5 && !foundCustomerId) {
-        try {
-          const result = await customersList(polar, {
-            page,
-            limit: 100,
-          });
-          // @ts-ignore - Polar SDK types may not match exactly
-          const items = result.value?.items || result.value || [];
-          const customer = items.find((c: any) => c.email === email);
-          if (customer) {
-            foundCustomerId = customer.id;
-          }
-          // @ts-ignore
-          if (!result.value?.pagination?.hasMore) break;
-          page++;
-        } catch {
-          break;
-        }
+    // Create or get customer
+    const createOrGetCustomer = async (): Promise<string> => {
+      if (dbCustomer?.id) {
+        return dbCustomer.id;
       }
 
-      if (foundCustomerId) {
-        // Link the existing customer
+      // Try to find existing customer in Polar
+      const existingCustomerId = await findCustomerByEmail(email);
+      if (existingCustomerId) {
+        // Link to local DB
         await ctx.runMutation(components.polar.lib.insertCustomer, {
-          id: foundCustomerId,
+          id: existingCustomerId,
           userId,
         });
-        dbCustomer = { id: foundCustomerId, userId };
+        return existingCustomerId;
       }
-    }
 
-    // Now create the checkout session
-    return await ctx.runAction(api.billing.generateCheckoutLink, {
-      ...args,
-      origin: args.origin ?? args.successUrl,
+      // Create new customer
+      try {
+        const customer = await polar.customers.create({
+          email,
+          metadata: { userId },
+        });
+        if (!customer.id) {
+          throw new Error("Customer not created");
+        }
+
+        // Link to local DB
+        await ctx.runMutation(components.polar.lib.insertCustomer, {
+          id: customer.id,
+          userId,
+        });
+
+        return customer.id;
+      } catch (error: any) {
+        // If customer already exists (race condition or search missed it), try to find again
+        const errorMsg = error?.message || String(error);
+        if (errorMsg.includes("already exists") || errorMsg.includes("email")) {
+          const retryCustomerId = await findCustomerByEmail(email);
+          if (retryCustomerId) {
+            await ctx.runMutation(components.polar.lib.insertCustomer, {
+              id: retryCustomerId,
+              userId,
+            });
+            return retryCustomerId;
+          }
+        }
+        throw error;
+      }
+    };
+
+    const customerId = await createOrGetCustomer();
+
+    // Create checkout with existing customer
+    const checkout = await polar.checkouts.create({
+      products: args.productIds,
+      allowDiscountCodes: true,
+      customerId,
+      successUrl: args.successUrl,
+      embedOrigin: args.origin ?? args.successUrl,
     });
+
+    return { url: checkout.url };
   },
 });

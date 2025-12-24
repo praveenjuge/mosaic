@@ -3,6 +3,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { PLAN_LIMITS } from "./constants";
 import type { SubscriptionInfo } from "./billing";
+import type { Id } from "./_generated/dataModel";
 
 type QuotaStatus = {
   canGenerateMore: boolean;
@@ -70,42 +71,6 @@ export const getUserQuotaStatus = query({
   },
 });
 
-export const getUserStats = query({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      return {
-        total_images: 0,
-        total_storage_bytes: 0,
-        total_websites: 0,
-      };
-    }
-
-    const screenshots = await ctx.db
-      .query("screenshots")
-      .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
-      .collect();
-
-    const totalImages = screenshots.length;
-    const totalStorageBytes = screenshots.reduce(
-      (sum, shot) => sum + (shot.size_in_bytes ?? 0),
-      0,
-    );
-    const websites = await ctx.db
-      .query("sites")
-      .withIndex("by_user_id", (q) => q.eq("user_id", identity.subject))
-      .collect();
-
-    return {
-      total_images: totalImages,
-      total_storage_bytes: totalStorageBytes,
-      total_websites: websites.length,
-    };
-  },
-});
-
-// Consolidated dashboard stats query - returns all dashboard data in a single request
 export type DashboardStats = {
   total_websites: number;
   total_images: number;
@@ -116,6 +81,20 @@ export type DashboardStats = {
   can_generate_more: boolean;
   has_exceeded_limit: boolean;
   images_limit: number;
+  websites: Array<{
+    _id: Id<"sites">;
+    url_base: string;
+    _creationTime: number;
+  }>;
+  screenshot_counts: Record<string, number>;
+  latest_screenshots: Array<{
+    id: Id<"screenshots">;
+    screenshot_url: string;
+    size_in_bytes: number;
+    generated_at: number;
+    page_url: string;
+    website_name: string | null;
+  }>;
 };
 
 const PLAN_DISPLAY_NAMES: Record<string, string> = {
@@ -139,6 +118,9 @@ export const getUserDashboardStats = query({
         can_generate_more: false,
         has_exceeded_limit: false,
         images_limit: PLAN_LIMITS.FREE.IMAGES,
+        websites: [],
+        screenshot_counts: {},
+        latest_screenshots: [],
       };
     }
 
@@ -146,17 +128,58 @@ export const getUserDashboardStats = query({
 
     // Fetch all data in parallel
     const [sites, screenshots, subscription] = await Promise.all([
-      ctx.db.query("sites").withIndex("by_user_id", (q) => q.eq("user_id", userId)).collect(),
-      ctx.db.query("screenshots").withIndex("by_user_id", (q) => q.eq("user_id", userId)).collect(),
+      ctx.db
+        .query("sites")
+        .withIndex("by_user_id", (q) => q.eq("user_id", userId))
+        .collect(),
+      ctx.db
+        .query("screenshots")
+        .withIndex("by_user_id", (q) => q.eq("user_id", userId))
+        .order("desc")
+        .collect(),
       ctx.runQuery(internal.billing.getSubscriptionByUserId, { userId }),
     ]);
 
     const totalImages = screenshots.length;
-    const totalStorageBytes = screenshots.reduce((sum, shot) => sum + (shot.size_in_bytes ?? 0), 0);
+    const totalStorageBytes = screenshots.reduce(
+      (sum, shot) => sum + (shot.size_in_bytes ?? 0),
+      0,
+    );
     const totalWebsites = sites.length;
     const plan = subscription.plan;
     const imagesLimit = subscription.plan_properties.images_limit;
     const hasExceededLimit = totalImages >= imagesLimit;
+
+    // Prepare websites array (sorted by creation time, newest first)
+    const websites = sites
+      .map((site) => ({
+        _id: site._id,
+        url_base: site.url_base,
+        _creationTime: site._creationTime,
+      }))
+      .sort((a, b) => b._creationTime - a._creationTime);
+
+    // Calculate screenshot counts per website
+    const screenshot_counts: Record<string, number> = {};
+    for (const websiteId of websites.map((w) => w._id)) {
+      const count = screenshots.filter(
+        (s) => s.website_id === websiteId,
+      ).length;
+      screenshot_counts[websiteId] = count;
+    }
+
+    // Get latest 10 screenshots with website names
+    const latest_screenshots = screenshots.slice(0, 10).map((screenshot) => {
+      const website = sites.find((s) => s._id === screenshot.website_id);
+      return {
+        id: screenshot._id,
+        screenshot_url: screenshot.screenshot_url,
+        size_in_bytes: screenshot.size_in_bytes ?? 0,
+        generated_at: screenshot._creationTime,
+        page_url: screenshot.full_url,
+        website_name: website?.url_base ?? null,
+      };
+    });
 
     return {
       total_websites: totalWebsites,
@@ -168,6 +191,9 @@ export const getUserDashboardStats = query({
       can_generate_more: !hasExceededLimit,
       has_exceeded_limit: hasExceededLimit,
       images_limit: imagesLimit,
+      websites,
+      screenshot_counts,
+      latest_screenshots,
     };
   },
 });
