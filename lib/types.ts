@@ -1,21 +1,10 @@
-import type { Doc, Id } from "@/convex/_generated/dataModel";
+import type { Doc } from "@/convex/_generated/dataModel";
 
 // New table structure types
 export type Site = Doc<"sites">;
-export type Screenshot = Doc<"screenshots">;
 
 export interface SiteWithStats extends Site {
   screenshot_count: number;
-}
-
-export interface ScreenshotWithDetails {
-  id: Id<"screenshots">;
-  screenshot_url: string;
-  size_in_bytes: number;
-  generated_at: number;
-  page_title: string | null;
-  page_url: string;
-  website_name: string | null;
 }
 
 // Markdown content types

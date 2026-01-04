@@ -23,19 +23,18 @@ export const getUserQuotaStatusInternal = internalQuery({
       internal.billing.getSubscriptionByUserId,
       {
         userId: args.userId,
-      }
+      },
     );
 
     const plan = subscription.plan;
     const limit: number = subscription.plan_properties.images_limit;
 
-    // Count total images
-    const screenshots = await ctx.db
-      .query("screenshots")
+    const sites = await ctx.db
+      .query("sites")
       .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
       .collect();
 
-    const used = screenshots.length;
+    const used = sites.reduce((sum, site) => sum + (site.image_count ?? 0), 0);
     const hasExceededLimit: boolean = used >= limit;
 
     return {
@@ -74,7 +73,6 @@ export const getUserQuotaStatus = query({
 export type DashboardStats = {
   total_websites: number;
   total_images: number;
-  total_storage_bytes: number;
   plan: "free" | "pro" | "pro-yearly";
   plan_display_name: string;
   is_active: boolean;
@@ -88,7 +86,7 @@ export type DashboardStats = {
   }>;
   screenshot_counts: Record<string, number>;
   latest_screenshots: Array<{
-    id: Id<"screenshots">;
+    id: string;
     screenshot_url: string;
     size_in_bytes: number;
     generated_at: number;
@@ -103,6 +101,9 @@ const PLAN_DISPLAY_NAMES: Record<string, string> = {
   "pro-yearly": "Pro Yearly",
 };
 
+const PUBLIC_R2_BASE_URL = "https://og.mosaicimg.com/";
+const getPublicImageUrl = (key: string) => `${PUBLIC_R2_BASE_URL}${key}`;
+
 export const getUserDashboardStats = query({
   args: {},
   handler: async (ctx): Promise<DashboardStats> => {
@@ -111,7 +112,6 @@ export const getUserDashboardStats = query({
       return {
         total_websites: 0,
         total_images: 0,
-        total_storage_bytes: 0,
         plan: "free",
         plan_display_name: PLAN_DISPLAY_NAMES.free,
         is_active: false,
@@ -127,22 +127,16 @@ export const getUserDashboardStats = query({
     const userId = identity.subject;
 
     // Fetch all data in parallel
-    const [sites, screenshots, subscription] = await Promise.all([
+    const [sites, subscription] = await Promise.all([
       ctx.db
         .query("sites")
         .withIndex("by_user_id", (q) => q.eq("user_id", userId))
         .collect(),
-      ctx.db
-        .query("screenshots")
-        .withIndex("by_user_id", (q) => q.eq("user_id", userId))
-        .order("desc")
-        .collect(),
       ctx.runQuery(internal.billing.getSubscriptionByUserId, { userId }),
     ]);
 
-    const totalImages = screenshots.length;
-    const totalStorageBytes = screenshots.reduce(
-      (sum, shot) => sum + (shot.size_in_bytes ?? 0),
+    const totalImages = sites.reduce(
+      (sum, site) => sum + (site.image_count ?? 0),
       0,
     );
     const totalWebsites = sites.length;
@@ -162,29 +156,28 @@ export const getUserDashboardStats = query({
     // Calculate screenshot counts per website
     const screenshot_counts: Record<string, number> = {};
     for (const websiteId of websites.map((w) => w._id)) {
-      const count = screenshots.filter(
-        (s) => s.website_id === websiteId,
-      ).length;
-      screenshot_counts[websiteId] = count;
+      const site = sites.find((s) => s._id === websiteId);
+      screenshot_counts[websiteId] = site?.image_count ?? 0;
     }
 
-    // Get latest 10 screenshots with website names
-    const latest_screenshots = screenshots.slice(0, 10).map((screenshot) => {
-      const website = sites.find((s) => s._id === screenshot.website_id);
-      return {
-        id: screenshot._id,
-        screenshot_url: screenshot.screenshot_url,
-        size_in_bytes: screenshot.size_in_bytes ?? 0,
-        generated_at: screenshot._creationTime,
-        page_url: screenshot.full_url,
-        website_name: website?.url_base ?? null,
-      };
-    });
+    // Get latest 10 images across all sites
+    const latest_screenshots = sites
+      .flatMap((site) =>
+        (site.latest_images ?? []).map((image) => ({
+          id: image.key,
+          screenshot_url: getPublicImageUrl(image.key),
+          size_in_bytes: image.size_in_bytes,
+          generated_at: image.generated_at,
+          page_url: image.page_url,
+          website_name: site.url_base ?? null,
+        })),
+      )
+      .sort((a, b) => b.generated_at - a.generated_at)
+      .slice(0, 10);
 
     return {
       total_websites: totalWebsites,
       total_images: totalImages,
-      total_storage_bytes: totalStorageBytes,
       plan,
       plan_display_name: PLAN_DISPLAY_NAMES[plan] ?? PLAN_DISPLAY_NAMES.free,
       is_active: subscription.is_active,

@@ -1,12 +1,26 @@
 import { api } from "@/convex/_generated/api";
+import type { Id } from "@/convex/_generated/dataModel";
 import { extractUrlPartsConsistent } from "@/lib/utils";
 import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 import crypto from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 
 // Utility functions
-const getDirectR2Url = (imageKey: string, isDemo = false): string =>
-  `https://og.mosaicimg.com/${isDemo ? 'demo/' : ''}${imageKey}`;
+const PUBLIC_R2_BASE_URL = "https://og.mosaicimg.com/";
+const getDirectR2Url = (path: string): string => `${PUBLIC_R2_BASE_URL}${path}`;
+const getR2Key = (
+  cacheKey: string,
+  prefix?: string,
+  isDemo = false,
+): string => {
+  if (isDemo) {
+    return `demo/${cacheKey}.png`;
+  }
+  if (!prefix) {
+    throw new Error("Missing R2 prefix for production images");
+  }
+  return `${prefix}/${cacheKey}.png`;
+};
 
 const generateCacheKey = (url: string): string =>
   crypto.createHash("sha256").update(url).digest("hex");
@@ -19,34 +33,48 @@ const redirectToImage = (url: string) =>
     },
   });
 
-// Check if demo image exists in R2
-async function checkDemoImageInR2(cacheKey: string): Promise<string | null> {
-  console.log(`[DEMO_CACHE_CHECK_START] Checking R2 cache for key: ${cacheKey}`);
+// Check if image exists in R2
+async function checkImageInR2(
+  imageKey: string,
+  modeLabel: string,
+): Promise<string | null> {
+  console.log(
+    `[${modeLabel}_CACHE_CHECK_START] Checking R2 cache for key: ${imageKey}`,
+  );
   try {
-    const exists = await fetchAction(api.r2.checkObjectExists, {
-      key: `demo/${cacheKey}.png`,
+    const exists = await fetchQuery(api.r2.objectExists, {
+      key: imageKey,
     });
 
     // If no error, object exists - return direct R2 URL
     if (exists) {
-      const cachedUrl = getDirectR2Url(`${cacheKey}.png`, true);
-      console.log(`[DEMO_CACHE_CHECK_HIT] Cache hit! Found demo image: ${cachedUrl}`);
+      const cachedUrl = getDirectR2Url(imageKey);
+      console.log(
+        `[${modeLabel}_CACHE_CHECK_HIT] Cache hit! Found image: ${cachedUrl}`,
+      );
       return cachedUrl;
     }
 
-    console.log(`[DEMO_CACHE_CHECK_MISS] No cached demo image found for key: ${cacheKey}`);
+    console.log(
+      `[${modeLabel}_CACHE_CHECK_MISS] No cached image found for key: ${imageKey}`,
+    );
     return null;
   } catch (error: unknown) {
-    console.error("[DEMO_CACHE_CHECK_ERROR] Error checking R2:", error);
+    console.error(`[${modeLabel}_CACHE_CHECK_ERROR] Error checking R2:`, error);
     return null;
   }
 }
 
-// Upload to R2 and return direct public URL
-async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, isDemo = false): Promise<string | null> {
-  console.log(`[R2_UPLOAD_START] Starting R2 upload for cache key: ${cacheKey} (demo: ${isDemo})`);
+// Upload to R2 and return direct public URL + key
+async function uploadToR2(
+  imageBuffer: ArrayBuffer,
+  imageKey: string,
+  modeLabel: string,
+): Promise<{ url: string; key: string; isNew: boolean } | null> {
+  console.log(
+    `[R2_UPLOAD_START] Starting R2 upload for key: ${imageKey} (${modeLabel.toLowerCase()})`,
+  );
   try {
-    const imageKey = isDemo ? `demo/${cacheKey}.png` : `${cacheKey}.png`;
     console.log(`[R2_UPLOAD_CONFIG] Key: ${imageKey}, Size: ${imageBuffer.byteLength} bytes`);
 
     await fetchAction(api.r2.storeImage, {
@@ -55,13 +83,41 @@ async function uploadToR2(imageBuffer: ArrayBuffer, cacheKey: string, isDemo = f
       dataBase64: Buffer.from(imageBuffer).toString("base64"),
     });
 
-    const directUrl = getDirectR2Url(isDemo ? `${cacheKey}.png` : imageKey, isDemo);
+    const directUrl = getDirectR2Url(imageKey);
     console.log(`[R2_UPLOAD_SUCCESS] Successfully uploaded to R2, direct URL: ${directUrl}`);
-    return directUrl;
+    return { url: directUrl, key: imageKey, isNew: true };
   } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.includes("Metadata already exists for key")) {
+      const directUrl = getDirectR2Url(imageKey);
+      console.warn(
+        `[R2_UPLOAD_DUPLICATE] R2 key already exists, using cached URL: ${directUrl}`,
+      );
+      return { url: directUrl, key: imageKey, isNew: false };
+    }
     console.error("[R2_UPLOAD_ERROR] R2 upload failed:", error);
     return null;
   }
+}
+
+type SiteCandidate = {
+  siteId: Id<"sites">;
+  url_base: string;
+  r2Prefix: string;
+};
+
+async function findCachedImageForSites(
+  sites: SiteCandidate[],
+  cacheKey: string,
+): Promise<{ url: string; site: SiteCandidate } | null> {
+  for (const site of sites) {
+    const imageKey = getR2Key(cacheKey, site.r2Prefix, false);
+    const cachedUrl = await checkImageInR2(imageKey, "PROD");
+    if (cachedUrl) {
+      return { url: cachedUrl, site };
+    }
+  }
+  return null;
 }
 
 // Take screenshot using Cloudflare Browser Rendering
@@ -162,8 +218,11 @@ export async function GET(request: NextRequest) {
 
     // Check cache based on mode
     let cachedImageUrl: string | null = null;
+    let selectedSite: SiteCandidate | null = null;
+    let imageKey: string | null = null;
     if (isDemo) {
-      cachedImageUrl = await checkDemoImageInR2(cacheKey);
+      imageKey = getR2Key(cacheKey, undefined, true);
+      cachedImageUrl = await checkImageInR2(imageKey, "DEMO");
       if (cachedImageUrl) {
         console.log(`[API_REQUEST_DEMO_CACHE_HIT] Returning cached demo image: ${cachedImageUrl}`);
         return NextResponse.json({
@@ -172,25 +231,14 @@ export async function GET(request: NextRequest) {
         });
       }
     } else {
-      cachedImageUrl = await fetchQuery(api.ogImages.checkImageInDatabase, {
-        pageUrl: url,
-      });
-      if (cachedImageUrl) {
-        console.log(`[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedImageUrl}`);
-        return redirectToImage(cachedImageUrl);
-      }
-
-      // Check if website exists (only for production mode)
-      console.log("[API_REQUEST_WEBSITE_CHECK] Checking if website exists");
       const { urlBase } = extractUrlPartsConsistent(url);
       console.log(`[API_REQUEST_URL_BASE] Extracted URL base: ${urlBase}`);
 
-      const websiteExists = await fetchQuery(
-        api.ogImages.checkWebsiteExistsForUrl,
-        { url_base: urlBase },
-      );
+      const sitesResult = await fetchQuery(api.ogImages.getSitesForUrlBase, {
+        urlBase,
+      });
 
-      if (!websiteExists) {
+      if (sitesResult.sites.length === 0) {
         console.warn(`[API_REQUEST_WEBSITE_NOT_FOUND] No website found for URL base: ${urlBase}`);
         return NextResponse.json(
           { error: "Website must be added to Mosaic before generating OG images" },
@@ -198,26 +246,36 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      console.log(`[API_REQUEST_WEBSITE_FOUND] Website exists, proceeding with screenshot`);
-
-      // Check the website owner's image limit (public endpoint, but owner's limit applies)
-      try {
-        const limitCheckResult = await fetchMutation(api.ogImages.checkWebsiteOwnerLimit, {
-          urlBase,
-        });
-        if (!limitCheckResult.canGenerate) {
-          console.warn(`[API_REQUEST_LIMIT_EXCEEDED] All website owners have exceeded their image limits`);
-          return NextResponse.json(
-            {
-              error: "OG image limit exceeded for this plan. Please upgrade your subscription.",
-            },
-            { status: 403 }
-          );
-        }
-      } catch (limitError) {
-        console.error("[API_REQUEST_LIMIT_CHECK_ERROR] Limit check failed:", limitError);
-        // Proceed with generation on error (fail open)
+      const cachedResult = await findCachedImageForSites(
+        sitesResult.sites,
+        cacheKey,
+      );
+      if (cachedResult) {
+        console.log(
+          `[API_REQUEST_CACHE_HIT] Redirecting to cached image: ${cachedResult.url}`,
+        );
+        return redirectToImage(cachedResult.url);
       }
+
+      if (!sitesResult.selectedSite) {
+        console.warn(
+          "[API_REQUEST_LIMIT_EXCEEDED] All website owners have exceeded their image limits",
+        );
+        return NextResponse.json(
+          {
+            error:
+              "OG image limit exceeded for this plan. Please upgrade your subscription.",
+          },
+          { status: 403 },
+        );
+      }
+
+      selectedSite = sitesResult.selectedSite;
+      imageKey = getR2Key(
+        cacheKey,
+        selectedSite.r2Prefix,
+        false,
+      );
     }
 
     // Generate screenshot
@@ -228,9 +286,21 @@ export async function GET(request: NextRequest) {
     }
 
     // Upload to R2
-    const uploadedUrl = await uploadToR2(imageBuffer, cacheKey, isDemo);
+    if (!isDemo && !imageKey) {
+      console.error("[API_REQUEST_ERROR] Missing R2 key for production image");
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 },
+      );
+    }
 
-    if (!uploadedUrl) {
+    const uploadResult = await uploadToR2(
+      imageBuffer,
+      imageKey ?? getR2Key(cacheKey, undefined, true),
+      isDemo ? "DEMO" : "PROD",
+    );
+
+    if (!uploadResult) {
       console.warn("[API_REQUEST_R2_FAILED] R2 upload failed");
       if (isDemo) {
         // For demo mode, return base64 fallback
@@ -255,28 +325,34 @@ export async function GET(request: NextRequest) {
     }
 
     if (isDemo) {
-      console.log(`[API_REQUEST_DEMO_SUCCESS] Successfully processed demo request: ${uploadedUrl}`);
+      console.log(`[API_REQUEST_DEMO_SUCCESS] Successfully processed demo request: ${uploadResult.url}`);
       return NextResponse.json({
-        imageUrl: uploadedUrl,
+        imageUrl: uploadResult.url,
         cached: false,
       });
     } else {
       // Store in database (background task) - only for production mode
-      const imageSize = Buffer.from(imageBuffer).length;
-      console.log(`[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`);
-      fetchMutation(api.ogImages.storeImageInDatabase, {
-        pageUrl: url,
-        imageSize,
-        uploadedUrl,
-      }).catch((error) =>
-        console.error(
-          "[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:",
-          error,
-        ),
-      );
+      if (selectedSite) {
+        const imageSize = Buffer.from(imageBuffer).length;
+        console.log(
+          `[API_REQUEST_DB_STORAGE] Starting background database storage (image size: ${imageSize} bytes)`,
+        );
+        fetchMutation(api.ogImages.storeImageForSite, {
+          siteId: selectedSite.siteId,
+          pageUrl: url,
+          imageSize,
+          imageKey: uploadResult.key,
+          isNew: uploadResult.isNew,
+        }).catch((error) =>
+          console.error(
+            "[API_REQUEST_DB_STORAGE_ERROR] Background database storage failed:",
+            error,
+          ),
+        );
+      }
 
-      console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadedUrl}`);
-      return redirectToImage(uploadedUrl);
+      console.log(`[API_REQUEST_SUCCESS] Successfully processed request, redirecting to: ${uploadResult.url}`);
+      return redirectToImage(uploadResult.url);
     }
   } catch (error) {
     console.error("[API_REQUEST_ERROR] Unexpected error in OG Image API:", error);

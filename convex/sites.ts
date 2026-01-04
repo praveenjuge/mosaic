@@ -1,14 +1,13 @@
 import { action, mutation, query } from "./_generated/server";
-import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
 import { normalizeUrlBase } from "./utils/url";
+const generateR2Prefix = () =>
+  `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
 const siteInput = v.object({
   url_base: v.string(),
 });
-
-
 export const listForUser = query({
   args: {},
   handler: async (ctx) => {
@@ -114,6 +113,9 @@ export const addSite = mutation({
     const site = {
       user_id: identity.subject,
       url_base: normalizedUrl,
+      image_count: 0,
+      r2_prefix: generateR2Prefix(),
+      latest_images: [],
     };
 
     const siteId = await ctx.db.insert("sites", site);
@@ -202,28 +204,18 @@ export const deleteSite = action({
       };
     }
 
-    const deleteByWebsiteId = async (websiteId: typeof args.siteId) => {
-      let cursor: string | null = null;
-      do {
-        const result: {
-          data: Array<{ id: Id<"screenshots"> }>;
-          cursor: string | null;
-          hasMore: boolean;
-        } = await ctx.runQuery(api.screenshots.listLatestForWebsite, {
-          websiteId,
-          cursor: cursor ?? undefined,
-          limit: 100,
-        });
-        for (const screenshot of result.data) {
-          await ctx.runMutation(api.ogImages.deleteImage, { imageId: screenshot.id });
-        }
-        cursor = result.cursor;
-        if (!result.hasMore) break;
-      } while (cursor);
+    const legacyPrefix = `${existing.user_id}/${existing._id}/`;
+    const prefixes = new Set<string>([
+      legacyPrefix,
+      `${existing._id}/`,
+    ]);
+    if (existing.r2_prefix) {
+      prefixes.add(`${existing.r2_prefix}/`);
+    }
+    for (const targetPrefix of prefixes) {
+      await ctx.runAction(api.r2.deleteObjectsByPrefix, { prefix: targetPrefix });
+    }
 
-    };
-
-    await deleteByWebsiteId(args.siteId);
     await ctx.runMutation(api.sites.deleteSiteInternal, { siteId: args.siteId });
     return {
       status: "success" as const,
@@ -282,6 +274,9 @@ export const importSites = mutation({
         await ctx.db.insert("sites", {
           user_id: identity.subject,
           url_base: normalizedUrl,
+          image_count: 0,
+          r2_prefix: generateR2Prefix(),
+          latest_images: [],
         });
         inserted += 1;
       }

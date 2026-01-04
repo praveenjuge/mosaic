@@ -1,176 +1,158 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
 import { PLAN_LIMITS, PLAN_TYPE_MAPPING } from "./constants";
-import { api, internal } from "./_generated/api";
+import { internal } from "./_generated/api";
 
-const nowTimestamp = () => Date.now();
-export const checkImageInDatabase = query({
-  args: {
-    pageUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { sanitizedUrl } = extractUrlParts(args.pageUrl);
-    const latestScreenshot = await ctx.db
-      .query("screenshots")
-      .withIndex("by_full_url", (q) => q.eq("full_url", sanitizedUrl))
-      .order("desc")
-      .first();
+type SiteCandidate = {
+  siteId: Id<"sites">;
+  userId: string;
+  url_base: string;
+  r2Prefix: string;
+};
 
-    return latestScreenshot?.screenshot_url ?? null;
-  },
-});
+type SiteSummary = Omit<SiteCandidate, "userId">;
 
-export const checkWebsiteExistsForUrl = query({
-  args: {
-    url_base: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const normalizedUrl = normalizeUrlBase(args.url_base);
-    const existing = await ctx.db
-      .query("sites")
-      .withIndex("by_url_base", (q) => q.eq("url_base", normalizedUrl))
-      .first();
-
-    return Boolean(existing);
-  },
-});
-
-export const storeImageInDatabase = mutation({
-  args: {
-    pageUrl: v.string(),
-    imageSize: v.number(),
-    uploadedUrl: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { urlBase, sanitizedUrl } = extractUrlParts(args.pageUrl);
-
-    const matchingSites = await ctx.db
-      .query("sites")
-      .withIndex("by_url_base", (q) => q.eq("url_base", urlBase))
-      .collect();
-
-    if (!matchingSites.length) {
-      return {
-        status: "skipped" as const,
-        message: "No matching websites found for URL base.",
-      };
-    }
-
-    // Find a website owner who has capacity (fallback to oldest)
-    let selectedWebsite = matchingSites.sort(
-      (a, b) => a._creationTime - b._creationTime,
-    )[0];
-
-    for (const site of matchingSites) {
-      const subscription = await ctx.runQuery(internal.billing.getSubscriptionByUserId, {
-        userId: site.user_id,
-      });
-      const planType: keyof typeof PLAN_LIMITS =
-        PLAN_TYPE_MAPPING[subscription.plan as keyof typeof PLAN_TYPE_MAPPING] ||
-        "FREE";
-      const limit = PLAN_LIMITS[planType].IMAGES;
-
-      const screenshots = await ctx.db
-        .query("screenshots")
-        .withIndex("by_user_id", (q) => q.eq("user_id", site.user_id))
-        .collect();
-
-      if (screenshots.length < limit) {
-        selectedWebsite = site;
-        break;
-      }
-    }
-
-    const existingPage = await ctx.db
-      .query("screenshots")
-      .withIndex("by_full_url", (q) => q.eq("full_url", sanitizedUrl))
-      .first();
-
-    if (!existingPage) {
-      await ctx.db.insert("screenshots", {
-        website_id: selectedWebsite._id,
-        user_id: selectedWebsite.user_id,
-        full_url: sanitizedUrl,
-        screenshot_url: args.uploadedUrl,
-        size_in_bytes: args.imageSize,
-      });
-      return { status: "success" as const };
-    }
-
-    await ctx.db.patch(existingPage._id, {
-      full_url: sanitizedUrl,
-      screenshot_url: args.uploadedUrl,
-      size_in_bytes: args.imageSize,
-    });
-    return { status: "success" as const };
-  },
-});
-
-export const deleteImage = mutation({
-  args: {
-    imageId: v.id("screenshots"),
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
-      throw new Error("You must be logged in to delete images.");
-    }
-
-    const screenshot = await ctx.db.get(args.imageId);
-    if (!screenshot || screenshot.user_id !== identity.subject) {
-      throw new Error("Image not found or access denied.");
-    }
-
-    await ctx.db.delete(args.imageId);
-  },
-});
-
-// Check if any user with this website has capacity (for public API endpoint)
-// Returns true if ANY user with this website can accept more images
-export const checkWebsiteOwnerLimit = mutation({
+export const getSitesForUrlBase = query({
   args: {
     urlBase: v.string(),
   },
   handler: async (ctx, args): Promise<{
-    canGenerate: boolean;
+    sites: SiteSummary[];
+    selectedSite: SiteSummary | null;
   }> => {
-    // Normalize the url_base to match how it's stored
     const normalizedUrlBase = normalizeUrlBase(args.urlBase);
 
-    // Find all sites with matching url_base
     const matchingSites = await ctx.db
       .query("sites")
       .withIndex("by_url_base", (q) => q.eq("url_base", normalizedUrlBase))
       .collect();
 
     if (!matchingSites.length) {
-      return { canGenerate: false };
+      return { sites: [], selectedSite: null };
     }
 
-    // Check each site owner's limit - return true if ANY has capacity
-    for (const site of matchingSites) {
-      const subscription = await ctx.runQuery(internal.billing.getSubscriptionByUserId, {
-        userId: site.user_id,
-      });
-      const planType: keyof typeof PLAN_LIMITS =
-        PLAN_TYPE_MAPPING[subscription.plan as keyof typeof PLAN_TYPE_MAPPING] ||
-        "FREE";
-      const limit = PLAN_LIMITS[planType].IMAGES;
+    const sortedSites = matchingSites
+      .slice()
+      .sort((a, b) => a._creationTime - b._creationTime);
 
-      // Count this user's images
-      const screenshots = await ctx.db
-        .query("screenshots")
-        .withIndex("by_user_id", (q) => q.eq("user_id", site.user_id))
+    const siteCandidates: SiteCandidate[] = sortedSites.map((site) => ({
+      siteId: site._id,
+      userId: site.user_id,
+      url_base: site.url_base,
+      r2Prefix: site.r2_prefix ?? site._id,
+    }));
+
+    const userImageCounts = new Map<string, number>();
+    const getUserImageCount = async (userId: string) => {
+      if (userImageCounts.has(userId)) {
+        return userImageCounts.get(userId) ?? 0;
+      }
+      const userSites = await ctx.db
+        .query("sites")
+        .withIndex("by_user_id", (q) => q.eq("user_id", userId))
         .collect();
+      const count = userSites.reduce(
+        (sum, site) => sum + (site.image_count ?? 0),
+        0,
+      );
+      userImageCounts.set(userId, count);
+      return count;
+    };
 
-      if (screenshots.length < limit) {
-        // This user has capacity!
-        return { canGenerate: true };
+    let selectedSite: SiteCandidate | null = null;
+    for (const site of siteCandidates) {
+      try {
+        const subscription = await ctx.runQuery(
+          internal.billing.getSubscriptionByUserId,
+          {
+            userId: site.userId,
+          },
+        );
+        const planType: keyof typeof PLAN_LIMITS =
+          PLAN_TYPE_MAPPING[
+          subscription.plan as keyof typeof PLAN_TYPE_MAPPING
+          ] || "FREE";
+        const limit = PLAN_LIMITS[planType].IMAGES;
+        const used = await getUserImageCount(site.userId);
+
+        if (used < limit) {
+          selectedSite = site;
+          break;
+        }
+      } catch (error) {
+        console.error(
+          "[OG_IMAGES_SITE_SELECTION] Failed to check billing, failing open:",
+          error,
+        );
+        selectedSite = site;
+        break;
       }
     }
 
-    // All users with this website are at their limit
-    return { canGenerate: false };
+    const sites: SiteSummary[] = siteCandidates.map(
+      ({ siteId, url_base, r2Prefix }) => ({
+        siteId,
+        url_base,
+        r2Prefix,
+      }),
+    );
+    const selectedSiteSummary = selectedSite
+      ? {
+        siteId: selectedSite.siteId,
+        url_base: selectedSite.url_base,
+        r2Prefix: selectedSite.r2Prefix,
+      }
+      : null;
+
+    return { sites, selectedSite: selectedSiteSummary };
+  },
+});
+
+export const storeImageForSite = mutation({
+  args: {
+    siteId: v.id("sites"),
+    pageUrl: v.string(),
+    imageSize: v.number(),
+    imageKey: v.string(),
+    isNew: v.boolean(),
+  },
+  handler: async (ctx, args) => {
+    const site = await ctx.db.get(args.siteId);
+    if (!site) {
+      return {
+        status: "error" as const,
+        message: "Website not found.",
+      };
+    }
+
+    const { sanitizedUrl } = extractUrlParts(args.pageUrl);
+    const now = Date.now();
+    const nextLatest = [
+      {
+        key: args.imageKey,
+        page_url: sanitizedUrl,
+        size_in_bytes: args.imageSize,
+        generated_at: now,
+      },
+      ...(site.latest_images ?? []).filter(
+        (image) => image.key !== args.imageKey,
+      ),
+    ].slice(0, 10);
+
+    const patch: {
+      latest_images: typeof nextLatest;
+      image_count?: number;
+    } = {
+      latest_images: nextLatest,
+    };
+    if (args.isNew) {
+      patch.image_count = (site.image_count ?? 0) + 1;
+    }
+
+    await ctx.db.patch(site._id, patch);
+
+    return { status: "success" as const };
   },
 });

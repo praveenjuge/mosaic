@@ -1,8 +1,9 @@
 import { R2 } from "@convex-dev/r2";
 import { v } from "convex/values";
+import { ListObjectsV2Command } from "@aws-sdk/client-s3";
 
 import { components } from "./_generated/api";
-import { action } from "./_generated/server";
+import { action, query } from "./_generated/server";
 
 const r2 = new R2(components.r2, {
   R2_BUCKET: process.env.R2_BUCKET ?? process.env.PROD_R2_BUCKET_NAME ?? "mosaic-og-prod",
@@ -16,25 +17,13 @@ const r2 = new R2(components.r2, {
     process.env.R2_SECRET_ACCESS_KEY ?? process.env.PROD_R2_SECRET_ACCESS_KEY,
 });
 
-export const checkObjectExists = action({
+export const objectExists = query({
   args: {
     key: v.string(),
   },
   handler: async (ctx, args) => {
-    try {
-      await r2.syncMetadata(ctx, args.key);
-      return true;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      const isNotFound =
-        message.includes("NotFound") ||
-        message.includes("NoSuchKey") ||
-        message.includes("404");
-      if (isNotFound) {
-        return false;
-      }
-      throw error;
-    }
+    const metadata = await r2.getMetadata(ctx, args.key);
+    return Boolean(metadata);
   },
 });
 
@@ -51,6 +40,48 @@ export const storeImage = action({
       type: args.contentType,
     });
     return key;
+  },
+});
+
+export const deleteObject = action({
+  args: {
+    key: v.string(),
+  },
+  handler: async (ctx, args) => {
+    await r2.deleteObject(ctx, args.key);
+  },
+});
+
+export const deleteObjectsByPrefix = action({
+  args: {
+    prefix: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const batchSize = 25;
+    let continuationToken: string | undefined;
+    do {
+      const response = await r2.r2.send(
+        new ListObjectsV2Command({
+          Bucket: r2.config.bucket,
+          Prefix: args.prefix,
+          ContinuationToken: continuationToken,
+        }),
+      );
+
+      const keys =
+        response.Contents?.map((entry) => entry.Key).filter(
+          (key): key is string => Boolean(key),
+        ) ?? [];
+
+      for (let i = 0; i < keys.length; i += batchSize) {
+        const batch = keys.slice(i, i + batchSize);
+        await Promise.all(batch.map((key) => r2.deleteObject(ctx, key)));
+      }
+
+      continuationToken = response.IsTruncated
+        ? response.NextContinuationToken
+        : undefined;
+    } while (continuationToken);
   },
 });
 
