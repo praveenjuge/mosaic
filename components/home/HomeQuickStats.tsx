@@ -10,73 +10,39 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { DashboardStats } from "@/convex/stats";
 import { Authenticated, Unauthenticated } from "convex/react";
 
-function ImagesStatCard({ count }: { count: number }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{count.toLocaleString()}</CardTitle>
-        <CardDescription>OG Images</CardDescription>
-      </CardHeader>
-    </Card>
-  );
+interface StatCardSkeletonProps {
+  titleWidth: string;
+  description: string;
 }
 
-function SubscriptionStatCard({
-  planDisplayName,
-  isActive,
-}: {
-  planDisplayName: string;
-  isActive: boolean;
-}) {
+function StatCardSkeleton({ titleWidth, description }: StatCardSkeletonProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className={isActive ? "text-green-600" : ""}>
-          {planDisplayName}
+        <CardTitle>
+          <Skeleton className={`h-4.5 ${titleWidth}`} />
         </CardTitle>
-        <CardDescription>Subscription</CardDescription>
+        <CardDescription>{description}</CardDescription>
       </CardHeader>
     </Card>
   );
 }
 
-// Loading skeleton for all stats
 function StatsLoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-4.5 w-16" />
-          </CardTitle>
-          <CardDescription>Websites</CardDescription>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-4.5 w-16" />
-          </CardTitle>
-          <CardDescription>OG Images</CardDescription>
-        </CardHeader>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Skeleton className="h-4.5 w-24" />
-          </CardTitle>
-          <CardDescription>Subscription</CardDescription>
-        </CardHeader>
-      </Card>
+      <StatCardSkeleton titleWidth="w-16" description="Websites" />
+      <StatCardSkeleton titleWidth="w-16" description="OG Images" />
+      <StatCardSkeleton titleWidth="w-24" description="Subscription" />
     </div>
   );
 }
 
-export default function HomeQuickStats({
-  stats,
-}: {
+interface HomeQuickStatsProps {
   stats: DashboardStats | null | undefined;
-}) {
+}
+
+export default function HomeQuickStats({ stats }: HomeQuickStatsProps) {
   return (
     <>
       <Unauthenticated>
@@ -108,15 +74,24 @@ export default function HomeQuickStats({
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <Card>
               <CardHeader>
-                <CardTitle>{stats.total_websites.toLocaleString()}</CardTitle>
+                <CardTitle>{stats.total_websites_display}</CardTitle>
                 <CardDescription>Websites</CardDescription>
               </CardHeader>
             </Card>
-            <ImagesStatCard count={stats.total_images} />
-            <SubscriptionStatCard
-              planDisplayName={stats.plan_display_name}
-              isActive={stats.is_active}
-            />
+            <Card>
+              <CardHeader>
+                <CardTitle>{stats.total_images_display}</CardTitle>
+                <CardDescription>OG Images</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className={stats.is_active ? "text-green-600" : ""}>
+                  {stats.plan_display_name}
+                </CardTitle>
+                <CardDescription>Subscription</CardDescription>
+              </CardHeader>
+            </Card>
           </div>
         )}
       </Authenticated>

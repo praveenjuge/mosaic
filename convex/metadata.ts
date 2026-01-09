@@ -1,5 +1,6 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
+import { extractUrlParts } from "./utils/url";
 
 const normalizeText = (value: string) =>
   value.replace(/\s+/g, " ").trim();
@@ -27,84 +28,124 @@ const extractTitleTag = (html: string) => {
   return match?.[1] ? normalizeText(match[1]) : null;
 };
 
+const normalizeUrl = (url: string): string => {
+  if (!url) return url;
+
+  url = url.trim();
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  return `https://${url}`;
+};
+
+const getUserMessageForStatus = (status: number): string => {
+  if (status === 403) {
+    return "This website blocks automated requests. Please try a different URL.";
+  }
+  if (status === 404) {
+    return "The requested page was not found. Please check the URL and try again.";
+  }
+  if (status === 502) {
+    return "The website is currently experiencing issues. Please try again later.";
+  }
+  return "Failed to fetch metadata";
+};
+
+const fetchPageHtml = async (url: URL): Promise<string> => {
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      redirect: "follow",
+      headers: {
+        "User-Agent":
+          "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaicimg.com)",
+        Accept: "text/html,application/xhtml+xml",
+      },
+    });
+  } catch {
+    throw new Error(
+      "Failed to fetch metadata. Please check the URL and try again.",
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(getUserMessageForStatus(response.status));
+  }
+
+  return response.text();
+};
+
+const extractMetadata = (html: string, baseUrl: URL) => {
+  const title =
+    extractMeta(html, "property", ["og:title"]) ||
+    extractMeta(html, "name", ["twitter:title", "title"]) ||
+    extractTitleTag(html) ||
+    "";
+
+  const description =
+    extractMeta(html, "property", ["og:description"]) ||
+    extractMeta(html, "name", ["description", "twitter:description"]) ||
+    "";
+
+  let image =
+    extractMeta(html, "property", ["og:image"]) ||
+    extractMeta(html, "name", ["twitter:image", "twitter:image:src"]) ||
+    "";
+
+  if (image) {
+    try {
+      image = new URL(image, baseUrl).toString();
+    } catch {
+      // Keep original if it can't be normalized.
+    }
+  }
+
+  return { title, description, image };
+};
+
+const validateAndParseUrl = (url: string): URL => {
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(url);
+  } catch {
+    throw new Error("Please enter a valid URL.");
+  }
+
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw new Error("Only HTTP and HTTPS URLs are supported.");
+  }
+
+  return parsedUrl;
+};
+
 export const fetchMetadata = action({
   args: {
     url: v.string(),
   },
   handler: async (_ctx, args) => {
-    let parsedUrl: URL;
+    const parsedUrl = validateAndParseUrl(args.url);
+    const html = await fetchPageHtml(parsedUrl);
+    return extractMetadata(html, parsedUrl);
+  },
+});
 
-    try {
-      parsedUrl = new URL(args.url);
-    } catch {
-      throw new Error("Please enter a valid URL.");
-    }
-
-    if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-      throw new Error("Only HTTP and HTTPS URLs are supported.");
-    }
-
-    let response: Response;
-    try {
-      response = await fetch(parsedUrl.toString(), {
-        redirect: "follow",
-        headers: {
-          "User-Agent":
-            "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaicimg.com)",
-          Accept: "text/html,application/xhtml+xml",
-        },
-      });
-    } catch {
-      throw new Error(
-        "Failed to fetch metadata. Please check the URL and try again.",
-      );
-    }
-
-    if (!response.ok) {
-      let userMessage = "Failed to fetch metadata";
-      if (response.status === 403) {
-        userMessage =
-          "This website blocks automated requests. Please try a different URL.";
-      } else if (response.status === 404) {
-        userMessage =
-          "The requested page was not found. Please check the URL and try again.";
-      } else if (response.status === 502) {
-        userMessage =
-          "The website is currently experiencing issues. Please try again later.";
-      }
-      throw new Error(userMessage);
-    }
-
-    const html = await response.text();
-
-    const title =
-      extractMeta(html, "property", ["og:title"]) ||
-      extractMeta(html, "name", ["twitter:title", "title"]) ||
-      extractTitleTag(html) ||
-      "";
-
-    const description =
-      extractMeta(html, "property", ["og:description"]) ||
-      extractMeta(html, "name", ["description", "twitter:description"]) ||
-      "";
-
-    let image =
-      extractMeta(html, "property", ["og:image"]) ||
-      extractMeta(html, "name", ["twitter:image", "twitter:image:src"]) ||
-      "";
-
-    if (image) {
-      try {
-        image = new URL(image, parsedUrl).toString();
-      } catch {
-        // Keep original if it can't be normalized.
-      }
-    }
+export const fetchDemoData = action({
+  args: {
+    url: v.string(),
+  },
+  handler: async (_ctx, args) => {
+    const normalizedUrl = normalizeUrl(args.url);
+    const parsedUrl = validateAndParseUrl(normalizedUrl);
+    const html = await fetchPageHtml(parsedUrl);
+    const metadata = extractMetadata(html, parsedUrl);
+    const { sanitizedUrl } = extractUrlParts(normalizedUrl);
 
     return {
-      title,
-      description,
-      image,
+      normalizedUrl: sanitizedUrl,
+      ...metadata,
+      screenshotApiUrl: `/use?url=${encodeURIComponent(normalizedUrl)}&demo=true`,
     };
   },
 });

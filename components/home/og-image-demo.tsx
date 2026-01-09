@@ -9,88 +9,84 @@ import { useAction } from "convex/react";
 import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
 import { useCallback, useState } from "react";
 
-interface OGData {
+interface DemoData {
+  normalizedUrl: string;
   title: string;
   description: string;
   image: string;
+  screenshotApiUrl: string;
 }
 
-// Normalize URL by adding protocol if missing
-function normalizeUrl(url: string): string {
-  if (!url) return url;
-
-  // Remove any leading/trailing whitespace
-  url = url.trim();
-
-  // If URL already has a protocol, return as is
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
-  // Add https:// prefix for URLs without protocol
-  return `https://${url}`;
-}
-
-const ImageContainer = ({
-  isLoading,
-  src,
-  alt,
-  isScreenshotLoading,
-}: {
+interface ImageContainerProps {
   isLoading: boolean;
   src: string | null;
   alt: string;
   isScreenshotLoading?: boolean;
-}) => (
-  <div className="relative h-52 w-full">
-    {isLoading || isScreenshotLoading ? (
-      <Skeleton className="bg-primary size-full rounded-none" />
-    ) : src ? (
-      <>
-        <Skeleton className="absolute inset-0 size-full rounded-none" />
-        <img
-          src={src}
-          alt={alt}
-          width={600}
-          height={250}
-          className="relative size-full object-cover"
-        />
-      </>
-    ) : (
-      <div className="bg-primary-foreground flex size-full items-center justify-center">
-        <p>No OG image available</p>
-      </div>
-    )}
-  </div>
-);
+}
 
-const ContentContainer = ({
+function ImageContainer({
   isLoading,
-  title,
-  description,
-  url,
-}: {
+  src,
+  alt,
+  isScreenshotLoading,
+}: ImageContainerProps) {
+  const showSkeleton = isLoading || isScreenshotLoading;
+
+  return (
+    <div className="relative h-52 w-full">
+      {showSkeleton ? (
+        <Skeleton className="bg-primary size-full rounded-none" />
+      ) : src ? (
+        <>
+          <Skeleton className="absolute inset-0 size-full rounded-none" />
+          <img
+            src={src}
+            alt={alt}
+            width={600}
+            height={250}
+            className="relative size-full object-cover"
+          />
+        </>
+      ) : (
+        <div className="bg-primary-foreground flex size-full items-center justify-center">
+          <p>No OG image available</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface ContentContainerProps {
   isLoading: boolean;
   title: string;
   description: string;
   url: string;
-}) => (
-  <div className="bg-primary-foreground flex flex-col gap-0.5 p-3.5">
-    {isLoading ? (
-      <>
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-8 w-full" />
-        <Skeleton className="h-4 w-1/2" />
-      </>
-    ) : (
-      <>
-        <p className="line-clamp-1 font-semibold">{title}</p>
-        <p className="line-clamp-2">{description}</p>
-        <p className="text-muted-foreground">{url}</p>
-      </>
-    )}
-  </div>
-);
+}
+
+function ContentContainer({
+  isLoading,
+  title,
+  description,
+  url,
+}: ContentContainerProps) {
+  return (
+    <div className="bg-primary-foreground flex flex-col gap-0.5 p-3.5">
+      {isLoading ? (
+        <>
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-8 w-full" />
+          <Skeleton className="h-4 w-1/2" />
+        </>
+      ) : (
+        <>
+          <p className="line-clamp-1 font-semibold">{title}</p>
+          <p className="line-clamp-2">{description}</p>
+          <p className="text-muted-foreground">{url}</p>
+        </>
+      )}
+    </div>
+  );
+}
 
 const defaultData = {
   title: "To Use or Not to Use Auto Layout in Figma",
@@ -101,15 +97,14 @@ const defaultData = {
 
 export default function OGImageDemo() {
   const [inputUrl, setInputUrl] = useState("");
-  const [submittedUrl, setSubmittedUrl] = useState("");
-  const [ogData, setOgData] = useState<OGData | null>(null);
+  const [demoData, setDemoData] = useState<DemoData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
   const [error, setError] = useState("");
   const [mosaicImageUrl, setMosaicImageUrl] = useState(
     "/images/mosaic-example-og.png",
   );
-  const fetchMetadata = useAction(api.metadata.fetchMetadata);
+  const fetchDemoData = useAction(api.metadata.fetchDemoData);
 
   const fetchOGData = useCallback(async () => {
     if (!inputUrl) {
@@ -117,24 +112,18 @@ export default function OGImageDemo() {
       return;
     }
 
-    // Normalize the URL before processing
-    const normalizedUrl = normalizeUrl(inputUrl);
-
     setIsLoading(true);
     setIsScreenshotLoading(true);
     setError("");
 
     try {
-      const ogDataResult = await fetchMetadata({ url: normalizedUrl });
-      setOgData(ogDataResult);
-      setSubmittedUrl(normalizedUrl);
-      setIsLoading(false); // OG data loaded, stop general loading
+      const data = await fetchDemoData({ url: inputUrl });
+      setDemoData(data);
+      setIsLoading(false);
 
-      // Fetch screenshot (this might take longer)
+      // Fetch screenshot using the API URL returned from Convex
       try {
-        const screenshotResponse = await fetch(
-          `/use?url=${encodeURIComponent(normalizedUrl)}&demo=true`,
-        );
+        const screenshotResponse = await fetch(data.screenshotApiUrl);
         if (!screenshotResponse.ok) {
           throw new Error(`Screenshot API error: ${screenshotResponse.status}`);
         }
@@ -148,20 +137,19 @@ export default function OGImageDemo() {
       } catch (screenshotError) {
         console.error("Screenshot error:", screenshotError);
         setError("Failed to generate OG Image. Using fallback image.");
-        // Keep the default fallback image
       }
-    } catch (error) {
-      console.log("Error fetching data:", error);
+    } catch (err) {
+      console.log("Error fetching data:", err);
       const errorMessage =
-        error instanceof Error
-          ? error.message
+        err instanceof Error
+          ? err.message
           : "Failed to load data. Please check if the URL is correct and try again!";
       setError(errorMessage);
     } finally {
       setIsLoading(false);
       setIsScreenshotLoading(false);
     }
-  }, [fetchMetadata, inputUrl]);
+  }, [fetchDemoData, inputUrl]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -200,16 +188,14 @@ export default function OGImageDemo() {
         <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
           <ImageContainer
             isLoading={isLoading}
-            src={
-              ogData ? ogData.image || null : "/images/original-example-og.jpg"
-            }
+            src={demoData?.image || "/images/original-example-og.jpg"}
             alt="Original Open Graph Image"
           />
           <ContentContainer
             isLoading={isLoading}
-            title={ogData?.title || defaultData.title}
-            description={ogData?.description || defaultData.description}
-            url={submittedUrl || defaultData.url}
+            title={demoData?.title ?? defaultData.title}
+            description={demoData?.description ?? defaultData.description}
+            url={demoData?.normalizedUrl ?? defaultData.url}
           />
         </div>
         <span
@@ -228,9 +214,9 @@ export default function OGImageDemo() {
           />
           <ContentContainer
             isLoading={isLoading}
-            title={ogData?.title || defaultData.title}
-            description={ogData?.description || defaultData.description}
-            url={submittedUrl || defaultData.url}
+            title={demoData?.title ?? defaultData.title}
+            description={demoData?.description ?? defaultData.description}
+            url={demoData?.normalizedUrl ?? defaultData.url}
           />
         </div>
       </div>

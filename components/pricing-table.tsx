@@ -1,6 +1,7 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,54 +10,55 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Check } from "lucide-react";
-import { Button } from "./ui/button";
+import { api } from "@/convex/_generated/api";
+import type { PlanInfo } from "@/convex/stats";
 import { SignUpButton } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { Check } from "lucide-react";
 
-// Define plan features
-const planFeatures: Record<"free" | "pro" | "pro-yearly", string[]> = {
-  free: ["500 OG Images", "Unlimited Websites", "Community Forum Support"],
-  pro: ["5,000 OG Images", "Unlimited Websites", "Priority Email Support"],
-  "pro-yearly": [
-    "Unlimited OG Images",
-    "Unlimited Websites",
-    "Priority Email Support",
-  ],
-};
+type PlanType = "free" | "pro" | "pro-yearly";
 
-// Static pricing data
-const plans = [
+interface Plan {
+  name: string;
+  description: string;
+  price: string;
+  period: string;
+  badge: string | null;
+  planType: PlanType;
+}
+
+const plans: Plan[] = [
   {
-    key: "free",
     name: "Free",
     description: "Perfect for Getting Started",
     price: "$0",
     period: "",
     badge: null,
-    planType: "free" as const,
+    planType: "free",
   },
   {
-    key: "pro",
     name: "Pro",
     description: "For Growing Teams",
     price: "$19",
     period: "/month",
     badge: "Popular",
-    planType: "pro" as const,
+    planType: "pro",
   },
   {
-    key: "pro-yearly",
     name: "Pro Yearly",
     description: "Best Value - Save $29",
     price: "$199",
     period: "/year",
     badge: "Save $29/year",
-    planType: "pro-yearly" as const,
+    planType: "pro-yearly",
   },
 ];
 
-// Plan button component
-function PlanButton({ type }: { type: "free" | "pro" | "pro-yearly" }) {
+interface PlanButtonProps {
+  type: PlanType;
+}
+
+function PlanButton({ type }: PlanButtonProps) {
   return (
     <SignUpButton mode="modal" oauthFlow="popup">
       <Button className="w-full">
@@ -66,7 +68,16 @@ function PlanButton({ type }: { type: "free" | "pro" | "pro-yearly" }) {
   );
 }
 
-// Individual plan card component
+interface PlanCardProps {
+  name: string;
+  description: string;
+  price: string;
+  period: string;
+  badge: string | null;
+  planType: PlanType;
+  planInfo: PlanInfo;
+}
+
 function PlanCard({
   name,
   description,
@@ -74,14 +85,14 @@ function PlanCard({
   period,
   badge,
   planType,
-}: {
-  name: string;
-  description: string;
-  price: string;
-  period: string;
-  badge: string | null;
-  planType: "free" | "pro" | "pro-yearly";
-}) {
+  planInfo,
+}: PlanCardProps) {
+  const features = [
+    planInfo.images_display,
+    planInfo.websites,
+    planInfo.support,
+  ];
+
   return (
     <Card className="flex flex-col">
       <CardHeader>
@@ -101,7 +112,7 @@ function PlanCard({
       </CardHeader>
       <CardContent className="flex-1">
         <ul className="space-y-3">
-          {planFeatures[planType]?.map((feature) => (
+          {features.map((feature) => (
             <li key={feature} className="flex items-center gap-2">
               <Check className="text-primary size-4 stroke-2" />
               <span className="text-sm">{feature}</span>
@@ -116,19 +127,30 @@ function PlanCard({
   );
 }
 
-// Main pricing table component
+function getDefaultPlanInfo(): PlanInfo {
+  return {
+    images: 0,
+    images_display: "Loading...",
+    websites: "Loading...",
+    support: "Loading...",
+  };
+}
+
 export default function PricingTable() {
+  const planInfo = useQuery(api.stats.getPlanInfo);
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
       {plans.map((plan) => (
         <PlanCard
-          key={plan.key}
+          key={plan.planType}
           name={plan.name}
           description={plan.description}
           price={plan.price}
           period={plan.period}
           badge={plan.badge}
           planType={plan.planType}
+          planInfo={planInfo?.[plan.planType] ?? getDefaultPlanInfo()}
         />
       ))}
     </div>

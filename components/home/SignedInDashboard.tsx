@@ -25,7 +25,6 @@ import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
 import { api } from "@/convex/_generated/api";
 import type { DashboardStats } from "@/convex/stats";
-import { website_url } from "@/lib/constants";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -45,22 +44,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 
-// Stat card components
-function ImagesStatCard({
-  count,
-  limit,
-  plan,
-}: {
-  count: number;
-  limit: number | null;
-  plan: "free" | "pro" | "pro-yearly";
-}) {
-  const limitText = limit ? `${limit.toLocaleString()}` : "∞";
+interface ImagesStatCardProps {
+  countDisplay: string;
+  limitDisplay: string;
+}
+
+function ImagesStatCard({ countDisplay, limitDisplay }: ImagesStatCardProps) {
   return (
     <Card>
       <CardHeader className="px-4">
         <CardTitle>
-          {count.toLocaleString()}/{limitText}
+          {countDisplay}/{limitDisplay}
         </CardTitle>
         <CardDescription>OG Images</CardDescription>
       </CardHeader>
@@ -68,15 +62,10 @@ function ImagesStatCard({
   );
 }
 
-// Upgrade button component
-function UpgradeButton({
-  type,
-  productId,
-  label,
-  dashboardStats,
-  createCheckout,
-}: {
-  type: "free" | "pro" | "pro-yearly";
+type PlanType = "free" | "pro" | "pro-yearly";
+
+interface UpgradeButtonProps {
+  type: PlanType;
   productId: string;
   label?: string;
   dashboardStats: DashboardStats;
@@ -85,39 +74,46 @@ function UpgradeButton({
     successUrl: string;
     origin: string;
   }) => Promise<unknown>;
-}) {
+}
+
+function UpgradeButton({
+  type,
+  productId,
+  label,
+  dashboardStats,
+  createCheckout,
+}: UpgradeButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const isActive = dashboardStats.is_active;
   const currentPlan = dashboardStats.plan;
 
-  const handleUpgrade = async () => {
+  function handleUpgrade() {
     if (!productId) return;
 
     setIsLoading(true);
-    try {
-      const result = await createCheckout({
-        productIds: [productId],
-        successUrl: `${window.location.origin}/`,
-        origin: window.location.origin,
+    createCheckout({
+      productIds: [productId],
+      successUrl: `${window.location.origin}/`,
+      origin: window.location.origin,
+    })
+      .then((result) => {
+        if (result && typeof result === "object" && "url" in result) {
+          window.location.href = result.url as string;
+        }
+      })
+      .catch((error) => {
+        console.error("Checkout error:", error);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
-      if (result && typeof result === "object" && "url" in result) {
-        window.location.href = result.url as string;
-      }
-    } catch (error) {
-      console.error("Checkout error:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }
 
-  const renderButton = () => {
+  function getSignedInButton() {
     if (type === "free") {
-      const planName = isActive
-        ? currentPlan.charAt(0).toUpperCase() + currentPlan.slice(1)
-        : "Free";
       return (
         <Button variant="outline" size="sm" disabled>
-          You are on {planName} Plan {isActive ? "🎉" : ""}
+          You are on {dashboardStats.plan_display_name} {isActive ? "🎉" : ""}
         </Button>
       );
     }
@@ -131,10 +127,9 @@ function UpgradeButton({
     }
 
     if (isActive) {
-      const otherPlanName = type === "pro" ? "Pro Yearly" : "Pro";
       return (
         <Button variant="outline" size="sm" disabled>
-          You are on {otherPlanName} Plan 🎉
+          You are on {dashboardStats.plan_display_name} Plan 🎉
         </Button>
       );
     }
@@ -147,15 +142,15 @@ function UpgradeButton({
       );
     }
 
-    const upgradeText =
+    const buttonText =
       label || (type === "pro" ? "Upgrade to Pro" : "Upgrade to Pro Yearly");
 
     return (
       <Button size="sm" onClick={handleUpgrade} disabled={isLoading}>
-        {isLoading ? "Loading..." : upgradeText}
+        {isLoading ? "Loading..." : buttonText}
       </Button>
     );
-  };
+  }
 
   return (
     <>
@@ -172,13 +167,12 @@ function UpgradeButton({
             </Button>
           </SignUpButton>
         </SignedOut>
-        <SignedIn>{renderButton()}</SignedIn>
+        <SignedIn>{getSignedInButton()}</SignedIn>
       </ClerkLoaded>
     </>
   );
 }
 
-// Loading skeleton
 function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
@@ -288,7 +282,6 @@ function DashboardSkeleton() {
   );
 }
 
-// Empty state for screenshots
 function ScreenshotsEmpty() {
   return (
     <Card>
@@ -302,21 +295,19 @@ function ScreenshotsEmpty() {
   );
 }
 
-// Website table row component
-function WebsiteRow({
-  website,
-  screenshotCount,
-}: {
+interface WebsiteRowProps {
   website: DashboardStats["websites"][number];
   screenshotCount: number;
-}) {
+}
+
+function WebsiteRow({ website, screenshotCount }: WebsiteRowProps) {
   return (
     <TableRow className="items-center">
       <TableCell>
         <div className="flex items-center gap-2">
           <Suspense fallback={<Skeleton className="size-3.5 rounded-sm" />}>
             <Image
-              src={`https://www.google.com/s2/favicons?domain=https://${website.url_base}&sz=64`}
+              src={website.favicon_url}
               alt="Favicon"
               className="size-3.5"
               width={14}
@@ -324,7 +315,7 @@ function WebsiteRow({
             />
           </Suspense>
           <a
-            href={`https://${website.url_base}`}
+            href={website.full_url}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary max-w-xs truncate font-medium"
@@ -336,12 +327,10 @@ function WebsiteRow({
       <TableCell>
         <div className="flex items-center gap-1">
           <span className="max-w-lg items-center truncate font-medium">
-            {`${website_url}use?url=https://${website.url_base}`}
+            {website.og_image_usage_url}
           </span>
           <Suspense fallback={<Skeleton className="size-4" />}>
-            <CopyButton
-              text={`${website_url}use?url=https://${website.url_base}`}
-            />
+            <CopyButton text={website.og_image_usage_url} />
           </Suspense>
         </div>
       </TableCell>
@@ -384,7 +373,6 @@ export default function SignedInDashboard() {
           <WelcomeEmptyState />
         ) : (
           <div className="flex flex-col gap-10">
-            {/* Limit Alert */}
             {dashboardStats.plan === "free" &&
               dashboardStats.has_exceeded_limit && (
                 <Alert variant="destructive">
@@ -397,7 +385,6 @@ export default function SignedInDashboard() {
                 </Alert>
               )}
 
-            {/* Stats Section */}
             <div className="flex flex-col gap-1.5">
               <CardHeader className="p-0">
                 <CardTitle>Overview</CardTitle>
@@ -406,15 +393,14 @@ export default function SignedInDashboard() {
                 <Card>
                   <CardHeader className="px-4">
                     <CardTitle>
-                      {dashboardStats.total_websites.toLocaleString()}
+                      {dashboardStats.total_websites_display}
                     </CardTitle>
                     <CardDescription>Websites</CardDescription>
                   </CardHeader>
                 </Card>
                 <ImagesStatCard
-                  count={dashboardStats.total_images}
-                  limit={dashboardStats.images_limit}
-                  plan={dashboardStats.plan}
+                  countDisplay={dashboardStats.total_images_display}
+                  limitDisplay={dashboardStats.images_limit_display}
                 />
                 <Card className="md:col-span-2">
                   <CardHeader className="items-center px-4">
@@ -430,12 +416,8 @@ export default function SignedInDashboard() {
                           type={dashboardStats.plan}
                           productId={
                             dashboardStats.plan === "pro-yearly"
-                              ? process.env
-                                  .NEXT_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID ||
-                                ""
-                              : process.env
-                                  .NEXT_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID ||
-                                ""
+                              ? process.env.NEXT_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID || ""
+                              : process.env.NEXT_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID || ""
                           }
                           dashboardStats={dashboardStats}
                           createCheckout={createCheckout}
@@ -445,22 +427,14 @@ export default function SignedInDashboard() {
                           <UpgradeButton
                             type="pro"
                             label="Monthly $19"
-                            productId={
-                              process.env
-                                .NEXT_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID ||
-                              ""
-                            }
+                            productId={process.env.NEXT_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID || ""}
                             dashboardStats={dashboardStats}
                             createCheckout={createCheckout}
                           />
                           <UpgradeButton
                             type="pro-yearly"
                             label="Yearly $199"
-                            productId={
-                              process.env
-                                .NEXT_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID ||
-                              ""
-                            }
+                            productId={process.env.NEXT_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID || ""}
                             dashboardStats={dashboardStats}
                             createCheckout={createCheckout}
                           />
@@ -472,7 +446,6 @@ export default function SignedInDashboard() {
               </div>
             </div>
 
-            {/* Websites Section */}
             <div className="flex flex-col gap-1.5">
               <CardHeader className="flex items-center justify-between p-0">
                 <CardTitle>Websites</CardTitle>
@@ -503,7 +476,6 @@ export default function SignedInDashboard() {
               </Card>
             </div>
 
-            {/* Latest Screenshots Section */}
             <div className="flex flex-col gap-1.5">
               <CardHeader className="p-0">
                 <CardTitle>Latest OG Images</CardTitle>
@@ -514,70 +486,52 @@ export default function SignedInDashboard() {
                 <Card className="p-0">
                   <Table>
                     <TableBody>
-                      {dashboardStats.latest_screenshots.map((item) => {
-                        const pageUrl = item.page_url.replace(/\\+$/, "");
-                        const displayUrl = pageUrl.replace(/^https?:\/\//, "");
-
-                        return (
-                          <TableRow key={item.id}>
-                            <TableCell className="py-0">
-                              <Link
+                      {dashboardStats.latest_screenshots.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell className="py-0">
+                            <Link
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              href={item.screenshot_url}
+                              className="block w-12 shrink-0"
+                            >
+                              <img
+                                src={item.screenshot_url}
+                                alt={item.page_url || "Screenshot"}
+                                className="h-6 w-12 shrink-0 rounded border-[0.5px] bg-cover bg-center object-cover"
+                                width={56}
+                                height={24}
+                              />
+                            </Link>
+                          </TableCell>
+                          <TableCell>
+                            {item.page_url ? (
+                              <a
+                                href={item.page_url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                href={item.screenshot_url}
-                                className="block w-12 shrink-0"
+                                className="text-primary max-w-xs truncate font-medium hover:underline"
                               >
-                                <img
-                                  src={item.screenshot_url}
-                                  alt={pageUrl || "Screenshot"}
-                                  className="h-6 w-12 shrink-0 rounded border-[0.5px] bg-cover bg-center object-cover"
-                                  width={56}
-                                  height={24}
-                                />
-                              </Link>
-                            </TableCell>
-                            <TableCell>
-                              {pageUrl ? (
-                                <a
-                                  href={pageUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary max-w-xs truncate font-medium hover:underline"
-                                >
-                                  {displayUrl}
-                                </a>
-                              ) : (
-                                <span className="text-muted-foreground">
-                                  Unknown page
-                                </span>
-                              )}
-                            </TableCell>
-                            <TableCell>
+                                {item.display_url}
+                              </a>
+                            ) : (
                               <span className="text-muted-foreground">
-                                {item.website_name ?? "Unknown website"}
+                                Unknown page
                               </span>
-                            </TableCell>
-                            <TableCell>
-                              <span className="text-muted-foreground text-sm">
-                                {item.generated_at
-                                  ? new Date(item.generated_at).toLocaleString(
-                                      "en-US",
-                                      {
-                                        year: "numeric",
-                                        month: "short",
-                                        day: "numeric",
-                                        hour: "numeric",
-                                        minute: "numeric",
-                                        second: "numeric",
-                                        hour12: true,
-                                      },
-                                    )
-                                  : "Never refreshed"}
-                              </span>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground">
+                              {item.website_name ?? "Unknown website"}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-muted-foreground text-sm">
+                              {item.formatted_date}
+                            </span>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                     </TableBody>
                   </Table>
                 </Card>
