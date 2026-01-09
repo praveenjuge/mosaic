@@ -2,7 +2,6 @@
 
 import { CopyButton } from "@/components/copy-button";
 import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
-import { LocalTime } from "@/components/local-time";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -560,7 +559,20 @@ export default function SignedInDashboard() {
                             </TableCell>
                             <TableCell>
                               <span className="text-muted-foreground text-sm">
-                                <LocalTime timeString={item.generated_at} />
+                                {item.generated_at
+                                  ? new Date(item.generated_at).toLocaleString(
+                                      "en-US",
+                                      {
+                                        year: "numeric",
+                                        month: "short",
+                                        day: "numeric",
+                                        hour: "numeric",
+                                        minute: "numeric",
+                                        second: "numeric",
+                                        hour12: true,
+                                      },
+                                    )
+                                  : "Never refreshed"}
                               </span>
                             </TableCell>
                           </TableRow>
