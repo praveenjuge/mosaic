@@ -125,12 +125,6 @@ function formatLimit(limit: number): string {
   return limit >= 999999 ? "∞" : formatNumber(limit);
 }
 
-function formatPlanLimit(limit: number): string {
-  return limit >= 999999
-    ? "Unlimited OG Images"
-    : `${limit.toLocaleString()} OG Images`;
-}
-
 function cleanPageUrl(url: string): string {
   return url.replace(/\/+$/, "").replace(/^https?:\/\//, "");
 }
@@ -247,35 +241,4 @@ export const getUserDashboardStats = query({
   },
 });
 
-export type PlanInfo = {
-  images: number;
-  images_display: string;
-  websites: string;
-  support: string;
-};
-
-export const getPlanInfo = query({
-  args: {},
-  handler: async (): Promise<Record<"free" | "pro" | "pro-yearly", PlanInfo>> => {
-    return {
-      free: {
-        images: PLAN_LIMITS.FREE.IMAGES,
-        images_display: formatPlanLimit(PLAN_LIMITS.FREE.IMAGES),
-        websites: "Unlimited Websites",
-        support: "Community Forum Support",
-      },
-      pro: {
-        images: PLAN_LIMITS.PRO.IMAGES,
-        images_display: formatPlanLimit(PLAN_LIMITS.PRO.IMAGES),
-        websites: "Unlimited Websites",
-        support: "Priority Email Support",
-      },
-      "pro-yearly": {
-        images: PLAN_LIMITS.PRO_YEARLY.IMAGES,
-        images_display: formatPlanLimit(PLAN_LIMITS.PRO_YEARLY.IMAGES),
-        websites: "Unlimited Websites",
-        support: "Priority Email Support",
-      },
-    };
-  },
-});
+// getPlanInfo query removed - now using static config in lib/pricing.ts

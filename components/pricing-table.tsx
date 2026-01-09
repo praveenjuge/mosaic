@@ -10,49 +10,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/convex/_generated/api";
-import type { PlanInfo } from "@/convex/stats";
+import { PLAN_DISPLAY_NAMES, PLANS, PRICING_PLANS, type PlanType } from "@/lib/pricing";
 import { SignUpButton } from "@clerk/nextjs";
-import { useQuery } from "convex/react";
 import { Check } from "lucide-react";
-
-type PlanType = "free" | "pro" | "pro-yearly";
-
-interface Plan {
-  name: string;
-  description: string;
-  price: string;
-  period: string;
-  badge: string | null;
-  planType: PlanType;
-}
-
-const plans: Plan[] = [
-  {
-    name: "Free",
-    description: "Perfect for Getting Started",
-    price: "$0",
-    period: "",
-    badge: null,
-    planType: "free",
-  },
-  {
-    name: "Pro",
-    description: "For Growing Teams",
-    price: "$19",
-    period: "/month",
-    badge: "Popular",
-    planType: "pro",
-  },
-  {
-    name: "Pro Yearly",
-    description: "Best Value - Save $29",
-    price: "$199",
-    period: "/year",
-    badge: "Save $29/year",
-    planType: "pro-yearly",
-  },
-];
 
 interface PlanButtonProps {
   type: PlanType;
@@ -75,7 +35,7 @@ interface PlanCardProps {
   period: string;
   badge: string | null;
   planType: PlanType;
-  planInfo: PlanInfo;
+  planInfo: (typeof PLANS)[PlanType];
 }
 
 function PlanCard({
@@ -127,21 +87,10 @@ function PlanCard({
   );
 }
 
-function getDefaultPlanInfo(): PlanInfo {
-  return {
-    images: 0,
-    images_display: "Loading...",
-    websites: "Loading...",
-    support: "Loading...",
-  };
-}
-
 export default function PricingTable() {
-  const planInfo = useQuery(api.stats.getPlanInfo);
-
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-      {plans.map((plan) => (
+      {PRICING_PLANS.map((plan) => (
         <PlanCard
           key={plan.planType}
           name={plan.name}
@@ -150,7 +99,7 @@ export default function PricingTable() {
           period={plan.period}
           badge={plan.badge}
           planType={plan.planType}
-          planInfo={planInfo?.[plan.planType] ?? getDefaultPlanInfo()}
+          planInfo={PLANS[plan.planType]}
         />
       ))}
     </div>
