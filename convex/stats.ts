@@ -130,6 +130,7 @@ function cleanPageUrl(url: string): string {
 }
 
 const PUBLIC_R2_BASE_URL = "https://og.mosaicimg.com/";
+const API_BASE_URL = "https://mosaicimg.com/";
 
 function getPublicImageUrl(key: string): string {
   return `${PUBLIC_R2_BASE_URL}${key}`;
@@ -188,7 +189,7 @@ export const getUserDashboardStats = query({
           _id: site._id,
           url_base: site.url_base,
           full_url: fullUrl,
-          og_image_usage_url: `${PUBLIC_R2_BASE_URL}use?url=${fullUrl}`,
+          og_image_usage_url: `${API_BASE_URL}use?url=${fullUrl}`,
           favicon_url: `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`,
           _creationTime: site._creationTime,
         };
