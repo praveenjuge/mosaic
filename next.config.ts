@@ -72,6 +72,15 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/use",
+        destination: `${process.env.CONVEX_SITE_URL}/use`,
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
