@@ -14,7 +14,8 @@ interface DemoData {
   title: string;
   description: string;
   image: string;
-  screenshotApiUrl: string;
+  imageUrl: string | null;
+  error?: string;
 }
 
 interface ImageContainerProps {
@@ -119,23 +120,13 @@ export default function OGImageDemo() {
     try {
       const data = await fetchDemoData({ url: inputUrl });
       setDemoData(data);
-      setIsLoading(false);
 
-      // Fetch screenshot using the API URL returned from Convex
-      try {
-        const screenshotResponse = await fetch(data.screenshotApiUrl);
-        if (!screenshotResponse.ok) {
-          throw new Error(`Screenshot API error: ${screenshotResponse.status}`);
-        }
-        const screenshotData = await screenshotResponse.json();
-
-        if (screenshotData.imageUrl) {
-          setMosaicImageUrl(screenshotData.imageUrl);
-        } else {
-          throw new Error("No image URL received");
-        }
-      } catch (screenshotError) {
-        console.error("Screenshot error:", screenshotError);
+      if (data.error) {
+        setError(data.error);
+        setMosaicImageUrl("/images/mosaic-example-og.png");
+      } else if (data.imageUrl) {
+        setMosaicImageUrl(data.imageUrl);
+      } else {
         setError("Failed to generate OG Image. Using fallback image.");
       }
     } catch (err) {

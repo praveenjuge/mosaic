@@ -1,5 +1,6 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
+import { api } from "./_generated/api";
 import { extractUrlParts } from "./utils/url";
 
 const normalizeText = (value: string) =>
@@ -135,17 +136,38 @@ export const fetchDemoData = action({
   args: {
     url: v.string(),
   },
-  handler: async (_ctx, args) => {
+  handler: async (ctx, args): Promise<{
+    normalizedUrl: string;
+    title: string;
+    description: string;
+    image: string;
+    imageUrl: string | null;
+    error?: string;
+  }> => {
     const normalizedUrl = normalizeUrl(args.url);
     const parsedUrl = validateAndParseUrl(normalizedUrl);
     const html = await fetchPageHtml(parsedUrl);
     const metadata = extractMetadata(html, parsedUrl);
     const { sanitizedUrl } = extractUrlParts(normalizedUrl);
 
+    const ogImageResult = await ctx.runAction(api.ogImageGeneration.generateOgImage, {
+      url: normalizedUrl,
+      isDemo: true,
+    });
+
+    if ("error" in ogImageResult) {
+      return {
+        normalizedUrl: sanitizedUrl,
+        ...metadata,
+        imageUrl: null,
+        error: ogImageResult.error,
+      };
+    }
+
     return {
       normalizedUrl: sanitizedUrl,
       ...metadata,
-      screenshotApiUrl: `/use?url=${encodeURIComponent(normalizedUrl)}&demo=true`,
+      imageUrl: ogImageResult.imageUrl,
     };
   },
 });

@@ -203,7 +203,8 @@ export const generateOgImage = action({
           }
         }
 
-        if (!sitesResult.selectedSite) {
+        selectedSite = sitesResult.selectedSite;
+        if (!selectedSite) {
           console.warn(
             "[API_REQUEST_LIMIT_EXCEEDED] All website owners have exceeded their image limits",
           );
@@ -213,7 +214,6 @@ export const generateOgImage = action({
           };
         }
 
-        selectedSite = sitesResult.selectedSite;
         imageKey = getR2Key(
           cacheKey,
           selectedSite.r2Prefix,
