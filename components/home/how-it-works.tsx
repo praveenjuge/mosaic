@@ -2,18 +2,17 @@ import { cn } from "@/lib/utils";
 
 const steps = [
   {
-    title: "Add your Website",
-    description: "Connect your site to Mosaic with just a few clicks",
+    title: "Add your website URL",
+    description: "Drop in your homepage link and connect your site in minutes.",
   },
   {
-    title: "We Generate an OG Image",
+    title: "We capture + design",
     description:
-      "Mosaic automatically grabs a beautiful OG Image of your website's hero section",
+      "Mosaic screenshots your hero and creates a share-ready OG image.",
   },
   {
-    title: "Add the OG Image to Your Site",
-    description:
-      "Insert the generated link in your meta tags for instant previews",
+    title: "Paste one meta tag",
+    description: "Use the provided og:image URL to get instant social previews.",
   },
 ];
 
@@ -23,6 +22,10 @@ export default function HowItWorks() {
       <h2 className="mb-10 text-4xl font-semibold tracking-tight">
         How it Works
       </h2>
+      <p className="text-muted-foreground mx-auto mb-10 max-w-[560px] text-balance text-base md:text-lg">
+        Add your URL, we generate a beautiful OG image from your page, and you
+        paste a single meta tag. That&apos;s it.
+      </p>
       <div className="grid gap-8 md:grid-cols-3">
         {steps.map((step, index) => (
           <div key={step.title} className="flex flex-col gap-3 md:items-center">
