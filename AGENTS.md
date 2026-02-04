@@ -2,7 +2,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 
 ## Rules
 
-- After generating code do `npm run predev` and `npm run build` to check if everything works.
+- After generating code do `bun run predev` and `bun run build` to check if everything works.
 
 ### Core Technologies
 
@@ -13,8 +13,8 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Authentication**: Clerk
 - `convex` - Database and backend functions
 - Build command: `bun run build`
-- Development command: `bun dev`
-- Linting command: `bun lint`
+- Development command: `bun run dev` (runs Convex + Next.js concurrently; clears port 3000)
+- Linting command: `bun run lint` (auto-fixes via eslint --fix)
 
 ## Project Structure
 
