@@ -212,9 +212,11 @@ export const deleteSite = action({
     if (existing.r2_prefix) {
       prefixes.add(`${existing.r2_prefix}/`);
     }
-    for (const targetPrefix of prefixes) {
-      await ctx.runAction(api.r2.deleteObjectsByPrefix, { prefix: targetPrefix });
-    }
+    await Promise.all(
+      [...prefixes].map((prefix) =>
+        ctx.runAction(api.r2.deleteObjectsByPrefix, { prefix })
+      )
+    );
 
     await ctx.runMutation(api.sites.deleteSiteInternal, { siteId: args.siteId });
     return {

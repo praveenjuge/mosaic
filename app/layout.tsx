@@ -48,6 +48,14 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`touch-manipulation antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
     >
+      <head>
+        <link rel="preconnect" href="https://clerk.mosaicimg.com" />
+        <link
+          rel="preconnect"
+          href={process.env.NEXT_PUBLIC_CONVEX_URL}
+          crossOrigin="anonymous"
+        />
+      </head>
       <body className="relative flex flex-col text-sm">
         <ThemeProvider
           enableSystem
