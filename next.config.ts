@@ -79,6 +79,28 @@ const nextConfig: NextConfig = {
         destination: `${process.env.CONVEX_SITE_URL}/use`,
         permanent: false,
       },
+      // Blog redirects → Help page
+      {
+        source: "/blog",
+        destination: "/help",
+        permanent: true,
+      },
+      {
+        source: "/blog/:slug",
+        destination: "/help/:slug",
+        permanent: true,
+      },
+      // Changelog redirects → Home page
+      {
+        source: "/changelog",
+        destination: "/#latest-updates",
+        permanent: true,
+      },
+      {
+        source: "/changelog/:slug",
+        destination: "/#latest-updates",
+        permanent: true,
+      },
     ];
   },
 };

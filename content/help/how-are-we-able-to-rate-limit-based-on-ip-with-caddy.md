@@ -2,6 +2,7 @@
 title: "How are we able to rate limit based on IP with Caddy"
 description: "Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance."
 publishedAt: "2024-10-04T07:51:36.232Z"
+category: "Articles"
 ---
 
 I am not starting another Caddy vs Nginx war, but I’ve decided to go with Caddy.

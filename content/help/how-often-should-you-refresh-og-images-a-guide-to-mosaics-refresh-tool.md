@@ -2,6 +2,7 @@
 title: "How Often Should You Refresh OG Images? A Guide to Mosaic’s Refresh Tool"
 description: "Advice on refresh frequency based on site design changes, product launches, or seasonal content."
 publishedAt: "2025-05-08T05:40:06.907Z"
+category: "Articles"
 ---
 
 When you share a link on social media, the preview image can make all the

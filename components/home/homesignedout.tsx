@@ -7,7 +7,18 @@ import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";
+import LatestUpdates from "./latest-updates";
 import OGImageDemo from "./og-image-demo";
+
+interface ChangelogEntry {
+  title: string;
+  slug: string;
+  publishedAt: Date | string;
+}
+
+interface HomeSignedOutProps {
+  changelogEntries: ChangelogEntry[];
+}
 
 // Loading component for auth button
 function AuthButtonSkeleton() {
@@ -121,7 +132,7 @@ function FAQSection() {
   );
 }
 
-export default function HomeSignedOut() {
+export default function HomeSignedOut({ changelogEntries }: HomeSignedOutProps) {
   return (
     <>
       <HeroSection />
@@ -130,6 +141,7 @@ export default function HomeSignedOut() {
       <HowItWorks />
       <PricingSection />
       <FAQSection />
+      <LatestUpdates entries={changelogEntries} />
       <CTASection />
     </>
   );

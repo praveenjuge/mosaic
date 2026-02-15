@@ -14,8 +14,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticRoutes = [
     '',
-    'blog',
-    'changelog',
     'faq',
     'help',
     'legal',
@@ -33,9 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }));
   };
 
-  // Generate entries for different content types
-  const blogEntries = generateContentEntries("content/blog/", "blog");
-  const changelogEntries = generateContentEntries("content/changelog/", "changelog");
+  // Generate entries for help content
   const helpEntries = generateContentEntries("content/help/", "help");
 
   // Generate guide entries
@@ -46,8 +42,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
-    ...blogEntries,
-    ...changelogEntries,
     ...helpEntries,
     ...guideEntries,
   ];

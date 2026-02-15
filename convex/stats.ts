@@ -1,7 +1,7 @@
 import { internalQuery, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { PLAN_LIMITS } from "./constants";
+import { PLAN_LIMITS } from "../lib/constants";
 import type { SubscriptionInfo } from "./billing";
 import type { Id } from "./_generated/dataModel";
 

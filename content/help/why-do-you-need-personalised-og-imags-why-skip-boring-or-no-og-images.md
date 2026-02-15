@@ -2,6 +2,7 @@
 title: "Why do you need personalized OG images? Why skip boring or no OG images?"
 description: "Ever clicked on a link and been greeted by a bland, generic image? Or worse, no image at all? "
 publishedAt: "2024-12-15T08:37:21.750Z"
+category: "Articles"
 ---
 
 Ever clicked on a link and been greeted by a bland, generic image? Or worse, no

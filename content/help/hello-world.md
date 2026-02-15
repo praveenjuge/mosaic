@@ -2,6 +2,7 @@
 title: "Hello World!"
 description: "In our inaugural post, we introduce the features and benefits of Mosaic, providing insights into how it can elevate your visual content. Join us on this exciting journey as we explore innovative techniques, share expert tips, and inspire your creative projects. Stay tuned for updates, tutorials, and much more!"
 publishedAt: "2024-07-24"
+category: "Articles"
 ---
 
 Welcome to our first blog post on Mosaic!
@@ -14,8 +15,8 @@ already have.
 With Mosaic, you can effortlessly generate these screenshots and integrate them
 into your website in under a minute, no coding skills required.
 
-We invite you to explore our [changelog](https://mosaicimg.com/changelog) for
-the latest updates and features. For any assistance or support, visit our
+We invite you to explore our [latest updates](https://mosaicimg.com/#latest-updates) for
+new features. For any assistance or support, visit our
 [help page](https://mosaicimg.com/help).
 
 Feel free to reach out with any questions or feature requests. We're here to

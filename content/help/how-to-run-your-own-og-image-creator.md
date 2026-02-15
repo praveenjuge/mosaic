@@ -2,6 +2,7 @@
 title: "How to run your own OG image creator?"
 description: "Ever wondered how to create eye-catching Open Graph (OG) images without any design skills? Those captivating images that appear when you share links on social media are OG images. Here's a step-by-step guide to creating your own using Playwright and Python."
 publishedAt: "2024-08-29T08:16:13.093Z"
+category: "Articles"
 ---
 
 Before understanding how to create your Open Graph images with zero design

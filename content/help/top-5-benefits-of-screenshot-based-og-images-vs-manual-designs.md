@@ -2,6 +2,7 @@
 title: "Top 5 Benefits of Screenshot-Based OG Images vs. Manual Designs"
 description: "Discover how automated screenshots save time and keep your brand consistent across every Open Graph image."
 publishedAt: "2025-01-20T05:39:13.000Z"
+category: "Articles"
 ---
 
 When sharing a page on social media, the OG image is often the first thing

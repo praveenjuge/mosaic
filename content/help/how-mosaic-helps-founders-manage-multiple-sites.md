@@ -2,6 +2,7 @@
 title: "How Mosaic Helps Founders Manage Multiple Sites"
 description: "Running several websites can be exhausting. Learn how Mosaic streamlines your workflow so you can focus on building."
 publishedAt: "2025-02-25T06:24:44.707Z"
+category: "Articles"
 ---
 
 Juggling a handful of websites is no easy task. Between keeping content fresh

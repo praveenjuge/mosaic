@@ -1,4 +1,4 @@
-import { PLAN_LIMITS } from "@/convex/constants";
+import { PLAN_LIMITS } from "@/lib/constants";
 
 export type PlanType = "free" | "pro" | "pro-yearly";
 

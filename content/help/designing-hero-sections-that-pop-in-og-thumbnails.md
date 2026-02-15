@@ -2,6 +2,7 @@
 title: "Designing Hero Sections That Pop in OG Thumbnails"
 description: "Actionable tips for creating hero sections that translate beautifully into OG images, from smart composition to strong text contrast and layout."
 publishedAt: "2025-04-02T05:40:00.916Z"
+category: "Articles"
 ---
 
 First impressions count, especially when your content gets shared on social

@@ -8,13 +8,23 @@ import { memo } from "react";
 // Memoized dashboard to prevent re-renders
 const MemoizedSignedInDashboard = memo(SignedInDashboard);
 
+interface ChangelogEntry {
+  title: string;
+  slug: string;
+  publishedAt: Date | string;
+}
+
+interface HomeViewProps {
+  changelogEntries: ChangelogEntry[];
+}
+
 // Client component for conditional auth-based rendering
-export default function HomeView() {
+export default function HomeView({ changelogEntries }: HomeViewProps) {
   const { isLoaded, userId } = useAuth();
 
   // Show signed-out view while loading or if not signed in
   if (!isLoaded || !userId) {
-    return <HomeSignedOut />;
+    return <HomeSignedOut changelogEntries={changelogEntries} />;
   }
 
   return <MemoizedSignedInDashboard />;

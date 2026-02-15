@@ -13,8 +13,6 @@ const footerSections = [
     title: "Resources",
     links: [
       { href: "/help", label: "Help & Guides" },
-      { href: "/blog", label: "Blog" },
-      { href: "/changelog", label: "Changelog" },
       { href: "mailto:hello@praveenjuge.com", label: "Contact Support" },
     ],
   },

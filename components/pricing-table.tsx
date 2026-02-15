@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { PLAN_DISPLAY_NAMES, PLANS, PRICING_PLANS, type PlanType } from "@/lib/pricing";
+import { PLANS, PRICING_PLANS, type PlanType } from "@/lib/pricing";
 import { SignUpButton } from "@clerk/nextjs";
 import { Check } from "lucide-react";
 

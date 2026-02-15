@@ -1,11 +1,12 @@
 import { Polar } from "@convex-dev/polar";
-import { components, api } from "./_generated/api";
+import { components } from "./_generated/api";
 import { query, internalQuery, action } from "./_generated/server";
 import { v } from "convex/values";
-import { PLAN_LIMITS } from "./constants";
+import { PLAN_LIMITS } from "../lib/constants";
 
 // Helper function to get user info from Clerk identity
 async function getUserInfoFromIdentity(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ctx: any
 ): Promise<{ userId: string; email: string }> {
   const identity = await ctx.auth.getUserIdentity();
@@ -180,10 +181,10 @@ async function findCustomerByEmail(email: string): Promise<string | null> {
     const maxPages = 20;
 
     for await (const page of iterator) {
-      // @ts-ignore
+      // @ts-expect-error - Polar SDK typing is incomplete for async iterator
       const items = page.items || page || [];
       if (Array.isArray(items)) {
-        const customer = items.find((c: any) => c.email?.toLowerCase() === email.toLowerCase());
+        const customer = items.find((c: { email?: string }) => c.email?.toLowerCase() === email.toLowerCase());
         if (customer) {
           return customer.id;
         }
@@ -212,7 +213,7 @@ export const createCheckoutLink = action({
     const { userId, email } = await getUserInfoFromIdentity(ctx);
 
     // Check if customer already exists in Convex
-    let dbCustomer = await ctx.runQuery(
+    const dbCustomer = await ctx.runQuery(
       components.polar.lib.getCustomerByUserId,
       { userId }
     );
@@ -258,9 +259,9 @@ export const createCheckoutLink = action({
         });
 
         return customer.id;
-      } catch (error: any) {
+      } catch (error: unknown) {
         // If customer already exists (race condition or search missed it), try to find again
-        const errorMsg = error?.message || String(error);
+        const errorMsg = error instanceof Error ? error.message : String(error);
         if (errorMsg.includes("already exists") || errorMsg.includes("email")) {
           const retryCustomerId = await findCustomerByEmail(email);
           if (retryCustomerId) {

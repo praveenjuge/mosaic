@@ -1,5 +1,6 @@
 import HomeView from "@/components/home/home-view";
 import { website_subtitle } from "@/lib/constants";
+import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
 import { Metadata } from "next";
 
@@ -10,5 +11,7 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  return <HomeView />;
+  const changelogEntries = getMarkDownData("content/changelog/");
+
+  return <HomeView changelogEntries={changelogEntries} />;
 }

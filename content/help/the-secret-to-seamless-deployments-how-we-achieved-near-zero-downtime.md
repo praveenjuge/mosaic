@@ -2,6 +2,7 @@
 title: "The Secret to Seamless Deployments: How We Achieved Near-Zero Downtime"
 description: "Discover how Mosaic HQ achieves near-zero downtime deployment with Docker and Caddy. Learn our step-by-step process to ensure smooth updates with minimal user disruption."
 publishedAt: "2024-11-09T09:23:19.552Z"
+category: "Articles"
 ---
 
 We at Mosaic HQ, love doing dirty engineering things on our own. And one of such

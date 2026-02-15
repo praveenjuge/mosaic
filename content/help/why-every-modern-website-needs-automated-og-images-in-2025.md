@@ -2,6 +2,7 @@
 title: "Why Every Modern Website Needs Automated OG Images in 2025"
 description: "Explore how automated Open Graph (OG) images keep your site competitive in SEO, accessibility, and social-first design trends."
 publishedAt: "2025-06-20T05:42:33Z"
+category: "Articles"
 ---
 
 When the Open Graph protocol debuted, it gave websites a simple way to show off
