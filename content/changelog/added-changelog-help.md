@@ -1,5 +1,5 @@
 ---
-title: "Added Changelog & Help"
+title: "Help Center + Changelog"
 publishedAt: "2024-07-26T17:41:59.000Z"
 ---
 

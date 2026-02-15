@@ -18,26 +18,26 @@ interface LatestUpdatesProps {
 }
 
 export default function LatestUpdates({ entries }: LatestUpdatesProps) {
-  const recentEntries = entries.slice(0, 3);
+  const recentEntries = entries.slice(0, 10);
 
   return (
-    <section id="latest-updates" className="mx-auto max-w-4xl pt-10">
-      <div className="mb-8 md:text-center">
-        <h2 className="mb-3 text-3xl font-semibold tracking-tighter">
+    <section id="latest-updates" className="mx-auto max-w-4xl pt-8">
+      <div className="mb-5 md:text-center">
+        <h2 className="mb-2 text-2xl font-semibold tracking-tighter md:text-3xl">
           Latest Updates
         </h2>
-        <p className="text-muted-foreground text-lg">
+        <p className="text-muted-foreground text-base">
           What&apos;s new with Mosaic
         </p>
       </div>
-      <div className="space-y-4">
+      <div className="grid gap-x-6 gap-y-2 md:grid-cols-2">
         {recentEntries.map((entry) => (
           <div
             key={entry.slug}
-            className="flex items-center justify-between border-b border-border pb-4 last:border-0"
+            className="flex items-center justify-between gap-3 border-b border-border py-2"
           >
-            <h3 className="font-medium">{entry.title}</h3>
-            <span className="text-muted-foreground text-sm">
+            <h3 className="min-w-0 text-sm font-medium">{entry.title}</h3>
+            <span className="text-muted-foreground shrink-0 text-xs">
               {formatDate(entry.publishedAt)}
             </span>
           </div>

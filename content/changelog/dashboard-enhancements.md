@@ -1,5 +1,5 @@
 ---
-title: "Dashboard Enhancements & URL Fixes"
+title: "Dashboard UI + URL Fixes"
 publishedAt: "2025-06-17T12:00:00.000Z"
 ---
 

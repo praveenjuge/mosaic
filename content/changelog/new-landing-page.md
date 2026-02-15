@@ -1,5 +1,5 @@
 ---
-title: "New Landing Page"
+title: "Marketing Landing Page"
 publishedAt: "2024-08-18T09:28:51.345Z"
 ---
 

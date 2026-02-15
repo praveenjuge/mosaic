@@ -1,5 +1,5 @@
 ---
-title: "Initial Commit ✨"
+title: "Platform Launch"
 publishedAt: "2024-07-17T17:40:16.898Z"
 ---
 

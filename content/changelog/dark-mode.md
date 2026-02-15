@@ -1,5 +1,5 @@
 ---
-title: "Dark Mode"
+title: "Light/Dark Theme"
 publishedAt: "2024-08-07T15:18:52.292Z"
 ---
 

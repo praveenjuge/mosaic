@@ -7,3 +7,11 @@ script = '''
 bun install
 bun dev
 '''
+
+[[actions]]
+name = "Run"
+icon = "run"
+command = '''
+bun install
+bun dev
+'''

@@ -1,5 +1,5 @@
 ---
-title: "Reduced Pricing (like a lot)"
+title: "Lower Pro Pricing"
 publishedAt: "2024-12-17T17:43:01.000Z"
 ---
 

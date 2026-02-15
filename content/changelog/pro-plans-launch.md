@@ -1,5 +1,5 @@
 ---
-title: "Pro Plans Launch - Scale Your OG Images"
+title: "Pro Plans (5k/Unlimited)"
 publishedAt: "2025-01-15T12:00:00.000Z"
 ---
 
