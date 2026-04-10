@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { getMarkDownData } from "@/lib/getMarkdown";
 import { getOgImageUrl } from "@/lib/utils";
-import { Mail, Twitter } from "lucide-react";
+import { Mail } from "lucide-react";
 import { Metadata } from "next";
 import Link from "next/link";
 import Guides from "./guides";
@@ -102,7 +102,6 @@ function ContactSection() {
             rel="noopener noreferrer"
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
-            <Twitter className="size-4" />
             Twitter Support
           </Link>
         </div>
