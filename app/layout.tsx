@@ -10,10 +10,13 @@ import {
   website_subtitle,
   website_url,
 } from "@/lib/constants";
-import { getOgImageUrl } from "@/lib/utils";
+import { cn, getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
+import { Geist } from "next/font/google";
 import { Suspense } from "react";
+
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 export const viewport: Viewport = { themeColor: "#059669" };
 
@@ -46,7 +49,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`touch-manipulation antialiased [font-feature-settings:"ss02","ss03","ss04","ss07","ss08","ss09"] [text-rendering:optimizeLegibility]`}
+      className={cn(
+        "touch-manipulation",
+        "antialiased",
+        "[font-feature-settings:'ss02','ss03','ss04','ss07','ss08','ss09']",
+        "[text-rendering:optimizeLegibility]",
+        "font-sans",
+        geist.variable,
+      )}
     >
       <head>
         <link rel="preconnect" href="https://clerk.mosaicimg.com" />

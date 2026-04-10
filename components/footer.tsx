@@ -48,23 +48,14 @@ export default function Footer() {
               value={mounted ? (theme ?? "system") : "system"}
               onValueChange={setTheme}
             >
-              <TabsList className="bg-transparent p-0">
-                <TabsTrigger
-                  className="data-[state=active]:border-border h-7 text-xs data-[state=active]:border data-[state=active]:shadow-none"
-                  value="light"
-                >
+              <TabsList>
+                <TabsTrigger value="light">
                   <Sun />
                 </TabsTrigger>
-                <TabsTrigger
-                  className="data-[state=active]:border-border h-7 text-xs data-[state=active]:border data-[state=active]:shadow-none"
-                  value="dark"
-                >
+                <TabsTrigger value="dark">
                   <Moon />
                 </TabsTrigger>
-                <TabsTrigger
-                  className="data-[state=active]:border-border h-7 text-xs data-[state=active]:border data-[state=active]:shadow-none"
-                  value="system"
-                >
+                <TabsTrigger value="system">
                   <Computer />
                 </TabsTrigger>
               </TabsList>

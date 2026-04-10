@@ -48,7 +48,7 @@ function ImageContainer({
           />
         </>
       ) : (
-        <div className="bg-primary-foreground flex size-full items-center justify-center">
+        <div className="bg-muted flex size-full items-center justify-center">
           <p>No OG image available</p>
         </div>
       )}
@@ -70,7 +70,7 @@ function ContentContainer({
   url,
 }: ContentContainerProps) {
   return (
-    <div className="bg-primary-foreground flex flex-col gap-0.5 p-3.5">
+    <div className="bg-muted flex flex-col gap-0.5 p-3.5">
       {isLoading ? (
         <>
           <Skeleton className="h-4 w-3/4" />
