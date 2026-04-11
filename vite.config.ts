@@ -1,12 +1,12 @@
 import { readdirSync } from "node:fs";
 import { extname } from "node:path";
 import { cloudflare } from "@cloudflare/vite-plugin";
+import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react from "@vitejs/plugin-react";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { guides } from "./src/lib/help-guides";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig, loadEnv } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 type PrerenderPage = {
   path: string;
@@ -121,14 +121,15 @@ export default defineConfig(({ mode }) => {
         },
         srcDirectory: "src",
       }),
-      react({
-        babel: {
-          plugins: ["babel-plugin-react-compiler"],
-        },
+      react(),
+      babel({
+        presets: [reactCompilerPreset()],
       }),
-      tsconfigPaths(),
       tailwindcss(),
     ],
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
       port: 3000,
     },
