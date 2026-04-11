@@ -1,9 +1,5 @@
 Mosaic is a SaaS platform that automatically generates Open Graph (OG) images for websites using screenshots. The application allows users to add their websites and automatically create beautiful social media preview images by taking screenshots of their web pages.
 
-## Rules
-
-- After generating code do `bun run predev` and `bun run build` to check if everything works.
-
 ### Core Technologies
 
 - **Framework**: TanStack Start with TanStack Router, Vite, and React 19 TypeScript
@@ -27,8 +23,6 @@ src/
 ├── generated/       # Build-time generated typed content manifests
 ├── lib/             # Shared utilities, SEO, env, and constants
 └── styles/          # Global app styles
-
-scripts/             # Build-time generators such as content manifest creation
 convex/              # Convex schema, queries, mutations, actions
 public/              # Static assets
 ```
@@ -39,7 +33,6 @@ public/              # Static assets
 - Export types from `lib/types.ts` for reusability
 - Use functional components with hooks
 - Implement proper loading states with `<Skeleton>` components
-- Use `Suspense` only when a boundary actually wraps async or lazy work
 - Follow the pattern: SignedIn/SignedOut components for authentication states
 - TanStack Start route files should stay focused on `validateSearch`, `beforeLoad`, `loader`, and `head`
 - Prefer lazy route companions for heavy route components
@@ -49,7 +42,6 @@ public/              # Static assets
 - For any db schema changes, update Convex schema and regenerate codegen
 - Use shadcn/ui components consistently
 - Show loading states during async operations
-- Follow the card-based layout pattern
 - Implement proper error boundaries and fallbacks
 - Implement proper SEO metadata for all pages
 - Use dynamic imports where appropriate
