@@ -2,7 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { extractUrlParts, normalizeUrlBase } from "./utils/url";
-import { PLAN_LIMITS, PLAN_TYPE_MAPPING } from "../lib/constants";
+import { PLAN_LIMITS, PLAN_TYPE_MAPPING } from "../src/lib/constants";
 import { internal } from "./_generated/api";
 
 type SiteCandidate = {

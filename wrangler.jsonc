@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mosaic",
+  "main": "@tanstack/react-start/server-entry",
+  "compatibility_date": "2026-04-10",
+  "compatibility_flags": [
+    "nodejs_compat",
+    "global_fetch_strictly_public"
+  ],
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true
+}

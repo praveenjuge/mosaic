@@ -2,7 +2,7 @@ import { Polar } from "@convex-dev/polar";
 import { components } from "./_generated/api";
 import { query, internalQuery, action } from "./_generated/server";
 import { v } from "convex/values";
-import { PLAN_LIMITS } from "../lib/constants";
+import { PLAN_LIMITS } from "../src/lib/constants";
 
 // Helper function to get user info from Clerk identity
 async function getUserInfoFromIdentity(
