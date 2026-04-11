@@ -54,6 +54,26 @@ export type SubscriptionInfo = {
   };
 };
 
+type CheckoutPlan = "pro" | "pro-yearly";
+
+const checkoutPlanValidator = v.union(v.literal("pro"), v.literal("pro-yearly"));
+
+const checkoutProductEnvByPlan = {
+  pro: "POLAR_PREMIUM_MONTHLY_PRODUCT_ID",
+  "pro-yearly": "POLAR_PREMIUM_YEARLY_PRODUCT_ID",
+} as const satisfies Record<CheckoutPlan, string>;
+
+function getCheckoutProductId(plan: CheckoutPlan) {
+  const envKey = checkoutProductEnvByPlan[plan];
+  const productId = process.env[envKey];
+
+  if (!productId) {
+    throw new Error(`Missing ${envKey} for ${plan} checkout`);
+  }
+
+  return productId;
+}
+
 // Query to get subscription with plan details
 export const getCurrentSubscription = query({
   args: {},
@@ -204,7 +224,7 @@ async function findCustomerByEmail(email: string): Promise<string | null> {
 // If a customer with this email already exists in Polar, we'll link it automatically
 export const createCheckoutLink = action({
   args: {
-    productIds: v.array(v.string()),
+    plan: checkoutPlanValidator,
     successUrl: v.string(),
     origin: v.optional(v.string()),
     subscriptionId: v.optional(v.string()),
@@ -277,10 +297,11 @@ export const createCheckoutLink = action({
     };
 
     const customerId = await createOrGetCustomer();
+    const productId = getCheckoutProductId(args.plan);
 
     // Create checkout with existing customer
     const checkout = await polar.checkouts.create({
-      products: args.productIds,
+      products: [productId],
       allowDiscountCodes: true,
       customerId,
       successUrl: args.successUrl,

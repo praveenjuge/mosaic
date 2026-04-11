@@ -1,6 +1,12 @@
 type PublicEnvValue = string | boolean | undefined;
 
-const runtimeEnv = import.meta.env as Record<string, PublicEnvValue>;
+const runtimeEnv: Record<string, PublicEnvValue> = {
+  DEV: import.meta.env.DEV,
+  VITE_CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
+  VITE_CONVEX_SITE_URL: import.meta.env.VITE_CONVEX_SITE_URL,
+  VITE_CONVEX_URL: import.meta.env.VITE_CONVEX_URL,
+  VITE_SITE_URL: import.meta.env.VITE_SITE_URL,
+};
 
 function readPublicEnv(keys: string[], fallback?: string) {
   for (const key of keys) {
@@ -51,12 +57,4 @@ export const publicEnv = {
     readPublicEnv(["VITE_CONVEX_SITE_URL"], deriveConvexSiteUrl(convexUrl)),
   ),
   clerkPublishableKey: readPublicEnv(["VITE_CLERK_PUBLISHABLE_KEY"], ""),
-  polarPremiumMonthlyProductId: readPublicEnv(
-    ["VITE_POLAR_PREMIUM_MONTHLY_PRODUCT_ID"],
-    "",
-  ),
-  polarPremiumYearlyProductId: readPublicEnv(
-    ["VITE_POLAR_PREMIUM_YEARLY_PRODUCT_ID"],
-    "",
-  ),
 } as const;

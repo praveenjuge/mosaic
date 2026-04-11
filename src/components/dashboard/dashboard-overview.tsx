@@ -12,16 +12,16 @@ import {
 import { api } from "@/convex/_generated/api";
 import type { DashboardStats } from "@/convex/stats";
 import { authenticatedHomePath } from "@/lib/clerk-auth";
-import { publicEnv } from "@/lib/env";
 import { CustomerPortalLink } from "@convex-dev/polar/react";
 import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
 
 type PlanType = "free" | "pro" | "pro-yearly";
+type CheckoutPlan = Exclude<PlanType, "free">;
 
 type CreateCheckoutLink = (args: {
   origin: string;
-  productIds: string[];
+  plan: CheckoutPlan;
   successUrl: string;
   subscriptionId?: string;
 }) => Promise<{ url: string }>;
@@ -49,13 +49,13 @@ function UpgradeButton({
   createCheckout,
   dashboardStats,
   label,
-  productId,
+  plan,
   type,
 }: {
   createCheckout: CreateCheckoutLink;
   dashboardStats: DashboardStats;
   label?: string;
-  productId: string;
+  plan?: CheckoutPlan;
   type: PlanType;
 }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -63,13 +63,13 @@ function UpgradeButton({
   const currentPlan = dashboardStats.plan;
 
   function handleUpgrade() {
-    if (!productId) {
+    if (!plan) {
       return;
     }
 
     setIsLoading(true);
     createCheckout({
-      productIds: [productId],
+      plan,
       successUrl: `${window.location.origin}${authenticatedHomePath}`,
       origin: window.location.origin,
     })
@@ -108,7 +108,7 @@ function UpgradeButton({
     );
   }
 
-  if (!productId) {
+  if (!plan) {
     return (
       <Button variant="outline" size="sm" disabled>
         Invalid plan
@@ -173,10 +173,8 @@ export function DashboardOverview({
                 {dashboardStats.is_active ? (
                   <UpgradeButton
                     type={dashboardStats.plan}
-                    productId={
-                      dashboardStats.plan === "pro-yearly"
-                        ? publicEnv.polarPremiumYearlyProductId
-                        : publicEnv.polarPremiumMonthlyProductId
+                    plan={
+                      dashboardStats.plan === "pro-yearly" ? "pro-yearly" : "pro"
                     }
                     dashboardStats={dashboardStats}
                     createCheckout={createCheckout}
@@ -186,14 +184,14 @@ export function DashboardOverview({
                     <UpgradeButton
                       type="pro"
                       label="Monthly $19"
-                      productId={publicEnv.polarPremiumMonthlyProductId}
+                      plan="pro"
                       dashboardStats={dashboardStats}
                       createCheckout={createCheckout}
                     />
                     <UpgradeButton
                       type="pro-yearly"
                       label="Yearly $199"
-                      productId={publicEnv.polarPremiumYearlyProductId}
+                      plan="pro-yearly"
                       dashboardStats={dashboardStats}
                       createCheckout={createCheckout}
                     />
