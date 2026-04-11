@@ -10,6 +10,18 @@ function resolveSiteHost(siteUrl: string) {
   return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
 }
 
+const prerenderBlockedPaths = [
+  "/blog",
+  "/changelog",
+  "/dashboard",
+  "/sign-in",
+  "/sign-up",
+  "/use",
+];
+
+const staticAssetPattern =
+  /\.(avif|css|gif|ico|jpe?g|js|json|map|png|svg|webp|woff2?)$/i;
+
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const siteHost = resolveSiteHost(
@@ -32,10 +44,13 @@ export default defineConfig(({ mode }) => {
           crawlLinks: true,
           enabled: true,
           failOnError: true,
-          filter: (page) =>
-            !["/blog", "/changelog", "/dashboard", "/sign-in", "/sign-up", "/use"].some(
+          filter: (page) => {
+            if (staticAssetPattern.test(page.path)) return false;
+
+            return !prerenderBlockedPaths.some(
               (path) => page.path === path || page.path.startsWith(`${path}/`),
-            ),
+            );
+          },
         },
         router: {
           generatedRouteTree: "./routeTree.gen.ts",

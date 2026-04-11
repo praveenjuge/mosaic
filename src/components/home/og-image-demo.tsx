@@ -95,15 +95,16 @@ const defaultData = {
   url: "praveenjuge.com",
 };
 
+const fallbackOriginalImage = "/images/original-example-og-814873d7.jpg";
+const fallbackMosaicImage = "/images/mosaic-example-og-f9e253a9.png";
+
 export default function OGImageDemo() {
   const [inputUrl, setInputUrl] = useState("");
   const [demoData, setDemoData] = useState<DemoData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
   const [error, setError] = useState("");
-  const [mosaicImageUrl, setMosaicImageUrl] = useState(
-    "/images/mosaic-example-og.png",
-  );
+  const [mosaicImageUrl, setMosaicImageUrl] = useState(fallbackMosaicImage);
   const fetchDemoData = useAction(api.metadata.fetchDemoData);
 
   const fetchOGData = useCallback(async () => {
@@ -122,7 +123,7 @@ export default function OGImageDemo() {
 
       if (data.error) {
         setError(data.error);
-        setMosaicImageUrl("/images/mosaic-example-og.png");
+        setMosaicImageUrl(fallbackMosaicImage);
       } else if (data.imageUrl) {
         setMosaicImageUrl(data.imageUrl);
       } else {
@@ -178,7 +179,7 @@ export default function OGImageDemo() {
         <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
           <ImageContainer
             isLoading={isLoading}
-            src={demoData?.image || "/images/original-example-og.jpg"}
+            src={demoData?.image || fallbackOriginalImage}
             alt="Original Open Graph Image"
           />
           <ContentContainer
