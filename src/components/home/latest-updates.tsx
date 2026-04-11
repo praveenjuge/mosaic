@@ -1,3 +1,5 @@
+import type { ChangelogEntry } from "@/lib/content";
+
 function formatDate(dateString: string | Date) {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
@@ -5,12 +7,6 @@ function formatDate(dateString: string | Date) {
     month: "short",
     day: "numeric",
   });
-}
-
-interface ChangelogEntry {
-  title: string;
-  slug: string;
-  publishedAt: Date | string;
 }
 
 interface LatestUpdatesProps {

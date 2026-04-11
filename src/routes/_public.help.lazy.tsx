@@ -1,4 +1,5 @@
 import Guides from "@/components/help/guides";
+import type { HelpCategory } from "@/lib/content";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -7,13 +8,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { helpCategories } from "@/generated/content";
 import { cn } from "@/lib/utils";
-import { Link, createLazyFileRoute } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createLazyFileRoute,
+  useRouterState,
+} from "@tanstack/react-router";
 import { Mail } from "lucide-react";
 
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";
+
+function normalizePathname(pathname: string) {
+  return pathname.replace(/\/+$/, "") || "/";
+}
 
 export const Route = createLazyFileRoute("/_public/help")({
   component: HelpPage,
@@ -28,7 +37,11 @@ function HelpHeader() {
   );
 }
 
-function HelpCategoriesSection() {
+function HelpCategoriesSection({
+  helpCategories,
+}: {
+  helpCategories: HelpCategory[];
+}) {
   return (
     <>
       {helpCategories.map((category) => (
@@ -88,11 +101,20 @@ function ContactSection() {
 }
 
 function HelpPage() {
+  const { guides, helpCategories } = Route.useLoaderData();
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  });
+
+  if (normalizePathname(pathname) !== "/help") {
+    return <Outlet />;
+  }
+
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">
       <HelpHeader />
-      <Guides />
-      <HelpCategoriesSection />
+      <Guides guides={guides} />
+      <HelpCategoriesSection helpCategories={helpCategories} />
       <ContactSection />
     </div>
   );

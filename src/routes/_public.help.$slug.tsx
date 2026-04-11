@@ -1,11 +1,11 @@
-import { helpArticlesBySlug } from "@/generated/content";
+import { getHelpArticle } from "@/lib/content";
 import { absoluteUrl, buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/utils";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/help/$slug")({
   loader: ({ params }) => {
-    const help = helpArticlesBySlug[params.slug as keyof typeof helpArticlesBySlug];
+    const help = getHelpArticle(params.slug);
     if (!help) {
       throw notFound();
     }

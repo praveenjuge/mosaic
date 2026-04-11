@@ -1,12 +1,11 @@
-import { helpGuidesBySlug } from "@/generated/content";
+import { getGuide } from "@/lib/content";
 import { absoluteUrl, buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/utils";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/help/guides/$slug")({
   loader: ({ params }) => {
-    const guide =
-      helpGuidesBySlug[params.slug as keyof typeof helpGuidesBySlug];
+    const guide = getGuide(params.slug);
     if (!guide) {
       throw notFound();
     }
@@ -15,7 +14,7 @@ export const Route = createFileRoute("/_public/help/guides/$slug")({
   },
   head: ({ loaderData, params }) => {
     const title = loaderData?.guide.title;
-    const description = `Get started with integrating Mosaic into your ${title} project.`;
+    const description = loaderData?.guide.description;
     const seo = buildSeoMeta({
       title,
       description,

@@ -3,7 +3,15 @@ import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
 
 export default tseslint.config(
-  { ignores: ["node_modules/", ".next/", "convex/_generated/"] },
+  {
+    ignores: [
+      "node_modules/",
+      ".content-collections/",
+      ".next/",
+      "convex/_generated/",
+      "dist/",
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

@@ -1,5 +1,6 @@
 import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
+import type { ChangelogEntry } from "@/lib/content";
 import { Button } from "@/components/ui/button";
 import {
   ClerkLoaded,
@@ -12,16 +13,6 @@ import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";
 import LatestUpdates from "./latest-updates";
 import OGImageDemo from "./og-image-demo";
-
-interface ChangelogEntry {
-  title: string;
-  slug: string;
-  publishedAt: Date | string;
-}
-
-interface HomeSignedOutProps {
-  changelogEntries: ChangelogEntry[];
-}
 
 function AuthButtonSkeleton() {
   return (
@@ -99,7 +90,11 @@ function FAQSection() {
   );
 }
 
-export default function HomeSignedOut({ changelogEntries }: HomeSignedOutProps) {
+export default function HomeSignedOut({
+  changelogEntries,
+}: {
+  changelogEntries: ChangelogEntry[];
+}) {
   return (
     <>
       <HeroSection />

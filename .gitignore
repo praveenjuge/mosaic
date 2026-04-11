@@ -17,6 +17,7 @@
 /build
 /dist
 /.wrangler
+/.content-collections
 
 # misc
 .DS_Store

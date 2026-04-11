@@ -1,20 +1,10 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
+import contentCollections from "@content-collections/vite";
 import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import { helpArticles, helpGuides } from "./src/generated/content";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig, loadEnv } from "vite";
-
-type PrerenderPage = {
-  path: string;
-  prerender?: { enabled: boolean };
-  sitemap?: {
-    changefreq?: "monthly" | "weekly" | "yearly";
-    exclude?: boolean;
-    priority?: number;
-  };
-};
 
 function resolveSiteHost(siteUrl: string) {
   return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
@@ -27,34 +17,6 @@ export default defineConfig(({ mode }) => {
       (mode === "development" ? "http://localhost:3000" : "https://mosaicimg.com"),
   );
 
-  const prerenderPages: PrerenderPage[] = [
-    {
-      path: "/",
-      prerender: { enabled: true },
-      sitemap: { changefreq: "weekly", priority: 1 },
-    },
-    {
-      path: "/help",
-      prerender: { enabled: true },
-      sitemap: { changefreq: "weekly", priority: 0.9 },
-    },
-    {
-      path: "/legal",
-      prerender: { enabled: true },
-      sitemap: { changefreq: "yearly", priority: 0.4 },
-    },
-    ...helpArticles.map((entry) => ({
-      path: `/help/${entry.slug}`,
-      prerender: { enabled: true },
-      sitemap: { changefreq: "monthly" as const, priority: 0.8 },
-    })),
-    ...helpGuides.map((guide) => ({
-      path: `/help/guides/${guide.slug}`,
-      prerender: { enabled: true },
-      sitemap: { changefreq: "monthly" as const, priority: 0.7 },
-    })),
-  ];
-
   return {
     build: {
       sourcemap: true,
@@ -62,8 +24,8 @@ export default defineConfig(({ mode }) => {
     envPrefix: ["VITE_"],
     plugins: [
       cloudflare({ viteEnvironment: { name: "ssr" } }),
+      contentCollections(),
       ...tanstackStart({
-        pages: prerenderPages,
         prerender: {
           autoStaticPathsDiscovery: true,
           autoSubfolderIndex: true,

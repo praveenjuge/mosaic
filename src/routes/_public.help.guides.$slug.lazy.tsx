@@ -24,27 +24,10 @@ function GuidePage() {
           <CardTitle>{guide.title}</CardTitle>
           <CardDescription>{guide.description}</CardDescription>
         </CardHeader>
-        <CardContent className="mt-4 divide-y-[0.5px] border-t-[0.5px] p-0">
-          {guide.steps.map((step, index) => (
-            <div
-              key={step.title}
-              className="flex flex-col gap-4 px-6 py-4 sm:grid sm:grid-cols-6"
-            >
-              <p className="text-primary shrink-0 font-mono font-medium uppercase select-none">
-                Step {index + 1}
-              </p>
-              <div className="gap-4 sm:col-span-5">
-                <p>{step.title}</p>
-                {step.codeHtml ? (
-                  <div
-                    className="mt-4 overflow-hidden rounded [&>code]:overflow-x-auto [&>pre]:overflow-x-auto [&>pre]:rounded-md [&>pre]:p-2"
-                    dangerouslySetInnerHTML={{ __html: step.codeHtml }}
-                  />
-                ) : null}
-              </div>
-            </div>
-          ))}
-        </CardContent>
+        <CardContent
+          className="prose prose-slate dark:prose-invert mt-4 max-w-none [&>pre]:overflow-x-auto [&_pre]:overflow-x-auto"
+          dangerouslySetInnerHTML={{ __html: guide.contentHtml }}
+        />
       </Card>
     </article>
   );

@@ -1,39 +1,10 @@
 import type { Doc } from "@/convex/_generated/dataModel";
-import type { HelpGuide, HelpGuideStep } from "./help-guides";
 
 // New table structure types
 export type Site = Doc<"sites">;
 
 export interface SiteWithStats extends Site {
   screenshot_count: number;
-}
-
-export interface ContentEntry {
-  category?: string;
-  contentHtml: string;
-  description: string;
-  publishedAt: string;
-  slug: string;
-  title: string;
-}
-
-export interface ContentLink {
-  slug: string;
-  title: string;
-}
-
-export interface ContentCategory {
-  category: string;
-  entries: ContentLink[];
-}
-
-export interface GeneratedHelpGuideStep extends HelpGuideStep {
-  codeHtml?: string;
-}
-
-export interface GeneratedHelpGuide extends Omit<HelpGuide, "steps"> {
-  description: string;
-  steps: GeneratedHelpGuideStep[];
 }
 
 // Polar API types
