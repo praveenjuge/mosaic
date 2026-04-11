@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { authenticatedHomePath } from "@/lib/clerk-auth";
 import { PLANS, PRICING_PLANS, type PlanType } from "@/lib/pricing";
 import { SignUpButton } from "@clerk/tanstack-react-start";
 import { Check } from "lucide-react";
@@ -21,8 +22,8 @@ interface PlanButtonProps {
 function PlanButton({ type }: PlanButtonProps) {
   return (
     <SignUpButton
-      fallbackRedirectUrl="/dashboard"
-      forceRedirectUrl="/dashboard"
+      fallbackRedirectUrl={authenticatedHomePath}
+      forceRedirectUrl={authenticatedHomePath}
     >
       <Button className="w-full">
         {type === "free" ? "Start Free" : "Sign Up"}

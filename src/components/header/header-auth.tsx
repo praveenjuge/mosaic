@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { authenticatedHomePath } from "@/lib/clerk-auth";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -24,16 +25,16 @@ function SignedOutButtons() {
   return (
     <div className="flex items-center gap-2">
       <SignInButton
-        fallbackRedirectUrl="/dashboard"
-        forceRedirectUrl="/dashboard"
+        fallbackRedirectUrl={authenticatedHomePath}
+        forceRedirectUrl={authenticatedHomePath}
       >
         <Button variant="outline" size="sm">
           Log In
         </Button>
       </SignInButton>
       <SignUpButton
-        fallbackRedirectUrl="/dashboard"
-        forceRedirectUrl="/dashboard"
+        fallbackRedirectUrl={authenticatedHomePath}
+        forceRedirectUrl={authenticatedHomePath}
       >
         <Button size="sm">Sign Up</Button>
       </SignUpButton>

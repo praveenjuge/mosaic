@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { api } from "@/convex/_generated/api";
 import type { DashboardStats } from "@/convex/stats";
+import { authenticatedHomePath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
 import { CustomerPortalLink } from "@convex-dev/polar/react";
 import { AlertTriangle } from "lucide-react";
@@ -69,7 +70,7 @@ function UpgradeButton({
     setIsLoading(true);
     createCheckout({
       productIds: [productId],
-      successUrl: `${window.location.origin}/dashboard`,
+      successUrl: `${window.location.origin}${authenticatedHomePath}`,
       origin: window.location.origin,
     })
       .then((result) => {
@@ -139,8 +140,8 @@ export function DashboardOverview({
           <AlertTriangle />
           <AlertTitle>Free Plan Limit Exceeded</AlertTitle>
           <AlertDescription>
-            You've reached the limit of {dashboardStats.images_limit} OG
-            images. Upgrade to continue generating images.
+            You've reached the limit of {dashboardStats.images_limit} OG images.
+            Upgrade to continue generating images.
           </AlertDescription>
         </Alert>
       ) : null}

@@ -11,17 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UseRouteImport } from './routes/use'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as PublicRouteImport } from './routes/_public'
-import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as ChangelogSlugRouteImport } from './routes/changelog.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
-import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
 import { Route as PublicHelpSlugRouteImport } from './routes/_public.help.$slug'
 import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
 import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
@@ -37,6 +36,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   path: '/robots.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChangelogRoute = ChangelogRouteImport.update({
   id: '/changelog',
   path: '/changelog',
@@ -49,10 +53,6 @@ const BlogRoute = BlogRouteImport.update({
 } as any)
 const PublicRoute = PublicRouteImport.update({
   id: '/_public',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -84,13 +84,6 @@ const PublicHelpRoute = PublicHelpRouteImport.update({
   path: '/help',
   getParentRoute: () => PublicRoute,
 } as any).lazy(() => import('./routes/_public.help.lazy').then((d) => d.Route))
-const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
-  getParentRoute: () => DashboardRoute,
-} as any).lazy(() =>
-  import('./routes/_dashboard.dashboard.lazy').then((d) => d.Route),
-)
 const PublicHelpSlugRoute = PublicHelpSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -120,9 +113,9 @@ export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/blog': typeof BlogRouteWithChildren
   '/changelog': typeof ChangelogRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
-  '/dashboard': typeof DashboardDashboardRoute
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -136,9 +129,9 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/blog': typeof BlogRouteWithChildren
   '/changelog': typeof ChangelogRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
-  '/dashboard': typeof DashboardDashboardRoute
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -151,13 +144,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
-  '/_dashboard': typeof DashboardRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
   '/changelog': typeof ChangelogRouteWithChildren
+  '/dashboard': typeof DashboardRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
-  '/_dashboard/dashboard': typeof DashboardDashboardRoute
   '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -174,9 +166,9 @@ export interface FileRouteTypes {
     | '/'
     | '/blog'
     | '/changelog'
+    | '/dashboard'
     | '/robots.txt'
     | '/use'
-    | '/dashboard'
     | '/help'
     | '/legal'
     | '/blog/$slug'
@@ -190,9 +182,9 @@ export interface FileRouteTypes {
     | '/'
     | '/blog'
     | '/changelog'
+    | '/dashboard'
     | '/robots.txt'
     | '/use'
-    | '/dashboard'
     | '/help'
     | '/legal'
     | '/blog/$slug'
@@ -204,13 +196,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_auth'
-    | '/_dashboard'
     | '/_public'
     | '/blog'
     | '/changelog'
+    | '/dashboard'
     | '/robots.txt'
     | '/use'
-    | '/_dashboard/dashboard'
     | '/_public/help'
     | '/_public/legal'
     | '/blog/$slug'
@@ -224,10 +215,10 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
-  DashboardRoute: typeof DashboardRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   ChangelogRoute: typeof ChangelogRouteWithChildren
+  DashboardRoute: typeof DashboardRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
 }
@@ -246,6 +237,13 @@ declare module '@tanstack/react-router' {
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/changelog': {
@@ -267,13 +265,6 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PublicRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/_dashboard': {
-      id: '/_dashboard'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_auth': {
@@ -318,13 +309,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicHelpRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/_dashboard/dashboard': {
-      id: '/_dashboard/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardDashboardRouteImport
-      parentRoute: typeof DashboardRoute
-    }
     '/_public/help/$slug': {
       id: '/_public/help/$slug'
       path: '/$slug'
@@ -367,18 +351,6 @@ const AuthRouteChildren: AuthRouteChildren = {
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
-interface DashboardRouteChildren {
-  DashboardDashboardRoute: typeof DashboardDashboardRoute
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardDashboardRoute: DashboardDashboardRoute,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
 
 interface PublicHelpRouteChildren {
   PublicHelpSlugRoute: typeof PublicHelpSlugRoute
@@ -433,10 +405,10 @@ const ChangelogRouteWithChildren = ChangelogRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
-  DashboardRoute: DashboardRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   ChangelogRoute: ChangelogRouteWithChildren,
+  DashboardRoute: DashboardRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
 }

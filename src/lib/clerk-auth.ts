@@ -1,7 +1,7 @@
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 
-export const dashboardPath = "/dashboard";
+export const authenticatedHomePath = "/";
 export const signInPath = "/sign-in";
 export const signUpPath = "/sign-up";
 
@@ -23,10 +23,7 @@ export const fetchClerkAuth = createServerFn({ method: "GET" }).handler(
   },
 );
 
-export function buildRouteAuth({
-  token,
-  userId,
-}: ClerkAuthState): RouteAuth {
+export function buildRouteAuth({ token, userId }: ClerkAuthState): RouteAuth {
   return {
     token,
     userId,
@@ -35,15 +32,24 @@ export function buildRouteAuth({
 }
 
 export function sanitizeRedirectPath(redirectUrl?: string) {
-  if (!redirectUrl || !redirectUrl.startsWith("/") || redirectUrl.startsWith("//")) {
-    return dashboardPath;
+  if (
+    !redirectUrl ||
+    !redirectUrl.startsWith("/") ||
+    redirectUrl.startsWith("//")
+  ) {
+    return authenticatedHomePath;
   }
 
   try {
     const parsed = new URL(redirectUrl, "https://mosaic.local");
+
+    if (parsed.pathname === "/dashboard") {
+      return authenticatedHomePath;
+    }
+
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
-    return dashboardPath;
+    return authenticatedHomePath;
   }
 }
 

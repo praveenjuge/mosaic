@@ -1,7 +1,8 @@
 import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
-import type { ChangelogEntry } from "@/lib/content";
 import { Button } from "@/components/ui/button";
+import { authenticatedHomePath } from "@/lib/clerk-auth";
+import type { ChangelogEntry } from "@/lib/content";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -31,8 +32,8 @@ function AuthButton() {
       </ClerkLoading>
       <ClerkLoaded>
         <SignUpButton
-          fallbackRedirectUrl="/dashboard"
-          forceRedirectUrl="/dashboard"
+          fallbackRedirectUrl={authenticatedHomePath}
+          forceRedirectUrl={authenticatedHomePath}
         >
           <Button size="lg">
             Start for Free
@@ -46,15 +47,16 @@ function AuthButton() {
 
 function HeroSection() {
   return (
-    <section className="mx-auto w-full max-w-2xl flex flex-col items-center gap-4 text-center">
+    <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 text-center">
       <div className="space-y-2">
-        <h1 className="text-4xl md:text-5xl font-semibold tracking-tighter text-balance">
-          Instant beautiful OG images from your website. <span className="text-primary">No design needed.</span>
+        <h1 className="text-4xl font-semibold tracking-tighter text-balance md:text-5xl">
+          Instant beautiful OG images from your website.{" "}
+          <span className="text-primary">No design needed.</span>
         </h1>
-        <p className="text-muted-foreground text-base md:text-lg text-balance">
-          Instantly turn your website’s hero sections into stunning OG
-          images—no design skills needed. Boost brand visibility and drive
-          clicks with automated, high-converting social previews.
+        <p className="text-muted-foreground text-base text-balance md:text-lg">
+          Instantly turn your website’s hero sections into stunning OG images—no
+          design skills needed. Boost brand visibility and drive clicks with
+          automated, high-converting social previews.
         </p>
       </div>
       <AuthButton />

@@ -1,5 +1,5 @@
 import { getChangelogEntries } from "@/lib/content";
-import { buildOrganizationJsonLd, buildSeoMeta } from "@/lib/seo";
+import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -20,12 +20,6 @@ export const Route = createFileRoute("/_public/")({
 
     return {
       ...seo,
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify(buildOrganizationJsonLd()),
-        },
-      ],
     };
   },
 });

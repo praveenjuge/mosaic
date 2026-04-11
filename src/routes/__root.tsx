@@ -3,6 +3,7 @@
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
+  authenticatedHomePath,
   buildRouteAuth,
   fetchClerkAuth,
   signInPath,
@@ -14,6 +15,7 @@ import {
   website_subtitle,
 } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
+import { buildOrganizationJsonLd } from "@/lib/seo";
 import { cn, getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import {
@@ -115,8 +117,8 @@ function RootComponent() {
       publishableKey={publicEnv.clerkPublishableKey}
       signInUrl={signInPath}
       signUpUrl={signUpPath}
-      signInFallbackRedirectUrl="/dashboard"
-      signUpFallbackRedirectUrl="/dashboard"
+      signInFallbackRedirectUrl={authenticatedHomePath}
+      signUpFallbackRedirectUrl={authenticatedHomePath}
     >
       <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
         <ThemeProvider
@@ -137,6 +139,9 @@ function RootComponent() {
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
+  const organizationJsonLd = JSON.stringify(buildOrganizationJsonLd());
+  const shouldRenderStructuredData = typeof document === "undefined";
+
   return (
     <html
       lang="en"
@@ -149,6 +154,12 @@ function RootDocument({ children }: { children: ReactNode }) {
     >
       <head>
         <HeadContent />
+        {shouldRenderStructuredData ? (
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: organizationJsonLd }}
+          />
+        ) : null}
       </head>
       <body className="relative flex min-h-screen flex-col text-sm">
         {children}

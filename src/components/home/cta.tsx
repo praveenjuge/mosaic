@@ -1,3 +1,4 @@
+import { authenticatedHomePath } from "@/lib/clerk-auth";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -27,8 +28,8 @@ export default function CTA() {
           </ClerkLoading>
           <ClerkLoaded>
             <SignUpButton
-              fallbackRedirectUrl="/dashboard"
-              forceRedirectUrl="/dashboard"
+              fallbackRedirectUrl={authenticatedHomePath}
+              forceRedirectUrl={authenticatedHomePath}
             >
               <Button size="lg">
                 Start for Free
