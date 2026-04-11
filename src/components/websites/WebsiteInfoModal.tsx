@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { guides } from "@/lib/help-guides";
+import { helpGuides } from "@/generated/content";
 import { Code, ExternalLink, Ghost } from "lucide-react";
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
@@ -65,7 +65,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
           </Tabs>
 
           <div className="flex flex-wrap gap-2">
-            {guides.map((guide) => (
+            {helpGuides.map((guide) => (
               <GuideLink key={guide.slug} guide={guide} />
             ))}
           </div>

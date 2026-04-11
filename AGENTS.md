@@ -6,42 +6,31 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 
 ### Core Technologies
 
-- **Framework**: Next.js (App Router) with React 19 TypeScript
+- **Framework**: TanStack Start with TanStack Router, Vite, and React 19 TypeScript
 - **Runtime**: Bun (package manager and runtime)
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Database**: Convex
 - **Authentication**: Clerk
+- **Deployment Runtime**: Cloudflare via Wrangler
 - `convex` - Database and backend functions
 - Build command: `bun run build`
-- Development command: `bun run dev` (runs Convex + Next.js concurrently; clears port 3000)
+- Development command: `bun run dev` (generates content, then runs Convex + Vite concurrently)
 - Linting command: `bun run lint` (auto-fixes via eslint --fix)
 
 ## Project Structure
 
 ```
-app/                  # Next.js App Router pages
-├── api/              # API routes
-├── blog/             # Blog pages with markdown content
-├── changelog/        # Changelog pages
-├── help/             # Help and documentation
-├── legal/            # Legal pages
+src/
+├── routes/          # TanStack Start file-based routes and lazy route modules
+├── components/      # Reusable UI and route-specific presentation
+├── content/         # Markdown content sources
+├── generated/       # Build-time generated typed content manifests
+├── lib/             # Shared utilities, SEO, env, and constants
+└── styles/          # Global app styles
 
-components/           # Reusable React components
-├── home/            # Homepage-specific components
-├── server/          # Server-side components
-└── ui/              # shadcn/ui components
-
-content/             # Markdown content
-├── blog/           # Blog posts
-├── changelog/      # Changelog entries
-└── help/           # Help articles
-
-lib/                # Utility functions and configurations
-├── constants.ts    # Application constants
-├── types.ts        # TypeScript type definitions
-└── utils.ts        # Utility functions
-
-convex/             # Convex schema, queries, mutations, actions
+scripts/             # Build-time generators such as content manifest creation
+convex/              # Convex schema, queries, mutations, actions
+public/              # Static assets
 ```
 
 ## Coding Standards & Best Practices
@@ -50,10 +39,11 @@ convex/             # Convex schema, queries, mutations, actions
 - Export types from `lib/types.ts` for reusability
 - Use functional components with hooks
 - Implement proper loading states with `<Skeleton>` components
-- Use `Suspense` boundaries for data fetching
+- Use `Suspense` only when a boundary actually wraps async or lazy work
 - Follow the pattern: SignedIn/SignedOut components for authentication states
-- Server components by default, use "use client" only when necessary
-- Use server-side client for data fetching in Server Components
+- TanStack Start route files should stay focused on `validateSearch`, `beforeLoad`, `loader`, and `head`
+- Prefer lazy route companions for heavy route components
+- Keep build-time content processing out of the route runtime path
 - Handle errors gracefully with try/catch blocks
 - Use Convex auth checks (ctx.auth) to enforce data access
 - For any db schema changes, update Convex schema and regenerate codegen
@@ -66,12 +56,13 @@ convex/             # Convex schema, queries, mutations, actions
 - Implement proper loading states
 - Show user-friendly error messages
 - Log errors appropriately without exposing sensitive data
-- Use ESLint with Next.js configuration
+- Use ESLint with the Vite/TanStack Start setup
 - Format code with Prettier (organize imports, Tailwind class sorting)
 - Uses Bun as the runtime and package manager
 - All database operations should go through Convex
 - Authentication is handled entirely by Clerk
 - OG image generation is handled internally via Cloudflare Browser Rendering API
+- Public client environment variables must use the `VITE_` prefix
 - Website URL format: always clean and normalize URLs before storage
 - Suggest new instructions or improvements to this file as the project evolves.
 

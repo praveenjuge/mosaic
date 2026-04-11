@@ -1,10 +1,8 @@
-import { readdirSync } from "node:fs";
-import { extname } from "node:path";
 import { cloudflare } from "@cloudflare/vite-plugin";
 import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import { guides } from "./src/lib/help-guides";
+import { helpArticles, helpGuides } from "./src/generated/content";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import { defineConfig, loadEnv } from "vite";
 
@@ -18,12 +16,6 @@ type PrerenderPage = {
   };
 };
 
-function getHelpArticlePaths() {
-  return readdirSync("./src/content/help")
-    .filter((file) => extname(file) === ".md")
-    .map((file) => `/help/${file.replace(/\.md$/, "")}`);
-}
-
 function resolveSiteHost(siteUrl: string) {
   return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
 }
@@ -31,9 +23,8 @@ function resolveSiteHost(siteUrl: string) {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const siteHost = resolveSiteHost(
-    env.VITE_PUBLIC_SITE_URL ||
-    env.NEXT_PUBLIC_SITE_URL ||
-    (mode === "development" ? "http://localhost:3000" : "https://mosaicimg.com"),
+    env.VITE_SITE_URL ||
+      (mode === "development" ? "http://localhost:3000" : "https://mosaicimg.com"),
   );
 
   const prerenderPages: PrerenderPage[] = [
@@ -52,36 +43,12 @@ export default defineConfig(({ mode }) => {
       prerender: { enabled: true },
       sitemap: { changefreq: "yearly", priority: 0.4 },
     },
-    {
-      path: "/blog",
-      sitemap: { exclude: true },
-    },
-    {
-      path: "/changelog",
-      sitemap: { exclude: true },
-    },
-    {
-      path: "/dashboard",
-      sitemap: { exclude: true },
-    },
-    {
-      path: "/sign-in",
-      sitemap: { exclude: true },
-    },
-    {
-      path: "/sign-up",
-      sitemap: { exclude: true },
-    },
-    {
-      path: "/use",
-      sitemap: { exclude: true },
-    },
-    ...getHelpArticlePaths().map((path) => ({
-      path,
+    ...helpArticles.map((entry) => ({
+      path: `/help/${entry.slug}`,
       prerender: { enabled: true },
       sitemap: { changefreq: "monthly" as const, priority: 0.8 },
     })),
-    ...guides.map((guide) => ({
+    ...helpGuides.map((guide) => ({
       path: `/help/guides/${guide.slug}`,
       prerender: { enabled: true },
       sitemap: { changefreq: "monthly" as const, priority: 0.7 },
@@ -92,7 +59,7 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true,
     },
-    envPrefix: ["VITE_", "NEXT_PUBLIC_", "CLERK_PUBLISHABLE_KEY"],
+    envPrefix: ["VITE_"],
     plugins: [
       cloudflare({ viteEnvironment: { name: "ssr" } }),
       ...tanstackStart({
@@ -104,7 +71,7 @@ export default defineConfig(({ mode }) => {
           enabled: true,
           failOnError: true,
           filter: (page) =>
-            !["/dashboard", "/sign-in", "/sign-up", "/use"].some(
+            !["/blog", "/changelog", "/dashboard", "/sign-in", "/sign-up", "/use"].some(
               (path) => page.path === path || page.path.startsWith(`${path}/`),
             ),
         },

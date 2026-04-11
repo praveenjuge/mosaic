@@ -9,7 +9,6 @@ import {
   SignUpButton,
   useAuth,
 } from "@clerk/tanstack-react-start";
-import { Suspense } from "react";
 import UserProfile from "./user-profile";
 
 function AuthLoadingSkeleton() {
@@ -45,9 +44,7 @@ function SignedOutButtons() {
 function SignedInNav() {
   return (
     <nav className="flex items-center gap-2 md:gap-4">
-      <Suspense fallback={<Skeleton className="size-8 rounded-full" />}>
-        <UserProfile />
-      </Suspense>
+      <UserProfile />
     </nav>
   );
 }
@@ -65,9 +62,7 @@ export default function HeaderAuth() {
         <AuthLoadingSkeleton />
       </ClerkLoading>
       <ClerkLoaded>
-        <Suspense fallback={<AuthLoadingSkeleton />}>
-          {userId ? <SignedInNav /> : <SignedOutButtons />}
-        </Suspense>
+        {userId ? <SignedInNav /> : <SignedOutButtons />}
       </ClerkLoaded>
     </>
   );

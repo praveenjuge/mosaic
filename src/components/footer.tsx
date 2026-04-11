@@ -1,10 +1,9 @@
 "use client";
 
 import { website_name } from "@/lib/constants";
+import { Link, useHydrated } from "@tanstack/react-router";
 import { Computer, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 import Logo from "./logo";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
@@ -28,11 +27,7 @@ const footerSections = [
 
 export default function Footer() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const hydrated = useHydrated();
 
   return (
     <footer className="bg-background mt-auto border-t-[0.5px]">
@@ -45,7 +40,7 @@ export default function Footer() {
               automatically using your hero section as an OG Image.
             </p>
             <Tabs
-              value={mounted ? (theme ?? "system") : "system"}
+              value={hydrated ? (theme ?? "system") : "system"}
               onValueChange={setTheme}
             >
               <TabsList>

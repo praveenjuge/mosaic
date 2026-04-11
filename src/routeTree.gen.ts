@@ -15,15 +15,16 @@ import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
+import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
-import { Route as SignUpSplatRouteImport } from './routes/sign-up.$'
-import { Route as SignInSplatRouteImport } from './routes/sign-in.$'
 import { Route as ChangelogSlugRouteImport } from './routes/changelog.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
 import { Route as PublicHelpSlugRouteImport } from './routes/_public.help.$slug'
+import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
+import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
 import { Route as PublicHelpGuidesSlugRouteImport } from './routes/_public.help.guides.$slug'
 
 const UseRoute = UseRouteImport.update({
@@ -54,21 +55,15 @@ const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
-} as any)
-const SignUpSplatRoute = SignUpSplatRouteImport.update({
-  id: '/sign-up/$',
-  path: '/sign-up/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInSplatRoute = SignInSplatRouteImport.update({
-  id: '/sign-in/$',
-  path: '/sign-in/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/_public.index.lazy').then((d) => d.Route))
 const ChangelogSlugRoute = ChangelogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -83,27 +78,43 @@ const PublicLegalRoute = PublicLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
   getParentRoute: () => PublicRoute,
-} as any)
+} as any).lazy(() => import('./routes/_public.legal.lazy').then((d) => d.Route))
 const PublicHelpRoute = PublicHelpRouteImport.update({
   id: '/help',
   path: '/help',
   getParentRoute: () => PublicRoute,
-} as any)
+} as any).lazy(() => import('./routes/_public.help.lazy').then((d) => d.Route))
 const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => DashboardRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_dashboard.dashboard.lazy').then((d) => d.Route),
+)
 const PublicHelpSlugRoute = PublicHelpSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => PublicHelpRoute,
+} as any).lazy(() =>
+  import('./routes/_public.help.$slug.lazy').then((d) => d.Route),
+)
+const AuthSignUpSplatRoute = AuthSignUpSplatRouteImport.update({
+  id: '/sign-up/$',
+  path: '/sign-up/$',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSignInSplatRoute = AuthSignInSplatRouteImport.update({
+  id: '/sign-in/$',
+  path: '/sign-in/$',
+  getParentRoute: () => AuthRoute,
 } as any)
 const PublicHelpGuidesSlugRoute = PublicHelpGuidesSlugRouteImport.update({
   id: '/guides/$slug',
   path: '/guides/$slug',
   getParentRoute: () => PublicHelpRoute,
-} as any)
+} as any).lazy(() =>
+  import('./routes/_public.help.guides.$slug.lazy').then((d) => d.Route),
+)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -116,8 +127,8 @@ export interface FileRoutesByFullPath {
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
-  '/sign-in/$': typeof SignInSplatRoute
-  '/sign-up/$': typeof SignUpSplatRoute
+  '/sign-in/$': typeof AuthSignInSplatRoute
+  '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
   '/help/guides/$slug': typeof PublicHelpGuidesSlugRoute
 }
@@ -132,13 +143,14 @@ export interface FileRoutesByTo {
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
-  '/sign-in/$': typeof SignInSplatRoute
-  '/sign-up/$': typeof SignUpSplatRoute
+  '/sign-in/$': typeof AuthSignInSplatRoute
+  '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
   '/help/guides/$slug': typeof PublicHelpGuidesSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
+  '/_auth': typeof AuthRouteWithChildren
   '/_dashboard': typeof DashboardRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
@@ -150,9 +162,9 @@ export interface FileRoutesById {
   '/_public/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
-  '/sign-in/$': typeof SignInSplatRoute
-  '/sign-up/$': typeof SignUpSplatRoute
   '/_public/': typeof PublicIndexRoute
+  '/_auth/sign-in/$': typeof AuthSignInSplatRoute
+  '/_auth/sign-up/$': typeof AuthSignUpSplatRoute
   '/_public/help/$slug': typeof PublicHelpSlugRoute
   '/_public/help/guides/$slug': typeof PublicHelpGuidesSlugRoute
 }
@@ -191,6 +203,7 @@ export interface FileRouteTypes {
     | '/help/guides/$slug'
   id:
     | '__root__'
+    | '/_auth'
     | '/_dashboard'
     | '/_public'
     | '/blog'
@@ -202,22 +215,21 @@ export interface FileRouteTypes {
     | '/_public/legal'
     | '/blog/$slug'
     | '/changelog/$slug'
-    | '/sign-in/$'
-    | '/sign-up/$'
     | '/_public/'
+    | '/_auth/sign-in/$'
+    | '/_auth/sign-up/$'
     | '/_public/help/$slug'
     | '/_public/help/guides/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
+  AuthRoute: typeof AuthRouteWithChildren
   DashboardRoute: typeof DashboardRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
   ChangelogRoute: typeof ChangelogRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
-  SignInSplatRoute: typeof SignInSplatRoute
-  SignUpSplatRoute: typeof SignUpSplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,26 +276,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_public/': {
       id: '/_public/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
-    }
-    '/sign-up/$': {
-      id: '/sign-up/$'
-      path: '/sign-up/$'
-      fullPath: '/sign-up/$'
-      preLoaderRoute: typeof SignUpSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in/$': {
-      id: '/sign-in/$'
-      path: '/sign-in/$'
-      fullPath: '/sign-in/$'
-      preLoaderRoute: typeof SignInSplatRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/changelog/$slug': {
       id: '/changelog/$slug'
@@ -327,6 +332,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicHelpSlugRouteImport
       parentRoute: typeof PublicHelpRoute
     }
+    '/_auth/sign-up/$': {
+      id: '/_auth/sign-up/$'
+      path: '/sign-up/$'
+      fullPath: '/sign-up/$'
+      preLoaderRoute: typeof AuthSignUpSplatRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/sign-in/$': {
+      id: '/_auth/sign-in/$'
+      path: '/sign-in/$'
+      fullPath: '/sign-in/$'
+      preLoaderRoute: typeof AuthSignInSplatRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_public/help/guides/$slug': {
       id: '/_public/help/guides/$slug'
       path: '/guides/$slug'
@@ -336,6 +355,18 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AuthRouteChildren {
+  AuthSignInSplatRoute: typeof AuthSignInSplatRoute
+  AuthSignUpSplatRoute: typeof AuthSignUpSplatRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthSignInSplatRoute: AuthSignInSplatRoute,
+  AuthSignUpSplatRoute: AuthSignUpSplatRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface DashboardRouteChildren {
   DashboardDashboardRoute: typeof DashboardDashboardRoute
@@ -401,14 +432,13 @@ const ChangelogRouteWithChildren = ChangelogRoute._addFileChildren(
 )
 
 const rootRouteChildren: RootRouteChildren = {
+  AuthRoute: AuthRouteWithChildren,
   DashboardRoute: DashboardRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
   ChangelogRoute: ChangelogRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
-  SignInSplatRoute: SignInSplatRoute,
-  SignUpSplatRoute: SignUpSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

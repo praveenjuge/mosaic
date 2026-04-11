@@ -2,7 +2,12 @@
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
-import { fetchClerkAuth, signInPath, signUpPath } from "@/lib/clerk-auth";
+import {
+  buildRouteAuth,
+  fetchClerkAuth,
+  signInPath,
+  signUpPath,
+} from "@/lib/clerk-auth";
 import {
   website_description,
   website_name,
@@ -11,8 +16,6 @@ import {
 import { publicEnv } from "@/lib/env";
 import { cn, getOgImageUrl } from "@/lib/utils";
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
-import { ConvexQueryClient } from "@convex-dev/react-query";
-import { QueryClient } from "@tanstack/react-query";
 import {
   HeadContent,
   Outlet,
@@ -30,8 +33,6 @@ import appCss from "../styles/app.css?url";
 
 export const Route = createRootRouteWithContext<{
   convexClient: ConvexReactClient;
-  convexQueryClient: ConvexQueryClient;
-  queryClient: QueryClient;
 }>()({
   head: () => ({
     meta: [
@@ -87,14 +88,12 @@ export const Route = createRootRouteWithContext<{
       },
     ],
   }),
-  beforeLoad: async (ctx) => {
-    const { token, userId } = await fetchClerkAuth();
+  beforeLoad: async () => {
+    const authState = await fetchClerkAuth();
 
-    if (token) {
-      ctx.context.convexQueryClient.serverHttpClient?.setAuth(token);
-    }
-
-    return { token, userId };
+    return {
+      auth: buildRouteAuth(authState),
+    };
   },
   errorComponent: (props) => (
     <RootDocument>
@@ -106,7 +105,10 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
-  const context = useRouteContext({ from: Route.id });
+  const convexClient = useRouteContext({
+    from: Route.id,
+    select: (context) => context.convexClient,
+  });
 
   return (
     <ClerkProvider
@@ -116,7 +118,7 @@ function RootComponent() {
       signInFallbackRedirectUrl="/dashboard"
       signUpFallbackRedirectUrl="/dashboard"
     >
-      <ConvexProviderWithClerk client={context.convexClient} useAuth={useAuth}>
+      <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
         <ThemeProvider
           enableSystem
           attribute="class"

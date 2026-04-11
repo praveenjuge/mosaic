@@ -1,11 +1,12 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { guides, type HelpGuide } from "@/lib/help-guides";
+import { helpGuides } from "@/generated/content";
+import type { GeneratedHelpGuide } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 
-export function GuideLink({ guide }: { guide: HelpGuide }) {
+export function GuideLink({ guide }: { guide: GeneratedHelpGuide }) {
   return (
     <Link
       to="/help/guides/$slug"
@@ -55,7 +56,7 @@ export default function Guides() {
         <CardTitle>Framework Guides</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
-        {guides.map((guide) => (
+        {helpGuides.map((guide) => (
           <GuideLink key={guide.slug} guide={guide} />
         ))}
       </CardContent>

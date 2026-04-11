@@ -24,35 +24,18 @@ function normalizeSiteUrl(siteUrl: string) {
 export const publicEnv = {
   siteUrl: normalizeSiteUrl(
     readPublicEnv(
-      ["VITE_PUBLIC_SITE_URL", "NEXT_PUBLIC_SITE_URL"],
+      ["VITE_SITE_URL"],
       runtimeEnv.DEV ? "http://localhost:3000/" : "https://mosaicimg.com/",
     ),
   ),
-  convexUrl: readPublicEnv([
-    "VITE_PUBLIC_CONVEX_URL",
-    "VITE_CONVEX_URL",
-    "NEXT_PUBLIC_CONVEX_URL",
-  ]),
-  clerkPublishableKey: readPublicEnv(
-    [
-      "VITE_PUBLIC_CLERK_PUBLISHABLE_KEY",
-      "CLERK_PUBLISHABLE_KEY",
-      "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY",
-    ],
-    "",
-  ),
+  convexUrl: readPublicEnv(["VITE_CONVEX_URL"]),
+  clerkPublishableKey: readPublicEnv(["VITE_CLERK_PUBLISHABLE_KEY"], ""),
   polarPremiumMonthlyProductId: readPublicEnv(
-    [
-      "VITE_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID",
-      "NEXT_PUBLIC_POLAR_PREMIUM_MONTHLY_PRODUCT_ID",
-    ],
+    ["VITE_POLAR_PREMIUM_MONTHLY_PRODUCT_ID"],
     "",
   ),
   polarPremiumYearlyProductId: readPublicEnv(
-    [
-      "VITE_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID",
-      "NEXT_PUBLIC_POLAR_PREMIUM_YEARLY_PRODUCT_ID",
-    ],
+    ["VITE_POLAR_PREMIUM_YEARLY_PRODUCT_ID"],
     "",
   ),
 } as const;

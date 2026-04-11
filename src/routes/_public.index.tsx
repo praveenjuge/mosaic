@@ -1,7 +1,5 @@
-import HomeSignedOut from "@/components/home/homesignedout";
-import { getMarkDownData } from "@/lib/getMarkdown";
-import { getOgImageUrl } from "@/lib/utils";
 import { buildOrganizationJsonLd, buildSeoMeta } from "@/lib/seo";
+import { getOgImageUrl } from "@/lib/utils";
 import { createFileRoute } from "@tanstack/react-router";
 
 const homeDescription =
@@ -26,11 +24,4 @@ export const Route = createFileRoute("/_public/")({
       ],
     };
   },
-  component: HomePage,
 });
-
-function HomePage() {
-  const changelogEntries = getMarkDownData("src/content/changelog/");
-
-  return <HomeSignedOut changelogEntries={changelogEntries} />;
-}

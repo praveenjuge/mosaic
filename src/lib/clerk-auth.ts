@@ -5,14 +5,34 @@ export const dashboardPath = "/dashboard";
 export const signInPath = "/sign-in";
 export const signUpPath = "/sign-up";
 
+export type ClerkAuthState = {
+  token: string | null;
+  userId: string | null;
+};
+
+export type RouteAuth = ClerkAuthState & {
+  isAuthenticated: boolean;
+};
+
 export const fetchClerkAuth = createServerFn({ method: "GET" }).handler(
-  async () => {
+  async (): Promise<ClerkAuthState> => {
     const { getToken, userId } = await auth();
     const token = await getToken();
 
     return { token, userId };
   },
 );
+
+export function buildRouteAuth({
+  token,
+  userId,
+}: ClerkAuthState): RouteAuth {
+  return {
+    token,
+    userId,
+    isAuthenticated: userId !== null,
+  };
+}
 
 export function sanitizeRedirectPath(redirectUrl?: string) {
   if (!redirectUrl || !redirectUrl.startsWith("/") || redirectUrl.startsWith("//")) {

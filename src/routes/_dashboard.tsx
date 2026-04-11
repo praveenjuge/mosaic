@@ -1,7 +1,16 @@
 import Header from "@/components/header/header";
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import { buildSignInHref } from "@/lib/clerk-auth";
+import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_dashboard")({
+  beforeLoad: ({ context, location }) => {
+    if (!context.auth.userId) {
+      throw redirect({
+        href: buildSignInHref(location.href),
+        statusCode: 302,
+      });
+    }
+  },
   component: DashboardLayout,
 });
 

@@ -7,7 +7,6 @@ import {
   SignUpButton,
 } from "@clerk/tanstack-react-start";
 import { MoveRight } from "lucide-react";
-import { Suspense } from "react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";
@@ -24,7 +23,6 @@ interface HomeSignedOutProps {
   changelogEntries: ChangelogEntry[];
 }
 
-// Loading component for auth button
 function AuthButtonSkeleton() {
   return (
     <Button size="lg" disabled>
@@ -34,7 +32,6 @@ function AuthButtonSkeleton() {
   );
 }
 
-// Auth button component
 function AuthButton() {
   return (
     <>
@@ -56,7 +53,6 @@ function AuthButton() {
   );
 }
 
-// Hero section component
 function HeroSection() {
   return (
     <section className="mx-auto w-full max-w-2xl flex flex-col items-center gap-4 text-center">
@@ -70,53 +66,23 @@ function HeroSection() {
           clicks with automated, high-converting social previews.
         </p>
       </div>
-      <Suspense fallback={<AuthButtonSkeleton />}>
-        <AuthButton />
-      </Suspense>
+      <AuthButton />
     </section>
   );
 }
 
-// Features section component
 function FeaturesSection() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
-      }
-    >
-      <FeaturesBenefits />
-    </Suspense>
-  );
+  return <FeaturesBenefits />;
 }
 
-// Pricing section component
 function PricingSection() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
-      }
-    >
-      <LandingPricing />
-    </Suspense>
-  );
+  return <LandingPricing />;
 }
 
-// CTA section component
 function CTASection() {
-  return (
-    <Suspense
-      fallback={
-        <div className="bg-muted h-32 w-full animate-pulse rounded-lg" />
-      }
-    >
-      <CTA />
-    </Suspense>
-  );
+  return <CTA />;
 }
 
-// FAQ section component
 function FAQSection() {
   return (
     <section className="mx-auto max-w-4xl pt-10">
@@ -128,13 +94,7 @@ function FAQSection() {
           Common questions about OG Images and our service.
         </p>
       </div>
-      <Suspense
-        fallback={
-          <div className="bg-muted h-64 w-full animate-pulse rounded-lg" />
-        }
-      >
-        <FAQ showCard={false} />
-      </Suspense>
+      <FAQ showCard={false} />
     </section>
   );
 }

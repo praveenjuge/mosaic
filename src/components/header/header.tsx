@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import Logo from "../logo";
 import HeaderAuth from "./header-auth";
 
@@ -8,11 +7,8 @@ const Header = () => {
       <div className="mx-auto flex h-12 w-full max-w-7xl items-center justify-between px-4">
         <Logo />
 
-        {/* Right side - Navigation and Auth */}
         <div className="flex items-center gap-4 md:gap-6">
-          <Suspense fallback={<div className="h-8 w-16" />}>
-            <HeaderAuth />
-          </Suspense>
+          <HeaderAuth />
         </div>
       </div>
     </header>

@@ -1,26 +1,13 @@
-import {
-  dashboardPath,
-  fetchClerkAuth,
-  sanitizeRedirectPath,
-  signInPath,
-  signUpPath,
-} from "@/lib/clerk-auth";
+import { sanitizeRedirectPath, signInPath, signUpPath } from "@/lib/clerk-auth";
 import { pageTitle } from "@/lib/seo";
 import { SignIn } from "@clerk/tanstack-react-start";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/sign-in/$")({
+export const Route = createFileRoute("/_auth/sign-in/$")({
   validateSearch: (search: Record<string, unknown>) => ({
     redirect_url:
       typeof search.redirect_url === "string" ? search.redirect_url : undefined,
   }),
-  beforeLoad: async () => {
-    const { userId } = await fetchClerkAuth();
-
-    if (userId) {
-      throw redirect({ to: dashboardPath, statusCode: 302 });
-    }
-  },
   head: () => ({
     meta: [
       { title: pageTitle("Sign In") },
