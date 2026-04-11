@@ -148,7 +148,7 @@ function RootDocument({ children }: { children: ReactNode }) {
       suppressHydrationWarning
       className={cn(
         "touch-manipulation font-sans antialiased",
-        "[font-feature-settings:'ss02','ss03','ss04','ss07','ss08','ss09']",
+        "font-features-['ss02','ss03','ss04','ss07','ss08','ss09']",
         "[text-rendering:optimizeLegibility]",
       )}
     >
