@@ -11,6 +11,7 @@ function resolveSiteHost(siteUrl: string) {
 }
 
 const prerenderBlockedPaths = [
+  "/",
   "/blog",
   "/changelog",
   "/dashboard",
@@ -38,6 +39,7 @@ export default defineConfig(({ mode }) => {
       cloudflare({ viteEnvironment: { name: "ssr" } }),
       contentCollections(),
       ...tanstackStart({
+        pages: [{ path: "/help" }, { path: "/legal" }],
         prerender: {
           autoStaticPathsDiscovery: true,
           autoSubfolderIndex: true,

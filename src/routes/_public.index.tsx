@@ -1,3 +1,5 @@
+import DashboardPage from "@/components/dashboard/dashboard-page";
+import HomeSignedOut from "@/components/home/homesignedout";
 import { getChangelogEntries } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/utils";
@@ -22,4 +24,16 @@ export const Route = createFileRoute("/_public/")({
       ...seo,
     };
   },
+  component: HomePage,
 });
+
+function HomePage() {
+  const { changelogEntries } = Route.useLoaderData();
+  const { auth } = Route.useRouteContext();
+
+  if (auth.isAuthenticated) {
+    return <DashboardPage />;
+  }
+
+  return <HomeSignedOut changelogEntries={changelogEntries} />;
+}

@@ -63,7 +63,7 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
-} as any).lazy(() => import('./routes/_public.index.lazy').then((d) => d.Route))
+} as any)
 const ChangelogSlugRoute = ChangelogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
