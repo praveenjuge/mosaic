@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getGuideLinks } from "@/lib/content";
+import { publicEnv } from "@/lib/env";
+import { buildSiteOgImageUrl } from "@/lib/platform";
 import { Code, ExternalLink, Ghost } from "lucide-react";
 
 const guideLinks = getGuideLinks();
@@ -18,9 +20,10 @@ const guideLinks = getGuideLinks();
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${websiteUrl}`;
   const getMetaTag = (isHomePage: boolean) =>
-    `<meta property="og:image" content="https://mosaicimg.com/use?url=${
-      isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`
-    }" />`;
+    `<meta property="og:image" content="${buildSiteOgImageUrl(
+      publicEnv.siteUrl,
+      isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`,
+    )}" />`;
 
   const renderCodeBlock = (content: string) => (
     <div className="bg-muted relative w-full rounded p-2 pr-4 font-mono text-xs font-medium whitespace-pre-wrap">

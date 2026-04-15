@@ -1,3 +1,5 @@
+import { normalizeBaseUrl } from "./platform";
+
 type PublicEnvValue = string | boolean | undefined;
 
 const runtimeEnv: Record<string, PublicEnvValue> = {
@@ -21,10 +23,6 @@ function readPublicEnv(keys: string[], fallback?: string) {
   }
 
   throw new Error(`Missing public environment variable. Checked: ${keys.join(", ")}`);
-}
-
-function normalizeBaseUrl(url: string) {
-  return url.endsWith("/") ? url : `${url}/`;
 }
 
 function deriveConvexSiteUrl(convexUrl: string) {

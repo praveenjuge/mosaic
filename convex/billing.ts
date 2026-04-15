@@ -2,22 +2,19 @@ import { Polar } from "@convex-dev/polar";
 import { components } from "./_generated/api";
 import { query, internalQuery, action } from "./_generated/server";
 import { v } from "convex/values";
-import { PLAN_LIMITS } from "../src/lib/constants";
+import {
+  buildSubscriptionInfo,
+  checkoutPlanValidator,
+  getCheckoutProductId,
+  type SubscriptionInfo,
+} from "./billing.config";
+import {
+  createPolarSdkClient,
+  findCustomerByEmail,
+  getUserInfoFromIdentity,
+} from "./billing.customers";
 
-// Helper function to get user info from Clerk identity
-async function getUserInfoFromIdentity(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ctx: any
-): Promise<{ userId: string; email: string }> {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throw new Error("Not authenticated");
-  }
-  return {
-    userId: identity.subject,
-    email: identity.email ?? "",
-  };
-}
+export type { SubscriptionInfo } from "./billing.config";
 
 // Query to get current user info - called by Polar component
 export const getCurrentUser = query({
@@ -45,72 +42,20 @@ export const {
   listAllProducts,
 } = polar.api();
 
-// Type for subscription info
-export type SubscriptionInfo = {
-  plan: "free" | "pro" | "pro-yearly";
-  is_active: boolean;
-  plan_properties: {
-    images_limit: number;
-  };
-};
-
-type CheckoutPlan = "pro" | "pro-yearly";
-
-const checkoutPlanValidator = v.union(v.literal("pro"), v.literal("pro-yearly"));
-
-const checkoutProductEnvByPlan = {
-  pro: "POLAR_PREMIUM_MONTHLY_PRODUCT_ID",
-  "pro-yearly": "POLAR_PREMIUM_YEARLY_PRODUCT_ID",
-} as const satisfies Record<CheckoutPlan, string>;
-
-function getCheckoutProductId(plan: CheckoutPlan) {
-  const envKey = checkoutProductEnvByPlan[plan];
-  const productId = process.env[envKey];
-
-  if (!productId) {
-    throw new Error(`Missing ${envKey} for ${plan} checkout`);
-  }
-
-  return productId;
-}
-
 // Query to get subscription with plan details
 export const getCurrentSubscription = query({
   args: {},
   handler: async (ctx): Promise<SubscriptionInfo> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) {
-      return {
-        plan: "free",
-        is_active: false,
-        plan_properties: {
-          images_limit: PLAN_LIMITS.FREE.IMAGES
-        },
-      };
+      return buildSubscriptionInfo(null);
     }
 
     const subscription = await polar.getCurrentSubscription(ctx, {
       userId: identity.subject, // Clerk subject as userId
     });
 
-    if (!subscription) {
-      return {
-        plan: "free",
-        is_active: false,
-        plan_properties: {
-          images_limit: PLAN_LIMITS.FREE.IMAGES
-        },
-      };
-    }
-
-    const isYearly = subscription.productKey === "premiumYearly";
-    return {
-      plan: isYearly ? "pro-yearly" : "pro",
-      is_active: subscription.status === "active",
-      plan_properties: {
-        images_limit: isYearly ? PLAN_LIMITS.PRO_YEARLY.IMAGES : PLAN_LIMITS.PRO.IMAGES,
-      },
-    };
+    return buildSubscriptionInfo(subscription);
   },
 });
 
@@ -125,24 +70,7 @@ export const getSubscriptionByUserId = internalQuery({
       userId: args.userId,
     });
 
-    if (!subscription) {
-      return {
-        plan: "free",
-        is_active: false,
-        plan_properties: {
-          images_limit: PLAN_LIMITS.FREE.IMAGES
-        },
-      };
-    }
-
-    const isYearly = subscription.productKey === "premiumYearly";
-    return {
-      plan: isYearly ? "pro-yearly" : "pro",
-      is_active: subscription.status === "active",
-      plan_properties: {
-        images_limit: isYearly ? PLAN_LIMITS.PRO_YEARLY.IMAGES : PLAN_LIMITS.PRO.IMAGES,
-      },
-    };
+    return buildSubscriptionInfo(subscription);
   },
 });
 
@@ -185,41 +113,6 @@ export const linkExistingCustomer = action({
   },
 });
 
-// Helper function to find existing customer by email in Polar
-async function findCustomerByEmail(email: string): Promise<string | null> {
-  const { Polar } = await import("@polar-sh/sdk");
-
-  const polar = new Polar({
-    accessToken: process.env.POLAR_ACCESS_TOKEN ?? "",
-    server: (process.env.POLAR_SERVER ?? "sandbox") as "sandbox" | "production",
-  });
-
-  // Search through customers using async iterator
-  try {
-    const iterator = await polar.customers.list({ limit: 100 });
-    let count = 0;
-    const maxPages = 20;
-
-    for await (const page of iterator) {
-      // @ts-expect-error - Polar SDK typing is incomplete for async iterator
-      const items = page.items || page || [];
-      if (Array.isArray(items)) {
-        const customer = items.find((c: { email?: string }) => c.email?.toLowerCase() === email.toLowerCase());
-        if (customer) {
-          return customer.id;
-        }
-      }
-
-      count++;
-      if (count >= maxPages) break;
-    }
-  } catch (e) {
-    console.error("[findCustomerByEmail] Error:", e);
-  }
-
-  return null;
-}
-
 // Custom checkout link generator that handles existing Polar customers
 // If a customer with this email already exists in Polar, we'll link it automatically
 export const createCheckoutLink = action({
@@ -239,11 +132,7 @@ export const createCheckoutLink = action({
     );
 
     // Initialize Polar SDK
-    const { Polar } = await import("@polar-sh/sdk");
-    const polar = new Polar({
-      accessToken: process.env.POLAR_ACCESS_TOKEN ?? "",
-      server: (process.env.POLAR_SERVER ?? "sandbox") as "sandbox" | "production",
-    });
+    const polar = await createPolarSdkClient();
 
     // Create or get customer
     const createOrGetCustomer = async (): Promise<string> => {

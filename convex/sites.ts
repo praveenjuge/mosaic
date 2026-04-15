@@ -1,7 +1,7 @@
 import { action, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
-import { normalizeUrlBase } from "./utils/url";
+import { normalizeUrlBase } from "../src/lib/url";
 const generateR2Prefix = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 

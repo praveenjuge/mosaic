@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { extractUrlParts } from "@/convex/utils/url";
+import { extractUrlParts } from "@/lib/url";
+import { buildSiteOgImageUrl } from "./platform";
 import { publicEnv } from "./env";
 
 export function cn(...inputs: ClassValue[]) {
@@ -51,7 +52,7 @@ export function getOgImageUrl(slug: string) {
   const normalizedSlug = slug.replace(/^\//, "");
   const targetUrl = new URL(normalizedSlug, publicEnv.siteUrl).toString();
 
-  return `${publicEnv.siteUrl}use?url=${encodeURIComponent(targetUrl)}`;
+  return buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
 }
 
 /**

@@ -1,13 +1,16 @@
-import { sanitizeRedirectPath, signInPath, signUpPath } from "@/lib/clerk-auth";
+import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import {
+  sanitizeRedirectPath,
+  signInPath,
+  signUpPath,
+  validateRedirectSearch,
+} from "@/lib/clerk-auth";
 import { pageTitle } from "@/lib/seo";
 import { SignIn } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/sign-in/$")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect_url:
-      typeof search.redirect_url === "string" ? search.redirect_url : undefined,
-  }),
+  validateSearch: validateRedirectSearch,
   head: () => ({
     meta: [
       { title: pageTitle("Sign In") },
@@ -22,7 +25,7 @@ function SignInPage() {
   const redirectUrl = sanitizeRedirectPath(redirect_url);
 
   return (
-    <main className="mx-auto flex min-h-[calc(100vh-6rem)] w-full max-w-md items-center px-4 py-10">
+    <AuthPageShell>
       <SignIn
         path={signInPath}
         routing="path"
@@ -30,6 +33,6 @@ function SignInPage() {
         fallbackRedirectUrl={redirectUrl}
         forceRedirectUrl={redirectUrl}
       />
-    </main>
+    </AuthPageShell>
   );
 }

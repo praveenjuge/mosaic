@@ -1,5 +1,6 @@
 import Guides from "@/components/help/guides";
 import type { HelpCategory } from "@/lib/content";
+import { buildSeoMeta } from "@/lib/seo";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -8,23 +9,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import {
-  Link,
-  Outlet,
-  createLazyFileRoute,
-  useRouterState,
-} from "@tanstack/react-router";
+import { cn, getOgImageUrl } from "@/lib/utils";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail } from "lucide-react";
+import { Route as HelpRoute } from "./_public.help";
 
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";
 
-function normalizePathname(pathname: string) {
-  return pathname.replace(/\/+$/, "") || "/";
-}
-
-export const Route = createLazyFileRoute("/_public/help")({
+export const Route = createFileRoute("/_public/help/")({
+  head: () =>
+    buildSeoMeta({
+      title: "Help & Support",
+      description: helpDescription,
+      image: getOgImageUrl("help"),
+      path: "/help",
+    }),
   component: HelpPage,
 });
 
@@ -101,14 +101,7 @@ function ContactSection() {
 }
 
 function HelpPage() {
-  const { guides, helpCategories } = Route.useLoaderData();
-  const pathname = useRouterState({
-    select: (state) => state.location.pathname,
-  });
-
-  if (normalizePathname(pathname) !== "/help") {
-    return <Outlet />;
-  }
+  const { guides, helpCategories } = HelpRoute.useLoaderData();
 
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">

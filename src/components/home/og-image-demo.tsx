@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { api } from "@/convex/_generated/api";
 import { useAction } from "convex/react";
 import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 interface DemoData {
   normalizedUrl: string;
@@ -107,7 +107,7 @@ export default function OGImageDemo() {
   const [mosaicImageUrl, setMosaicImageUrl] = useState(fallbackMosaicImage);
   const fetchDemoData = useAction(api.metadata.fetchDemoData);
 
-  const fetchOGData = useCallback(async () => {
+  const fetchOGData = async () => {
     if (!inputUrl) {
       setError("Please enter a URL");
       return;
@@ -140,7 +140,7 @@ export default function OGImageDemo() {
       setIsLoading(false);
       setIsScreenshotLoading(false);
     }
-  }, [fetchDemoData, inputUrl]);
+  };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

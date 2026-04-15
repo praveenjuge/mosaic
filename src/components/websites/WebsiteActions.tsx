@@ -24,15 +24,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { useRouter } from "@tanstack/react-router";
-import { useAction, useMutation } from "convex/react";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
-import { FormEvent, useState } from "react";
-import { toast } from "sonner";
+import { useState } from "react";
+import { useWebsiteActions } from "./use-website-actions";
+import { WebsiteUrlForm } from "./website-url-form";
 
 interface WebsiteActionsProps {
   websiteId: Id<"sites">;
@@ -44,35 +40,17 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
-  const editSite = useMutation(api.sites.editSite);
-  const deleteSite = useAction(api.sites.deleteSite);
+  const { removeWebsite, saveWebsite } = useWebsiteActions();
 
-  const handleEditSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const url = formData.get("website")?.toString() || "";
-
-    if (!url) {
-      toast.error("Please enter a valid website URL.");
-      return;
-    }
-
+  const handleEditSubmit = async (url: string) => {
     setIsSaving(true);
+
     try {
-      const result = await editSite({
-        siteId: websiteId,
-        url_base: url,
-      });
-      if (result.status === "error") {
-        toast.error(result.message);
-      } else {
-        toast.success(result.message);
+      const didSave = await saveWebsite({ siteId: websiteId, url });
+
+      if (didSave) {
         setEditOpen(false);
       }
-    } catch (error) {
-      console.error("Error editing website:", error);
-      toast.error("Failed to update website. Please try again.");
     } finally {
       setIsSaving(false);
     }
@@ -80,18 +58,13 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
 
   const handleDeleteAction = async () => {
     setIsDeleting(true);
+
     try {
-      const result = await deleteSite({ siteId: websiteId });
-      if (result.status === "error") {
-        toast.error(result.message);
-      } else {
-        toast.success(result.message);
+      const didDelete = await removeWebsite(websiteId);
+
+      if (didDelete) {
         setDeleteOpen(false);
-        void router.invalidate();
       }
-    } catch (error) {
-      console.error("Delete error:", error);
-      toast.error("Failed to delete website. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -130,23 +103,12 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
               Enter the new URL for the website.
             </DialogDescription>
           </DialogHeader>
-          <form className="grid gap-4" onSubmit={handleEditSubmit}>
-            <div className="grid gap-2">
-              <Label htmlFor="website">Website</Label>
-              <Input
-                id="website"
-                name="website"
-                type="text"
-                placeholder="example.com or https://example.com"
-                defaultValue={currentUrl}
-                required
-                disabled={isSaving}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isSaving}>
-              {isSaving ? <LoadingSpinner size={18} /> : "Save"}
-            </Button>
-          </form>
+          <WebsiteUrlForm
+            defaultValue={currentUrl}
+            isSubmitting={isSaving}
+            onSubmit={handleEditSubmit}
+            submitLabel="Save"
+          />
         </DialogContent>
       </Dialog>
 

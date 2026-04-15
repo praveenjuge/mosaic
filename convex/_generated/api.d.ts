@@ -16,7 +16,6 @@ import type * as ogImages from "../ogImages.js";
 import type * as r2 from "../r2.js";
 import type * as sites from "../sites.js";
 import type * as stats from "../stats.js";
-import type * as utils_url from "../utils/url.js";
 
 import type {
   ApiFromModules,
@@ -33,7 +32,6 @@ declare const fullApi: ApiFromModules<{
   r2: typeof r2;
   sites: typeof sites;
   stats: typeof stats;
-  "utils/url": typeof utils_url;
 }>;
 
 /**

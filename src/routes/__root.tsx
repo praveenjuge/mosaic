@@ -4,8 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
   authenticatedHomePath,
-  buildRouteAuth,
-  fetchClerkAuth,
+  fetchRouteAuth,
   signInPath,
   signUpPath,
 } from "@/lib/clerk-auth";
@@ -91,10 +90,8 @@ export const Route = createRootRouteWithContext<{
     ],
   }),
   beforeLoad: async () => {
-    const authState = await fetchClerkAuth();
-
     return {
-      auth: buildRouteAuth(authState),
+      auth: await fetchRouteAuth(),
     };
   },
   errorComponent: (props) => (

@@ -1,7 +1,11 @@
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 import { api } from "./_generated/api";
-import { extractUrlParts } from "./utils/url";
+import {
+  ensureWebsiteProtocol,
+  extractUrlParts,
+  parseWebsiteUrl,
+} from "../src/lib/url";
 
 const normalizeText = (value: string) =>
   value.replace(/\s+/g, " ").trim();
@@ -27,18 +31,6 @@ const extractMeta = (
 const extractTitleTag = (html: string) => {
   const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
   return match?.[1] ? normalizeText(match[1]) : null;
-};
-
-const normalizeUrl = (url: string): string => {
-  if (!url) return url;
-
-  url = url.trim();
-
-  if (url.startsWith("http://") || url.startsWith("https://")) {
-    return url;
-  }
-
-  return `https://${url}`;
 };
 
 const getUserMessageForStatus = (status: number): string => {
@@ -106,27 +98,12 @@ const extractMetadata = (html: string, baseUrl: URL) => {
   return { title, description, image };
 };
 
-const validateAndParseUrl = (url: string): URL => {
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(url);
-  } catch {
-    throw new Error("Please enter a valid URL.");
-  }
-
-  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
-    throw new Error("Only HTTP and HTTPS URLs are supported.");
-  }
-
-  return parsedUrl;
-};
-
 export const fetchMetadata = action({
   args: {
     url: v.string(),
   },
   handler: async (_ctx, args) => {
-    const parsedUrl = validateAndParseUrl(args.url);
+    const parsedUrl = parseWebsiteUrl(args.url);
     const html = await fetchPageHtml(parsedUrl);
     return extractMetadata(html, parsedUrl);
   },
@@ -144,8 +121,8 @@ export const fetchDemoData = action({
     imageUrl: string | null;
     error?: string;
   }> => {
-    const normalizedUrl = normalizeUrl(args.url);
-    const parsedUrl = validateAndParseUrl(normalizedUrl);
+    const normalizedUrl = ensureWebsiteProtocol(args.url);
+    const parsedUrl = parseWebsiteUrl(normalizedUrl);
     const html = await fetchPageHtml(parsedUrl);
     const metadata = extractMetadata(html, parsedUrl);
     const { sanitizedUrl } = extractUrlParts(normalizedUrl);

@@ -4,6 +4,8 @@ import { v } from "convex/values";
 import { PLAN_LIMITS } from "../src/lib/constants";
 import type { SubscriptionInfo } from "./billing";
 import type { Id } from "./_generated/dataModel";
+import { buildPublicImageUrl, buildSiteOgImageUrl } from "../src/lib/platform";
+import { cleanDisplayUrl } from "../src/lib/url";
 
 type QuotaStatus = {
   canGenerateMore: boolean;
@@ -125,17 +127,6 @@ function formatLimit(limit: number): string {
   return limit >= 999999 ? "∞" : formatNumber(limit);
 }
 
-function cleanPageUrl(url: string): string {
-  return url.replace(/\/+$/, "").replace(/^https?:\/\//, "");
-}
-
-const PUBLIC_R2_BASE_URL = "https://og.mosaicimg.com/";
-const API_BASE_URL = "https://mosaicimg.com/";
-
-function getPublicImageUrl(key: string): string {
-  return `${PUBLIC_R2_BASE_URL}${key}`;
-}
-
 function getEmptyDashboardStats(): DashboardStats {
   return {
     total_websites: 0,
@@ -189,7 +180,7 @@ export const getUserDashboardStats = query({
           _id: site._id,
           url_base: site.url_base,
           full_url: fullUrl,
-          og_image_usage_url: `${API_BASE_URL}use?url=${fullUrl}`,
+          og_image_usage_url: buildSiteOgImageUrl("https://mosaicimg.com/", fullUrl),
           favicon_url: `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`,
           _creationTime: site._creationTime,
         };
@@ -210,12 +201,12 @@ export const getUserDashboardStats = query({
           const pageUrl = image.page_url.replace(/\/+$/, "");
           return {
             id: image.key,
-            screenshot_url: getPublicImageUrl(image.key),
+            screenshot_url: buildPublicImageUrl(image.key),
             size_in_bytes: image.size_in_bytes,
             generated_at: image.generated_at,
             formatted_date: formatDate(image.generated_at),
             page_url: pageUrl,
-            display_url: cleanPageUrl(pageUrl),
+            display_url: cleanDisplayUrl(pageUrl),
             website_name: site.url_base ?? null,
           };
         }),

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Check, Copy } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 interface CopyButtonProps {
   text: string;
@@ -11,12 +11,12 @@ interface CopyButtonProps {
 export function CopyButton({ text }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
-  const copyToClipboard = useCallback(() => {
+  const copyToClipboard = () => {
     navigator.clipboard.writeText(text).then(() => {
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     });
-  }, [text]);
+  };
 
   return (
     <Button

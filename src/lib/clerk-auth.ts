@@ -5,31 +5,21 @@ export const authenticatedHomePath = "/";
 export const signInPath = "/sign-in";
 export const signUpPath = "/sign-up";
 
-export type ClerkAuthState = {
-  token: string | null;
+export type RouteAuth = {
   userId: string | null;
-};
-
-export type RouteAuth = ClerkAuthState & {
   isAuthenticated: boolean;
 };
 
-export const fetchClerkAuth = createServerFn({ method: "GET" }).handler(
-  async (): Promise<ClerkAuthState> => {
-    const { getToken, userId } = await auth();
-    const token = await getToken();
+export const fetchRouteAuth = createServerFn({ method: "GET" }).handler(
+  async (): Promise<RouteAuth> => {
+    const { userId } = await auth();
 
-    return { token, userId };
-  },
-);
-
-export function buildRouteAuth({ token, userId }: ClerkAuthState): RouteAuth {
   return {
-    token,
     userId,
     isAuthenticated: userId !== null,
   };
-}
+  },
+);
 
 export function sanitizeRedirectPath(redirectUrl?: string) {
   if (
@@ -42,15 +32,17 @@ export function sanitizeRedirectPath(redirectUrl?: string) {
 
   try {
     const parsed = new URL(redirectUrl, "https://mosaic.local");
-
-    if (parsed.pathname === "/dashboard") {
-      return authenticatedHomePath;
-    }
-
     return `${parsed.pathname}${parsed.search}${parsed.hash}`;
   } catch {
     return authenticatedHomePath;
   }
+}
+
+export function validateRedirectSearch(search: Record<string, unknown>) {
+  return {
+    redirect_url:
+      typeof search.redirect_url === "string" ? search.redirect_url : undefined,
+  };
 }
 
 export function buildSignInHref(redirectUrl?: string) {

@@ -5,17 +5,14 @@ import { v } from "convex/values";
 import { api } from "./_generated/api";
 import type { Id } from "./_generated/dataModel";
 import crypto from "crypto";
-import { extractUrlParts } from "./utils/url";
-
-const PUBLIC_R2_BASE_URL = "https://og.mosaicimg.com/";
+import { extractUrlParts, parseWebsiteUrl } from "../src/lib/url";
+import { buildPublicImageUrl } from "../src/lib/platform";
 
 type SiteCandidate = {
   siteId: Id<"sites">;
   url_base: string;
   r2Prefix: string;
 };
-
-const getDirectR2Url = (path: string): string => `${PUBLIC_R2_BASE_URL}${path}`;
 
 const getR2Key = (
   cacheKey: string,
@@ -34,13 +31,13 @@ const getR2Key = (
 const generateCacheKey = (url: string): string =>
   crypto.createHash("sha256").update(url).digest("hex");
 
-function validateUrl(url: string, nodeEnv: string): { isValid: boolean; validatedUrl?: URL; error?: string } {
+function validateUrl(url: string, nodeEnv: string): {
+  isValid: boolean;
+  validatedUrl?: URL;
+  error?: string;
+} {
   try {
-    const validatedUrl = new URL(url);
-
-    if (!["http:", "https:"].includes(validatedUrl.protocol)) {
-      return { isValid: false, error: "Only HTTP and HTTPS URLs are supported" };
-    }
+    const validatedUrl = parseWebsiteUrl(url);
 
     const hostname = validatedUrl.hostname.toLowerCase();
     const isLocalhost = ["localhost", "127.0.0.1", "0.0.0.0"].some(domain =>
@@ -117,7 +114,7 @@ export const generateOgImage = action({
         const exists = await ctx.runQuery(api.r2.objectExists, { key: imageKey });
 
         if (exists) {
-          cachedImageUrl = getDirectR2Url(imageKey);
+          cachedImageUrl = buildPublicImageUrl(imageKey);
           return { imageUrl: cachedImageUrl, cached: true, redirect: false };
         }
       } else {
@@ -137,7 +134,7 @@ export const generateOgImage = action({
           const exists = await ctx.runQuery(api.r2.objectExists, { key: siteImageKey });
 
           if (exists) {
-            cachedImageUrl = getDirectR2Url(siteImageKey);
+            cachedImageUrl = buildPublicImageUrl(siteImageKey);
             return { imageUrl: cachedImageUrl, cached: true, redirect: true };
           }
         }
@@ -173,12 +170,12 @@ export const generateOgImage = action({
           dataBase64: Buffer.from(imageBuffer).toString("base64"),
         });
 
-        const directUrl = getDirectR2Url(finalImageKey);
+        const directUrl = buildPublicImageUrl(finalImageKey);
         uploadResult = { url: directUrl, key: finalImageKey, isNew: true };
       } catch (error) {
         const message = error instanceof Error ? error.message : "";
         if (message.includes("Metadata already exists for key")) {
-          const directUrl = getDirectR2Url(finalImageKey);
+          const directUrl = buildPublicImageUrl(finalImageKey);
           uploadResult = { url: directUrl, key: finalImageKey, isNew: false };
         }
       }
