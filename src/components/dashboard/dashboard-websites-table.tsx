@@ -47,9 +47,14 @@ function WebsiteRow({
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-1">
-          <span className="max-w-lg items-center truncate font-medium">
-            {website.og_image_usage_url}
-          </span>
+          <a
+            href={website.og_image_usage_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="max-w-lg truncate font-medium"
+          >
+            {decodeURIComponent(website.og_image_usage_url)}
+          </a>
           <CopyButton text={website.og_image_usage_url} />
         </div>
       </TableCell>

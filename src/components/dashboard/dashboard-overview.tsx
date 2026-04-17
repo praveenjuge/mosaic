@@ -147,9 +147,6 @@ export function DashboardOverview({
       ) : null}
 
       <div className="flex flex-col gap-1.5">
-        <CardHeader className="p-0">
-          <CardTitle>Overview</CardTitle>
-        </CardHeader>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="px-4">
@@ -174,7 +171,9 @@ export function DashboardOverview({
                   <UpgradeButton
                     type={dashboardStats.plan}
                     plan={
-                      dashboardStats.plan === "pro-yearly" ? "pro-yearly" : "pro"
+                      dashboardStats.plan === "pro-yearly"
+                        ? "pro-yearly"
+                        : "pro"
                     }
                     dashboardStats={dashboardStats}
                     createCheckout={createCheckout}

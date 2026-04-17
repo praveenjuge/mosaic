@@ -4,12 +4,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import type { DashboardStats } from "@/convex/stats";
 
 function ScreenshotsEmpty() {
@@ -53,7 +48,7 @@ export function DashboardLatestImages({
                       <img
                         src={item.screenshot_url}
                         alt={item.page_url || "Screenshot"}
-                        className="h-6 w-12 shrink-0 rounded border-[0.5px] bg-cover bg-center object-cover"
+                        className="h-6 w-12 shrink-0 rounded border bg-cover bg-center object-cover"
                         width={56}
                         height={24}
                       />

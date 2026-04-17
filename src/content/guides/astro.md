@@ -3,8 +3,8 @@ title: "Astro"
 slug: "astro"
 description: "Get started with integrating Mosaic into your Astro project."
 order: 40
-svgLight: "astro"
-svgDark: "astro_dark"
+svgLight: "astro-icon-light"
+svgDark: "astro-icon-dark"
 ---
 
 ## Define variables in frontmatter and use them in `<head>`

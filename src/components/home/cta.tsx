@@ -10,7 +10,7 @@ import { Button } from "../ui/button";
 export default function CTA() {
   return (
     <section className="py-10">
-      <div className="bg-background relative mx-auto flex max-w-5xl flex-col items-center justify-center overflow-hidden rounded-lg border-[0.5px] py-16 text-center md:px-6">
+      <div className="bg-background relative mx-auto flex max-w-4xl flex-col items-center justify-center overflow-hidden rounded-lg border py-16 text-center md:px-6">
         <div className="relative mx-auto flex max-w-xs flex-col items-center justify-center gap-6">
           <div className="space-y-2">
             <h2 className="text-xl font-semibold tracking-tight md:text-2xl">

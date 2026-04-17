@@ -30,8 +30,8 @@ export default function Footer() {
   const hydrated = useHydrated();
 
   return (
-    <footer className="bg-background mt-auto border-t-[0.5px]">
-      <div className="mx-auto max-w-7xl px-4 pt-14 pb-8">
+    <footer className="bg-background mt-auto border-t">
+      <div className="mx-auto max-w-6xl px-4 pt-14 pb-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           <div className="gap-4 space-y-4 xl:col-span-1">
             <Logo />

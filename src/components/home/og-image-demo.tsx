@@ -176,7 +176,7 @@ export default function OGImageDemo() {
         </p>
       )}
       <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
-        <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+        <div className="divide-y- border- flex w-full flex-col overflow-hidden rounded-lg">
           <ImageContainer
             isLoading={isLoading}
             src={demoData?.image || fallbackOriginalImage}
@@ -196,7 +196,7 @@ export default function OGImageDemo() {
           <ArrowRight className="hidden size-7 md:block" />
           <ArrowDown className="size-7 md:hidden" />
         </span>
-        <div className="flex w-full flex-col divide-y-[0.5px] overflow-hidden rounded-lg border-[0.5px]">
+        <div className="divide-y- border- flex w-full flex-col overflow-hidden rounded-lg">
           <ImageContainer
             isLoading={isLoading}
             src={mosaicImageUrl}
