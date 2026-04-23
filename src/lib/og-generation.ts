@@ -6,7 +6,6 @@
 
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../convex/_generated/api";
-import puppeteer from "@cloudflare/puppeteer";
 import { env } from "cloudflare:workers";
 import { extractUrlParts } from "@/lib/url";
 
@@ -152,29 +151,50 @@ export { api };
 // ── Screenshot Helper ───────────────────────────────────────────────
 
 /**
- * Launch a headless browser via the Cloudflare Browser Rendering binding,
- * navigate to the given URL, and return a PNG screenshot as an ArrayBuffer.
+ * Cloudflare Browser Rendering REST API endpoint for screenshots.
  */
-async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  const browser = await puppeteer.launch(env.BROWSER);
-  try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1560, height: 819 });
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
-    await page.addStyleTag({ content: "* { overflow: hidden; }" });
-    const screenshot = await page.screenshot({ type: "png" });
-    // Puppeteer may return a Buffer or Uint8Array; normalize to ArrayBuffer
-    if (screenshot instanceof ArrayBuffer) {
-      return screenshot;
-    }
-    const bytes = new Uint8Array(screenshot);
-    return bytes.buffer.slice(
-      bytes.byteOffset,
-      bytes.byteOffset + bytes.byteLength,
-    ) as ArrayBuffer;
-  } finally {
-    await browser.close();
+const BROWSER_RENDERING_URL = (accountId: string) =>
+  `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/screenshot`;
+
+/**
+ * Take a PNG screenshot of the given URL via the Cloudflare Browser Rendering
+ * REST API `/screenshot` endpoint. This replaces the previous Puppeteer-based
+ * approach and removes the need for the `@cloudflare/puppeteer` package and
+ * the Workers `browser` binding.
+ */
+export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
+  const accountId = env.CF_ACCOUNT_ID;
+  const apiToken = env.CF_BROWSER_RENDERING_TOKEN;
+
+  if (!accountId || !apiToken) {
+    throw new Error(
+      "CF_ACCOUNT_ID and CF_BROWSER_RENDERING_TOKEN must be set",
+    );
   }
+
+  const response = await fetch(BROWSER_RENDERING_URL(accountId), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url,
+      viewport: { width: 1560, height: 819 },
+      gotoOptions: { waitUntil: "networkidle0", timeout: 30000 },
+      addStyleTag: [{ content: "* { overflow: hidden; }" }],
+      screenshotOptions: { type: "png" },
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Browser Rendering API returned ${response.status}: ${text}`,
+    );
+  }
+
+  return response.arrayBuffer();
 }
 
 // ── Main Request Handler ────────────────────────────────────────────

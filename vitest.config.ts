@@ -14,10 +14,6 @@ export default defineConfig({
         __dirname,
         "src/lib/__mocks__/cloudflare-workers.ts",
       ),
-      "@cloudflare/puppeteer": path.resolve(
-        __dirname,
-        "src/lib/__mocks__/cloudflare-puppeteer.ts",
-      ),
     },
   },
   test: {

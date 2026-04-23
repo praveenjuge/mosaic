@@ -24,7 +24,6 @@
   "dependencies": {
     "@clerk/tanstack-react-start": "^1.1.2",
     "@clerk/themes": "^2.4.57",
-    "@cloudflare/puppeteer": "^1.1.0",
     "@content-collections/core": "0.15.0",
     "@convex-dev/polar": "0.9.0",
     "@convex-dev/r2": "0.10.0",

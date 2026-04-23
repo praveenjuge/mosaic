@@ -30,8 +30,5 @@
       "bucket_name": "mosaic-og-prod",
       "remote": true
     }
-  ],
-  "browser": {
-    "binding": "BROWSER"
-  }
+  ]
 }

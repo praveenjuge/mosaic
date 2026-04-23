@@ -4,7 +4,8 @@
 declare namespace Cloudflare {
 	interface Env {
 		OG_BUCKET: R2Bucket;
-		BROWSER: Fetcher;
+		CF_ACCOUNT_ID: string;
+		CF_BROWSER_RENDERING_TOKEN: string;
 		VITE_CLERK_PUBLISHABLE_KEY: string;
 		CLERK_SECRET_KEY: string;
 		CONVEX_DEPLOYMENT: string;

@@ -1,4 +1,4 @@
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 
 /**
  * Feature: cloudflare-native-use-endpoint
@@ -16,36 +16,19 @@ import { vi, describe, it, expect, beforeEach } from "vitest";
 const {
   mockHead,
   mockPut,
-  mockScreenshot,
-  mockPage,
-  mockBrowser,
-  mockLaunch,
+  mockFetch,
   mockQuery,
   mockMutation,
 } = vi.hoisted(() => {
   const mockHead = vi.fn();
   const mockPut = vi.fn();
-  const mockScreenshot = vi.fn().mockResolvedValue(new ArrayBuffer(100));
-  const mockPage = {
-    setViewport: vi.fn().mockResolvedValue(undefined),
-    goto: vi.fn().mockResolvedValue(undefined),
-    addStyleTag: vi.fn().mockResolvedValue(undefined),
-    screenshot: mockScreenshot,
-  };
-  const mockBrowser = {
-    newPage: vi.fn().mockResolvedValue(mockPage),
-    close: vi.fn().mockResolvedValue(undefined),
-  };
-  const mockLaunch = vi.fn().mockResolvedValue(mockBrowser);
+  const mockFetch = vi.fn();
   const mockQuery = vi.fn();
   const mockMutation = vi.fn();
   return {
     mockHead,
     mockPut,
-    mockScreenshot,
-    mockPage,
-    mockBrowser,
-    mockLaunch,
+    mockFetch,
     mockQuery,
     mockMutation,
   };
@@ -59,17 +42,20 @@ vi.mock("cloudflare:workers", () => ({
       head: mockHead,
       put: mockPut,
     },
-    BROWSER: {},
+    CF_ACCOUNT_ID: "test-account-id",
+    CF_BROWSER_RENDERING_TOKEN: "test-api-token",
   },
 }));
 
-// ── Mock @cloudflare/puppeteer ──────────────────────────────────────
+// ── Mock global fetch for Browser Rendering REST API ────────────────
 
-vi.mock("@cloudflare/puppeteer", () => ({
-  default: {
-    launch: mockLaunch,
-  },
-}));
+const originalFetch = globalThis.fetch;
+beforeEach(() => {
+  globalThis.fetch = mockFetch;
+});
+afterEach(() => {
+  globalThis.fetch = originalFetch;
+});
 
 // ── Mock Convex client ──────────────────────────────────────────────
 
@@ -116,12 +102,13 @@ describe("Integration: handleUseRequest full request flows", () => {
     mockPut.mockResolvedValue(undefined);
     mockQuery.mockResolvedValue({ sites: [], selectedSite: null });
     mockMutation.mockResolvedValue({ status: "success" });
-    mockScreenshot.mockResolvedValue(new ArrayBuffer(100));
-    mockLaunch.mockResolvedValue(mockBrowser);
-    mockBrowser.newPage.mockResolvedValue(mockPage);
-    mockPage.setViewport.mockResolvedValue(undefined);
-    mockPage.goto.mockResolvedValue(undefined);
-    mockPage.addStyleTag.mockResolvedValue(undefined);
+    // Default: Browser Rendering REST API returns a 100-byte PNG
+    mockFetch.mockResolvedValue(
+      new Response(new ArrayBuffer(100), {
+        status: 200,
+        headers: { "Content-Type": "image/png" },
+      }),
+    );
   });
 
   // ── 1. Cache hit flow (production) ──────────────────────────────
@@ -282,7 +269,7 @@ describe("Integration: handleUseRequest full request flows", () => {
   // ── 6. Browser failure ──────────────────────────────────────────
 
   describe("browser failure", () => {
-    it("returns 500 JSON error when puppeteer.launch throws", async () => {
+    it("returns 500 JSON error when Browser Rendering API fails", async () => {
       const selectedSite = {
         siteId: "s1",
         url_base: "example.com",
@@ -293,7 +280,9 @@ describe("Integration: handleUseRequest full request flows", () => {
         selectedSite,
       });
       mockHead.mockResolvedValue(null);
-      mockLaunch.mockRejectedValue(new Error("Browser unavailable"));
+      mockFetch.mockResolvedValue(
+        new Response("Service unavailable", { status: 500 }),
+      );
 
       const request = new Request(
         "https://worker.example.com/use?url=https://example.com",

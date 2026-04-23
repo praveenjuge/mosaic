@@ -6,8 +6,8 @@ import {
   generateCacheKey,
   getR2Key,
   buildPublicImageUrl,
+  takeScreenshot,
 } from "@/lib/og-generation";
-import puppeteer from "@cloudflare/puppeteer";
 import { env } from "cloudflare:workers";
 import { ensureWebsiteProtocol, extractUrlParts } from "@/lib/url";
 
@@ -101,29 +101,6 @@ async function fetchPageHtml(url: URL): Promise<string> {
   }
 
   return response.text();
-}
-
-// ── Screenshot Helper ───────────────────────────────────────────────
-
-async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  const browser = await puppeteer.launch(env.BROWSER);
-  try {
-    const page = await browser.newPage();
-    await page.setViewport({ width: 1560, height: 819 });
-    await page.goto(url, { waitUntil: "networkidle0", timeout: 30000 });
-    await page.addStyleTag({ content: "* { overflow: hidden; }" });
-    const screenshot = await page.screenshot({ type: "png" });
-    if (screenshot instanceof ArrayBuffer) {
-      return screenshot;
-    }
-    const bytes = new Uint8Array(screenshot);
-    return bytes.buffer.slice(
-      bytes.byteOffset,
-      bytes.byteOffset + bytes.byteLength,
-    ) as ArrayBuffer;
-  } finally {
-    await browser.close();
-  }
 }
 
 // ── Route Handler ───────────────────────────────────────────────────
