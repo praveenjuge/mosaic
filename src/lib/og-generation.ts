@@ -301,7 +301,8 @@ export async function handleUseRequest(
     let imageBuffer: ArrayBuffer;
     try {
       imageBuffer = await takeScreenshot(url);
-    } catch {
+    } catch (err) {
+      console.error("[USE] Screenshot failed:", err);
       return createJsonResponse(
         { error: "Failed to take screenshot" },
         500,
@@ -327,8 +328,8 @@ export async function handleUseRequest(
               isNew: true,
             },
           );
-        } catch {
-          /* best-effort */
+        } catch (err) {
+          console.error("[USE] Convex storeImageForSite failed:", err);
         }
 
         return createRedirectResponse(buildPublicImageUrl(imageKey));
@@ -343,8 +344,9 @@ export async function handleUseRequest(
         },
         200,
       );
-    } catch {
+    } catch (err) {
       // R2 put failure — return base64 fallback
+      console.error("[USE] R2 put failed, returning base64 fallback:", err);
       const base64 = btoa(
         String.fromCharCode(...new Uint8Array(imageBuffer)),
       );
@@ -357,8 +359,9 @@ export async function handleUseRequest(
         200,
       );
     }
-  } catch {
+  } catch (err) {
     // 9. Unexpected error
+    console.error("[USE] Unhandled error:", err);
     return createJsonResponse({ error: "Internal server error" }, 500);
   }
 }
