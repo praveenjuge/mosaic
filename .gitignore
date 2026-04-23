@@ -9,10 +9,6 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
 # production
 /build
 /dist
@@ -39,12 +35,8 @@ yarn-error.log*
 .env.backup
 .env.tmp
 
-# vercel
-.vercel
-
 # typescript
 *.tsbuildinfo
-next-env.d.ts
 .env
 bun.lock
 

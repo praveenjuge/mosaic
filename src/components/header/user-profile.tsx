@@ -1,5 +1,3 @@
-"use client";
-
 import { UserButton } from "@clerk/tanstack-react-start";
 import { dark } from "@clerk/themes";
 import { useTheme } from "next-themes";

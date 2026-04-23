@@ -1,5 +1,3 @@
-"use client";
-
 import { website_name } from "@/lib/constants";
 import { Link, useHydrated } from "@tanstack/react-router";
 import { Computer, Moon, Sun } from "lucide-react";

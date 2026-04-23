@@ -1,5 +1,3 @@
-"use client";
-
 import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@clerk/tanstack-react-start";

@@ -1,5 +1,3 @@
-"use client";
-
 import { LoadingSpinner } from "@/components/spinner";
 import {
   AlertDialog,
