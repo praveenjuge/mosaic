@@ -4,7 +4,7 @@ import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 
 function resolveSiteHost(siteUrl: string) {
   return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
@@ -22,6 +22,25 @@ const prerenderBlockedPaths = [
 
 const staticAssetPattern =
   /\.(avif|css|gif|ico|jpe?g|js|json|map|png|svg|webp|woff2?)$/i;
+
+function exitAfterCloudflarePrerender(): Plugin {
+  return {
+    name: "mosaic:exit-after-cloudflare-prerender",
+    apply: "build",
+    enforce: "post",
+    buildApp: {
+      order: "post",
+      async handler() {
+        if (process.env.TSS_PRERENDERING !== "true") return;
+
+        // Cloudflare's prerender preview can leave workerd handles open after the sitemap is written.
+        setImmediate(() => {
+          process.exit(process.exitCode ?? 0);
+        });
+      },
+    },
+  };
+}
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -72,6 +91,7 @@ export default defineConfig(({ mode }) => {
         presets: [reactCompilerPreset()],
       }),
       tailwindcss(),
+      exitAfterCloudflarePrerender(),
     ],
     resolve: {
       tsconfigPaths: true,
