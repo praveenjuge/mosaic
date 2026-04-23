@@ -2,7 +2,8 @@
   "name": "mosaic",
   "type": "module",
   "scripts": {
-    "build": "vite build && tsc --noEmit",
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
     "content:sync": "bun --eval 'import { createBuilder } from \"@content-collections/core\"; const builder = await createBuilder(\"./content-collections.ts\"); await builder.build();'",
     "dev": "bun --parallel dev:frontend dev:backend",
     "dev:backend": "convex dev",
