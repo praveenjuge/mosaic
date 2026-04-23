@@ -30,5 +30,10 @@
       "bucket_name": "mosaic-og-prod",
       "remote": true
     }
-  ]
+  ],
+  "vars": {
+    "VITE_CONVEX_URL": "https://clear-warthog-996.convex.cloud",
+    "VITE_CONVEX_SITE_URL": "https://clear-warthog-996.convex.site",
+    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ"
+  }
 }
