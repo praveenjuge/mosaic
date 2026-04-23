@@ -16,7 +16,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
+    "incremental": false,
     "types": [
       "vite/client"
     ],
@@ -36,6 +36,10 @@
     "worker-configuration.d.ts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist",
+    ".convex",
+    ".content-collections",
+    ".wrangler"
   ]
 }
