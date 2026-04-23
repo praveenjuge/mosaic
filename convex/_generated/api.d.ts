@@ -10,8 +10,6 @@
 
 import type * as billing from "../billing.js";
 import type * as http from "../http.js";
-import type * as metadata from "../metadata.js";
-import type * as ogImageGeneration from "../ogImageGeneration.js";
 import type * as ogImages from "../ogImages.js";
 import type * as r2 from "../r2.js";
 import type * as sites from "../sites.js";
@@ -26,8 +24,6 @@ import type {
 declare const fullApi: ApiFromModules<{
   billing: typeof billing;
   http: typeof http;
-  metadata: typeof metadata;
-  ogImageGeneration: typeof ogImageGeneration;
   ogImages: typeof ogImages;
   r2: typeof r2;
   sites: typeof sites;

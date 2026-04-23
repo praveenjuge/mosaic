@@ -18,6 +18,7 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as ChangelogSlugRouteImport } from './routes/changelog.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ApiDemoRouteImport } from './routes/api.demo'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
 import { Route as PublicHelpIndexRouteImport } from './routes/_public.help.index'
@@ -69,6 +70,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
+const ApiDemoRoute = ApiDemoRouteImport.update({
+  id: '/api/demo',
+  path: '/api/demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicLegalRoute = PublicLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/use': typeof UseRoute
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
+  '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
+  '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/use': typeof UseRoute
   '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
+  '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
   '/_public/': typeof PublicIndexRoute
@@ -169,6 +178,7 @@ export interface FileRouteTypes {
     | '/use'
     | '/help'
     | '/legal'
+    | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
     | '/sign-in/$'
@@ -184,6 +194,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/use'
     | '/legal'
+    | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
     | '/sign-in/$'
@@ -201,6 +212,7 @@ export interface FileRouteTypes {
     | '/use'
     | '/_public/help'
     | '/_public/legal'
+    | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
     | '/_public/'
@@ -218,6 +230,7 @@ export interface RootRouteChildren {
   ChangelogRoute: typeof ChangelogRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
+  ApiDemoRoute: typeof ApiDemoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -284,6 +297,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
+    }
+    '/api/demo': {
+      id: '/api/demo'
+      path: '/api/demo'
+      fullPath: '/api/demo'
+      preLoaderRoute: typeof ApiDemoRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_public/legal': {
       id: '/_public/legal'
@@ -409,6 +429,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChangelogRoute: ChangelogRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
+  ApiDemoRoute: ApiDemoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

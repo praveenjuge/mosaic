@@ -3,8 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { api } from "@/convex/_generated/api";
-import { useAction } from "convex/react";
 import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
 import { useState } from "react";
 
@@ -105,7 +103,6 @@ export default function OGImageDemo() {
   const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
   const [error, setError] = useState("");
   const [mosaicImageUrl, setMosaicImageUrl] = useState(fallbackMosaicImage);
-  const fetchDemoData = useAction(api.metadata.fetchDemoData);
 
   const fetchOGData = async () => {
     if (!inputUrl) {
@@ -118,7 +115,11 @@ export default function OGImageDemo() {
     setError("");
 
     try {
-      const data = await fetchDemoData({ url: inputUrl });
+      const response = await fetch(
+        `/api/demo?url=${encodeURIComponent(inputUrl)}`,
+      );
+      const data: DemoData = await response.json();
+
       setDemoData(data);
 
       if (data.error) {
