@@ -2,8 +2,7 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { extractUrlParts, normalizeUrlBase } from "../src/lib/url";
-import { PLAN_LIMITS, PLAN_TYPE_MAPPING } from "../src/lib/constants";
-import { internal } from "./_generated/api";
+import { IMAGES_LIMIT } from "../src/lib/constants";
 
 type SiteCandidate = {
   siteId: Id<"sites">;
@@ -61,31 +60,11 @@ export const getSitesForUrlBase = query({
       return count;
     };
 
+    // Select the first site whose owner hasn't exceeded the global limit
     let selectedSite: SiteCandidate | null = null;
     for (const site of siteCandidates) {
-      try {
-        const subscription = await ctx.runQuery(
-          internal.billing.getSubscriptionByUserId,
-          {
-            userId: site.userId,
-          },
-        );
-        const planType: keyof typeof PLAN_LIMITS =
-          PLAN_TYPE_MAPPING[
-          subscription.plan as keyof typeof PLAN_TYPE_MAPPING
-          ] || "FREE";
-        const limit = PLAN_LIMITS[planType].IMAGES;
-        const used = await getUserImageCount(site.userId);
-
-        if (used < limit) {
-          selectedSite = site;
-          break;
-        }
-      } catch (error) {
-        console.error(
-          "[OG_IMAGES_SITE_SELECTION] Failed to check billing, failing open:",
-          error,
-        );
+      const used = await getUserImageCount(site.userId);
+      if (used < IMAGES_LIMIT) {
         selectedSite = site;
         break;
       }

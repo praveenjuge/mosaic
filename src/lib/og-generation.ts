@@ -282,13 +282,13 @@ export async function handleUseRequest(
         }
       }
 
-      // Check billing limit
+      // Check image limit
       selectedSite = sitesResult.selectedSite;
       if (!selectedSite) {
         return createJsonResponse(
           {
             error:
-              "OG image limit exceeded for this plan. Please upgrade your subscription.",
+              "OG image limit exceeded. Please contact support.",
           },
           403,
         );

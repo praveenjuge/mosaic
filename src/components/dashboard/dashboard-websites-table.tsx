@@ -15,7 +15,7 @@ import {
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
-import type { DashboardStats } from "@/convex/stats";
+import type { DashboardStats } from "@/lib/types";
 
 function WebsiteRow({
   screenshotCount,

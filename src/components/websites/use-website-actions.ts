@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 type SaveWebsiteArgs =
   | { siteId?: undefined; url: string }
-  | { siteId: Id<"sites">; url: string };
+  | { siteId: string; url: string };
 
 export function useWebsiteActions() {
   const addSite = useMutation(api.sites.addSite);
@@ -25,7 +25,7 @@ export function useWebsiteActions() {
     try {
       const result =
         "siteId" in args && args.siteId
-          ? await editSite({ siteId: args.siteId, url_base: url })
+          ? await editSite({ siteId: args.siteId as Id<"sites">, url_base: url })
           : await addSite({ url_base: url });
 
       if (result.status === "error") {
@@ -42,9 +42,9 @@ export function useWebsiteActions() {
     }
   }
 
-  async function removeWebsite(siteId: Id<"sites">) {
+  async function removeWebsite(siteId: string) {
     try {
-      const result = await deleteSite({ siteId });
+      const result = await deleteSite({ siteId: siteId as Id<"sites"> });
 
       if (result.status === "error") {
         toast.error(result.message);

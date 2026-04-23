@@ -1,46 +1,29 @@
 import { internalQuery, query } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
-import { PLAN_LIMITS } from "../src/lib/constants";
-import type { SubscriptionInfo } from "./billing";
-import type { Id } from "./_generated/dataModel";
+import { IMAGES_LIMIT } from "../src/lib/constants";
+import { formatDate, formatLimit, formatNumber } from "../src/lib/format";
+import type { DashboardStats, QuotaStatus } from "../src/lib/types";
 import { buildPublicImageUrl, buildSiteOgImageUrl } from "../src/lib/platform";
 import { cleanDisplayUrl } from "../src/lib/url";
 
-type QuotaStatus = {
-  canGenerateMore: boolean;
-  used: number;
-  limit: number;
-  plan: "free" | "pro" | "pro-yearly";
-  isFreePlan: boolean;
-  hasExceededLimit: boolean;
-};
+export type { DashboardStats, QuotaStatus } from "../src/lib/types";
 
 export const getUserQuotaStatusInternal = internalQuery({
   args: { userId: v.string() },
   handler: async (ctx, args): Promise<QuotaStatus> => {
-    const subscription: SubscriptionInfo = await ctx.runQuery(
-      internal.billing.getSubscriptionByUserId,
-      { userId: args.userId },
-    );
-
-    const plan = subscription.plan;
-    const limit = subscription.plan_properties.images_limit;
-
     const sites = await ctx.db
       .query("sites")
       .withIndex("by_user_id", (q) => q.eq("user_id", args.userId))
       .collect();
 
     const used = sites.reduce((sum, site) => sum + (site.image_count ?? 0), 0);
-    const hasExceededLimit = used >= limit;
+    const hasExceededLimit = used >= IMAGES_LIMIT;
 
     return {
       canGenerateMore: !hasExceededLimit,
       used,
-      limit,
-      plan,
-      isFreePlan: plan === "free",
+      limit: IMAGES_LIMIT,
       hasExceededLimit,
     };
   },
@@ -54,9 +37,7 @@ export const getUserQuotaStatus = query({
       return {
         canGenerateMore: false,
         used: 0,
-        limit: PLAN_LIMITS.FREE.IMAGES,
-        plan: "free",
-        isFreePlan: true,
+        limit: IMAGES_LIMIT,
         hasExceededLimit: false,
       };
     }
@@ -67,79 +48,16 @@ export const getUserQuotaStatus = query({
   },
 });
 
-export type DashboardStats = {
-  total_websites: number;
-  total_websites_display: string;
-  total_images: number;
-  total_images_display: string;
-  plan: "free" | "pro" | "pro-yearly";
-  plan_display_name: string;
-  is_active: boolean;
-  can_generate_more: boolean;
-  has_exceeded_limit: boolean;
-  images_limit: number;
-  images_limit_display: string;
-  websites: Array<{
-    _id: Id<"sites">;
-    url_base: string;
-    full_url: string;
-    og_image_usage_url: string;
-    favicon_url: string;
-    _creationTime: number;
-  }>;
-  screenshot_counts: Record<string, number>;
-  latest_screenshots: Array<{
-    id: string;
-    screenshot_url: string;
-    size_in_bytes: number;
-    generated_at: number;
-    formatted_date: string;
-    page_url: string;
-    display_url: string;
-    website_name: string | null;
-  }>;
-};
-
-const PLAN_DISPLAY_NAMES: Record<string, string> = {
-  free: "Free Plan",
-  pro: "Pro Plan",
-  "pro-yearly": "Pro Yearly",
-};
-
-function formatDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  return date.toLocaleString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-    hour12: true,
-  });
-}
-
-function formatNumber(num: number): string {
-  return num.toLocaleString("en-US");
-}
-
-function formatLimit(limit: number): string {
-  return limit >= 999999 ? "∞" : formatNumber(limit);
-}
-
 function getEmptyDashboardStats(): DashboardStats {
   return {
     total_websites: 0,
     total_websites_display: "0",
     total_images: 0,
     total_images_display: "0",
-    plan: "free",
-    plan_display_name: PLAN_DISPLAY_NAMES.free,
-    is_active: false,
+    images_limit: IMAGES_LIMIT,
+    images_limit_display: formatNumber(IMAGES_LIMIT),
     can_generate_more: false,
     has_exceeded_limit: false,
-    images_limit: PLAN_LIMITS.FREE.IMAGES,
-    images_limit_display: formatNumber(PLAN_LIMITS.FREE.IMAGES),
     websites: [],
     screenshot_counts: {},
     latest_screenshots: [],
@@ -156,22 +74,17 @@ export const getUserDashboardStats = query({
 
     const userId = identity.subject;
 
-    const [sites, subscription] = await Promise.all([
-      ctx.db
-        .query("sites")
-        .withIndex("by_user_id", (q) => q.eq("user_id", userId))
-        .collect(),
-      ctx.runQuery(internal.billing.getSubscriptionByUserId, { userId }),
-    ]);
+    const sites = await ctx.db
+      .query("sites")
+      .withIndex("by_user_id", (q) => q.eq("user_id", userId))
+      .collect();
 
     const totalImages = sites.reduce(
       (sum, site) => sum + (site.image_count ?? 0),
       0,
     );
     const totalWebsites = sites.length;
-    const plan = subscription.plan;
-    const imagesLimit = subscription.plan_properties.images_limit;
-    const hasExceededLimit = totalImages >= imagesLimit;
+    const hasExceededLimit = totalImages >= IMAGES_LIMIT;
 
     const websites = sites
       .map((site) => {
@@ -219,18 +132,13 @@ export const getUserDashboardStats = query({
       total_websites_display: formatNumber(totalWebsites),
       total_images: totalImages,
       total_images_display: formatNumber(totalImages),
-      plan,
-      plan_display_name: PLAN_DISPLAY_NAMES[plan] ?? PLAN_DISPLAY_NAMES.free,
-      is_active: subscription.is_active,
       can_generate_more: !hasExceededLimit,
       has_exceeded_limit: hasExceededLimit,
-      images_limit: imagesLimit,
-      images_limit_display: formatLimit(imagesLimit),
+      images_limit: IMAGES_LIMIT,
+      images_limit_display: formatLimit(IMAGES_LIMIT),
       websites,
       screenshot_counts,
       latest_screenshots,
     };
   },
 });
-
-// getPlanInfo query removed - now using static config in lib/pricing.ts

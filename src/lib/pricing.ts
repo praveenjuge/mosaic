@@ -1,5 +1,3 @@
-import { PLAN_LIMITS } from "@/lib/constants";
-
 export type PlanType = "free" | "pro" | "pro-yearly";
 
 export interface PlanInfo {
@@ -18,6 +16,13 @@ export interface Plan {
   planType: PlanType;
 }
 
+// Landing page display limits (cosmetic only — not enforced)
+const LANDING_PAGE_LIMITS = {
+  FREE: 500,
+  PRO: 5000,
+  PRO_YEARLY: 999999,
+} as const;
+
 function formatPlanLimit(limit: number): string {
   return limit >= 999999
     ? "Unlimited OG Images"
@@ -26,20 +31,20 @@ function formatPlanLimit(limit: number): string {
 
 export const PLANS: Record<PlanType, PlanInfo> = {
   free: {
-    images: PLAN_LIMITS.FREE.IMAGES,
-    images_display: formatPlanLimit(PLAN_LIMITS.FREE.IMAGES),
+    images: LANDING_PAGE_LIMITS.FREE,
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.FREE),
     websites: "Unlimited Websites",
     support: "Community Forum Support",
   },
   pro: {
-    images: PLAN_LIMITS.PRO.IMAGES,
-    images_display: formatPlanLimit(PLAN_LIMITS.PRO.IMAGES),
+    images: LANDING_PAGE_LIMITS.PRO,
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO),
     websites: "Unlimited Websites",
     support: "Priority Email Support",
   },
   "pro-yearly": {
-    images: PLAN_LIMITS.PRO_YEARLY.IMAGES,
-    images_display: formatPlanLimit(PLAN_LIMITS.PRO_YEARLY.IMAGES),
+    images: LANDING_PAGE_LIMITS.PRO_YEARLY,
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO_YEARLY),
     websites: "Unlimited Websites",
     support: "Priority Email Support",
   },

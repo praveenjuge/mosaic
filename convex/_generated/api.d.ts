@@ -8,7 +8,6 @@
  * @module
  */
 
-import type * as billing from "../billing.js";
 import type * as http from "../http.js";
 import type * as ogImages from "../ogImages.js";
 import type * as r2 from "../r2.js";
@@ -22,7 +21,6 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  billing: typeof billing;
   http: typeof http;
   ogImages: typeof ogImages;
   r2: typeof r2;
@@ -58,5 +56,4 @@ export declare const internal: FilterApi<
 
 export declare const components: {
   r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
-  polar: import("@convex-dev/polar/_generated/component.js").ComponentApi<"polar">;
 };

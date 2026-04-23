@@ -1,28 +1,10 @@
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardAction,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { api } from "@/convex/_generated/api";
-import type { DashboardStats } from "@/convex/stats";
-import { authenticatedHomePath } from "@/lib/clerk-auth";
-import { CustomerPortalLink } from "@convex-dev/polar/react";
-import { AlertTriangle } from "lucide-react";
-import { useState } from "react";
-
-type PlanType = "free" | "pro" | "pro-yearly";
-type CheckoutPlan = Exclude<PlanType, "free">;
-
-type CreateCheckoutLink = (args: {
-  origin: string;
-  plan: CheckoutPlan;
-  successUrl: string;
-  subscriptionId?: string;
-}) => Promise<{ url: string }>;
+import type { DashboardStats } from "@/lib/types";
 
 function ImagesStatCard({
   countDisplay,
@@ -43,109 +25,15 @@ function ImagesStatCard({
   );
 }
 
-function UpgradeButton({
-  createCheckout,
-  dashboardStats,
-  label,
-  plan,
-  type,
-}: {
-  createCheckout: CreateCheckoutLink;
-  dashboardStats: DashboardStats;
-  label?: string;
-  plan?: CheckoutPlan;
-  type: PlanType;
-}) {
-  const [isLoading, setIsLoading] = useState(false);
-  const isActive = dashboardStats.is_active;
-  const currentPlan = dashboardStats.plan;
-
-  function handleUpgrade() {
-    if (!plan) {
-      return;
-    }
-
-    setIsLoading(true);
-    createCheckout({
-      plan,
-      successUrl: `${window.location.origin}${authenticatedHomePath}`,
-      origin: window.location.origin,
-    })
-      .then((result) => {
-        window.location.href = result.url;
-      })
-      .catch((error) => {
-        console.error("Checkout error:", error);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }
-
-  if (type === "free") {
-    return (
-      <Button variant="outline" size="sm" disabled>
-        You are on {dashboardStats.plan_display_name} {isActive ? "🎉" : ""}
-      </Button>
-    );
-  }
-
-  if (isActive && currentPlan === type) {
-    return (
-      <CustomerPortalLink polarApi={api.billing}>
-        <Button size="sm">Manage Subscription 🎉</Button>
-      </CustomerPortalLink>
-    );
-  }
-
-  if (isActive) {
-    return (
-      <Button variant="outline" size="sm" disabled>
-        You are on {dashboardStats.plan_display_name} Plan 🎉
-      </Button>
-    );
-  }
-
-  if (!plan) {
-    return (
-      <Button variant="outline" size="sm" disabled>
-        Invalid plan
-      </Button>
-    );
-  }
-
-  const buttonText =
-    label || (type === "pro" ? "Upgrade to Pro" : "Upgrade to Pro Yearly");
-
-  return (
-    <Button size="sm" onClick={handleUpgrade} disabled={isLoading}>
-      {isLoading ? "Loading..." : buttonText}
-    </Button>
-  );
-}
-
 export function DashboardOverview({
-  createCheckout,
   dashboardStats,
 }: {
-  createCheckout: CreateCheckoutLink;
   dashboardStats: DashboardStats;
 }) {
   return (
     <div className="flex flex-col gap-10">
-      {dashboardStats.plan === "free" && dashboardStats.has_exceeded_limit ? (
-        <Alert variant="destructive">
-          <AlertTriangle />
-          <AlertTitle>Free Plan Limit Exceeded</AlertTitle>
-          <AlertDescription>
-            You've reached the limit of {dashboardStats.images_limit} OG images.
-            Upgrade to continue generating images.
-          </AlertDescription>
-        </Alert>
-      ) : null}
-
       <div className="flex flex-col gap-1.5">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="px-4">
               <CardTitle>{dashboardStats.total_websites_display}</CardTitle>
@@ -156,47 +44,6 @@ export function DashboardOverview({
             countDisplay={dashboardStats.total_images_display}
             limitDisplay={dashboardStats.images_limit_display}
           />
-          <Card className="md:col-span-2">
-            <CardHeader className="items-center px-4">
-              <CardTitle>{dashboardStats.plan_display_name}</CardTitle>
-              <CardDescription>
-                {dashboardStats.is_active
-                  ? "Your plan is active"
-                  : "Upgrade to unlock more features"}
-              </CardDescription>
-              <CardAction>
-                {dashboardStats.is_active ? (
-                  <UpgradeButton
-                    type={dashboardStats.plan}
-                    plan={
-                      dashboardStats.plan === "pro-yearly"
-                        ? "pro-yearly"
-                        : "pro"
-                    }
-                    dashboardStats={dashboardStats}
-                    createCheckout={createCheckout}
-                  />
-                ) : (
-                  <div className="flex gap-2">
-                    <UpgradeButton
-                      type="pro"
-                      label="Monthly $19"
-                      plan="pro"
-                      dashboardStats={dashboardStats}
-                      createCheckout={createCheckout}
-                    />
-                    <UpgradeButton
-                      type="pro-yearly"
-                      label="Yearly $199"
-                      plan="pro-yearly"
-                      dashboardStats={dashboardStats}
-                      createCheckout={createCheckout}
-                    />
-                  </div>
-                )}
-              </CardAction>
-            </CardHeader>
-          </Card>
         </div>
       </div>
     </div>

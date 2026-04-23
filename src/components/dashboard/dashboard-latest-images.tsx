@@ -5,7 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import type { DashboardStats } from "@/convex/stats";
+import type { DashboardStats } from "@/lib/types";
 
 function ScreenshotsEmpty() {
   return (

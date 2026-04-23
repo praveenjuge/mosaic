@@ -22,14 +22,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Id } from "@/convex/_generated/dataModel";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
 
 interface WebsiteActionsProps {
-  websiteId: Id<"sites">;
+  websiteId: string;
   currentUrl: string;
 }
 
