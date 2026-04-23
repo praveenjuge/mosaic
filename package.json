@@ -11,7 +11,8 @@
     "predev": "bun run content:sync && tsc --noEmit",
     "preview": "vite preview",
     "start": "vite preview",
-    "cf-typegen": "wrangler types"
+    "cf-typegen": "wrangler types",
+    "test": "vitest --run"
   },
   "prettier": {
     "plugins": [
@@ -22,6 +23,7 @@
   "dependencies": {
     "@clerk/tanstack-react-start": "^1.1.2",
     "@clerk/themes": "^2.4.57",
+    "@cloudflare/puppeteer": "^1.1.0",
     "@content-collections/core": "0.15.0",
     "@convex-dev/polar": "0.9.0",
     "@convex-dev/r2": "0.10.0",
@@ -62,6 +64,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "eslint": "^10.2.0",
     "eslint-plugin-unused-imports": "^4.4.1",
+    "fast-check": "^4.7.0",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwind-merge": "^3.5.0",
@@ -69,6 +72,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.8",
+    "vitest": "^4.1.5",
     "wrangler": "^4.83.0"
   }
 }

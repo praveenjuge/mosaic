@@ -1,16 +1,18 @@
-import { publicEnv } from "@/lib/env";
-import { normalizeBaseUrl } from "@/lib/platform";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { handleUseRequest, corsHeaders } from "@/lib/og-generation";
 
 export const Route = createFileRoute("/use")({
-  beforeLoad: ({ location }) => {
-    const targetUrl = new URL("use", normalizeBaseUrl(publicEnv.convexSiteUrl));
-    targetUrl.search = location.searchStr;
-
-    throw redirect({
-      href: targetUrl.toString(),
-      statusCode: 307,
-    });
+  server: {
+    handlers: {
+      GET: async ({ request }) => {
+        return handleUseRequest(request);
+      },
+      OPTIONS: async () => {
+        return new Response(null, {
+          status: 204,
+          headers: corsHeaders,
+        });
+      },
+    },
   },
-  component: () => null,
 });

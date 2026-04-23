@@ -23,5 +23,15 @@
   },
   "upload_source_maps": true,
   "workers_dev": false,
-  "preview_urls": false
+  "preview_urls": false,
+  "r2_buckets": [
+    {
+      "binding": "OG_BUCKET",
+      "bucket_name": "mosaic-og-prod",
+      "remote": true
+    }
+  ],
+  "browser": {
+    "binding": "BROWSER"
+  }
 }
