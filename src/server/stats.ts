@@ -49,11 +49,16 @@ export const getDashboardStats = createServerFn({ method: "GET" }).handler(
 
     const db = getDb();
 
+    // Debug: log the userId from Clerk auth
+    console.log("[getDashboardStats] userId from auth:", userId);
+
     // 1. Get all sites for this user
     const sitesResult = await db
       .prepare("SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC")
       .bind(userId)
       .all<Site>();
+
+    console.log("[getDashboardStats] sites found:", sitesResult.results.length);
 
     const sites = sitesResult.results;
 
