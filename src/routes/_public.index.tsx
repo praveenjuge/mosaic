@@ -6,7 +6,8 @@ import type { DashboardStats } from "@/lib/types";
 import { getOgImageUrl } from "@/lib/utils";
 import { getDashboardStats } from "@/server/stats";
 import { useAuth } from "@clerk/tanstack-react-start";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 const homeDescription =
   "Instantly turn your website's hero sections into stunning OG images-no design skills needed. Boost brand visibility and drive clicks with automated, high-converting social previews.";
@@ -41,6 +42,16 @@ function HomePage() {
   const { changelogEntries, dashboardStats } = Route.useLoaderData();
   const { auth } = Route.useRouteContext();
   const { isSignedIn } = useAuth();
+  const router = useRouter();
+
+  // After client-side sign-in, the loader may not have fetched dashboard
+  // stats yet (it ran before auth was established). Invalidate the router
+  // to re-run the loader so getDashboardStats gets called with auth.
+  useEffect(() => {
+    if (isSignedIn && !dashboardStats) {
+      router.invalidate();
+    }
+  }, [isSignedIn, dashboardStats, router]);
 
   // Use client-side Clerk state as well — after sign-in the server-side
   // auth from beforeLoad may still reflect the pre-auth state because the
