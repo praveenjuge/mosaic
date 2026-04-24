@@ -41,7 +41,7 @@ interface RecentImageRow {
 // ── Dashboard Stats ─────────────────────────────────────────────────
 
 export const getDashboardStats = createServerFn({ method: "GET" }).handler(
-  async (): Promise<DashboardStats & { _debug_userId?: string | null }> => {
+  async (): Promise<DashboardStats> => {
     const { userId } = await auth();
     if (!userId) {
       return getEmptyDashboardStats();
@@ -49,16 +49,11 @@ export const getDashboardStats = createServerFn({ method: "GET" }).handler(
 
     const db = getDb();
 
-    // Debug: log the userId from Clerk auth
-    console.log("[getDashboardStats] userId from auth:", userId);
-
     // 1. Get all sites for this user
     const sitesResult = await db
       .prepare("SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC")
       .bind(userId)
       .all<Site>();
-
-    console.log("[getDashboardStats] sites found:", sitesResult.results.length);
 
     const sites = sitesResult.results;
 
@@ -120,7 +115,6 @@ export const getDashboardStats = createServerFn({ method: "GET" }).handler(
     });
 
     return {
-      _debug_userId: userId,
       total_websites: totalWebsites,
       total_websites_display: formatNumber(totalWebsites),
       total_images: totalImages,

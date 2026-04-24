@@ -55,7 +55,7 @@ function WebsiteRow({
           >
             {decodeURIComponent(website.og_image_usage_url)}
           </a>
-          <CopyButton text={website.og_image_usage_url} />
+          <CopyButton text={decodeURIComponent(website.og_image_usage_url)} />
         </div>
       </TableCell>
       <TableCell className="py-0">
