@@ -22,7 +22,14 @@ export default function DashboardPage({
   }
 
   if (!dashboardStats.total_websites) {
-    return <WelcomeEmptyState />;
+    return (
+      <div>
+        <p style={{ padding: 20, fontFamily: "monospace" }}>
+          Debug: userId = {(dashboardStats as any)._debug_userId ?? "null"}
+        </p>
+        <WelcomeEmptyState />
+      </div>
+    );
   }
 
   return (

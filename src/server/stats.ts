@@ -41,7 +41,7 @@ interface RecentImageRow {
 // ── Dashboard Stats ─────────────────────────────────────────────────
 
 export const getDashboardStats = createServerFn({ method: "GET" }).handler(
-  async (): Promise<DashboardStats> => {
+  async (): Promise<DashboardStats & { _debug_userId?: string | null }> => {
     const { userId } = await auth();
     if (!userId) {
       return getEmptyDashboardStats();
@@ -120,6 +120,7 @@ export const getDashboardStats = createServerFn({ method: "GET" }).handler(
     });
 
     return {
+      _debug_userId: userId,
       total_websites: totalWebsites,
       total_websites_display: formatNumber(totalWebsites),
       total_images: totalImages,
