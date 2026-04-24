@@ -5,13 +5,14 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Framework**: TanStack Start with TanStack Router, Vite, and React 19 TypeScript
 - **Runtime**: Bun (package manager and runtime)
 - **Styling**: Tailwind CSS with shadcn/ui components
-- **Database**: Convex
-- **Authentication**: Clerk
-- **Deployment Runtime**: Cloudflare via Wrangler
-- `convex` - Database and backend functions
+- **Database**: Cloudflare D1 (SQLite), accessed via `env.DB` binding
+- **Storage**: Cloudflare R2 for OG images, accessed via `env.OG_BUCKET` binding
+- **Authentication**: Clerk (server-side JWT verification via `@clerk/tanstack-react-start/server`)
+- **Deployment Runtime**: Cloudflare Workers via Wrangler
 - Build command: `bun run build`
-- Development command: `bun run dev` (generates content, then runs Convex + Vite concurrently)
+- Development command: `bun run dev` (runs `vite dev` with Cloudflare plugin providing local D1/R2)
 - Linting command: `bun run lint` (auto-fixes via eslint --fix)
+- Seed local DB: `bun run db:seed-local`
 
 ## Project Structure
 
@@ -19,11 +20,15 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 src/
 ├── routes/          # TanStack Start file-based routes and lazy route modules
 ├── components/      # Reusable UI and route-specific presentation
+├── server/          # Server functions (sites CRUD, stats, OG helpers)
 ├── content/         # Markdown content sources
 ├── generated/       # Build-time generated typed content manifests
-├── lib/             # Shared utilities, SEO, env, and constants
+├── lib/             # Shared utilities, SEO, env, constants, db accessor
 └── styles/          # Global app styles
-convex/              # Convex schema, queries, mutations, actions
+d1/
+├── schema.sql       # D1 DDL (tables, indexes, constraints)
+├── migrate.ts       # One-time Convex → D1 migration script
+└── README.md        # Migration workflow docs
 public/              # Static assets
 ```
 
@@ -38,30 +43,23 @@ public/              # Static assets
 - Prefer lazy route companions for heavy route components
 - Keep build-time content processing out of the route runtime path
 - Handle errors gracefully with try/catch blocks
-- Use Convex auth checks (ctx.auth) to enforce data access
-- For any db schema changes, update Convex schema and regenerate codegen
+- Use Clerk `auth()` in server functions to enforce data access
+- For DB schema changes, update `d1/schema.sql` and re-apply
+- Use `getDb()` from `src/lib/db.ts` for D1 access in server functions
+- Use `import { env } from "cloudflare:workers"` for R2 and other bindings
 - Use shadcn/ui components consistently
 - Show loading states during async operations
 - Implement proper error boundaries and fallbacks
 - Implement proper SEO metadata for all pages
 - Use dynamic imports where appropriate
-- Implement proper loading states
 - Show user-friendly error messages
 - Log errors appropriately without exposing sensitive data
 - Use ESLint with the Vite/TanStack Start setup
 - Format code with Prettier (organize imports, Tailwind class sorting)
 - Uses Bun as the runtime and package manager
-- All database operations should go through Convex
+- All database operations go through D1 via `createServerFn` or direct queries in route handlers
 - Authentication is handled entirely by Clerk
 - OG image generation is handled internally via Cloudflare Browser Rendering API
 - Public client environment variables must use the `VITE_` prefix
 - Website URL format: always clean and normalize URLs before storage
 - Suggest new instructions or improvements to this file as the project evolves.
-
-<!-- convex-ai-start -->
-This project uses [Convex](https://convex.dev) as its backend.
-
-When working on Convex code, **always read `convex/_generated/ai/guidelines.md` first** for important guidelines on how to correctly use Convex APIs and patterns. The file contains rules that override what you may have learned about Convex from training data.
-
-Convex agent skills for common tasks can be installed by running `npx convex ai-files install`.
-<!-- convex-ai-end -->
