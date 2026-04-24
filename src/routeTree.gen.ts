@@ -19,6 +19,7 @@ import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as ChangelogSlugRouteImport } from './routes/changelog.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ApiDemoRouteImport } from './routes/api.demo'
+import { Route as ApiDebugRouteImport } from './routes/api.debug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
 import { Route as PublicHelpIndexRouteImport } from './routes/_public.help.index'
@@ -75,6 +76,11 @@ const ApiDemoRoute = ApiDemoRouteImport.update({
   path: '/api/demo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDebugRoute = ApiDebugRouteImport.update({
+  id: '/api/debug',
+  path: '/api/debug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PublicLegalRoute = PublicLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/use': typeof UseRoute
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
+  '/api/debug': typeof ApiDebugRoute
   '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
@@ -139,6 +146,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
+  '/api/debug': typeof ApiDebugRoute
   '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/use': typeof UseRoute
   '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
+  '/api/debug': typeof ApiDebugRoute
   '/api/demo': typeof ApiDemoRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/changelog/$slug': typeof ChangelogSlugRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/use'
     | '/help'
     | '/legal'
+    | '/api/debug'
     | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/use'
     | '/legal'
+    | '/api/debug'
     | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/use'
     | '/_public/help'
     | '/_public/legal'
+    | '/api/debug'
     | '/api/demo'
     | '/blog/$slug'
     | '/changelog/$slug'
@@ -230,6 +242,7 @@ export interface RootRouteChildren {
   ChangelogRoute: typeof ChangelogRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
+  ApiDebugRoute: typeof ApiDebugRoute
   ApiDemoRoute: typeof ApiDemoRoute
 }
 
@@ -303,6 +316,13 @@ declare module '@tanstack/react-router' {
       path: '/api/demo'
       fullPath: '/api/demo'
       preLoaderRoute: typeof ApiDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/debug': {
+      id: '/api/debug'
+      path: '/api/debug'
+      fullPath: '/api/debug'
+      preLoaderRoute: typeof ApiDebugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/legal': {
@@ -429,6 +449,7 @@ const rootRouteChildren: RootRouteChildren = {
   ChangelogRoute: ChangelogRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
+  ApiDebugRoute: ApiDebugRoute,
   ApiDemoRoute: ApiDemoRoute,
 }
 export const routeTree = rootRouteImport
