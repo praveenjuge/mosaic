@@ -4,10 +4,10 @@
  * that uses Cloudflare native bindings (R2, Browser Rendering).
  */
 
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import { extractUrlParts } from "@/lib/url";
 import { getDb } from "@/lib/db";
-import { getSitesForUrlBase, recordImage } from "@/server/og";
+import { findCachedImageKey, getSitesForUrlBase, recordImage } from "@/server/og";
 
 // ── CORS Headers ────────────────────────────────────────────────────
 
@@ -183,8 +183,9 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
 /**
  * Handle an incoming GET /use request.
  *
- * Orchestrates the full OG image flow: URL validation, R2 cache lookup,
- * Browser Rendering screenshot, R2 storage, and D1 metadata updates.
+ * Orchestrates the full OG image flow: edge cache check, URL validation,
+ * D1 cache lookup, Browser Rendering screenshot, R2 storage, and D1
+ * metadata updates.
  */
 export async function handleUseRequest(
   request: Request,
@@ -209,7 +210,16 @@ export async function handleUseRequest(
       return createJsonResponse({ error }, 400);
     }
 
-    // 4. Compute cache key
+    // 4. Edge cache check (production mode only — demo responses are JSON)
+    const cache = (caches as unknown as { default: Cache })["default"];
+    if (demo !== "true") {
+      const cachedResponse = await cache.match(request);
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+    }
+
+    // 5. Compute cache key
     const cacheKey = await generateCacheKey(url);
 
     // Variables shared across demo/production paths and the storage step
@@ -221,7 +231,7 @@ export async function handleUseRequest(
     } | null = null;
 
     if (demo === "true") {
-      // 5. Demo mode
+      // 6. Demo mode
       imageKey = getR2Key(cacheKey, undefined, true);
 
       const cached = await env.OG_BUCKET.head(imageKey);
@@ -236,7 +246,7 @@ export async function handleUseRequest(
         );
       }
     } else {
-      // 6. Production mode
+      // 7. Production mode
       const { urlBase } = extractUrlParts(url);
 
       const sitesResult = await getSitesForUrlBase(getDb(), urlBase);
@@ -251,13 +261,15 @@ export async function handleUseRequest(
         );
       }
 
-      // Check R2 cache for each site prefix
-      for (const site of sitesResult.sites) {
-        const siteKey = getR2Key(cacheKey, site.r2Prefix, false);
-        const cached = await env.OG_BUCKET.head(siteKey);
-        if (cached) {
-          return createRedirectResponse(buildPublicImageUrl(siteKey));
-        }
+      // Check D1 for an existing image record instead of looping R2 HEAD calls
+      const siteIds = sitesResult.sites.map((s) => s.siteId);
+      const existingKey = await findCachedImageKey(getDb(), url, siteIds);
+      if (existingKey) {
+        const response = createRedirectResponse(
+          buildPublicImageUrl(existingKey),
+        );
+        waitUntil(cache.put(request, response.clone()));
+        return response;
       }
 
       // Check image limit
@@ -275,7 +287,7 @@ export async function handleUseRequest(
       imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
     }
 
-    // 7. Take screenshot (cache miss for both modes)
+    // 8. Take screenshot (cache miss for both modes)
     let imageBuffer: ArrayBuffer;
     try {
       imageBuffer = await takeScreenshot(url);
@@ -287,7 +299,7 @@ export async function handleUseRequest(
       );
     }
 
-    // 8. Store in R2
+    // 9. Store in R2
     try {
       await env.OG_BUCKET.put(imageKey, imageBuffer, {
         httpMetadata: { contentType: "image/png" },
@@ -307,7 +319,11 @@ export async function handleUseRequest(
           console.error("[USE] recordImage failed:", err);
         }
 
-        return createRedirectResponse(buildPublicImageUrl(imageKey));
+        const response = createRedirectResponse(
+          buildPublicImageUrl(imageKey),
+        );
+        waitUntil(cache.put(request, response.clone()));
+        return response;
       }
 
       // Demo mode success
@@ -335,7 +351,7 @@ export async function handleUseRequest(
       );
     }
   } catch (err) {
-    // 9. Unexpected error
+    // 10. Unexpected error
     console.error("[USE] Unhandled error:", err);
     return createJsonResponse({ error: "Internal server error" }, 500);
   }

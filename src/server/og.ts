@@ -101,12 +101,41 @@ export async function getSitesForUrlBase(
   return { sites, selectedSite };
 }
 
+// ── findCachedImageKey ───────────────────────────────────────────────
+
+/**
+ * Look up an existing image record in D1 by page URL and site IDs.
+ * Returns the R2 key if a cached image exists, null otherwise.
+ * This avoids multiple R2 HEAD requests by checking D1 first.
+ */
+export async function findCachedImageKey(
+  db: D1Database,
+  pageUrl: string,
+  siteIds: number[],
+): Promise<string | null> {
+  if (siteIds.length === 0) return null;
+
+  const { sanitizedUrl } = extractUrlParts(pageUrl);
+  const placeholders = siteIds.map(() => "?").join(", ");
+
+  const result = await db
+    .prepare(
+      `SELECT key FROM images
+       WHERE page_url = ? AND site_id IN (${placeholders})
+       LIMIT 1`,
+    )
+    .bind(sanitizedUrl, ...siteIds)
+    .first<{ key: string }>();
+
+  return result?.key ?? null;
+}
+
 // ── recordImage ─────────────────────────────────────────────────────
 
 /**
  * Insert an image record into the images table and increment the
- * site's image_count. Called after a new OG image is generated and
- * stored in R2.
+ * site's image_count in a single batched D1 call. This reduces
+ * two sequential round trips to one.
  */
 export async function recordImage(
   db: D1Database,
@@ -118,16 +147,15 @@ export async function recordImage(
   const { sanitizedUrl } = extractUrlParts(pageUrl);
   const now = Date.now();
 
-  await db
-    .prepare(
-      `INSERT INTO images (site_id, key, page_url, size_in_bytes, generated_at)
-       VALUES (?, ?, ?, ?, ?)`,
-    )
-    .bind(siteId, imageKey, sanitizedUrl, imageSize, now)
-    .run();
-
-  await db
-    .prepare(`UPDATE sites SET image_count = image_count + 1 WHERE id = ?`)
-    .bind(siteId)
-    .run();
+  await db.batch([
+    db
+      .prepare(
+        `INSERT INTO images (site_id, key, page_url, size_in_bytes, generated_at)
+         VALUES (?, ?, ?, ?, ?)`,
+      )
+      .bind(siteId, imageKey, sanitizedUrl, imageSize, now),
+    db
+      .prepare(`UPDATE sites SET image_count = image_count + 1 WHERE id = ?`)
+      .bind(siteId),
+  ]);
 }

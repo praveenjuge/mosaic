@@ -15,28 +15,34 @@ import {
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
+import { buildSiteOgImageUrl } from "@/lib/platform";
 import type { DashboardStats } from "@/lib/types";
 
 function WebsiteRow({
-  screenshotCount,
   website,
 }: {
-  screenshotCount: number;
   website: DashboardStats["websites"][number];
 }) {
+  const fullUrl = `https://${website.url_base}`;
+  const ogImageUsageUrl = buildSiteOgImageUrl(
+    "https://mosaicimg.com/",
+    fullUrl,
+  );
+  const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
+
   return (
     <TableRow className="items-center">
       <TableCell>
         <div className="flex items-center gap-2">
           <img
-            src={website.favicon_url}
+            src={faviconUrl}
             alt="Favicon"
             className="size-3.5"
             width={14}
             height={14}
           />
           <a
-            href={website.full_url}
+            href={fullUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="text-primary max-w-xs truncate font-medium"
@@ -48,21 +54,21 @@ function WebsiteRow({
       <TableCell>
         <div className="flex items-center gap-1">
           <a
-            href={website.og_image_usage_url}
+            href={ogImageUsageUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="max-w-lg truncate font-medium"
           >
-            {decodeURIComponent(website.og_image_usage_url)}
+            {decodeURIComponent(ogImageUsageUrl)}
           </a>
-          <CopyButton text={decodeURIComponent(website.og_image_usage_url)} />
+          <CopyButton text={decodeURIComponent(ogImageUsageUrl)} />
         </div>
       </TableCell>
       <TableCell className="py-0">
-        {screenshotCount === 0 ? (
+        {website.image_count === 0 ? (
           <WebsiteInfoModal websiteUrl={website.url_base} />
         ) : (
-          screenshotCount
+          website.image_count
         )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
@@ -95,13 +101,7 @@ export function DashboardWebsitesTable({
           </TableHeader>
           <TableBody>
             {dashboardStats.websites.map((website) => (
-              <WebsiteRow
-                key={website.id}
-                website={website}
-                screenshotCount={
-                  dashboardStats.screenshot_counts[String(website.id)] ?? 0
-                }
-              />
+              <WebsiteRow key={website.id} website={website} />
             ))}
           </TableBody>
         </Table>

@@ -2,15 +2,27 @@ import { defineCollection, defineConfig } from "@content-collections/core";
 import { z } from "zod";
 import markdownToHtml from "./src/lib/markdownToHtml";
 
+// ── Shared Helpers ──────────────────────────────────────────────────
+
 function toIsoDate(value: string, field: string) {
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     throw new Error(`Invalid ${field} date: ${value}`);
   }
-
   return date.toISOString();
 }
+
+function withMarkdown<T extends { content: string; _meta: { path: string } }>(
+  entry: T,
+) {
+  return {
+    ...entry,
+    slug: entry._meta.path,
+    contentHtml: markdownToHtml(entry.content),
+  };
+}
+
+// ── Collections ─────────────────────────────────────────────────────
 
 const helpArticles = defineCollection({
   name: "helpArticles",
@@ -24,11 +36,9 @@ const helpArticles = defineCollection({
     content: z.string(),
   }),
   transform: async (entry) => ({
-    ...entry,
+    ...withMarkdown(entry),
     description: entry.description ?? "",
-    slug: entry._meta.path,
     publishedAt: toIsoDate(entry.publishedAt, "publishedAt"),
-    contentHtml: markdownToHtml(entry.content),
   }),
 });
 
@@ -42,10 +52,8 @@ const changelogEntries = defineCollection({
     content: z.string(),
   }),
   transform: async (entry) => ({
-    ...entry,
-    slug: entry._meta.path,
+    ...withMarkdown(entry),
     publishedAt: toIsoDate(entry.publishedAt, "publishedAt"),
-    contentHtml: markdownToHtml(entry.content),
   }),
 });
 
@@ -62,10 +70,7 @@ const guides = defineCollection({
     svgDark: z.string().optional(),
     content: z.string(),
   }),
-  transform: async (entry) => ({
-    ...entry,
-    contentHtml: markdownToHtml(entry.content),
-  }),
+  transform: async (entry) => withMarkdown(entry),
 });
 
 const legalDocuments = defineCollection({
@@ -81,9 +86,8 @@ const legalDocuments = defineCollection({
     content: z.string(),
   }),
   transform: async (entry) => ({
-    ...entry,
+    ...withMarkdown(entry),
     updatedAt: toIsoDate(entry.updatedAt, "updatedAt"),
-    contentHtml: markdownToHtml(entry.content),
   }),
 });
 

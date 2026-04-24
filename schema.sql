@@ -28,3 +28,6 @@ CREATE TABLE IF NOT EXISTS images (
 
 CREATE INDEX IF NOT EXISTS idx_images_site_id
   ON images(site_id);
+
+CREATE INDEX IF NOT EXISTS idx_images_page_url_site_id
+  ON images(page_url, site_id);

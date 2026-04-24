@@ -5,6 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { formatNumber } from "@/lib/format";
 import type { DashboardStats } from "@/lib/types";
 import { useAuth } from "@clerk/tanstack-react-start";
 
@@ -69,13 +70,13 @@ export default function HomeQuickStats({ stats }: HomeQuickStatsProps) {
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <Card>
         <CardHeader>
-          <CardTitle>{stats.total_websites_display}</CardTitle>
+          <CardTitle>{formatNumber(stats.total_websites)}</CardTitle>
           <CardDescription>Websites</CardDescription>
         </CardHeader>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{stats.total_images_display}</CardTitle>
+          <CardTitle>{formatNumber(stats.total_images)}</CardTitle>
           <CardDescription>OG Images</CardDescription>
         </CardHeader>
       </Card>

@@ -4,20 +4,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { formatLimit, formatNumber } from "@/lib/format";
 import type { DashboardStats } from "@/lib/types";
 
 function ImagesStatCard({
-  countDisplay,
-  limitDisplay,
+  count,
+  limit,
 }: {
-  countDisplay: string;
-  limitDisplay: string;
+  count: number;
+  limit: number;
 }) {
   return (
     <Card>
       <CardHeader className="px-4">
         <CardTitle>
-          {countDisplay}/{limitDisplay}
+          {formatNumber(count)}/{formatLimit(limit)}
         </CardTitle>
         <CardDescription>OG Images</CardDescription>
       </CardHeader>
@@ -36,13 +37,15 @@ export function DashboardOverview({
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <Card>
             <CardHeader className="px-4">
-              <CardTitle>{dashboardStats.total_websites_display}</CardTitle>
+              <CardTitle>
+                {formatNumber(dashboardStats.total_websites)}
+              </CardTitle>
               <CardDescription>Websites</CardDescription>
             </CardHeader>
           </Card>
           <ImagesStatCard
-            countDisplay={dashboardStats.total_images_display}
-            limitDisplay={dashboardStats.images_limit_display}
+            count={dashboardStats.total_images}
+            limit={dashboardStats.images_limit}
           />
         </div>
       </div>
