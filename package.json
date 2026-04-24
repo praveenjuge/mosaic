@@ -5,7 +5,7 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "content:sync": "bun --eval 'import { createBuilder } from \"@content-collections/core\"; const builder = await createBuilder(\"./content-collections.ts\"); await builder.build();'",
-    "db:seed-local": "bunx wrangler d1 execute mosaic-prod --local --file d1/schema.sql",
+    "db:seed-local": "bunx wrangler d1 execute mosaic-prod --local --file schema.sql",
     "dev": "vite dev",
     "dev:frontend": "vite dev",
     "lint": "eslint --fix",
