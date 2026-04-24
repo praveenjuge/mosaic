@@ -1,8 +1,23 @@
-import type { Doc } from "../../convex/_generated/dataModel";
-
 // ── Site Types ──────────────────────────────────────────────────────
 
-export type Site = Doc<"sites">;
+export interface Site {
+  id: number;
+  user_id: string;
+  url_base: string;
+  image_count: number;
+  r2_prefix: string;
+  created_at: string;
+}
+
+export interface ImageRecord {
+  id: number;
+  site_id: number;
+  key: string;
+  page_url: string;
+  size_in_bytes: number;
+  generated_at: number;
+  created_at: string;
+}
 
 export interface SiteWithStats extends Site {
   screenshot_count: number;
@@ -29,12 +44,12 @@ export type DashboardStats = {
   images_limit: number;
   images_limit_display: string;
   websites: Array<{
-    _id: string;
+    id: number;
     url_base: string;
     full_url: string;
     og_image_usage_url: string;
     favicon_url: string;
-    _creationTime: number;
+    created_at: string;
   }>;
   screenshot_counts: Record<string, number>;
   latest_screenshots: Array<{

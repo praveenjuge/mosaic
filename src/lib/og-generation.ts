@@ -4,10 +4,10 @@
  * that uses Cloudflare native bindings (R2, Browser Rendering).
  */
 
-import { ConvexHttpClient } from "convex/browser";
-import { api } from "../../convex/_generated/api";
 import { env } from "cloudflare:workers";
 import { extractUrlParts } from "@/lib/url";
+import { getDb } from "@/lib/db";
+import { getSitesForUrlBase, recordImage } from "@/server/og";
 
 // ── CORS Headers ────────────────────────────────────────────────────
 
@@ -127,26 +127,7 @@ export function createRedirectResponse(location: string): Response {
   });
 }
 
-// ── Convex Client ───────────────────────────────────────────────────
 
-let convexClient: ConvexHttpClient | null = null;
-
-/**
- * Return a cached ConvexHttpClient instance.
- * Lazily creates the client on first call using VITE_CONVEX_URL.
- */
-export function getConvexClient(): ConvexHttpClient {
-  if (!convexClient) {
-    const url = process.env.VITE_CONVEX_URL;
-    if (!url) {
-      throw new Error("VITE_CONVEX_URL is not set");
-    }
-    convexClient = new ConvexHttpClient(url);
-  }
-  return convexClient;
-}
-
-export { api };
 
 // ── Screenshot Helper ───────────────────────────────────────────────
 
@@ -203,7 +184,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
  * Handle an incoming GET /use request.
  *
  * Orchestrates the full OG image flow: URL validation, R2 cache lookup,
- * Browser Rendering screenshot, R2 storage, and Convex metadata updates.
+ * Browser Rendering screenshot, R2 storage, and D1 metadata updates.
  */
 export async function handleUseRequest(
   request: Request,
@@ -234,7 +215,7 @@ export async function handleUseRequest(
     // Variables shared across demo/production paths and the storage step
     let imageKey: string;
     let selectedSite: {
-      siteId: string;
+      siteId: number;
       url_base: string;
       r2Prefix: string;
     } | null = null;
@@ -258,10 +239,7 @@ export async function handleUseRequest(
       // 6. Production mode
       const { urlBase } = extractUrlParts(url);
 
-      const sitesResult = await getConvexClient().query(
-        api.ogImages.getSitesForUrlBase,
-        { urlBase },
-      );
+      const sitesResult = await getSitesForUrlBase(getDb(), urlBase);
 
       if (sitesResult.sites.length === 0) {
         return createJsonResponse(
@@ -316,20 +294,17 @@ export async function handleUseRequest(
       });
 
       if (demo !== "true" && selectedSite) {
-        // Best-effort Convex mutation — don't fail the response
+        // Best-effort D1 record — don't fail the response
         try {
-          await getConvexClient().mutation(
-            api.ogImages.storeImageForSite,
-            {
-              siteId: selectedSite.siteId as never,
-              pageUrl: url,
-              imageSize: imageBuffer.byteLength,
-              imageKey,
-              isNew: true,
-            },
+          await recordImage(
+            getDb(),
+            selectedSite.siteId,
+            imageKey,
+            url,
+            imageBuffer.byteLength,
           );
         } catch (err) {
-          console.error("[USE] Convex storeImageForSite failed:", err);
+          console.error("[USE] recordImage failed:", err);
         }
 
         return createRedirectResponse(buildPublicImageUrl(imageKey));

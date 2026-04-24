@@ -1,21 +1,23 @@
 import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
-import { api } from "@/convex/_generated/api";
+import type { DashboardStats } from "@/lib/types";
 import { useAuth } from "@clerk/tanstack-react-start";
-import { useQuery } from "convex/react";
 import { DashboardLatestImages } from "./dashboard-latest-images";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { DashboardWebsitesTable } from "./dashboard-websites-table";
 
-export default function DashboardPage() {
+export default function DashboardPage({
+  dashboardStats,
+}: {
+  dashboardStats: DashboardStats | null;
+}) {
   const { isSignedIn } = useAuth();
-  const dashboardStats = useQuery(api.stats.getUserDashboardStats);
 
   if (!isSignedIn) {
     return null;
   }
 
-  if (dashboardStats === undefined) {
+  if (!dashboardStats) {
     return <DashboardSkeleton />;
   }
 

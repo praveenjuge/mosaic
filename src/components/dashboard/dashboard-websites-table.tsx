@@ -66,7 +66,7 @@ function WebsiteRow({
         )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
-        <WebsiteActions websiteId={website._id} currentUrl={website.url_base} />
+        <WebsiteActions websiteId={website.id} currentUrl={website.url_base} />
       </TableCell>
     </TableRow>
   );
@@ -96,10 +96,10 @@ export function DashboardWebsitesTable({
           <TableBody>
             {dashboardStats.websites.map((website) => (
               <WebsiteRow
-                key={website._id}
+                key={website.id}
                 website={website}
                 screenshotCount={
-                  dashboardStats.screenshot_counts[website._id] ?? 0
+                  dashboardStats.screenshot_counts[String(website.id)] ?? 0
                 }
               />
             ))}

@@ -7,7 +7,6 @@ export default tseslint.config(
     ignores: [
       "node_modules/",
       ".content-collections/",
-      "convex/_generated/",
       "dist/",
     ],
   },

@@ -38,7 +38,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    ".convex",
+    "d1",
     ".content-collections",
     ".wrangler"
   ]

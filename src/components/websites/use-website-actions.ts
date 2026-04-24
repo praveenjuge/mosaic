@@ -1,18 +1,13 @@
-"use client";
-
-import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
-import { useAction, useMutation } from "convex/react";
+import { addSite, editSite, deleteSite } from "@/server/sites";
 import { toast } from "sonner";
+import { useRouter } from "@tanstack/react-router";
 
 type SaveWebsiteArgs =
   | { siteId?: undefined; url: string }
-  | { siteId: string; url: string };
+  | { siteId: number; url: string };
 
 export function useWebsiteActions() {
-  const addSite = useMutation(api.sites.addSite);
-  const editSite = useMutation(api.sites.editSite);
-  const deleteSite = useAction(api.sites.deleteSite);
+  const router = useRouter();
 
   async function saveWebsite(args: SaveWebsiteArgs) {
     const url = args.url.trim();
@@ -25,8 +20,8 @@ export function useWebsiteActions() {
     try {
       const result =
         "siteId" in args && args.siteId
-          ? await editSite({ siteId: args.siteId as Id<"sites">, url_base: url })
-          : await addSite({ url_base: url });
+          ? await editSite({ data: { siteId: args.siteId, url_base: url } })
+          : await addSite({ data: { url_base: url } });
 
       if (result.status === "error") {
         toast.error(result.message);
@@ -34,6 +29,7 @@ export function useWebsiteActions() {
       }
 
       toast.success(result.message);
+      router.invalidate();
       return true;
     } catch (error) {
       console.error("Website save error:", error);
@@ -42,9 +38,9 @@ export function useWebsiteActions() {
     }
   }
 
-  async function removeWebsite(siteId: string) {
+  async function removeWebsite(siteId: number) {
     try {
-      const result = await deleteSite({ siteId: siteId as Id<"sites"> });
+      const result = await deleteSite({ data: { siteId } });
 
       if (result.status === "error") {
         toast.error(result.message);
@@ -52,6 +48,7 @@ export function useWebsiteActions() {
       }
 
       toast.success(result.message);
+      router.invalidate();
       return true;
     } catch (error) {
       console.error("Website delete error:", error);

@@ -28,7 +28,7 @@ import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
 
 interface WebsiteActionsProps {
-  websiteId: string;
+  websiteId: number;
   currentUrl: string;
 }
 

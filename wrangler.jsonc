@@ -24,6 +24,13 @@
   "upload_source_maps": true,
   "workers_dev": false,
   "preview_urls": false,
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mosaic-prod",
+      "database_id": "ac32231f-9bd4-406d-9d60-d37ae0a5c007"
+    }
+  ],
   "r2_buckets": [
     {
       "binding": "OG_BUCKET",
@@ -32,8 +39,6 @@
     }
   ],
   "vars": {
-    "VITE_CONVEX_URL": "https://clear-warthog-996.convex.cloud",
-    "VITE_CONVEX_SITE_URL": "https://clear-warthog-996.convex.site",
     "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ"
   }
 }

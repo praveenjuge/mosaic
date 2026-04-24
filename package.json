@@ -5,8 +5,8 @@
     "build": "vite build",
     "typecheck": "tsc --noEmit",
     "content:sync": "bun --eval 'import { createBuilder } from \"@content-collections/core\"; const builder = await createBuilder(\"./content-collections.ts\"); await builder.build();'",
-    "dev": "bun --parallel dev:frontend dev:backend",
-    "dev:backend": "convex dev",
+    "db:seed-local": "bunx wrangler d1 execute mosaic-prod --local --file d1/schema.sql",
+    "dev": "vite dev",
     "dev:frontend": "vite dev",
     "lint": "eslint --fix",
     "predev": "bun run content:sync && tsc --noEmit",
@@ -24,17 +24,13 @@
     "@clerk/tanstack-react-start": "^1.1.2",
     "@clerk/themes": "^2.4.57",
     "@content-collections/core": "0.15.0",
-    "@convex-dev/polar": "0.9.0",
-    "@convex-dev/r2": "0.10.0",
     "@fontsource-variable/geist": "^5.2.8",
-    "@polar-sh/sdk": "0.47.0",
     "@shikijs/markdown-it": "^4.0.2",
     "@tanstack/react-router": "1.168.22",
     "@tanstack/react-router-devtools": "1.166.13",
     "@tanstack/react-start": "1.167.41",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "convex": "^1.35.1",
     "lucide-react": "^1.8.0",
     "markdown-it": "^14.1.1",
     "next-themes": "^0.4.6",
@@ -70,6 +66,6 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.58.2",
     "vite": "^8.0.8",
-    "wrangler": "^4.83.0"
+    "wrangler": "^4.84.1"
   }
 }

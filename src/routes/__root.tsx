@@ -16,25 +16,20 @@ import {
 import { publicEnv } from "@/lib/env";
 import { buildOrganizationJsonLd } from "@/lib/seo";
 import { cn, getOgImageUrl } from "@/lib/utils";
-import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
+import { ClerkProvider } from "@clerk/tanstack-react-start";
 import {
   HeadContent,
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useRouteContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { ConvexReactClient } from "convex/react";
-import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { Suspense, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
 
-export const Route = createRootRouteWithContext<{
-  convexClient: ConvexReactClient;
-}>()({
+export const Route = createRootRouteWithContext<{}>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -82,11 +77,6 @@ export const Route = createRootRouteWithContext<{
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
       { rel: "preconnect", href: "https://clerk.mosaicimg.com" },
-      {
-        rel: "preconnect",
-        href: publicEnv.convexUrl,
-        crossOrigin: "anonymous",
-      },
     ],
   }),
   beforeLoad: async () => {
@@ -104,11 +94,6 @@ export const Route = createRootRouteWithContext<{
 });
 
 function RootComponent() {
-  const convexClient = useRouteContext({
-    from: Route.id,
-    select: (context) => context.convexClient,
-  });
-
   return (
     <ClerkProvider
       publishableKey={publicEnv.clerkPublishableKey}
@@ -117,20 +102,18 @@ function RootComponent() {
       signInFallbackRedirectUrl={authenticatedHomePath}
       signUpFallbackRedirectUrl={authenticatedHomePath}
     >
-      <ConvexProviderWithClerk client={convexClient} useAuth={useAuth}>
-        <ThemeProvider
-          enableSystem
-          attribute="class"
-          defaultTheme="light"
-          disableTransitionOnChange
-        >
-          <RootDocument>
-            <Suspense>
-              <Outlet />
-            </Suspense>
-          </RootDocument>
-        </ThemeProvider>
-      </ConvexProviderWithClerk>
+      <ThemeProvider
+        enableSystem
+        attribute="class"
+        defaultTheme="light"
+        disableTransitionOnChange
+      >
+        <RootDocument>
+          <Suspense>
+            <Outlet />
+          </Suspense>
+        </RootDocument>
+      </ThemeProvider>
     </ClerkProvider>
   );
 }
