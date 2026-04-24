@@ -11,14 +11,13 @@ const homeDescription =
   "Instantly turn your website's hero sections into stunning OG images-no design skills needed. Boost brand visibility and drive clicks with automated, high-converting social previews.";
 
 export const Route = createFileRoute("/_public/")({
-  loader: async () => {
-    const [changelogEntries, dashboardStats] = await Promise.all([
-      getChangelogEntries(),
-      getDashboardStats(),
-    ]);
-
-    return { changelogEntries, dashboardStats };
+  beforeLoad: async () => {
+    const dashboardStats = await getDashboardStats();
+    return { dashboardStats };
   },
+  loader: () => ({
+    changelogEntries: getChangelogEntries(),
+  }),
   head: () => {
     const seo = buildSeoMeta({
       title: "Simplify Your Open Graph Image Creation.",
@@ -35,8 +34,8 @@ export const Route = createFileRoute("/_public/")({
 });
 
 function HomePage() {
-  const { changelogEntries, dashboardStats } = Route.useLoaderData();
-  const { auth } = Route.useRouteContext();
+  const { changelogEntries } = Route.useLoaderData();
+  const { auth, dashboardStats } = Route.useRouteContext();
   const { isSignedIn } = useAuth();
 
   if (auth.isAuthenticated || isSignedIn) {
