@@ -35,6 +35,18 @@ export type QuotaStatus = {
 
 // ── Dashboard Types ─────────────────────────────────────────────────
 
+/** Row shape returned by the recent-images JOIN query in stats. */
+export interface RecentImageRow {
+  id: number;
+  site_id: number;
+  key: string;
+  page_url: string;
+  size_in_bytes: number;
+  generated_at: number;
+  created_at: string;
+  url_base: string;
+}
+
 export type DashboardStats = {
   total_websites: number;
   total_images: number;
@@ -57,4 +69,13 @@ export type DashboardStats = {
     generated_at: number;
     url_base: string;
   }>;
+};
+
+// ── OG Types ────────────────────────────────────────────────────────
+
+/** Lightweight site info used by the /use OG generation endpoint. */
+export type SiteSummary = {
+  siteId: number;
+  url_base: string;
+  r2Prefix: string;
 };

@@ -12,13 +12,28 @@ function toIsoDate(value: string, field: string) {
   return date.toISOString();
 }
 
+/**
+ * Shared transform that converts markdown to HTML, derives a slug,
+ * and optionally converts date string fields to ISO format.
+ *
+ * @param entry  - The raw content-collection entry.
+ * @param dates  - Map of `{ outputKey: rawDateString }` pairs to normalise.
+ */
 function withMarkdown<T extends { content: string; _meta: { path: string } }>(
   entry: T,
+  dates?: Record<string, string>,
 ) {
+  const normalizedDates = dates
+    ? Object.fromEntries(
+        Object.entries(dates).map(([key, value]) => [key, toIsoDate(value, key)]),
+      )
+    : {};
+
   return {
     ...entry,
     slug: entry._meta.path,
     contentHtml: markdownToHtml(entry.content),
+    ...normalizedDates,
   };
 }
 
@@ -36,9 +51,8 @@ const helpArticles = defineCollection({
     content: z.string(),
   }),
   transform: async (entry) => ({
-    ...withMarkdown(entry),
+    ...withMarkdown(entry, { publishedAt: entry.publishedAt }),
     description: entry.description ?? "",
-    publishedAt: toIsoDate(entry.publishedAt, "publishedAt"),
   }),
 });
 
@@ -51,10 +65,8 @@ const changelogEntries = defineCollection({
     publishedAt: z.string(),
     content: z.string(),
   }),
-  transform: async (entry) => ({
-    ...withMarkdown(entry),
-    publishedAt: toIsoDate(entry.publishedAt, "publishedAt"),
-  }),
+  transform: async (entry) =>
+    withMarkdown(entry, { publishedAt: entry.publishedAt }),
 });
 
 const guides = defineCollection({
@@ -85,10 +97,8 @@ const legalDocuments = defineCollection({
     order: z.number().int().nonnegative(),
     content: z.string(),
   }),
-  transform: async (entry) => ({
-    ...withMarkdown(entry),
-    updatedAt: toIsoDate(entry.updatedAt, "updatedAt"),
-  }),
+  transform: async (entry) =>
+    withMarkdown(entry, { updatedAt: entry.updatedAt }),
 });
 
 export default defineConfig({

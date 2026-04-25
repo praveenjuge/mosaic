@@ -10,7 +10,7 @@ export type RouteAuth = {
   isAuthenticated: boolean;
 };
 
-export const fetchRouteAuth = createServerFn({ method: "GET" }).handler(
+export const fetchRouteAuth = createServerFn().handler(
   async (): Promise<RouteAuth> => {
     const { userId } = await auth();
 

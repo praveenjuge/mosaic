@@ -6,6 +6,11 @@ type SaveWebsiteArgs =
   | { siteId?: undefined; url: string }
   | { siteId: number; url: string };
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return "An unexpected error occurred. Please try again.";
+}
+
 export function useWebsiteActions() {
   const router = useRouter();
 
@@ -18,60 +23,44 @@ export function useWebsiteActions() {
     }
 
     try {
-      const result =
-        "siteId" in args && args.siteId
-          ? await editSite({ data: { siteId: args.siteId, url_base: url } })
-          : await addSite({ data: { url_base: url } });
-
-      if (result.status === "error") {
-        toast.error(result.message);
-        return false;
+      if ("siteId" in args && args.siteId) {
+        await editSite({ data: { siteId: args.siteId, url_base: url } });
+        toast.success("Website updated successfully");
+      } else {
+        await addSite({ data: { url_base: url } });
+        toast.success("Website added successfully");
       }
 
-      toast.success(result.message);
       router.invalidate();
       return true;
     } catch (error) {
-      console.error("Website save error:", error);
-      toast.error("Failed to save website. Please try again.");
+      toast.error(getErrorMessage(error));
       return false;
     }
   }
 
   async function removeWebsite(siteId: number) {
     try {
-      const result = await deleteSite({ data: { siteId } });
-
-      if (result.status === "error") {
-        toast.error(result.message);
-        return false;
-      }
-
-      toast.success(result.message);
+      await deleteSite({ data: { siteId } });
+      toast.success("Website deleted successfully");
       router.invalidate();
       return true;
     } catch (error) {
-      console.error("Website delete error:", error);
-      toast.error("Failed to delete website. Please try again.");
+      toast.error(getErrorMessage(error));
       return false;
     }
   }
 
   async function refreshWebsite(siteId: number) {
     try {
-      const result = await refreshSiteImages({ data: { siteId } });
-
-      if (result.status === "error") {
-        toast.error(result.message);
-        return false;
-      }
-
-      toast.success(result.message);
+      await refreshSiteImages({ data: { siteId } });
+      toast.success(
+        "Images refreshed successfully. New screenshots will generate on next visit.",
+      );
       router.invalidate();
       return true;
     } catch (error) {
-      console.error("Website refresh error:", error);
-      toast.error("Failed to refresh images. Please try again.");
+      toast.error(getErrorMessage(error));
       return false;
     }
   }

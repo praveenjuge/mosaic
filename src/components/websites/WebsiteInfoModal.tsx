@@ -18,7 +18,7 @@ import { Code, ExternalLink, Ghost } from "lucide-react";
 const guideLinks = getGuideLinks();
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
-  const finalWebsiteUrl = `https://${websiteUrl}`;
+  const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
   const getMetaTag = (isHomePage: boolean) =>
     `<meta property="og:image" content="${buildSiteOgImageUrl(
       publicEnv.siteUrl,

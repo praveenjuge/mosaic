@@ -1,10 +1,10 @@
-import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import type { ImageRecord, Site } from "@/lib/types";
 import { normalizeUrlBase } from "@/lib/url";
+import { authMiddleware } from "./middleware";
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -14,22 +14,17 @@ function generateR2Prefix() {
 
 // ── List Sites ──────────────────────────────────────────────────────
 
-export const listSitesForUser = createServerFn({ method: "GET" }).handler(
-  async (): Promise<Site[]> => {
-    const { userId } = await auth();
-    if (!userId) {
-      return [];
-    }
-
+export const listSitesForUser = createServerFn()
+  .middleware([authMiddleware])
+  .handler(async ({ context }): Promise<Site[]> => {
     const db = getDb();
     const result = await db
       .prepare("SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC")
-      .bind(userId)
+      .bind(context.userId)
       .all<Site>();
 
     return result.results;
-  },
-);
+  });
 
 // ── Add Site ────────────────────────────────────────────────────────
 
@@ -38,29 +33,19 @@ const addSiteSchema = z.object({
 });
 
 export const addSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .inputValidator(addSiteSchema)
-  .handler(async ({ data }) => {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        status: "error" as const,
-        message: "You must be logged in to add a website.",
-      };
-    }
-
+  .handler(async ({ context, data }): Promise<Site> => {
     const normalizedUrl = normalizeUrlBase(data.url_base);
     const db = getDb();
 
     const existing = await db
       .prepare("SELECT id FROM sites WHERE user_id = ? AND url_base = ?")
-      .bind(userId, normalizedUrl)
+      .bind(context.userId, normalizedUrl)
       .first<{ id: number }>();
 
     if (existing) {
-      return {
-        status: "error" as const,
-        message: "This website already exists in your list.",
-      };
+      throw new Error("This website already exists in your list.");
     }
 
     const r2Prefix = generateR2Prefix();
@@ -69,7 +54,7 @@ export const addSite = createServerFn({ method: "POST" })
       .prepare(
         "INSERT INTO sites (user_id, url_base, image_count, r2_prefix) VALUES (?, ?, 0, ?)",
       )
-      .bind(userId, normalizedUrl, r2Prefix)
+      .bind(context.userId, normalizedUrl, r2Prefix)
       .run();
 
     const newSite = await db
@@ -77,11 +62,11 @@ export const addSite = createServerFn({ method: "POST" })
       .bind(insertResult.meta.last_row_id)
       .first<Site>();
 
-    return {
-      status: "success" as const,
-      message: "Website added successfully",
-      data: newSite ? [newSite] : [],
-    };
+    if (!newSite) {
+      throw new Error("Failed to create website. Please try again.");
+    }
+
+    return newSite;
   });
 
 // ── Edit Site ───────────────────────────────────────────────────────
@@ -92,28 +77,18 @@ const editSiteSchema = z.object({
 });
 
 export const editSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .inputValidator(editSiteSchema)
-  .handler(async ({ data }) => {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        status: "error" as const,
-        message: "You must be logged in to edit a website.",
-      };
-    }
-
+  .handler(async ({ context, data }): Promise<Site> => {
     const db = getDb();
 
     const existing = await db
       .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
-      .bind(data.siteId, userId)
+      .bind(data.siteId, context.userId)
       .first<Site>();
 
     if (!existing) {
-      return {
-        status: "error" as const,
-        message: "Website not found or access denied.",
-      };
+      throw new Error("Website not found or access denied.");
     }
 
     const normalizedUrl = normalizeUrlBase(data.url_base);
@@ -122,14 +97,11 @@ export const editSite = createServerFn({ method: "POST" })
       .prepare(
         "SELECT id FROM sites WHERE user_id = ? AND url_base = ? AND id != ?",
       )
-      .bind(userId, normalizedUrl, data.siteId)
+      .bind(context.userId, normalizedUrl, data.siteId)
       .first<{ id: number }>();
 
     if (duplicate) {
-      return {
-        status: "error" as const,
-        message: "This website already exists in your list.",
-      };
+      throw new Error("This website already exists in your list.");
     }
 
     await db
@@ -137,11 +109,7 @@ export const editSite = createServerFn({ method: "POST" })
       .bind(normalizedUrl, data.siteId)
       .run();
 
-    return {
-      status: "success" as const,
-      message: "Website updated successfully",
-      data: [{ ...existing, url_base: normalizedUrl }],
-    };
+    return { ...existing, url_base: normalizedUrl };
   });
 
 // ── Delete Site ─────────────────────────────────────────────────────
@@ -151,28 +119,18 @@ const deleteSiteSchema = z.object({
 });
 
 export const deleteSite = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .inputValidator(deleteSiteSchema)
-  .handler(async ({ data }) => {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        status: "error" as const,
-        message: "You must be logged in to delete a website.",
-      };
-    }
-
+  .handler(async ({ context, data }): Promise<void> => {
     const db = getDb();
 
     const existing = await db
       .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
-      .bind(data.siteId, userId)
+      .bind(data.siteId, context.userId)
       .first<Site>();
 
     if (!existing) {
-      return {
-        status: "error" as const,
-        message: "Website not found.",
-      };
+      throw new Error("Website not found.");
     }
 
     // Delete all R2 objects under the site's r2_prefix using cursor-based pagination
@@ -193,11 +151,6 @@ export const deleteSite = createServerFn({ method: "POST" })
 
     // Delete site row — cascades to images via FK ON DELETE CASCADE
     await db.prepare("DELETE FROM sites WHERE id = ?").bind(data.siteId).run();
-
-    return {
-      status: "success" as const,
-      message: "Website deleted successfully",
-    };
   });
 
 // ── Refresh Site Images ─────────────────────────────────────────────
@@ -207,28 +160,18 @@ const refreshSiteSchema = z.object({
 });
 
 export const refreshSiteImages = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
   .inputValidator(refreshSiteSchema)
-  .handler(async ({ data }) => {
-    const { userId } = await auth();
-    if (!userId) {
-      return {
-        status: "error" as const,
-        message: "You must be logged in to refresh images.",
-      };
-    }
-
+  .handler(async ({ context, data }): Promise<void> => {
     const db = getDb();
 
     const existing = await db
       .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
-      .bind(data.siteId, userId)
+      .bind(data.siteId, context.userId)
       .first<Site>();
 
     if (!existing) {
-      return {
-        status: "error" as const,
-        message: "Website not found or access denied.",
-      };
+      throw new Error("Website not found or access denied.");
     }
 
     // 1. Collect page URLs before deleting (needed for edge cache purge)
@@ -239,7 +182,7 @@ export const refreshSiteImages = createServerFn({ method: "POST" })
 
     // 2. Purge edge cache for each page URL
     const cache = (caches as unknown as { default: Cache })["default"];
-    const purgePromises = imageRows.results.map((row) => {
+    const purgePromises = imageRows.results.map(async (row) => {
       const cacheUrl = `https://mosaicimg.com/use?url=${encodeURIComponent(row.page_url)}`;
       const cacheRequest = new Request(cacheUrl, { method: "GET" });
       return cache.delete(cacheRequest).catch((err) => {
@@ -278,9 +221,4 @@ export const refreshSiteImages = createServerFn({ method: "POST" })
         )
         .bind(newR2Prefix, data.siteId),
     ]);
-
-    return {
-      status: "success" as const,
-      message: "Images refreshed successfully. New screenshots will generate on next visit.",
-    };
   });

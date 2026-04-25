@@ -2,7 +2,7 @@ import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { getDb } from "@/lib/db";
 import { IMAGES_LIMIT } from "@/lib/constants";
-import type { DashboardStats, Site } from "@/lib/types";
+import type { DashboardStats, RecentImageRow, Site } from "@/lib/types";
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
@@ -18,22 +18,16 @@ function getEmptyDashboardStats(): DashboardStats {
   };
 }
 
-// ── Row type for the recent images JOIN query ───────────────────────
-
-interface RecentImageRow {
-  id: number;
-  site_id: number;
-  key: string;
-  page_url: string;
-  size_in_bytes: number;
-  generated_at: number;
-  created_at: string;
-  url_base: string;
-}
-
 // ── Dashboard Stats ─────────────────────────────────────────────────
 
-export const getDashboardStats = createServerFn({ method: "GET" }).handler(
+/**
+ * Fetch dashboard stats for the current user.
+ *
+ * NOTE: This intentionally does NOT use authMiddleware because
+ * unauthenticated visitors should receive empty stats (the home
+ * page renders a signed-out view based on this), not an error.
+ */
+export const getDashboardStats = createServerFn().handler(
   async (): Promise<DashboardStats> => {
     const { userId } = await auth();
     if (!userId) {

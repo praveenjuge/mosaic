@@ -7,15 +7,10 @@
  */
 
 import { IMAGES_LIMIT } from "@/lib/constants";
+import type { SiteSummary } from "@/lib/types";
 import { extractUrlParts, normalizeUrlBase } from "@/lib/url";
 
-// ── Types ───────────────────────────────────────────────────────────
-
-export type SiteSummary = {
-  siteId: number;
-  url_base: string;
-  r2Prefix: string;
-};
+export type { SiteSummary };
 
 // ── getSitesForUrlBase ──────────────────────────────────────────────
 
