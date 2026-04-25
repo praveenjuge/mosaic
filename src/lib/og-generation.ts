@@ -2,12 +2,19 @@
  * OG image generation helpers and request handler.
  * Pure utility functions plus the main handleUseRequest handler
  * that uses Cloudflare native bindings (R2, Browser Rendering).
+ *
+ * Supports two modes via the `mode` query parameter:
+ * - `mode=demo` — fetches page metadata + generates a screenshot,
+ *   returns JSON for the demo UI. No D1 tracking.
+ * - (default) — production OG generation with D1 site lookup,
+ *   image limit checks, and 307 redirect responses.
  */
 
 import { env, waitUntil } from "cloudflare:workers";
-import { extractUrlParts } from "@/lib/url";
+import { ensureWebsiteProtocol, extractUrlParts } from "@/lib/url";
 import { getDb } from "@/lib/db";
 import { findCachedImageKey, getSitesForUrlBase, recordImage } from "@/server/og";
+import { extractMetadata, fetchPageHtml } from "@/lib/metadata";
 
 // ── CORS Headers ────────────────────────────────────────────────────
 
@@ -36,8 +43,8 @@ export async function generateCacheKey(url: string): Promise<string> {
 /**
  * Build the R2 object key for a cached OG image.
  *
- * - Demo mode always uses `demo/{cacheKey}.png` regardless of prefix.
- * - Production uses `{prefix}/{cacheKey}.png`.
+ * - Demo mode always uses `demo/{cacheKey}.jpeg` regardless of prefix.
+ * - Production uses `{prefix}/{cacheKey}.jpeg`.
  */
 export function getR2Key(
   cacheKey: string,
@@ -45,10 +52,11 @@ export function getR2Key(
   isDemo?: boolean,
 ): string {
   if (isDemo) {
-    return `demo/${cacheKey}.png`;
+    return `demo/${cacheKey}.jpeg`;
   }
-  return `${prefix}/${cacheKey}.png`;
+  return `${prefix}/${cacheKey}.jpeg`;
 }
+
 
 // ── URL Validation ──────────────────────────────────────────────────
 
@@ -103,12 +111,17 @@ export function buildPublicImageUrl(key: string): string {
 /**
  * Create a JSON response with CORS headers.
  */
-export function createJsonResponse(body: object, status: number): Response {
+export function createJsonResponse(
+  body: object,
+  status: number,
+  extraHeaders?: Record<string, string>,
+): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: {
       "Content-Type": "application/json",
       ...corsHeaders,
+      ...extraHeaders,
     },
   });
 }
@@ -128,7 +141,6 @@ export function createRedirectResponse(location: string): Response {
 }
 
 
-
 // ── Screenshot Helper ───────────────────────────────────────────────
 
 /**
@@ -138,10 +150,12 @@ const BROWSER_RENDERING_URL = (accountId: string) =>
   `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/screenshot`;
 
 /**
- * Take a PNG screenshot of the given URL via the Cloudflare Browser Rendering
- * REST API `/screenshot` endpoint. This replaces the previous Puppeteer-based
- * approach and removes the need for the `@cloudflare/puppeteer` package and
- * the Workers `browser` binding.
+ * Take a JPEG screenshot of the given URL via the Cloudflare Browser Rendering
+ * REST API `/screenshot` endpoint.
+ *
+ * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
+ * `networkidle0` to avoid stalling on sites with persistent connections
+ * (analytics beacons, websockets, long-polling).
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const accountId = env.CF_ACCOUNT_ID;
@@ -162,9 +176,9 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     body: JSON.stringify({
       url,
       viewport: { width: 1560, height: 819 },
-      gotoOptions: { waitUntil: "networkidle0", timeout: 30000 },
+      gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
       addStyleTag: [{ content: "* { overflow: hidden; }" }],
-      screenshotOptions: { type: "png" },
+      screenshotOptions: { type: "jpeg", quality: 85 },
     }),
   });
 
@@ -178,25 +192,259 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   return response.arrayBuffer();
 }
 
+
+// ── Demo Mode Handler ───────────────────────────────────────────────
+
+/** Cache-Control for demo JSON responses (1 hour). */
+const DEMO_CACHE_CONTROL = "public, max-age=3600";
+
+/**
+ * Handle a demo-mode request: fetch page metadata and generate a
+ * screenshot in parallel, returning a JSON response with both.
+ *
+ * Demo images are stored under the `demo/` R2 prefix and are not
+ * tracked in D1.
+ */
+async function handleDemoRequest(url: string): Promise<Response> {
+  // Normalize URL — demo accepts bare hostnames like "example.com"
+  let normalizedUrl: string;
+  try {
+    normalizedUrl = ensureWebsiteProtocol(url);
+  } catch {
+    return createJsonResponse(
+      { error: "Please enter a valid website URL." },
+      400,
+    );
+  }
+
+  // Validate
+  const { isValid, error } = validateUrl(normalizedUrl, true);
+  if (!isValid) {
+    return createJsonResponse({ error }, 400);
+  }
+
+  // Parse URL for metadata fetching
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(normalizedUrl);
+  } catch {
+    return createJsonResponse({ error: "Invalid URL provided" }, 400);
+  }
+
+  const { sanitizedUrl } = extractUrlParts(normalizedUrl);
+
+  // Fetch metadata and generate screenshot in parallel
+  const [metadata, screenshotResult] = await Promise.allSettled([
+    fetchPageHtml(parsedUrl).then((html) =>
+      extractMetadata(html, parsedUrl),
+    ),
+    (async () => {
+      const cacheKey = await generateCacheKey(normalizedUrl);
+      const imageKey = getR2Key(cacheKey, undefined, true);
+
+      // Check R2 cache first
+      const cached = await env.OG_BUCKET.head(imageKey);
+      if (cached) {
+        return {
+          imageUrl: buildPublicImageUrl(imageKey),
+          cached: true,
+        };
+      }
+
+      // Take screenshot
+      const imageBuffer = await takeScreenshot(normalizedUrl);
+
+      // Store in R2
+      try {
+        await env.OG_BUCKET.put(imageKey, imageBuffer, {
+          httpMetadata: { contentType: "image/jpeg" },
+        });
+        return {
+          imageUrl: buildPublicImageUrl(imageKey),
+          cached: false,
+        };
+      } catch {
+        // R2 put failure — return base64 fallback
+        const base64 = btoa(
+          String.fromCharCode(...new Uint8Array(imageBuffer)),
+        );
+        return {
+          imageUrl: `data:image/jpeg;base64,${base64}`,
+          cached: false,
+        };
+      }
+    })(),
+  ]);
+
+  // Extract metadata result
+  const meta =
+    metadata.status === "fulfilled"
+      ? metadata.value
+      : { title: "", description: "", image: "" };
+
+  // Extract screenshot result
+  let imageUrl: string | null = null;
+  let screenshotError: string | undefined;
+
+  if (screenshotResult.status === "fulfilled") {
+    imageUrl = screenshotResult.value.imageUrl;
+  } else {
+    screenshotError =
+      screenshotResult.reason instanceof Error
+        ? screenshotResult.reason.message
+        : "Failed to generate OG image";
+  }
+
+  return createJsonResponse(
+    {
+      normalizedUrl: sanitizedUrl,
+      title: meta.title,
+      description: meta.description,
+      image: meta.image,
+      imageUrl,
+      ...(screenshotError ? { error: screenshotError } : {}),
+    },
+    200,
+    { "Cache-Control": DEMO_CACHE_CONTROL },
+  );
+}
+
+
+// ── Production Mode Handler ─────────────────────────────────────────
+
+/**
+ * Handle a production-mode request: look up the site in D1, check
+ * image limits, generate a screenshot on cache miss, store in R2,
+ * record metadata in D1, and return a 307 redirect.
+ */
+async function handleProductionRequest(
+  request: Request,
+  url: string,
+): Promise<Response> {
+  // Validate URL (always production in Workers)
+  const { isValid, error } = validateUrl(url, true);
+  if (!isValid) {
+    return createJsonResponse({ error }, 400);
+  }
+
+  // Edge cache check
+  const cache = (caches as unknown as { default: Cache })["default"];
+  const cachedResponse = await cache.match(request);
+  if (cachedResponse) {
+    return cachedResponse;
+  }
+
+  // Run cache key generation and D1 site lookup in parallel
+  const { urlBase } = extractUrlParts(url);
+  const [cacheKey, sitesResult] = await Promise.all([
+    generateCacheKey(url),
+    getSitesForUrlBase(getDb(), urlBase),
+  ]);
+
+  if (sitesResult.sites.length === 0) {
+    return createJsonResponse(
+      {
+        error:
+          "Website must be added to Mosaic before generating OG images",
+      },
+      404,
+    );
+  }
+
+  // Check D1 for an existing image record instead of looping R2 HEAD calls
+  const siteIds = sitesResult.sites.map((s) => s.siteId);
+  const existingKey = await findCachedImageKey(getDb(), url, siteIds);
+  if (existingKey) {
+    const response = createRedirectResponse(
+      buildPublicImageUrl(existingKey),
+    );
+    waitUntil(cache.put(request, response.clone()));
+    return response;
+  }
+
+  // Check image limit
+  const selectedSite = sitesResult.selectedSite;
+  if (!selectedSite) {
+    return createJsonResponse(
+      {
+        error:
+          "OG image limit exceeded. Please contact support.",
+      },
+      403,
+    );
+  }
+
+  const imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
+
+  // Take screenshot (cache miss)
+  let imageBuffer: ArrayBuffer;
+  try {
+    imageBuffer = await takeScreenshot(url);
+  } catch (err) {
+    console.error("[USE] Screenshot failed:", err);
+    return createJsonResponse(
+      { error: "Failed to take screenshot" },
+      500,
+    );
+  }
+
+  // Store in R2
+  try {
+    await env.OG_BUCKET.put(imageKey, imageBuffer, {
+      httpMetadata: { contentType: "image/jpeg" },
+    });
+
+    // Best-effort D1 record via waitUntil — don't block the response
+    waitUntil(
+      recordImage(
+        getDb(),
+        selectedSite.siteId,
+        imageKey,
+        url,
+        imageBuffer.byteLength,
+      ).catch((err) => console.error("[USE] recordImage failed:", err)),
+    );
+
+    const response = createRedirectResponse(
+      buildPublicImageUrl(imageKey),
+    );
+    waitUntil(cache.put(request, response.clone()));
+    return response;
+  } catch (err) {
+    // R2 put failure — return base64 fallback
+    console.error("[USE] R2 put failed, returning base64 fallback:", err);
+    const base64 = btoa(
+      String.fromCharCode(...new Uint8Array(imageBuffer)),
+    );
+    return createJsonResponse(
+      {
+        imageUrl: `data:image/jpeg;base64,${base64}`,
+        cached: false,
+        fallback: true,
+      },
+      200,
+    );
+  }
+}
+
+
 // ── Main Request Handler ────────────────────────────────────────────
 
 /**
  * Handle an incoming GET /use request.
  *
- * Orchestrates the full OG image flow: edge cache check, URL validation,
- * D1 cache lookup, Browser Rendering screenshot, R2 storage, and D1
- * metadata updates.
+ * Routes to demo or production mode based on the `mode` query parameter:
+ * - `mode=demo` → {@link handleDemoRequest}
+ * - (default)   → {@link handleProductionRequest}
  */
 export async function handleUseRequest(
   request: Request,
 ): Promise<Response> {
   try {
-    // 1. Parse query parameters
     const requestUrl = new URL(request.url);
     const url = requestUrl.searchParams.get("url");
-    const demo = requestUrl.searchParams.get("demo");
+    const mode = requestUrl.searchParams.get("mode");
 
-    // 2. Require url parameter
     if (!url) {
       return createJsonResponse(
         { error: "URL parameter is required" },
@@ -204,154 +452,12 @@ export async function handleUseRequest(
       );
     }
 
-    // 3. Validate URL (always production in Workers)
-    const { isValid, error } = validateUrl(url, true);
-    if (!isValid) {
-      return createJsonResponse({ error }, 400);
+    if (mode === "demo") {
+      return handleDemoRequest(url);
     }
 
-    // 4. Edge cache check (production mode only — demo responses are JSON)
-    const cache = (caches as unknown as { default: Cache })["default"];
-    if (demo !== "true") {
-      const cachedResponse = await cache.match(request);
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-    }
-
-    // 5. Compute cache key
-    const cacheKey = await generateCacheKey(url);
-
-    // Variables shared across demo/production paths and the storage step
-    let imageKey: string;
-    let selectedSite: {
-      siteId: number;
-      url_base: string;
-      r2Prefix: string;
-    } | null = null;
-
-    if (demo === "true") {
-      // 6. Demo mode
-      imageKey = getR2Key(cacheKey, undefined, true);
-
-      const cached = await env.OG_BUCKET.head(imageKey);
-      if (cached) {
-        return createJsonResponse(
-          {
-            imageUrl: buildPublicImageUrl(imageKey),
-            cached: true,
-            fallback: false,
-          },
-          200,
-        );
-      }
-    } else {
-      // 7. Production mode
-      const { urlBase } = extractUrlParts(url);
-
-      const sitesResult = await getSitesForUrlBase(getDb(), urlBase);
-
-      if (sitesResult.sites.length === 0) {
-        return createJsonResponse(
-          {
-            error:
-              "Website must be added to Mosaic before generating OG images",
-          },
-          404,
-        );
-      }
-
-      // Check D1 for an existing image record instead of looping R2 HEAD calls
-      const siteIds = sitesResult.sites.map((s) => s.siteId);
-      const existingKey = await findCachedImageKey(getDb(), url, siteIds);
-      if (existingKey) {
-        const response = createRedirectResponse(
-          buildPublicImageUrl(existingKey),
-        );
-        waitUntil(cache.put(request, response.clone()));
-        return response;
-      }
-
-      // Check image limit
-      selectedSite = sitesResult.selectedSite;
-      if (!selectedSite) {
-        return createJsonResponse(
-          {
-            error:
-              "OG image limit exceeded. Please contact support.",
-          },
-          403,
-        );
-      }
-
-      imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
-    }
-
-    // 8. Take screenshot (cache miss for both modes)
-    let imageBuffer: ArrayBuffer;
-    try {
-      imageBuffer = await takeScreenshot(url);
-    } catch (err) {
-      console.error("[USE] Screenshot failed:", err);
-      return createJsonResponse(
-        { error: "Failed to take screenshot" },
-        500,
-      );
-    }
-
-    // 9. Store in R2
-    try {
-      await env.OG_BUCKET.put(imageKey, imageBuffer, {
-        httpMetadata: { contentType: "image/png" },
-      });
-
-      if (demo !== "true" && selectedSite) {
-        // Best-effort D1 record — don't fail the response
-        try {
-          await recordImage(
-            getDb(),
-            selectedSite.siteId,
-            imageKey,
-            url,
-            imageBuffer.byteLength,
-          );
-        } catch (err) {
-          console.error("[USE] recordImage failed:", err);
-        }
-
-        const response = createRedirectResponse(
-          buildPublicImageUrl(imageKey),
-        );
-        waitUntil(cache.put(request, response.clone()));
-        return response;
-      }
-
-      // Demo mode success
-      return createJsonResponse(
-        {
-          imageUrl: buildPublicImageUrl(imageKey),
-          cached: false,
-          fallback: false,
-        },
-        200,
-      );
-    } catch (err) {
-      // R2 put failure — return base64 fallback
-      console.error("[USE] R2 put failed, returning base64 fallback:", err);
-      const base64 = btoa(
-        String.fromCharCode(...new Uint8Array(imageBuffer)),
-      );
-      return createJsonResponse(
-        {
-          imageUrl: `data:image/png;base64,${base64}`,
-          cached: false,
-          fallback: true,
-        },
-        200,
-      );
-    }
+    return handleProductionRequest(request, url);
   } catch (err) {
-    // 10. Unexpected error
     console.error("[USE] Unhandled error:", err);
     return createJsonResponse({ error: "Internal server error" }, 500);
   }

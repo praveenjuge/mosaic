@@ -17,15 +17,14 @@ export type SiteSummary = {
   r2Prefix: string;
 };
 
-type SiteCandidate = SiteSummary & {
-  userId: string;
-};
-
 // ── getSitesForUrlBase ──────────────────────────────────────────────
 
 /**
  * Find all sites matching a given URL base and select the first site
  * whose owner hasn't exceeded the global image limit.
+ *
+ * Uses a single query with a correlated subquery to fetch per-user
+ * image totals, avoiding N+1 sequential D1 round-trips.
  */
 export async function getSitesForUrlBase(
   db: D1Database,
@@ -35,68 +34,45 @@ export async function getSitesForUrlBase(
 
   const matchingSites = await db
     .prepare(
-      `SELECT s.id, s.user_id, s.url_base, s.r2_prefix
-       FROM sites s
-       WHERE s.url_base = ?
-       ORDER BY s.created_at ASC`,
+      `SELECT s.id, s.user_id, s.url_base, s.r2_prefix,
+              (SELECT COALESCE(SUM(image_count), 0)
+                 FROM sites
+                WHERE user_id = s.user_id) AS user_total
+         FROM sites s
+        WHERE s.url_base = ?
+        ORDER BY s.created_at ASC`,
     )
     .bind(normalizedUrlBase)
-    .all<{ id: number; user_id: string; url_base: string; r2_prefix: string }>();
+    .all<{
+      id: number;
+      user_id: string;
+      url_base: string;
+      r2_prefix: string;
+      user_total: number;
+    }>();
 
   if (matchingSites.results.length === 0) {
     return { sites: [], selectedSite: null };
   }
 
-  const candidates: SiteCandidate[] = matchingSites.results.map((row) => ({
+  const sites: SiteSummary[] = matchingSites.results.map((row) => ({
     siteId: row.id,
-    userId: row.user_id,
     url_base: row.url_base,
     r2Prefix: row.r2_prefix,
   }));
 
-  // Check per-user image counts to find a site whose owner is under the limit
-  const userImageCounts = new Map<string, number>();
-
-  const getUserImageCount = async (userId: string): Promise<number> => {
-    const cached = userImageCounts.get(userId);
-    if (cached !== undefined) {
-      return cached;
-    }
-
-    const result = await db
-      .prepare(
-        `SELECT COALESCE(SUM(image_count), 0) as total
-         FROM sites
-         WHERE user_id = ?`,
-      )
-      .bind(userId)
-      .first<{ total: number }>();
-
-    const count = result?.total ?? 0;
-    userImageCounts.set(userId, count);
-    return count;
-  };
-
+  // Pick the first site whose owner is under the image limit
   let selectedSite: SiteSummary | null = null;
-  for (const candidate of candidates) {
-    const used = await getUserImageCount(candidate.userId);
-    if (used < IMAGES_LIMIT) {
+  for (const row of matchingSites.results) {
+    if (row.user_total < IMAGES_LIMIT) {
       selectedSite = {
-        siteId: candidate.siteId,
-        url_base: candidate.url_base,
-        r2Prefix: candidate.r2Prefix,
+        siteId: row.id,
+        url_base: row.url_base,
+        r2Prefix: row.r2_prefix,
       };
       break;
     }
   }
-
-  const sites: SiteSummary[] = candidates.map(
-    ({ siteId, url_base, r2Prefix }) => ({
-      siteId,
-      url_base,
-      r2Prefix,
-    }),
-  );
 
   return { sites, selectedSite };
 }

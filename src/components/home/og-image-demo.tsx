@@ -114,7 +114,7 @@ export default function OGImageDemo() {
 
     try {
       const response = await fetch(
-        `/api/demo?url=${encodeURIComponent(inputUrl)}`,
+        `/use?url=${encodeURIComponent(inputUrl)}&mode=demo`,
       );
       const data: DemoData = await response.json();
 
