@@ -77,6 +77,7 @@ export const getDashboardStats = createServerFn({ method: "GET" }).handler(
       url_base: site.url_base,
       image_count: site.image_count ?? 0,
       created_at: site.created_at,
+      refreshed_at: site.refreshed_at ?? null,
     }));
 
     const latest_screenshots = (

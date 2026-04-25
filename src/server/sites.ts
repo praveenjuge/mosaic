@@ -3,7 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
-import type { Site } from "@/lib/types";
+import type { ImageRecord, Site } from "@/lib/types";
 import { normalizeUrlBase } from "@/lib/url";
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -197,5 +197,90 @@ export const deleteSite = createServerFn({ method: "POST" })
     return {
       status: "success" as const,
       message: "Website deleted successfully",
+    };
+  });
+
+// ── Refresh Site Images ─────────────────────────────────────────────
+
+const refreshSiteSchema = z.object({
+  siteId: z.number(),
+});
+
+export const refreshSiteImages = createServerFn({ method: "POST" })
+  .inputValidator(refreshSiteSchema)
+  .handler(async ({ data }) => {
+    const { userId } = await auth();
+    if (!userId) {
+      return {
+        status: "error" as const,
+        message: "You must be logged in to refresh images.",
+      };
+    }
+
+    const db = getDb();
+
+    const existing = await db
+      .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
+      .bind(data.siteId, userId)
+      .first<Site>();
+
+    if (!existing) {
+      return {
+        status: "error" as const,
+        message: "Website not found or access denied.",
+      };
+    }
+
+    // 1. Collect page URLs before deleting (needed for edge cache purge)
+    const imageRows = await db
+      .prepare("SELECT page_url FROM images WHERE site_id = ?")
+      .bind(data.siteId)
+      .all<Pick<ImageRecord, "page_url">>();
+
+    // 2. Purge edge cache for each page URL
+    const cache = (caches as unknown as { default: Cache })["default"];
+    const purgePromises = imageRows.results.map((row) => {
+      const cacheUrl = `https://mosaicimg.com/use?url=${encodeURIComponent(row.page_url)}`;
+      const cacheRequest = new Request(cacheUrl, { method: "GET" });
+      return cache.delete(cacheRequest).catch((err) => {
+        console.error("[REFRESH] Cache purge failed for:", row.page_url, err);
+      });
+    });
+    await Promise.all(purgePromises);
+
+    // 3. Delete all R2 objects under the current r2_prefix
+    const oldPrefix = existing.r2_prefix;
+    let cursor: string | undefined;
+    do {
+      const listed = await env.OG_BUCKET.list({
+        prefix: `${oldPrefix}/`,
+        cursor,
+      });
+      if (listed.objects.length > 0) {
+        // R2 delete accepts up to 1000 keys at once
+        const keys = listed.objects.map((obj) => obj.key);
+        await env.OG_BUCKET.delete(keys);
+      }
+      cursor = listed.truncated ? listed.cursor : undefined;
+    } while (cursor);
+
+    // 4. Generate a new r2_prefix for fresh namespace
+    const newR2Prefix = generateR2Prefix();
+
+    // 5. Batch D1: delete image rows + update site with new prefix and reset count
+    await db.batch([
+      db
+        .prepare("DELETE FROM images WHERE site_id = ?")
+        .bind(data.siteId),
+      db
+        .prepare(
+          "UPDATE sites SET r2_prefix = ?, image_count = 0, refreshed_at = datetime('now') WHERE id = ?",
+        )
+        .bind(newR2Prefix, data.siteId),
+    ]);
+
+    return {
+      status: "success" as const,
+      message: "Images refreshed successfully. New screenshots will generate on next visit.",
     };
   });

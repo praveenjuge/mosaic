@@ -7,6 +7,7 @@ export interface Site {
   image_count: number;
   r2_prefix: string;
   created_at: string;
+  refreshed_at: string | null;
 }
 
 export interface ImageRecord {
@@ -45,6 +46,7 @@ export type DashboardStats = {
     url_base: string;
     image_count: number;
     created_at: string;
+    refreshed_at: string | null;
   }>;
   latest_screenshots: Array<{
     id: number;

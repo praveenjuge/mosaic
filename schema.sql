@@ -1,10 +1,11 @@
 CREATE TABLE IF NOT EXISTS sites (
-  id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  user_id     TEXT    NOT NULL,
-  url_base    TEXT    NOT NULL,
-  image_count INTEGER NOT NULL DEFAULT 0,
-  r2_prefix   TEXT    NOT NULL,
-  created_at  TEXT    NOT NULL DEFAULT (datetime('now'))
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id      TEXT    NOT NULL,
+  url_base     TEXT    NOT NULL,
+  image_count  INTEGER NOT NULL DEFAULT 0,
+  r2_prefix    TEXT    NOT NULL,
+  created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+  refreshed_at TEXT    DEFAULT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_sites_user_id

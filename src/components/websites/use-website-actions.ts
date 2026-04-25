@@ -1,4 +1,4 @@
-import { addSite, editSite, deleteSite } from "@/server/sites";
+import { addSite, editSite, deleteSite, refreshSiteImages } from "@/server/sites";
 import { toast } from "sonner";
 import { useRouter } from "@tanstack/react-router";
 
@@ -57,8 +57,28 @@ export function useWebsiteActions() {
     }
   }
 
+  async function refreshWebsite(siteId: number) {
+    try {
+      const result = await refreshSiteImages({ data: { siteId } });
+
+      if (result.status === "error") {
+        toast.error(result.message);
+        return false;
+      }
+
+      toast.success(result.message);
+      router.invalidate();
+      return true;
+    } catch (error) {
+      console.error("Website refresh error:", error);
+      toast.error("Failed to refresh images. Please try again.");
+      return false;
+    }
+  }
+
   return {
     removeWebsite,
+    refreshWebsite,
     saveWebsite,
   };
 }
