@@ -2,8 +2,8 @@
  * D1 query helpers for the /use OG image generation endpoint.
  *
  * These are plain async functions (not server functions) that accept
- * a D1Database parameter. They are called directly from the /use
- * route handler which already has access to env.DB.
+ * a D1Database or D1DatabaseSession parameter. They are called directly
+ * from the /use route handler which already has access to env.DB.
  */
 
 import { IMAGES_LIMIT } from "@/lib/constants";
@@ -11,6 +11,9 @@ import type { SiteSummary } from "@/lib/types";
 import { extractUrlParts, normalizeUrlBase } from "@/lib/url";
 
 export type { SiteSummary };
+
+/** Accepts either a full D1Database or a read-only D1DatabaseSession. */
+type D1Queryable = Pick<D1Database, "prepare" | "batch">;
 
 // ── getSitesForUrlBase ──────────────────────────────────────────────
 
@@ -22,7 +25,7 @@ export type { SiteSummary };
  * image totals, avoiding N+1 sequential D1 round-trips.
  */
 export async function getSitesForUrlBase(
-  db: D1Database,
+  db: D1Queryable,
   urlBase: string,
 ): Promise<{ sites: SiteSummary[]; selectedSite: SiteSummary | null }> {
   const normalizedUrlBase = normalizeUrlBase(urlBase);
@@ -80,7 +83,7 @@ export async function getSitesForUrlBase(
  * This avoids multiple R2 HEAD requests by checking D1 first.
  */
 export async function findCachedImageKey(
-  db: D1Database,
+  db: D1Queryable,
   pageUrl: string,
   siteIds: number[],
 ): Promise<string | null> {

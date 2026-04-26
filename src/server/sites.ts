@@ -1,5 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { getDb } from "@/lib/db";
 import type { ImageRecord, Site } from "@/lib/types";
@@ -17,8 +17,9 @@ function generateR2Prefix() {
 export const listSitesForUser = createServerFn()
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<Site[]> => {
-    const db = getDb();
-    const result = await db
+    // Read-only query — use a read session to hit the nearest replica
+    const session = getDb().withSession();
+    const result = await session
       .prepare("SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC")
       .bind(context.userId)
       .all<Site>();
@@ -133,24 +134,30 @@ export const deleteSite = createServerFn({ method: "POST" })
       throw new Error("Website not found.");
     }
 
-    // Delete all R2 objects under the site's r2_prefix using cursor-based pagination
-    const r2Prefix = existing.r2_prefix;
-    let cursor: string | undefined;
-    do {
-      const listed = await env.OG_BUCKET.list({
-        prefix: `${r2Prefix}/`,
-        cursor,
-      });
-      if (listed.objects.length > 0) {
-        await Promise.all(
-          listed.objects.map((obj) => env.OG_BUCKET.delete(obj.key)),
-        );
-      }
-      cursor = listed.truncated ? listed.cursor : undefined;
-    } while (cursor);
-
-    // Delete site row — cascades to images via FK ON DELETE CASCADE
+    // Delete site row first for immediate user feedback — cascades to images via FK
     await db.prepare("DELETE FROM sites WHERE id = ?").bind(data.siteId).run();
+
+    // Clean up R2 objects in the background — don't block the response
+    const r2Prefix = existing.r2_prefix;
+    waitUntil(
+      (async () => {
+        let cursor: string | undefined;
+        do {
+          const listed = await env.OG_BUCKET.list({
+            prefix: `${r2Prefix}/`,
+            cursor,
+          });
+          if (listed.objects.length > 0) {
+            await Promise.all(
+              listed.objects.map((obj) => env.OG_BUCKET.delete(obj.key)),
+            );
+          }
+          cursor = listed.truncated ? listed.cursor : undefined;
+        } while (cursor);
+      })().catch((err) =>
+        console.error("[DELETE] R2 cleanup failed for prefix:", r2Prefix, err),
+      ),
+    );
   });
 
 // ── Refresh Site Images ─────────────────────────────────────────────

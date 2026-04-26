@@ -12,8 +12,6 @@ function resolveSiteHost(siteUrl: string) {
 
 const prerenderBlockedPaths = [
   "/",
-  "/blog",
-  "/changelog",
   "/dashboard",
   "/sign-in",
   "/sign-up",

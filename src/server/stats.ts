@@ -36,14 +36,18 @@ export const getDashboardStats = createServerFn().handler(
 
     const db = getDb();
 
+    // Use a read session — dashboard stats are read-only and tolerate
+    // slightly stale data, so we can hit the nearest read replica.
+    const session = db.withSession();
+
     // Batch both queries into a single D1 round trip
-    const [sitesResult, recentImagesResult] = await db.batch([
-      db
+    const [sitesResult, recentImagesResult] = await session.batch([
+      session
         .prepare(
           "SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC",
         )
         .bind(userId),
-      db
+      session
         .prepare(
           `SELECT i.*, s.url_base
            FROM images i

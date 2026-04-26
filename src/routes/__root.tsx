@@ -79,7 +79,13 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "preconnect", href: "https://clerk.mosaicimg.com" },
     ],
   }),
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
+    // Skip Clerk auth() call for API routes and static assets — they don't need it
+    const skipAuthPaths = ["/use", "/robots.txt"];
+    if (skipAuthPaths.some((p) => location.pathname === p)) {
+      return { auth: { userId: null, isAuthenticated: false } };
+    }
+
     return {
       auth: await fetchRouteAuth(),
     };

@@ -13,6 +13,7 @@
 import { env, waitUntil } from "cloudflare:workers";
 import { ensureWebsiteProtocol, extractUrlParts } from "@/lib/url";
 import { getDb } from "@/lib/db";
+import { buildPublicImageUrl } from "@/lib/platform";
 import { findCachedImageKey, getSitesForUrlBase, recordImage } from "@/server/og";
 import { extractMetadata, fetchPageHtml } from "@/lib/metadata";
 
@@ -99,12 +100,7 @@ export function validateUrl(
 
 // ── Public Image URL ────────────────────────────────────────────────
 
-/**
- * Build the public-facing URL for a cached OG image.
- */
-export function buildPublicImageUrl(key: string): string {
-  return `https://og.mosaicimg.com/${key}`;
-}
+// buildPublicImageUrl is imported from @/lib/platform at the top of this file.
 
 // ── Response Helpers ────────────────────────────────────────────────
 
@@ -334,11 +330,13 @@ async function handleProductionRequest(
     return cachedResponse;
   }
 
-  // Run cache key generation and D1 site lookup in parallel
+  // Run cache key generation and D1 site lookup in parallel.
+  // Use a read session for the lookup — it can hit the nearest replica.
   const { urlBase } = extractUrlParts(url);
+  const readSession = getDb().withSession();
   const [cacheKey, sitesResult] = await Promise.all([
     generateCacheKey(url),
-    getSitesForUrlBase(getDb(), urlBase),
+    getSitesForUrlBase(readSession, urlBase),
   ]);
 
   if (sitesResult.sites.length === 0) {
@@ -353,7 +351,7 @@ async function handleProductionRequest(
 
   // Check D1 for an existing image record instead of looping R2 HEAD calls
   const siteIds = sitesResult.sites.map((s) => s.siteId);
-  const existingKey = await findCachedImageKey(getDb(), url, siteIds);
+  const existingKey = await findCachedImageKey(readSession, url, siteIds);
   if (existingKey) {
     const response = createRedirectResponse(
       buildPublicImageUrl(existingKey),

@@ -20,6 +20,7 @@
   },
   "placement": {
     "mode": "smart",
+    "hint": "apac"
   },
   "upload_source_maps": true,
   "workers_dev": false,
@@ -29,6 +30,8 @@
       "binding": "DB",
       "database_name": "mosaic-prod",
       "database_id": "ac32231f-9bd4-406d-9d60-d37ae0a5c007"
+      // Read replication: enable via Cloudflare Dashboard > D1 > Settings
+      // or REST API: PUT /d1/database/{id} with {"read_replication": {"mode": "auto"}}
     }
   ],
   "r2_buckets": [
