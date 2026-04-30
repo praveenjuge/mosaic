@@ -1,32 +1,13 @@
-import { fromHighlighter } from "@shikijs/markdown-it/core";
-import MarkdownIt from "markdown-it";
+import rehypeShikiFromHighlighter from "@shikijs/rehype/core";
+import rehypeRaw from "rehype-raw";
+import rehypeStringify from "rehype-stringify";
+import remarkParse from "remark-parse";
+import remarkRehype from "remark-rehype";
 import { createHighlighterCore } from "shiki/core";
 import { createJavaScriptRegexEngine } from "shiki/engine/javascript";
+import { unified } from "unified";
 
-const md = new MarkdownIt({
-  html: true,
-  typographer: true,
-});
-
-const defaultLinkRender =
-  md.renderer.rules.link_open ||
-  ((tokens, idx, options, _env, self) =>
-    self.renderToken(tokens, idx, options));
-
-md.renderer.rules.link_open = (tokens, idx, options, env, self) => {
-  const token = tokens[idx];
-  token.attrPush(["target", "_blank"]);
-  token.attrPush(["rel", "noopener noreferrer"]);
-  return defaultLinkRender(tokens, idx, options, env, self);
-};
-
-md.renderer.rules.image = (tokens, idx) => {
-  const token = tokens[idx];
-  const href = token.attrGet("src");
-  return `<a target="_blank" rel="noreferrer noopener" href="${href}">
-            <img src="${href}" alt="${token.content}" loading="lazy" />
-          </a>`;
-};
+// ── Shiki highlighter (JS regex engine for Cloudflare compatibility) ─
 
 const highlighter = await createHighlighterCore({
   themes: [import("shiki/themes/github-dark.mjs")],
@@ -44,17 +25,99 @@ const highlighter = await createHighlighterCore({
     import("shiki/langs/vue.mjs"),
     import("shiki/langs/yaml.mjs"),
   ],
-  // Use the JS regex engine so prerendering works in Cloudflare-compatible runtimes.
   engine: createJavaScriptRegexEngine(),
 });
-md.use(
-  fromHighlighter(highlighter as never, {
-    themes: {
-      light: "github-dark",
-    },
-  }),
-);
 
-export default function markdownToHtml(markdown: string) {
-  return md.render(markdown);
+// ── Custom rehype plugins ───────────────────────────────────────────
+
+/**
+ * Simple tree visitor for hast nodes.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type HastNode = any;
+
+function visit(
+  tree: HastNode,
+  type: string,
+  visitor: (node: HastNode, index?: number, parent?: HastNode) => void,
+) {
+  function walk(node: HastNode, index?: number, parent?: HastNode) {
+    if (node.type === type) {
+      visitor(node, index, parent);
+    }
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        walk(node.children[i], i, node);
+      }
+    }
+  }
+  walk(tree);
+}
+
+/**
+ * Rehype plugin: add target="_blank" and rel="noopener noreferrer" to all links.
+ */
+function rehypeExternalLinks() {
+  return (tree: HastNode) => {
+    visit(tree, "element", (node: HastNode) => {
+      if (node.tagName === "a") {
+        node.properties = node.properties || {};
+        node.properties.target = "_blank";
+        node.properties.rel = "noopener noreferrer";
+      }
+    });
+  };
+}
+
+/**
+ * Rehype plugin: wrap images in links and add loading="lazy".
+ */
+function rehypeLazyImages() {
+  return (tree: HastNode) => {
+    visit(
+      tree,
+      "element",
+      (node: HastNode, index: number | undefined, parent: HastNode) => {
+        if (node.tagName === "img" && parent && index !== undefined) {
+          const src = node.properties?.src ?? "";
+          node.properties = node.properties || {};
+          node.properties.loading = "lazy";
+
+          const wrapper = {
+            type: "element",
+            tagName: "a",
+            properties: {
+              target: "_blank",
+              rel: "noreferrer noopener",
+              href: src,
+            },
+            children: [node],
+          };
+
+          parent.children[index] = wrapper;
+        }
+      },
+    );
+  };
+}
+
+// ── Processor ───────────────────────────────────────────────────────
+
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkRehype, { allowDangerousHtml: true })
+  .use(rehypeRaw)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  .use(rehypeShikiFromHighlighter, highlighter as any, {
+    themes: { light: "github-dark" },
+  })
+  .use(rehypeExternalLinks)
+  .use(rehypeLazyImages)
+  .use(rehypeStringify);
+
+export default async function markdownToHtml(
+  markdown: string,
+): Promise<string> {
+  const result = await processor.process(markdown);
+  return String(result);
 }

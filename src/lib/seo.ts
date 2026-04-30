@@ -5,7 +5,7 @@ import {
   website_subtitle,
 } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
-import { buildSiteOgImageUrl } from "@/lib/platform";
+import { buildSiteOgImageUrl } from "@/lib/url";
 
 type SeoConfig = {
   description?: string;

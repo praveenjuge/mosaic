@@ -5,8 +5,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatNumber } from "@/lib/format";
 import type { DashboardStats } from "@/lib/types";
+import { formatNumber } from "@/lib/utils";
 import { useAuth } from "@clerk/tanstack-react-start";
 
 interface StatCardSkeletonProps {

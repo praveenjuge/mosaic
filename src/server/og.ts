@@ -8,7 +8,7 @@
 
 import { IMAGES_LIMIT } from "@/lib/constants";
 import type { SiteSummary } from "@/lib/types";
-import { extractUrlParts, normalizeUrlBase } from "@/lib/url";
+import { extractHostname, extractUrlParts } from "@/lib/url";
 
 export type { SiteSummary };
 
@@ -28,7 +28,7 @@ export async function getSitesForUrlBase(
   db: D1Queryable,
   urlBase: string,
 ): Promise<{ sites: SiteSummary[]; selectedSite: SiteSummary | null }> {
-  const normalizedUrlBase = normalizeUrlBase(urlBase);
+  const normalizedUrlBase = extractHostname(urlBase);
 
   const matchingSites = await db
     .prepare(

@@ -3,21 +3,23 @@ import {
   allGuides,
   allHelpArticles,
   allLegalDocuments,
-} from "content-collections";
+} from "./content-loader";
 
-export type HelpArticle = (typeof allHelpArticles)[number];
-export type ChangelogEntry = (typeof allChangelogEntries)[number];
-export type Guide = (typeof allGuides)[number];
-export type LegalDocument = (typeof allLegalDocuments)[number];
+export type {
+  ChangelogEntry,
+  Guide,
+  HelpArticle,
+  LegalDocument,
+} from "./content-loader";
 
 export type GuideLinkItem = Pick<
-  Guide,
+  (typeof allGuides)[number],
   "description" | "slug" | "svgDark" | "svgLight" | "title"
 >;
 
 export type HelpCategory = {
   category: string;
-  entries: Array<Pick<HelpArticle, "slug" | "title">>;
+  entries: Array<Pick<(typeof allHelpArticles)[number], "slug" | "title">>;
 };
 
 function sortByNewest<T extends { publishedAt: string }>(entries: T[]) {
@@ -30,7 +32,7 @@ function sortByOrder<T extends { order: number }>(entries: T[]) {
   return [...entries].sort((left, right) => left.order - right.order);
 }
 
-function groupHelpArticles(entries: HelpArticle[]): HelpCategory[] {
+function groupHelpArticles(entries: typeof allHelpArticles): HelpCategory[] {
   const groupedEntries = new Map<string, HelpCategory["entries"]>();
 
   entries.forEach((entry) => {
@@ -56,7 +58,9 @@ const changelogEntries = sortByNewest(allChangelogEntries);
 const guides = sortByOrder(allGuides);
 const legalDocuments = sortByOrder(allLegalDocuments);
 
-const helpArticleBySlug = new Map(helpArticles.map((entry) => [entry.slug, entry]));
+const helpArticleBySlug = new Map(
+  helpArticles.map((entry) => [entry.slug, entry]),
+);
 const guideBySlug = new Map(guides.map((entry) => [entry.slug, entry]));
 
 export function getChangelogEntries() {

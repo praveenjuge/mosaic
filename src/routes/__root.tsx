@@ -15,7 +15,8 @@ import {
 } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
 import { buildOrganizationJsonLd } from "@/lib/seo";
-import { cn, getOgImageUrl } from "@/lib/utils";
+import { getOgImageUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 import { ClerkProvider } from "@clerk/tanstack-react-start";
 import {
   HeadContent,

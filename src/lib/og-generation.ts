@@ -10,12 +10,19 @@
  *   image limit checks, and 307 redirect responses.
  */
 
-import { env, waitUntil } from "cloudflare:workers";
-import { ensureWebsiteProtocol, extractUrlParts } from "@/lib/url";
 import { getDb } from "@/lib/db";
-import { buildPublicImageUrl } from "@/lib/platform";
-import { findCachedImageKey, getSitesForUrlBase, recordImage } from "@/server/og";
 import { extractMetadata, fetchPageHtml } from "@/lib/metadata";
+import {
+  buildPublicImageUrl,
+  ensureWebsiteProtocol,
+  extractUrlParts,
+} from "@/lib/url";
+import {
+  findCachedImageKey,
+  getSitesForUrlBase,
+  recordImage,
+} from "@/server/og";
+import { env, waitUntil } from "cloudflare:workers";
 
 // ── CORS Headers ────────────────────────────────────────────────────
 
@@ -57,7 +64,6 @@ export function getR2Key(
   }
   return `${prefix}/${cacheKey}.jpeg`;
 }
-
 
 // ── URL Validation ──────────────────────────────────────────────────
 
@@ -136,7 +142,6 @@ export function createRedirectResponse(location: string): Response {
   });
 }
 
-
 // ── Screenshot Helper ───────────────────────────────────────────────
 
 /**
@@ -158,9 +163,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const apiToken = env.CF_BROWSER_RENDERING_TOKEN;
 
   if (!accountId || !apiToken) {
-    throw new Error(
-      "CF_ACCOUNT_ID and CF_BROWSER_RENDERING_TOKEN must be set",
-    );
+    throw new Error("CF_ACCOUNT_ID and CF_BROWSER_RENDERING_TOKEN must be set");
   }
 
   const response = await fetch(BROWSER_RENDERING_URL(accountId), {
@@ -187,7 +190,6 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
 
   return response.arrayBuffer();
 }
-
 
 // ── Demo Mode Handler ───────────────────────────────────────────────
 
@@ -231,9 +233,7 @@ async function handleDemoRequest(url: string): Promise<Response> {
 
   // Fetch metadata and generate screenshot in parallel
   const [metadata, screenshotResult] = await Promise.allSettled([
-    fetchPageHtml(parsedUrl).then((html) =>
-      extractMetadata(html, parsedUrl),
-    ),
+    fetchPageHtml(parsedUrl).then((html) => extractMetadata(html, parsedUrl)),
     (async () => {
       const cacheKey = await generateCacheKey(normalizedUrl);
       const imageKey = getR2Key(cacheKey, undefined, true);
@@ -305,7 +305,6 @@ async function handleDemoRequest(url: string): Promise<Response> {
   );
 }
 
-
 // ── Production Mode Handler ─────────────────────────────────────────
 
 /**
@@ -342,8 +341,7 @@ async function handleProductionRequest(
   if (sitesResult.sites.length === 0) {
     return createJsonResponse(
       {
-        error:
-          "Website must be added to Mosaic before generating OG images",
+        error: "Website must be added to Mosaic before generating OG images",
       },
       404,
     );
@@ -353,9 +351,7 @@ async function handleProductionRequest(
   const siteIds = sitesResult.sites.map((s) => s.siteId);
   const existingKey = await findCachedImageKey(readSession, url, siteIds);
   if (existingKey) {
-    const response = createRedirectResponse(
-      buildPublicImageUrl(existingKey),
-    );
+    const response = createRedirectResponse(buildPublicImageUrl(existingKey));
     waitUntil(cache.put(request, response.clone()));
     return response;
   }
@@ -365,8 +361,7 @@ async function handleProductionRequest(
   if (!selectedSite) {
     return createJsonResponse(
       {
-        error:
-          "OG image limit exceeded. Please contact support.",
+        error: "OG image limit exceeded. Please contact support.",
       },
       403,
     );
@@ -380,10 +375,7 @@ async function handleProductionRequest(
     imageBuffer = await takeScreenshot(url);
   } catch (err) {
     console.error("[USE] Screenshot failed:", err);
-    return createJsonResponse(
-      { error: "Failed to take screenshot" },
-      500,
-    );
+    return createJsonResponse({ error: "Failed to take screenshot" }, 500);
   }
 
   // Store in R2
@@ -403,17 +395,13 @@ async function handleProductionRequest(
       ).catch((err) => console.error("[USE] recordImage failed:", err)),
     );
 
-    const response = createRedirectResponse(
-      buildPublicImageUrl(imageKey),
-    );
+    const response = createRedirectResponse(buildPublicImageUrl(imageKey));
     waitUntil(cache.put(request, response.clone()));
     return response;
   } catch (err) {
     // R2 put failure — return base64 fallback
     console.error("[USE] R2 put failed, returning base64 fallback:", err);
-    const base64 = btoa(
-      String.fromCharCode(...new Uint8Array(imageBuffer)),
-    );
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
     return createJsonResponse(
       {
         imageUrl: `data:image/jpeg;base64,${base64}`,
@@ -425,7 +413,6 @@ async function handleProductionRequest(
   }
 }
 
-
 // ── Main Request Handler ────────────────────────────────────────────
 
 /**
@@ -435,19 +422,14 @@ async function handleProductionRequest(
  * - `mode=demo` → {@link handleDemoRequest}
  * - (default)   → {@link handleProductionRequest}
  */
-export async function handleUseRequest(
-  request: Request,
-): Promise<Response> {
+export async function handleUseRequest(request: Request): Promise<Response> {
   try {
     const requestUrl = new URL(request.url);
     const url = requestUrl.searchParams.get("url");
     const mode = requestUrl.searchParams.get("mode");
 
     if (!url) {
-      return createJsonResponse(
-        { error: "URL parameter is required" },
-        400,
-      );
+      return createJsonResponse({ error: "URL parameter is required" }, 400);
     }
 
     if (mode === "demo") {

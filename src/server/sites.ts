@@ -1,9 +1,9 @@
+import { getDb } from "@/lib/db";
+import type { ImageRecord, Site } from "@/lib/types";
+import { extractHostname } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
 import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
-import { getDb } from "@/lib/db";
-import type { ImageRecord, Site } from "@/lib/types";
-import { normalizeUrlBase } from "@/lib/url";
 import { authMiddleware } from "./middleware";
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -37,7 +37,7 @@ export const addSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(addSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
-    const normalizedUrl = normalizeUrlBase(data.url_base);
+    const normalizedUrl = extractHostname(data.url_base);
     const db = getDb();
 
     const existing = await db
@@ -92,7 +92,7 @@ export const editSite = createServerFn({ method: "POST" })
       throw new Error("Website not found or access denied.");
     }
 
-    const normalizedUrl = normalizeUrlBase(data.url_base);
+    const normalizedUrl = extractHostname(data.url_base);
 
     const duplicate = await db
       .prepare(
@@ -219,9 +219,7 @@ export const refreshSiteImages = createServerFn({ method: "POST" })
 
     // 5. Batch D1: delete image rows + update site with new prefix and reset count
     await db.batch([
-      db
-        .prepare("DELETE FROM images WHERE site_id = ?")
-        .bind(data.siteId),
+      db.prepare("DELETE FROM images WHERE site_id = ?").bind(data.siteId),
       db
         .prepare(
           "UPDATE sites SET r2_prefix = ?, image_count = 0, refreshed_at = datetime('now') WHERE id = ?",

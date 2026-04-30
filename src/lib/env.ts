@@ -1,4 +1,6 @@
-import { normalizeBaseUrl } from "./platform";
+function ensureTrailingSlash(url: string) {
+  return url.endsWith("/") ? url : `${url}/`;
+}
 
 type PublicEnvValue = string | boolean | undefined;
 
@@ -20,11 +22,13 @@ function readPublicEnv(keys: string[], fallback?: string) {
     return fallback;
   }
 
-  throw new Error(`Missing public environment variable. Checked: ${keys.join(", ")}`);
+  throw new Error(
+    `Missing public environment variable. Checked: ${keys.join(", ")}`,
+  );
 }
 
 export const publicEnv = {
-  siteUrl: normalizeBaseUrl(
+  siteUrl: ensureTrailingSlash(
     readPublicEnv(
       ["VITE_SITE_URL"],
       runtimeEnv.DEV ? "http://localhost:3000/" : "https://mosaicimg.com/",

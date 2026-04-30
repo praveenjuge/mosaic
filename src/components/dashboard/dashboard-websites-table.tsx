@@ -1,9 +1,5 @@
 import { CopyButton } from "@/components/copy-button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -15,8 +11,8 @@ import {
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
-import { buildSiteOgImageUrl } from "@/lib/platform";
 import type { DashboardStats } from "@/lib/types";
+import { buildSiteOgImageUrl } from "@/lib/url";
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString + "Z"); // D1 datetime('now') is UTC
@@ -28,12 +24,9 @@ function formatRelativeTime(dateString: string): string {
   const diffDays = Math.floor(diffHours / 24);
 
   if (diffSeconds < 60) return "just now";
-  if (diffMinutes < 60)
-    return `${diffMinutes}m ago`;
-  if (diffHours < 24)
-    return `${diffHours}h ago`;
-  if (diffDays < 30)
-    return `${diffDays}d ago`;
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
   return date.toLocaleDateString();
 }
 

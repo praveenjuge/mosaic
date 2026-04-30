@@ -14,10 +14,10 @@ export const fetchRouteAuth = createServerFn().handler(
   async (): Promise<RouteAuth> => {
     const { userId } = await auth();
 
-  return {
-    userId,
-    isAuthenticated: userId !== null,
-  };
+    return {
+      userId,
+      isAuthenticated: userId !== null,
+    };
   },
 );
 

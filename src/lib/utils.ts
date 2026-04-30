@@ -1,7 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { publicEnv } from "./env";
-import { buildSiteOgImageUrl } from "./platform";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,9 +17,23 @@ export function formatBytes(bytes: number, decimals = 2) {
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
 }
 
-export function getOgImageUrl(slug: string) {
-  const normalizedSlug = slug.replace(/^\//, "");
-  const targetUrl = new URL(normalizedSlug, publicEnv.siteUrl).toString();
+export function formatDate(timestamp: number): string {
+  const date = new Date(timestamp);
+  return date.toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: true,
+  });
+}
 
-  return buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
+export function formatNumber(num: number): string {
+  return num.toLocaleString("en-US");
+}
+
+export function formatLimit(limit: number): string {
+  return limit >= 999999 ? "∞" : formatNumber(limit);
 }

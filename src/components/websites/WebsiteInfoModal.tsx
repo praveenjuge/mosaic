@@ -1,5 +1,5 @@
-import { GuideLink } from "@/components/help/guides";
 import { CopyButton } from "@/components/copy-button";
+import { GuideLink } from "@/components/help/guides";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -12,7 +12,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getGuideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
-import { buildSiteOgImageUrl } from "@/lib/platform";
+import { buildSiteOgImageUrl } from "@/lib/url";
 import { Code, ExternalLink, Ghost } from "lucide-react";
 
 const guideLinks = getGuideLinks();

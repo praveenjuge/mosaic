@@ -1,6 +1,6 @@
 import { getLegalDocuments } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/utils";
+import { getOgImageUrl } from "@/lib/url";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/legal")({

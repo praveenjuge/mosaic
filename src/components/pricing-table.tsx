@@ -9,15 +9,88 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { authenticatedHomePath } from "@/lib/clerk-auth";
-import { PLANS, PRICING_PLANS, type PlanType } from "@/lib/pricing";
 import { SignUpButton } from "@clerk/tanstack-react-start";
 import { Check } from "lucide-react";
 
-interface PlanButtonProps {
-  type: PlanType;
+// ── Pricing Data ────────────────────────────────────────────────────
+
+type PlanType = "free" | "pro" | "pro-yearly";
+
+interface PlanInfo {
+  images_display: string;
+  websites: string;
+  support: string;
 }
 
-function PlanButton({ type }: PlanButtonProps) {
+interface Plan {
+  name: string;
+  description: string;
+  price: string;
+  period: string;
+  badge: string | null;
+  planType: PlanType;
+}
+
+const LANDING_PAGE_LIMITS = {
+  FREE: 500,
+  PRO: 5000,
+  PRO_YEARLY: 999999,
+} as const;
+
+function formatPlanLimit(limit: number): string {
+  return limit >= 999999
+    ? "Unlimited OG Images"
+    : `${limit.toLocaleString()} OG Images`;
+}
+
+const PLANS: Record<PlanType, PlanInfo> = {
+  free: {
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.FREE),
+    websites: "Unlimited Websites",
+    support: "Community Forum Support",
+  },
+  pro: {
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO),
+    websites: "Unlimited Websites",
+    support: "Priority Email Support",
+  },
+  "pro-yearly": {
+    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO_YEARLY),
+    websites: "Unlimited Websites",
+    support: "Priority Email Support",
+  },
+};
+
+const PRICING_PLANS: Plan[] = [
+  {
+    name: "Free",
+    description: "Perfect for Getting Started",
+    price: "$0",
+    period: "",
+    badge: null,
+    planType: "free",
+  },
+  {
+    name: "Pro",
+    description: "For Growing Teams",
+    price: "$19",
+    period: "/month",
+    badge: "Popular",
+    planType: "pro",
+  },
+  {
+    name: "Pro Yearly",
+    description: "Best Value - Save $29",
+    price: "$199",
+    period: "/year",
+    badge: "Save $29/year",
+    planType: "pro-yearly",
+  },
+];
+
+// ── Components ──────────────────────────────────────────────────────
+
+function PlanButton({ type }: { type: PlanType }) {
   return (
     <SignUpButton
       fallbackRedirectUrl={authenticatedHomePath}
@@ -30,16 +103,6 @@ function PlanButton({ type }: PlanButtonProps) {
   );
 }
 
-interface PlanCardProps {
-  name: string;
-  description: string;
-  price: string;
-  period: string;
-  badge: string | null;
-  planType: PlanType;
-  planInfo: (typeof PLANS)[PlanType];
-}
-
 function PlanCard({
   name,
   description,
@@ -48,7 +111,7 @@ function PlanCard({
   badge,
   planType,
   planInfo,
-}: PlanCardProps) {
+}: Plan & { planInfo: PlanInfo }) {
   const features = [
     planInfo.images_display,
     planInfo.websites,
@@ -95,12 +158,7 @@ export default function PricingTable() {
       {PRICING_PLANS.map((plan) => (
         <PlanCard
           key={plan.planType}
-          name={plan.name}
-          description={plan.description}
-          price={plan.price}
-          period={plan.period}
-          badge={plan.badge}
-          planType={plan.planType}
+          {...plan}
           planInfo={PLANS[plan.planType]}
         />
       ))}

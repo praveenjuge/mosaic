@@ -1,6 +1,6 @@
 import { getHelpArticle } from "@/lib/content";
 import { absoluteUrl, buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/utils";
+import { getOgImageUrl } from "@/lib/url";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/help/$slug")({

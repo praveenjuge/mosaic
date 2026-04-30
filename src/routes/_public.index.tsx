@@ -1,6 +1,6 @@
 import { getChangelogEntries } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/utils";
+import { getOgImageUrl } from "@/lib/url";
 import { getDashboardStats } from "@/server/stats";
 import { createFileRoute } from "@tanstack/react-router";
 

@@ -1,6 +1,4 @@
 import Guides from "@/components/help/guides";
-import type { HelpCategory } from "@/lib/content";
-import { buildSeoMeta } from "@/lib/seo";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -9,7 +7,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn, getOgImageUrl } from "@/lib/utils";
+import type { HelpCategory } from "@/lib/content";
+import { buildSeoMeta } from "@/lib/seo";
+import { getOgImageUrl } from "@/lib/url";
+import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail } from "lucide-react";
 import { Route as HelpRoute } from "./_public.help";

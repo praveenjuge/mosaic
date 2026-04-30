@@ -1,9 +1,8 @@
 import { cloudflare } from "@cloudflare/vite-plugin";
-import contentCollections from "@content-collections/vite";
 import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
-import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 
 function resolveSiteHost(siteUrl: string) {
@@ -44,7 +43,9 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const siteHost = resolveSiteHost(
     env.VITE_SITE_URL ||
-      (mode === "development" ? "http://localhost:3000" : "https://mosaicimg.com"),
+      (mode === "development"
+        ? "http://localhost:3000"
+        : "https://mosaicimg.com"),
   );
 
   return {
@@ -54,7 +55,6 @@ export default defineConfig(({ mode }) => {
     envPrefix: ["VITE_"],
     plugins: [
       cloudflare({ viteEnvironment: { name: "ssr" } }),
-      contentCollections(),
       ...tanstackStart({
         pages: [{ path: "/help" }, { path: "/legal" }],
         prerender: {

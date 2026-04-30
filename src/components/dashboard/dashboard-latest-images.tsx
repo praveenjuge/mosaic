@@ -5,10 +5,9 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { formatDate } from "@/lib/format";
-import { buildPublicImageUrl } from "@/lib/platform";
 import type { DashboardStats } from "@/lib/types";
-import { cleanDisplayUrl } from "@/lib/url";
+import { buildPublicImageUrl, cleanDisplayUrl } from "@/lib/url";
+import { formatDate } from "@/lib/utils";
 
 function ScreenshotsEmpty() {
   return (

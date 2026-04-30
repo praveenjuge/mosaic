@@ -4,16 +4,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { formatLimit, formatNumber } from "@/lib/format";
 import type { DashboardStats } from "@/lib/types";
+import { formatLimit, formatNumber } from "@/lib/utils";
 
-function ImagesStatCard({
-  count,
-  limit,
-}: {
-  count: number;
-  limit: number;
-}) {
+function ImagesStatCard({ count, limit }: { count: number; limit: number }) {
   return (
     <Card>
       <CardHeader className="px-4">
