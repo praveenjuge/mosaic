@@ -3,24 +3,21 @@
   "name": "mosaic",
   "main": "@tanstack/react-start/server-entry",
   "compatibility_date": "2026-04-10",
-  "compatibility_flags": [
-    "nodejs_compat",
-    "global_fetch_strictly_public"
-  ],
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "observability": {
     "enabled": true,
     "logs": {
       "enabled": true,
-      "head_sampling_rate": 1
+      "head_sampling_rate": 1,
     },
     "traces": {
       "enabled": true,
-      "head_sampling_rate": 1
-    }
+      "head_sampling_rate": 1,
+    },
   },
   "placement": {
     "mode": "smart",
-    "hint": "apac"
+    "hint": "apac",
   },
   "upload_source_maps": true,
   "workers_dev": false,
@@ -29,19 +26,23 @@
     {
       "binding": "DB",
       "database_name": "mosaic-prod",
-      "database_id": "ac32231f-9bd4-406d-9d60-d37ae0a5c007"
+      "database_id": "ac32231f-9bd4-406d-9d60-d37ae0a5c007",
       // Read replication: enable via Cloudflare Dashboard > D1 > Settings
       // or REST API: PUT /d1/database/{id} with {"read_replication": {"mode": "auto"}}
-    }
+    },
   ],
   "r2_buckets": [
     {
       "binding": "OG_BUCKET",
       "bucket_name": "mosaic-og-prod",
-      "remote": true
-    }
+      "remote": true,
+    },
   ],
+  "browser": {
+    "binding": "BROWSER",
+    "remote": true,
+  },
   "vars": {
-    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ"
-  }
+    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ",
+  },
 }

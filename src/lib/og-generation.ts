@@ -145,46 +145,35 @@ export function createRedirectResponse(location: string): Response {
 // ── Screenshot Helper ───────────────────────────────────────────────
 
 /**
- * Cloudflare Browser Rendering REST API endpoint for screenshots.
- */
-const BROWSER_RENDERING_URL = (accountId: string) =>
-  `https://api.cloudflare.com/client/v4/accounts/${accountId}/browser-rendering/screenshot`;
-
-/**
  * Take a JPEG screenshot of the given URL via the Cloudflare Browser Rendering
- * REST API `/screenshot` endpoint.
+ * `screenshot` Quick Action, called directly through the `BROWSER` Workers
+ * binding (`env.BROWSER.quickAction`).
+ *
+ * Using the binding talks to Browser Rendering directly over Cloudflare's
+ * network — no account ID or API token required, lower latency than the
+ * REST API. Requires a compatibility date of `2026-03-24` or later and a
+ * `browser` binding in `wrangler.jsonc`.
  *
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling).
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  const accountId = env.CF_ACCOUNT_ID;
-  const apiToken = env.CF_BROWSER_RENDERING_TOKEN;
-
-  if (!accountId || !apiToken) {
-    throw new Error("CF_ACCOUNT_ID and CF_BROWSER_RENDERING_TOKEN must be set");
-  }
-
-  const response = await fetch(BROWSER_RENDERING_URL(accountId), {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiToken}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      url,
-      viewport: { width: 1560, height: 819 },
-      gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
-      addStyleTag: [{ content: "* { overflow: hidden; }" }],
-      screenshotOptions: { type: "jpeg", quality: 85 },
-    }),
+  // `BROWSER` is typed as a plain `Fetcher` by the bundled runtime types;
+  // cast to the Quick Action surface until those types include `quickAction`.
+  const browser = env.BROWSER as unknown as BrowserRunBinding;
+  const response = await browser.quickAction("screenshot", {
+    url,
+    viewport: { width: 1560, height: 819 },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
+    addStyleTag: [{ content: "* { overflow: hidden; }" }],
+    screenshotOptions: { type: "jpeg", quality: 85 },
   });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     throw new Error(
-      `Browser Rendering API returned ${response.status}: ${text}`,
+      `Browser Rendering quick action returned ${response.status}: ${text}`,
     );
   }
 
