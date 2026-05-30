@@ -18,12 +18,6 @@ const helpRaw = import.meta.glob("../content/help/**/*.md", {
   import: "default",
 }) as Record<string, string>;
 
-const changelogRaw = import.meta.glob("../content/changelog/**/*.md", {
-  eager: true,
-  query: "?raw",
-  import: "default",
-}) as Record<string, string>;
-
 const guidesRaw = import.meta.glob("../content/guides/**/*.md", {
   eager: true,
   query: "?raw",
@@ -116,14 +110,6 @@ export interface HelpArticle {
   contentHtml: string;
 }
 
-export interface ChangelogEntry {
-  title: string;
-  publishedAt: string;
-  slug: string;
-  content: string;
-  contentHtml: string;
-}
-
 export interface Guide {
   title: string;
   slug: string;
@@ -172,17 +158,6 @@ export const allHelpArticles: HelpArticle[] = await loadCollection(
     title: fm.title as string,
     description: (fm.description as string) ?? "",
     category: fm.category as string | undefined,
-    publishedAt: toIsoDate(fm.publishedAt as string, "publishedAt"),
-    slug,
-    content,
-    contentHtml: html,
-  }),
-);
-
-export const allChangelogEntries: ChangelogEntry[] = await loadCollection(
-  changelogRaw,
-  (slug, fm, content, html) => ({
-    title: fm.title as string,
     publishedAt: toIsoDate(fm.publishedAt as string, "publishedAt"),
     slug,
     content,

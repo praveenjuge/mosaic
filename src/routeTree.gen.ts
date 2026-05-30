@@ -11,12 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UseRouteImport } from './routes/use'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as ChangelogRouteImport } from './routes/changelog'
 import { Route as BlogRouteImport } from './routes/blog'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
-import { Route as ChangelogSlugRouteImport } from './routes/changelog.$slug'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
@@ -34,11 +32,6 @@ const UseRoute = UseRouteImport.update({
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChangelogRoute = ChangelogRouteImport.update({
-  id: '/changelog',
-  path: '/changelog',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -59,11 +52,6 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any).lazy(() => import('./routes/_public.index.lazy').then((d) => d.Route))
-const ChangelogSlugRoute = ChangelogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ChangelogRoute,
-} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -112,13 +100,11 @@ const PublicHelpGuidesSlugRoute = PublicHelpGuidesSlugRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/blog': typeof BlogRouteWithChildren
-  '/changelog': typeof ChangelogRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/changelog/$slug': typeof ChangelogSlugRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -128,12 +114,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/blog': typeof BlogRouteWithChildren
-  '/changelog': typeof ChangelogRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/changelog/$slug': typeof ChangelogSlugRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -145,13 +129,11 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/blog': typeof BlogRouteWithChildren
-  '/changelog': typeof ChangelogRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
   '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/changelog/$slug': typeof ChangelogSlugRoute
   '/_public/': typeof PublicIndexRoute
   '/_auth/sign-in/$': typeof AuthSignInSplatRoute
   '/_auth/sign-up/$': typeof AuthSignUpSplatRoute
@@ -164,13 +146,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/blog'
-    | '/changelog'
     | '/robots.txt'
     | '/use'
     | '/help'
     | '/legal'
     | '/blog/$slug'
-    | '/changelog/$slug'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -180,12 +160,10 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/blog'
-    | '/changelog'
     | '/robots.txt'
     | '/use'
     | '/legal'
     | '/blog/$slug'
-    | '/changelog/$slug'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -196,13 +174,11 @@ export interface FileRouteTypes {
     | '/_auth'
     | '/_public'
     | '/blog'
-    | '/changelog'
     | '/robots.txt'
     | '/use'
     | '/_public/help'
     | '/_public/legal'
     | '/blog/$slug'
-    | '/changelog/$slug'
     | '/_public/'
     | '/_auth/sign-in/$'
     | '/_auth/sign-up/$'
@@ -215,7 +191,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
   BlogRoute: typeof BlogRouteWithChildren
-  ChangelogRoute: typeof ChangelogRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
 }
@@ -234,13 +209,6 @@ declare module '@tanstack/react-router' {
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/changelog': {
-      id: '/changelog'
-      path: '/changelog'
-      fullPath: '/changelog'
-      preLoaderRoute: typeof ChangelogRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog': {
@@ -270,13 +238,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
-    }
-    '/changelog/$slug': {
-      id: '/changelog/$slug'
-      path: '/$slug'
-      fullPath: '/changelog/$slug'
-      preLoaderRoute: typeof ChangelogSlugRouteImport
-      parentRoute: typeof ChangelogRoute
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -390,23 +351,10 @@ const BlogRouteChildren: BlogRouteChildren = {
 
 const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
 
-interface ChangelogRouteChildren {
-  ChangelogSlugRoute: typeof ChangelogSlugRoute
-}
-
-const ChangelogRouteChildren: ChangelogRouteChildren = {
-  ChangelogSlugRoute: ChangelogSlugRoute,
-}
-
-const ChangelogRouteWithChildren = ChangelogRoute._addFileChildren(
-  ChangelogRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
   BlogRoute: BlogRouteWithChildren,
-  ChangelogRoute: ChangelogRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
 }

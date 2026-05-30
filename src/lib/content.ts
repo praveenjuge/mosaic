@@ -1,16 +1,10 @@
 import {
-  allChangelogEntries,
   allGuides,
   allHelpArticles,
   allLegalDocuments,
 } from "./content-loader";
 
-export type {
-  ChangelogEntry,
-  Guide,
-  HelpArticle,
-  LegalDocument,
-} from "./content-loader";
+export type { Guide, HelpArticle, LegalDocument } from "./content-loader";
 
 export type GuideLinkItem = Pick<
   (typeof allGuides)[number],
@@ -54,7 +48,6 @@ function groupHelpArticles(entries: typeof allHelpArticles): HelpCategory[] {
 }
 
 const helpArticles = sortByNewest(allHelpArticles);
-const changelogEntries = sortByNewest(allChangelogEntries);
 const guides = sortByOrder(allGuides);
 const legalDocuments = sortByOrder(allLegalDocuments);
 
@@ -62,10 +55,6 @@ const helpArticleBySlug = new Map(
   helpArticles.map((entry) => [entry.slug, entry]),
 );
 const guideBySlug = new Map(guides.map((entry) => [entry.slug, entry]));
-
-export function getChangelogEntries() {
-  return changelogEntries;
-}
 
 export function getHelpCategories() {
   return groupHelpArticles(helpArticles);
