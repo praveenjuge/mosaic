@@ -8,7 +8,6 @@ export const Route = createLazyFileRoute("/_public/")({
 });
 
 function HomePage() {
-  const { changelogEntries } = Route.useLoaderData();
   const { auth, dashboardStats } = Route.useRouteContext();
   const { isSignedIn } = useAuth();
 
@@ -16,5 +15,5 @@ function HomePage() {
     return <DashboardPage dashboardStats={dashboardStats} />;
   }
 
-  return <HomeSignedOut changelogEntries={changelogEntries} />;
+  return <HomeSignedOut />;
 }

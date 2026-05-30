@@ -1,4 +1,3 @@
-import { getChangelogEntries } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { getDashboardStats } from "@/server/stats";
@@ -12,9 +11,6 @@ export const Route = createFileRoute("/_public/")({
     const dashboardStats = await getDashboardStats();
     return { dashboardStats };
   },
-  loader: () => ({
-    changelogEntries: getChangelogEntries(),
-  }),
   head: () => {
     const seo = buildSeoMeta({
       title: "Simplify Your Open Graph Image Creation.",

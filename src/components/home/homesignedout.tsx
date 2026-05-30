@@ -2,7 +2,6 @@ import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
 import { authenticatedHomePath } from "@/lib/clerk-auth";
-import type { ChangelogEntry } from "@/lib/content";
 import {
   ClerkLoaded,
   ClerkLoading,
@@ -12,7 +11,6 @@ import { MoveRight } from "lucide-react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";
-import LatestUpdates from "./latest-updates";
 import OGImageDemo from "./og-image-demo";
 
 function AuthButtonSkeleton() {
@@ -92,11 +90,7 @@ function FAQSection() {
   );
 }
 
-export default function HomeSignedOut({
-  changelogEntries,
-}: {
-  changelogEntries: ChangelogEntry[];
-}) {
+export default function HomeSignedOut() {
   return (
     <>
       <HeroSection />
@@ -105,7 +99,6 @@ export default function HomeSignedOut({
       <HowItWorks />
       <PricingSection />
       <FAQSection />
-      <LatestUpdates entries={changelogEntries} />
       <CTASection />
     </>
   );
