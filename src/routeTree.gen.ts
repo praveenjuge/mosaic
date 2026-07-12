@@ -15,6 +15,7 @@ import { Route as BlogRouteImport } from './routes/blog'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
+import { Route as ISplatRouteImport } from './routes/i.$'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
 import { Route as PublicHelpRouteImport } from './routes/_public.help'
@@ -52,6 +53,11 @@ const PublicIndexRoute = PublicIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PublicRoute,
 } as any).lazy(() => import('./routes/_public.index.lazy').then((d) => d.Route))
+const ISplatRoute = ISplatRouteImport.update({
+  id: '/i/$',
+  path: '/i/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -118,6 +125,7 @@ export interface FileRoutesByTo {
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/i/$': typeof ISplatRoute
   '/_public/': typeof PublicIndexRoute
   '/_auth/sign-in/$': typeof AuthSignInSplatRoute
   '/_auth/sign-up/$': typeof AuthSignUpSplatRoute
@@ -151,6 +160,7 @@ export interface FileRouteTypes {
     | '/help'
     | '/legal'
     | '/blog/$slug'
+    | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/use'
     | '/legal'
     | '/blog/$slug'
+    | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -179,6 +190,7 @@ export interface FileRouteTypes {
     | '/_public/help'
     | '/_public/legal'
     | '/blog/$slug'
+    | '/i/$'
     | '/_public/'
     | '/_auth/sign-in/$'
     | '/_auth/sign-up/$'
@@ -193,6 +205,7 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   UseRoute: typeof UseRoute
+  ISplatRoute: typeof ISplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -238,6 +251,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
+    }
+    '/i/$': {
+      id: '/i/$'
+      path: '/i/$'
+      fullPath: '/i/$'
+      preLoaderRoute: typeof ISplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -357,6 +377,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   UseRoute: UseRoute,
+  ISplatRoute: ISplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

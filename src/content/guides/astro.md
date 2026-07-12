@@ -12,7 +12,7 @@ svgDark: "astro-icon-dark"
 ```astro
 ---
 const title = "Your Page Title";
-const ogImage = "https://mosaicimg.com/use?url=yourwebsite.com/your_slug";
+const ogImage = "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug";
 ---
 
 <html lang="en">

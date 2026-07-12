@@ -30,6 +30,9 @@ import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
 
+// The root router context is intentionally empty; child routes augment it via
+// `beforeLoad` (see `auth`). `{}` is required here for that augmentation to work.
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export const Route = createRootRouteWithContext<{}>()({
   head: () => ({
     meta: [
@@ -77,7 +80,7 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "icon", href: "/favicon.ico" },
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
-      { rel: "preconnect", href: "https://clerk.mosaicimg.com" },
+      { rel: "preconnect", href: "https://clerk.mosaic.praveenjuge.com" },
     ],
   }),
   beforeLoad: async ({ location }) => {

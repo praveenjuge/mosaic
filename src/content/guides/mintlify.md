@@ -10,6 +10,6 @@ order: 130
 ```mdx
 ---
 title: "Your Page Title"
-"og:image": "https://mosaicimg.com/use?url=yourwebsite.com/your_slug"
+"og:image": "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug"
 ---
 ```

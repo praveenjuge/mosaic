@@ -11,7 +11,7 @@ order: 100
 function add_dynamic_og_image() {
     global $post;
     $current_slug = $post->post_name;
-    $og_image_url = 'https://mosaicimg.com/use?url=yourwebsite.com/' . $current_slug;
+    $og_image_url = 'https://mosaic.praveenjuge.com/use?url=yourwebsite.com/' . $current_slug;
 
     echo '<meta property="og:image" content="' . esc_url($og_image_url) . '" />';
 }

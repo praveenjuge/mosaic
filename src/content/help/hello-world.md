@@ -15,9 +15,9 @@ already have.
 With Mosaic, you can effortlessly generate these screenshots and integrate them
 into your website in under a minute, no coding skills required.
 
-We invite you to explore our [blog](https://mosaicimg.com/blog) for the latest
+We invite you to explore our [blog](https://mosaic.praveenjuge.com/blog) for the latest
 news and new features. For any assistance or support, visit our
-[help page](https://mosaicimg.com/help).
+[help page](https://mosaic.praveenjuge.com/help).
 
 Feel free to reach out with any questions or feature requests. We're here to
 help!

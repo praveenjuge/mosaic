@@ -16,7 +16,8 @@ export const meta: MetaFunction = () => {
   return [
     {
       property: "og:image",
-      content: "https://mosaicimg.com/use?url=yourwebsite.com/your_slug",
+      content:
+        "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug",
     },
     { property: "og:type", content: "website" },
   ];

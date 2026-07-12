@@ -1,6 +1,6 @@
 import { getDb } from "@/lib/db";
 import type { ImageRecord, Site } from "@/lib/types";
-import { extractHostname } from "@/lib/url";
+import { DEFAULT_SITE_URL, extractHostname, LEGACY_SITE_URL } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
 import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
@@ -189,11 +189,17 @@ export const refreshSiteImages = createServerFn({ method: "POST" })
 
     // 2. Purge edge cache for each page URL
     const cache = (caches as unknown as { default: Cache })["default"];
-    const purgePromises = imageRows.results.map(async (row) => {
-      const cacheUrl = `https://mosaicimg.com/use?url=${encodeURIComponent(row.page_url)}`;
-      const cacheRequest = new Request(cacheUrl, { method: "GET" });
-      return cache.delete(cacheRequest).catch((err) => {
-        console.error("[REFRESH] Cache purge failed for:", row.page_url, err);
+    const purgePromises = imageRows.results.flatMap((row) => {
+      const encoded = encodeURIComponent(row.page_url);
+      // Purge both the canonical host and the legacy host so OG images
+      // embedded on customer sites via either domain get regenerated.
+      return [DEFAULT_SITE_URL, LEGACY_SITE_URL].map((base) => {
+        const cacheRequest = new Request(`${base}use?url=${encoded}`, {
+          method: "GET",
+        });
+        return cache.delete(cacheRequest).catch((err) => {
+          console.error("[REFRESH] Cache purge failed for:", row.page_url, err);
+        });
       });
     });
     await Promise.all(purgePromises);

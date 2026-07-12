@@ -12,5 +12,5 @@ svgDark: "dub_dark_logo"
 When creating a link, click **Edit** next to **Link Preview**, then use the image URL option with:
 
 ```text
-https://mosaicimg.com/use?url=yourwebsite.com/your_slug
+https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug
 ```

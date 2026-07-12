@@ -4,10 +4,10 @@ category: "Authentication"
 publishedAt: "2024-08-18T09:51:15.583Z"
 ---
 
-If you need to change your password on Mosaicimg.com, follow these simple steps:
+If you need to change your password on mosaic.praveenjuge.com, follow these simple steps:
 
 - **Visit the Website**\
-   Go to [mosaicimg.com](https://mosaicimg.com) using your preferred web browser.
+   Go to [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com) using your preferred web browser.
 
 - **Sign In**\
    Click on the **“Sign In”** button located at the homepage.

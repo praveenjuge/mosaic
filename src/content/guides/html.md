@@ -16,13 +16,13 @@ svgDark: "html5"
     <meta property="og:title" content="Your Page Title" />
     <meta
       property="og:image"
-      content="https://mosaicimg.com/use?url=yourwebsite.com/your_slug"
+      content="https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug"
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:image"
-      content="https://mosaicimg.com/use?url=yourwebsite.com/your_slug"
+      content="https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug"
     />
   </head>
   <body>

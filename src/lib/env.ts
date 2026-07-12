@@ -31,7 +31,9 @@ export const publicEnv = {
   siteUrl: ensureTrailingSlash(
     readPublicEnv(
       ["VITE_SITE_URL"],
-      runtimeEnv.DEV ? "http://localhost:3000/" : "https://mosaicimg.com/",
+      runtimeEnv.DEV
+        ? "http://localhost:3000/"
+        : "https://mosaic.praveenjuge.com/",
     ),
   ),
   clerkPublishableKey: readPublicEnv(["VITE_CLERK_PUBLISHABLE_KEY"], ""),
