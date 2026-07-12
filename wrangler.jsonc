@@ -49,6 +49,13 @@
     "remote": true,
   },
   "vars": {
-    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ",
+    // Clerk production publishable key. The payload base64-decodes to the
+    // Frontend API host: `clerk.mosaic.praveenjuge.com$`.
+    // IMPORTANT: this key is only valid AFTER the Clerk production instance's
+    // primary domain is changed to `mosaic.praveenjuge.com` (Clerk dashboard or
+    // Backend API with the sk_live secret). Deploying this before that change
+    // will break auth because `clerk.mosaic.praveenjuge.com` won't resolve yet.
+    // Previous key (clerk.mosaicimg.com$): pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ
+    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljLnByYXZlZW5qdWdlLmNvbSQ",
   },
 }
