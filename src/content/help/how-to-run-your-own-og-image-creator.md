@@ -49,7 +49,7 @@ def capture_og_magic(url, output_file):
     page.screenshot(path=output_file, full_page=False)
     browser.close()
 
-url = "<https://mosaicimg.com/>"
+url = "<https://mosaic.praveenjuge.com/>"
 output_file = "og_image_of_awesomeness.png"
 capture_og_magic(url, output_file)
 ```
@@ -87,4 +87,4 @@ wisely.
 
 Happy screenshotting, you magnificent code sorcerer!
 
-P.S. If all else fails, you can always just use Mosaic. <https://mosaicimg.com/>
+P.S. If all else fails, you can always just use Mosaic. <https://mosaic.praveenjuge.com/>

@@ -12,7 +12,7 @@ order: 50
 useSeoMeta({
   title: "My Page Title",
   ogTitle: "My Page Title",
-  ogImage: "https://mosaicimg.com/use?url=yourwebsite.com/your_slug",
+  ogImage: "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug",
   ogType: "website",
 });
 </script>
@@ -28,7 +28,7 @@ const slug = route.params.slug;
 useSeoMeta({
   title: `Post: ${slug}`,
   ogTitle: `Post: ${slug}`,
-  ogImage: `https://mosaicimg.com/use?url=yourwebsite.com/${slug}`,
+  ogImage: `https://mosaic.praveenjuge.com/use?url=yourwebsite.com/${slug}`,
   ogType: "article",
 });
 </script>

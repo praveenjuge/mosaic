@@ -82,7 +82,7 @@ export async function fetchPageHtml(url: URL): Promise<string> {
       redirect: "follow",
       headers: {
         "User-Agent":
-          "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaicimg.com)",
+          "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaic.praveenjuge.com)",
         Accept: "text/html,application/xhtml+xml",
       },
     });

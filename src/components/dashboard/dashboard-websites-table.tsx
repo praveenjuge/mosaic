@@ -12,7 +12,7 @@ import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
 import type { DashboardStats } from "@/lib/types";
-import { buildSiteOgImageUrl } from "@/lib/url";
+import { buildSiteOgImageUrl, DEFAULT_SITE_URL } from "@/lib/url";
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString + "Z"); // D1 datetime('now') is UTC
@@ -36,10 +36,7 @@ function WebsiteRow({
   website: DashboardStats["websites"][number];
 }) {
   const fullUrl = `https://${website.url_base}`;
-  const ogImageUsageUrl = buildSiteOgImageUrl(
-    "https://mosaicimg.com/",
-    fullUrl,
-  );
+  const ogImageUsageUrl = buildSiteOgImageUrl(DEFAULT_SITE_URL, fullUrl);
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
 
   return (

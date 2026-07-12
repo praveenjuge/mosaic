@@ -19,7 +19,8 @@ export class PageComponent {
   constructor(private meta: Meta) {
     this.meta.updateTag({
       property: "og:image",
-      content: "https://mosaicimg.com/use?url=yourwebsite.com/your_slug",
+      content:
+        "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug",
     });
   }
 }

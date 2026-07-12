@@ -22,6 +22,12 @@
   "upload_source_maps": true,
   "workers_dev": false,
   "preview_urls": false,
+  // Single host serves the app + OG images (`/i/<key>`). The legacy domain
+  // stays bound to the Worker so it can 301-redirect (and keep `/use` alive).
+  "routes": [
+    { "pattern": "mosaic.praveenjuge.com", "custom_domain": true },
+    { "pattern": "mosaicimg.com", "custom_domain": true },
+  ],
   "d1_databases": [
     {
       "binding": "DB",
@@ -43,6 +49,12 @@
     "remote": true,
   },
   "vars": {
-    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ",
+    // Clerk production publishable key. The payload base64-decodes to the
+    // Frontend API host: `clerk.mosaic.praveenjuge.com$`.
+    // Requires the Clerk production instance's primary domain to be
+    // mosaic.praveenjuge.com with Clerk infrastructure kept on that subdomain
+    // (FAPI clerk.mosaic.praveenjuge.com), matching the other *.praveenjuge.com
+    // apps. Previous key (clerk.mosaicimg.com$): pk_live_Y2xlcmsubW9zYWljaW1nLmNvbSQ
+    "VITE_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsubW9zYWljLnByYXZlZW5qdWdlLmNvbSQ",
   },
 }

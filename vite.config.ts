@@ -15,6 +15,7 @@ const prerenderBlockedPaths = [
   "/sign-in",
   "/sign-up",
   "/use",
+  "/i",
 ];
 
 const staticAssetPattern =
@@ -45,7 +46,7 @@ export default defineConfig(({ mode }) => {
     env.VITE_SITE_URL ||
       (mode === "development"
         ? "http://localhost:3000"
-        : "https://mosaicimg.com"),
+        : "https://mosaic.praveenjuge.com"),
   );
 
   return {

@@ -5,7 +5,7 @@ publishedAt: "2024-07-18T14:25:38.421Z"
 ---
 
 - **Sign In to Mosaic**
-- **Go to [Mosaic Dashboard](https://mosaicimg.com)**
+- **Go to [Mosaic Dashboard](https://mosaic.praveenjuge.com)**
 - **Click on the "Add Website" Button**
 - **Enter Your Website URL**
 

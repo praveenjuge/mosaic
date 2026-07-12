@@ -1,5 +1,6 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
+import { DEFAULT_SITE_URL, LEGACY_HOST } from "@/lib/url";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import { createMiddleware, createStart } from "@tanstack/react-start";
 
@@ -16,6 +17,34 @@ const cspHeader = [
 ]
   .filter(Boolean)
   .join(" ");
+
+// Permanently redirect the legacy domain to the canonical one, while keeping
+// the OG image endpoint (`/use`) alive for embeds already in the wild — those
+// requests are served normally and 307-redirect to the new image host on their
+// own. `og.mosaicimg.com` is served directly by R2 and never reaches here.
+const legacyDomainRedirectMiddleware = createMiddleware({
+  type: "request",
+}).server(async ({ next, request }) => {
+  const url = new URL(request.url);
+
+  // Treat `/use` and `/use/` (trailing slash) as the OG endpoint to pass through.
+  const isUseEndpoint = /^\/use\/?$/.test(url.pathname);
+
+  if (url.hostname === LEGACY_HOST && !isUseEndpoint) {
+    const target = new URL(`${url.pathname}${url.search}`, DEFAULT_SITE_URL);
+    throw new Response(null, {
+      status: 301,
+      headers: {
+        Location: target.toString(),
+        "Cache-Control": "public, max-age=3600",
+        "Strict-Transport-Security":
+          "max-age=63072000; includeSubDomains; preload",
+      },
+    });
+  }
+
+  return next();
+});
 
 const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
   async ({ next }) => {
@@ -47,6 +76,7 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
 export const startInstance = createStart(() => {
   return {
     requestMiddleware: [
+      legacyDomainRedirectMiddleware,
       clerkMiddleware({
         publishableKey: publicEnv.clerkPublishableKey,
         signInUrl: signInPath,
