@@ -27,7 +27,10 @@ const legacyDomainRedirectMiddleware = createMiddleware({
 }).server(async ({ next, request }) => {
   const url = new URL(request.url);
 
-  if (url.hostname === LEGACY_HOST && url.pathname !== "/use") {
+  // Treat `/use` and `/use/` (trailing slash) as the OG endpoint to pass through.
+  const isUseEndpoint = /^\/use\/?$/.test(url.pathname);
+
+  if (url.hostname === LEGACY_HOST && !isUseEndpoint) {
     const target = new URL(`${url.pathname}${url.search}`, DEFAULT_SITE_URL);
     throw new Response(null, {
       status: 301,
