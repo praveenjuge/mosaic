@@ -84,9 +84,12 @@ export const Route = createRootRouteWithContext<{}>()({
     ],
   }),
   beforeLoad: async ({ location }) => {
-    // Skip Clerk auth() call for API routes and static assets — they don't need it
-    const skipAuthPaths = ["/use", "/robots.txt"];
-    if (skipAuthPaths.some((p) => location.pathname === p)) {
+    // Skip the Clerk auth() call for API/asset routes that don't need it. These
+    // are public and must not depend on Clerk — notably `/i/<key>` OG images,
+    // where a Clerk outage would otherwise break social embeds.
+    const skipAuthExact = ["/use", "/robots.txt"];
+    const { pathname } = location;
+    if (skipAuthExact.includes(pathname) || pathname.startsWith("/i/")) {
       return { auth: { userId: null, isAuthenticated: false } };
     }
 
