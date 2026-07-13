@@ -5,8 +5,26 @@ import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 
-function resolveSiteHost(siteUrl: string) {
-  return siteUrl.endsWith("/") ? siteUrl.slice(0, -1) : siteUrl;
+function resolveSiteHost(siteUrl: string | undefined) {
+  if (!siteUrl) {
+    throw new Error("VITE_SITE_URL is required.");
+  }
+
+  const parsed = new URL(siteUrl);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("VITE_SITE_URL must use HTTP or HTTPS.");
+  }
+  if (
+    parsed.username ||
+    parsed.password ||
+    parsed.pathname !== "/" ||
+    parsed.search ||
+    parsed.hash
+  ) {
+    throw new Error("VITE_SITE_URL must be an origin without a path or query.");
+  }
+
+  return parsed.origin;
 }
 
 const prerenderBlockedPaths = [
@@ -42,12 +60,7 @@ function exitAfterCloudflarePrerender(): Plugin {
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const siteHost = resolveSiteHost(
-    env.VITE_SITE_URL ||
-      (mode === "development"
-        ? "http://localhost:3000"
-        : "https://mosaic.praveenjuge.com"),
-  );
+  const siteHost = resolveSiteHost(env.VITE_SITE_URL);
 
   return {
     build: {

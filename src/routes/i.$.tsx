@@ -4,8 +4,7 @@ import { env, waitUntil } from "cloudflare:workers";
 /**
  * Serves OG images directly from R2 through the Worker at `/i/<r2key>`.
  *
- * Replaces the previous `og.mosaicimg.com` R2 custom domain so that a single
- * host (`mosaic.praveenjuge.com`) serves both the app and its images.
+ * The application origin serves both the app and its images.
  *
  * R2 keys contain slashes (`<prefix>/<hash>.jpeg` or `demo/<hash>.jpeg`), so
  * this is a splat route and the key is read from the path after `/i/`.

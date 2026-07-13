@@ -80,7 +80,6 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "icon", href: "/favicon.ico" },
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
-      { rel: "preconnect", href: "https://clerk.mosaic.praveenjuge.com" },
     ],
   }),
   beforeLoad: async ({ location }) => {

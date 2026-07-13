@@ -1,17 +1,54 @@
 {
   "name": "mosaic",
+  "description": "Automatically generate Open Graph images for websites with Cloudflare Browser Rendering.",
+  "license": "MIT",
+  "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/praveenjuge/mosaic.git"
+  },
+  "homepage": "https://mosaic.praveenjuge.com",
+  "bugs": {
+    "url": "https://github.com/praveenjuge/mosaic/issues"
+  },
+  "packageManager": "bun@1.3.14",
   "scripts": {
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "db:seed-local": "bunx wrangler d1 execute mosaic-prod --local --file schema.sql",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
+    "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
+    "deploy": "bun run db:migrate:remote && wrangler deploy",
     "dev": "NODE_OPTIONS='--max-http-header-size=32768' vite dev",
     "dev:frontend": "NODE_OPTIONS='--max-http-header-size=32768' vite dev",
-    "lint": "eslint --fix",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
     "predev": "tsc --noEmit",
     "preview": "vite preview",
     "start": "vite preview",
     "cf-typegen": "wrangler types"
+  },
+  "cloudflare": {
+    "bindings": {
+      "DB": {
+        "description": "D1 database storing websites and generated-image metadata."
+      },
+      "OG_BUCKET": {
+        "description": "R2 bucket storing generated Open Graph images."
+      },
+      "BROWSER": {
+        "description": "Browser Rendering binding used by Browser Run to capture screenshots."
+      },
+      "VITE_SITE_URL": {
+        "description": "Required build-time public HTTPS origin for this Mosaic deployment."
+      },
+      "VITE_CLERK_PUBLISHABLE_KEY": {
+        "description": "Required build-time publishable key for the Clerk application."
+      },
+      "CLERK_SECRET_KEY": {
+        "description": "Required runtime secret key for the Clerk application."
+      }
+    }
   },
   "prettier": {
     "plugins": [
