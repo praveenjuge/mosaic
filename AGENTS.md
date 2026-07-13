@@ -13,7 +13,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - Build command: `bun run build`
 - Development command: `bun run dev` (runs `vite dev` with Cloudflare plugin providing local D1/R2)
 - Linting command: `bun run lint` (auto-fixes via eslint --fix)
-- Seed local DB: `bun run db:seed-local`
+- Apply local DB migrations: `bun run db:migrate:local`
 
 ## Project Structure
 
@@ -26,10 +26,7 @@ src/
 ├── generated/       # Build-time generated typed content manifests
 ├── lib/             # Shared utilities, SEO, env, constants, db accessor
 └── styles/          # Global app styles
-d1/
-├── schema.sql       # D1 DDL (tables, indexes, constraints)
-├── migrate.ts       # One-time Convex → D1 migration script
-└── README.md        # Migration workflow docs
+migrations/          # Ordered Wrangler D1 migrations
 public/              # Static assets
 ```
 
@@ -45,7 +42,7 @@ public/              # Static assets
 - Keep build-time content processing out of the route runtime path
 - Handle errors gracefully with try/catch blocks
 - Use Clerk `auth()` in server functions to enforce data access
-- For DB schema changes, update `d1/schema.sql` and re-apply
+- For DB schema changes, add a Wrangler D1 migration and apply it locally
 - Use `getDb()` from `src/lib/db.ts` for D1 access in server functions
 - Use `import { env } from "cloudflare:workers"` for R2 and other bindings
 - Use shadcn/ui components consistently

@@ -1,11 +1,14 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
-import { DEFAULT_SITE_URL, LEGACY_HOST } from "@/lib/url";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
-import { createMiddleware, createStart } from "@tanstack/react-start";
+import {
+  createCsrfMiddleware,
+  createMiddleware,
+  createStart,
+} from "@tanstack/react-start";
 
 const cspHeader = [
-  "img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com https://pub-84f0589ebfe14c319d4884539bf9f1b7.r2.dev *;",
+  "img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com *;",
   "font-src 'self' https://fonts.gstatic.com;",
   "worker-src 'self' blob:;",
   "style-src 'self' 'unsafe-inline' https://www.gstatic.com;",
@@ -18,32 +21,8 @@ const cspHeader = [
   .filter(Boolean)
   .join(" ");
 
-// Permanently redirect the legacy domain to the canonical one, while keeping
-// the OG image endpoint (`/use`) alive for embeds already in the wild — those
-// requests are served normally and 307-redirect to the new image host on their
-// own. `og.mosaicimg.com` is served directly by R2 and never reaches here.
-const legacyDomainRedirectMiddleware = createMiddleware({
-  type: "request",
-}).server(async ({ next, request }) => {
-  const url = new URL(request.url);
-
-  // Treat `/use` and `/use/` (trailing slash) as the OG endpoint to pass through.
-  const isUseEndpoint = /^\/use\/?$/.test(url.pathname);
-
-  if (url.hostname === LEGACY_HOST && !isUseEndpoint) {
-    const target = new URL(`${url.pathname}${url.search}`, DEFAULT_SITE_URL);
-    throw new Response(null, {
-      status: 301,
-      headers: {
-        Location: target.toString(),
-        "Cache-Control": "public, max-age=3600",
-        "Strict-Transport-Security":
-          "max-age=63072000; includeSubDomains; preload",
-      },
-    });
-  }
-
-  return next();
+const csrfMiddleware = createCsrfMiddleware({
+  filter: (context) => context.handlerType === "serverFn",
 });
 
 const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
@@ -76,7 +55,7 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
 export const startInstance = createStart(() => {
   return {
     requestMiddleware: [
-      legacyDomainRedirectMiddleware,
+      csrfMiddleware,
       clerkMiddleware({
         publishableKey: publicEnv.clerkPublishableKey,
         signInUrl: signInPath,

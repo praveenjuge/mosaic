@@ -5,6 +5,8 @@
  * metadata (title, description, image) for display in the demo UI.
  */
 
+import { publicEnv } from "./env";
+
 // ── Helpers ─────────────────────────────────────────────────────────
 
 const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
@@ -81,8 +83,7 @@ export async function fetchPageHtml(url: URL): Promise<string> {
     response = await fetch(url.toString(), {
       redirect: "follow",
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (compatible; MosaicBot/1.0; +https://mosaic.praveenjuge.com)",
+        "User-Agent": `Mozilla/5.0 (compatible; MosaicBot/1.0; +${publicEnv.siteUrl})`,
         Accept: "text/html,application/xhtml+xml",
       },
     });

@@ -1,14 +1,11 @@
 import { publicEnv } from "./env";
 
-// ── Constants ───────────────────────────────────────────────────────
-
-export const DEFAULT_SITE_URL = "https://mosaic.praveenjuge.com/";
-export const LEGACY_SITE_URL = "https://mosaicimg.com/";
-export const LEGACY_HOST = "mosaicimg.com";
 // OG images are served by the Worker itself at `/i/<r2key>` (no separate
 // R2 custom domain). R2 keys contain slashes, so this is a splat route.
-export const DEFAULT_PUBLIC_IMAGE_BASE_URL =
-  "https://mosaic.praveenjuge.com/i/";
+export const DEFAULT_PUBLIC_IMAGE_BASE_URL = new URL(
+  "i/",
+  publicEnv.siteUrl,
+).toString();
 
 // ── Low-level URL manipulation ──────────────────────────────────────
 
