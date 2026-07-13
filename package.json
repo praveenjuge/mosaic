@@ -40,13 +40,13 @@
         "description": "Browser Rendering binding used by Browser Run to capture screenshots."
       },
       "VITE_SITE_URL": {
-        "description": "Public HTTPS origin for this Mosaic deployment."
+        "description": "Required build-time public HTTPS origin for this Mosaic deployment."
       },
       "VITE_CLERK_PUBLISHABLE_KEY": {
-        "description": "Publishable key for the Clerk application."
+        "description": "Required build-time publishable key for the Clerk application."
       },
       "CLERK_SECRET_KEY": {
-        "description": "Secret key for the Clerk application."
+        "description": "Required runtime secret key for the Clerk application."
       }
     }
   },
