@@ -26,7 +26,7 @@ bun run db:migrate:local
 bun run dev
 ```
 
-Fill in all three variables in `.env.local` and run `wrangler login` first. Browser Run uses the remote `BROWSER` binding during local development, so screenshot generation requires an authenticated Cloudflare account with Browser Rendering access.
+Fill in all three variables in `.env.local` (use `http://localhost:3000` for `VITE_SITE_URL`) and run `wrangler login` first. Browser Run uses the remote `BROWSER` binding during local development, so screenshot generation requires an authenticated Cloudflare account with Browser Rendering access.
 
 ## License
 
