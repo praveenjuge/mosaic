@@ -1,6 +1,5 @@
 /**
- * Ambient typings for the Browser Rendering (Browser Run) Workers binding
- * `quickAction()` method.
+ * Ambient typings for the Browser Run Workers binding `quickAction()` method.
  *
  * Cloudflare shipped `env.BROWSER.quickAction()` on 2026-05-28, but the
  * bundled `workerd` runtime types in `worker-configuration.d.ts` still type
@@ -9,10 +8,14 @@
  * surface we use so the binding can be cast and called type-safely.
  *
  * Remove this shim and the cast in `og-generation.ts` once the generated
- * runtime types include `quickAction`.
+ * runtime types include `BrowserRun` / `quickAction`.
  *
  * @see https://developers.cloudflare.com/browser-run/quick-actions/
+ * @see https://developers.cloudflare.com/browser-run/kitesurf/
  */
+
+/** Browser engine for Browser Run. Chromium is the default when omitted. */
+type BrowserRunEngine = "chromium" | "kitesurf";
 
 interface BrowserRunViewport {
   width: number;
@@ -42,6 +45,14 @@ interface BrowserRunScreenshotInput {
   html?: string;
   selector?: string;
   userAgent?: string;
+  /**
+   * Browser engine for this Quick Action.
+   *
+   * REST/CDP select Kitesurf with `?browser=kitesurf`. The Workers binding
+   * Quick Action surface has no query string, so the engine is passed here
+   * (runtime support shipped with Kitesurf; generated workers-types may lag).
+   */
+  browser?: BrowserRunEngine;
   viewport?: BrowserRunViewport;
   gotoOptions?: BrowserRunGotoOptions;
   addStyleTag?: BrowserRunStyleTag[];

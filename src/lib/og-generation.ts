@@ -145,14 +145,16 @@ export function createRedirectResponse(location: string): Response {
 // ── Screenshot Helper ───────────────────────────────────────────────
 
 /**
- * Take a JPEG screenshot of the given URL via the Cloudflare Browser Rendering
+ * Take a JPEG screenshot of the given URL via the Cloudflare Browser Run
  * `screenshot` Quick Action, called directly through the `BROWSER` Workers
  * binding (`env.BROWSER.quickAction`).
  *
- * Using the binding talks to Browser Rendering directly over Cloudflare's
- * network — no account ID or API token required, lower latency than the
- * REST API. Requires a compatibility date of `2026-03-24` or later and a
- * `browser` binding in `wrangler.jsonc`.
+ * Uses [Kitesurf](https://developers.cloudflare.com/browser-run/kitesurf/)
+ * as the default engine — Cloudflare's Workers-native browser that uses
+ * less CPU and memory than Chromium (free while in beta). On the Workers
+ * binding there is no URL query string, so the engine is selected with
+ * `browser: "kitesurf"` in the Quick Action options (REST/CDP use
+ * `?browser=kitesurf` instead). No account ID or API token required.
  *
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
@@ -164,6 +166,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const browser = env.BROWSER as unknown as BrowserRunBinding;
   const response = await browser.quickAction("screenshot", {
     url,
+    browser: "kitesurf",
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
