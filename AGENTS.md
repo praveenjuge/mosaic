@@ -7,7 +7,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Database**: Cloudflare D1 (SQLite), accessed via `env.DB` binding
 - **Storage**: Cloudflare R2 for OG images, accessed via `env.OG_BUCKET` binding
-- **Screenshots**: Cloudflare Browser Rendering (Browser Run) via the `env.BROWSER` binding (`quickAction`)
+- **Screenshots**: Cloudflare Browser Run via the `env.BROWSER` binding (`quickAction`), defaulting to the Kitesurf engine (`browser: "kitesurf"`)
 - **Authentication**: Clerk (server-side JWT verification via `@clerk/tanstack-react-start/server`)
 - **Deployment Runtime**: Cloudflare Workers via Wrangler
 - Build command: `bun run build`
@@ -57,7 +57,7 @@ public/              # Static assets
 - Uses Bun as the runtime and package manager
 - All database operations go through D1 via `createServerFn` or direct queries in route handlers
 - Authentication is handled entirely by Clerk
-- OG image generation is handled internally via the Cloudflare Browser Rendering (Browser Run) `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", ...)` — no account ID or API token required
+- OG image generation is handled internally via the Cloudflare Browser Run `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", { browser: "kitesurf", ... })` — Kitesurf by default, no account ID or API token required
 - Public client environment variables must use the `VITE_` prefix
 - Website URL format: always clean and normalize URLs before storage
 - Suggest new instructions or improvements to this file as the project evolves.
