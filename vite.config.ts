@@ -68,7 +68,13 @@ export default defineConfig(({ mode }) => {
     },
     envPrefix: ["VITE_"],
     plugins: [
-      cloudflare({ viteEnvironment: { name: "ssr" } }),
+      cloudflare({
+        viteEnvironment: { name: "ssr" },
+        // Prerendered routes (/help, /legal) never touch R2 or Browser Run.
+        // On Workers Builds, starting a remote proxy for those bindings can
+        // fail the whole `vite build` when the build token can't reach them.
+        remoteBindings: process.env.WORKERS_CI !== "1",
+      }),
       ...tanstackStart({
         pages: [{ path: "/help" }, { path: "/legal" }],
         prerender: {

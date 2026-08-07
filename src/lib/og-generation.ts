@@ -146,14 +146,15 @@ export function createRedirectResponse(location: string): Response {
 
 /**
  * Take a JPEG screenshot of the given URL via the Cloudflare Browser Run
- * `screenshot` Quick Action on the `BROWSER` Workers binding.
+ * `screenshot` Quick Action, called directly through the `BROWSER` Workers
+ * binding (`env.BROWSER.quickAction`).
  *
  * Uses [Kitesurf](https://developers.cloudflare.com/browser-run/kitesurf/)
  * as the default engine — Cloudflare's Workers-native browser that uses
- * less CPU and memory than Chromium (free while in beta). Opt-in is the
- * documented `?browser=kitesurf` query param on the binding fetch URL
- * (same pattern as CDP / REST and `@cloudflare/puppeteer`), not a body
- * field. No account ID or API token required.
+ * less CPU and memory than Chromium (free while in beta). On the Workers
+ * binding there is no URL query string, so the engine is selected with
+ * `browser: "kitesurf"` in the Quick Action options (REST/CDP use
+ * `?browser=kitesurf` instead). No account ID or API token required.
  *
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
@@ -161,24 +162,16 @@ export function createRedirectResponse(location: string): Response {
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   // `BROWSER` is typed as a plain `Fetcher` by the bundled runtime types;
-  // cast to the Browser Run surface until those types include `BrowserRun`.
+  // cast to the Quick Action surface until those types include `quickAction`.
   const browser = env.BROWSER as unknown as BrowserRunBinding;
-  // Binding fetch uses the same fake-host convention as @cloudflare/puppeteer.
-  // Kitesurf is selected via query string per Cloudflare's Kitesurf docs.
-  const response = await browser.fetch(
-    "https://fake.host/screenshot?browser=kitesurf",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url,
-        viewport: { width: 1560, height: 819 },
-        gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
-        addStyleTag: [{ content: "* { overflow: hidden; }" }],
-        screenshotOptions: { type: "jpeg", quality: 85 },
-      } satisfies BrowserRunScreenshotInput),
-    },
-  );
+  const response = await browser.quickAction("screenshot", {
+    url,
+    browser: "kitesurf",
+    viewport: { width: 1560, height: 819 },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
+    addStyleTag: [{ content: "* { overflow: hidden; }" }],
+    screenshotOptions: { type: "jpeg", quality: 85 },
+  });
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
