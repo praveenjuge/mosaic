@@ -11,11 +11,7 @@
  * runtime types include `BrowserRun` / `quickAction`.
  *
  * @see https://developers.cloudflare.com/browser-run/quick-actions/
- * @see https://developers.cloudflare.com/browser-run/kitesurf/
  */
-
-/** Browser engine for Browser Run. Chromium is the default when omitted. */
-type BrowserRunEngine = "chromium" | "kitesurf";
 
 interface BrowserRunViewport {
   width: number;
@@ -45,14 +41,6 @@ interface BrowserRunScreenshotInput {
   html?: string;
   selector?: string;
   userAgent?: string;
-  /**
-   * Browser engine for this Quick Action.
-   *
-   * REST/CDP select Kitesurf with `?browser=kitesurf`. The Workers binding
-   * Quick Action surface has no query string, so the engine is passed here
-   * (runtime support shipped with Kitesurf; generated workers-types may lag).
-   */
-  browser?: BrowserRunEngine;
   viewport?: BrowserRunViewport;
   gotoOptions?: BrowserRunGotoOptions;
   addStyleTag?: BrowserRunStyleTag[];
