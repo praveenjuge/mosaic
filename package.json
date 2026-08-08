@@ -37,7 +37,7 @@
         "description": "R2 bucket storing generated Open Graph images."
       },
       "BROWSER": {
-        "description": "Browser Run binding used to capture OG screenshots (Kitesurf by default)."
+        "description": "Browser Run binding used to capture OG screenshots."
       },
       "VITE_SITE_URL": {
         "description": "Required build-time public HTTPS origin for this Mosaic deployment."

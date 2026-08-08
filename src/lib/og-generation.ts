@@ -149,12 +149,14 @@ export function createRedirectResponse(location: string): Response {
  * `screenshot` Quick Action, called directly through the `BROWSER` Workers
  * binding (`env.BROWSER.quickAction`).
  *
- * Uses [Kitesurf](https://developers.cloudflare.com/browser-run/kitesurf/)
- * as the default engine — Cloudflare's Workers-native browser that uses
- * less CPU and memory than Chromium (free while in beta). On the Workers
- * binding there is no URL query string, so the engine is selected with
- * `browser: "kitesurf"` in the Quick Action options (REST/CDP use
- * `?browser=kitesurf` instead). No account ID or API token required.
+ * Uses Browser Run's default Chromium engine. Kitesurf is available on REST
+ * and CDP via `?browser=kitesurf`, but the Workers Quick Action binding does
+ * not yet accept an engine selector — passing `browser: "kitesurf"` in the
+ * options body is rejected at runtime and breaks OG generation.
+ *
+ * Using the binding talks to Browser Run directly over Cloudflare's network —
+ * no account ID or API token required. Requires a compatibility date of
+ * `2026-03-24` or later and a `browser` binding in `wrangler.jsonc`.
  *
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
@@ -166,7 +168,6 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const browser = env.BROWSER as unknown as BrowserRunBinding;
   const response = await browser.quickAction("screenshot", {
     url,
-    browser: "kitesurf",
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
@@ -366,7 +367,8 @@ async function handleProductionRequest(
   try {
     imageBuffer = await takeScreenshot(url);
   } catch (err) {
-    console.error("[USE] Screenshot failed:", err);
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("[USE] Screenshot failed:", message);
     return createJsonResponse({ error: "Failed to take screenshot" }, 500);
   }
 

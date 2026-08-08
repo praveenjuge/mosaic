@@ -1,6 +1,6 @@
 # Mosaic
 
-Mosaic automatically generates Open Graph images for websites by taking screenshots with Cloudflare Browser Run (Kitesurf by default).
+Mosaic automatically generates Open Graph images for websites by taking screenshots with Cloudflare Browser Run.
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/praveenjuge/mosaic)
 
