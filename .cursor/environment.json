@@ -1,0 +1,22 @@
+{
+  "name": "Mosaic",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "user": "ubuntu",
+  "install": ".cursor/cloud-agent-install.sh",
+  "terminals": [
+    {
+      "name": "dev",
+      "command": "export PATH=\"$HOME/.bun/bin:$PATH\" && WORKERS_CI=1 NODE_OPTIONS='--max-http-header-size=32768' bun run dev",
+      "description": "Vite dev server with local D1/R2/Browser bindings (port 3000)"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}
