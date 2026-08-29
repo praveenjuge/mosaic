@@ -25,7 +25,9 @@ function formatRelativeTime(timestamp: number): string {
   if (diffMinutes < 60) return `${diffMinutes}m ago`;
   if (diffHours < 24) return `${diffHours}h ago`;
   if (diffDays < 30) return `${diffDays}d ago`;
-  return new Date(timestamp).toLocaleDateString();
+  return new Date(timestamp).toLocaleDateString("en-US", {
+    timeZone: "Asia/Kolkata",
+  });
 }
 
 function UsageUrl({ targetUrl }: { targetUrl: string }) {

@@ -18,8 +18,7 @@ export function formatBytes(bytes: number, decimals = 2) {
 }
 
 export function formatDate(timestamp: number): string {
-  const date = new Date(timestamp);
-  return date.toLocaleString("en-US", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -27,7 +26,13 @@ export function formatDate(timestamp: number): string {
     minute: "numeric",
     second: "numeric",
     hour12: true,
-  });
+    timeZone: "Asia/Kolkata",
+  }).formatToParts(new Date(timestamp));
+  const values = Object.fromEntries(
+    parts.map((part) => [part.type, part.value]),
+  );
+
+  return `${values.month} ${values.day}, ${values.year}, ${values.hour}:${values.minute}:${values.second} ${values.dayPeriod}`;
 }
 
 export function formatNumber(num: number): string {
