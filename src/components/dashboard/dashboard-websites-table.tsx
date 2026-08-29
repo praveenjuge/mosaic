@@ -13,14 +13,15 @@ import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
 import { publicEnv } from "@/lib/env";
 import type { DashboardStats } from "@/lib/types";
-import { buildSiteOgImageUrl } from "@/lib/url";
+import { buildSiteOgImageUrl, buildUsePreviewUrl } from "@/lib/url";
 
 function UsageUrl({ targetUrl }: { targetUrl: string }) {
   const usageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
+  const previewUrl = buildUsePreviewUrl(publicEnv.siteUrl, targetUrl);
   return (
     <div className="flex items-center gap-1">
       <a
-        href={usageUrl}
+        href={previewUrl}
         target="_blank"
         rel="noopener noreferrer"
         className="max-w-lg truncate font-medium"

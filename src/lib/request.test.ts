@@ -31,6 +31,12 @@ describe("request intent", () => {
     expect(isDocumentNavigation(request)).toBe(false);
   });
 
+  test("does not infer intent when optional Fetch Metadata is absent", () => {
+    const request = new Request("https://mosaic.example/use");
+
+    expect(isDocumentNavigation(request)).toBe(false);
+  });
+
   test("rejects anonymous documents but permits signed-in previews", () => {
     const request = new Request("https://mosaic.example/use", {
       headers: {
