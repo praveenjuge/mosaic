@@ -1,78 +1,42 @@
 ---
 title: "Understanding Usage Limits"
-description: "Learn about the OG image and website limits for each Mosaic plan."
+description: "Learn how Mosaic's shared OG image cache and service limits work."
 category: "Guides"
 publishedAt: "2025-06-13T11:30:36.000Z"
 ---
 
 # Understanding Usage Limits
 
-Each Mosaic plan has different limits for OG image generation and website
-management. Here's what you need to know.
-
-## Plan Limits Overview
-
-| Feature         | Free Plan | Pro Plan       | Pro Yearly     |
-| --------------- | --------- | -------------- | -------------- |
-| OG Images/Month | 500       | 5,000          | Unlimited      |
-| Websites        | Unlimited | Unlimited      | Unlimited      |
-| Support         | Community | Priority Email | Priority Email |
-| Analytics       | Basic     | Advanced       | Advanced       |
-| Custom Branding | ❌        | ❌             | ✅             |
+Mosaic uses a shared cache so the same page is captured once and reused for
+everyone. There is no per-user image counter or signature setup.
 
 ## How Limits Work
 
 ### OG Image Generation
 
-- Limits reset on the first day of each month
-- Each unique URL counts as one image generation
-- Re-generating the same URL (refresh) doesn't count against your limit
+- A canonical page URL maps to one shared cached image
+- Cached images refresh automatically after 30 days
+- Requests normally reuse the cached image without taking a new screenshot
+- Mosaic applies per-client and service-wide daily generation budgets to protect
+  reliability and cost
+- When a budget is exhausted, Mosaic serves the stale cached image when one is
+  available, or a safe fallback image for a first request
 
 ### Website Management
 
-- All plans allow unlimited websites
-- Each website can have unlimited pages
+- You can save websites to your account without ownership verification
+- More than one user can save the same hostname
+- Saving a website does not expose its page list, cache history, or other users
+- Removing a website only removes your association; it does not delete shared
+  images
 
-## What Happens When You Hit Your Limit
+## Tips
 
-### Free Plan (500 images/month)
-
-When you reach your limit:
-
-- New OG images won't be generated
-- Existing images remain available
-- You'll see a notification to upgrade
-
-### Pro Plan (5,000 images/month)
-
-If you exceed your Pro plan limit:
-
-- New images won't be generated until next month
-- Consider upgrading to Pro Yearly for unlimited images
-- Existing images remain available
-
-## Monitoring Your Usage
-
-You can track your usage in your dashboard:
-
-1. Visit your dashboard after logging in
-2. Your current usage is displayed at the top
-3. Pro users get detailed analytics in Settings
-
-## Upgrading for More Capacity
-
-Need more capacity? You can upgrade anytime:
-
-- **Free → Pro**: Get 5,000 images/month
-- **Pro → Pro Yearly**: Get unlimited images + custom branding
-- Upgrades take effect immediately
-
-## Tips for Managing Usage
-
-1. **Use descriptive URLs**: Mosaic caches images per unique URL
-2. **Batch updates**: Make multiple page changes before regenerating
-3. **Monitor analytics**: Pro users can track which pages generate the most
-   images
+1. **Use stable canonical URLs**: query-string variations create distinct cache
+   entries
+2. **Use the page's final HTTPS URL**: redirects are followed safely before a
+   screenshot is generated
+3. **Let refresh happen automatically**: there is no manual purge step
 
 ## Need Help?
 

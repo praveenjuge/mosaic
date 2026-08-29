@@ -1,20 +1,14 @@
+import { getDb } from "@/lib/db";
+import type { DashboardStats, Site } from "@/lib/types";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
-import { getDb } from "@/lib/db";
-import { IMAGES_LIMIT } from "@/lib/constants";
-import type { DashboardStats, RecentImageRow, Site } from "@/lib/types";
 
 // ── Helpers ─────────────────────────────────────────────────────────
 
 function getEmptyDashboardStats(): DashboardStats {
   return {
     total_websites: 0,
-    total_images: 0,
-    images_limit: IMAGES_LIMIT,
-    can_generate_more: false,
-    has_exceeded_limit: false,
     websites: [],
-    latest_screenshots: [],
   };
 }
 
@@ -40,64 +34,26 @@ export const getDashboardStats = createServerFn().handler(
     // slightly stale data, so we can hit the nearest read replica.
     const session = db.withSession();
 
-    // Batch both queries into a single D1 round trip
-    const [sitesResult, recentImagesResult] = await session.batch([
-      session
-        .prepare(
-          "SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC",
-        )
-        .bind(userId),
-      session
-        .prepare(
-          `SELECT i.*, s.url_base
-           FROM images i
-           JOIN sites s ON i.site_id = s.id
-           WHERE s.user_id = ?
-           ORDER BY i.generated_at DESC
-           LIMIT 10`,
-        )
-        .bind(userId),
-    ]);
+    const sitesResult = await session
+      .prepare(
+        "SELECT id, url_base, created_at FROM sites WHERE user_id = ? ORDER BY created_at DESC",
+      )
+      .bind(userId)
+      .all<Pick<Site, "id" | "url_base" | "created_at">>();
 
-    const sites = (sitesResult as D1Result<Site>).results;
-
-    // Compute totals from image_count column
-    const totalImages = sites.reduce(
-      (sum, site) => sum + (site.image_count ?? 0),
-      0,
-    );
+    const sites = sitesResult.results;
     const totalWebsites = sites.length;
-    const hasExceededLimit = totalImages >= IMAGES_LIMIT;
 
     // Return raw data — formatting happens on the client
     const websites = sites.map((site) => ({
       id: site.id,
       url_base: site.url_base,
-      image_count: site.image_count ?? 0,
       created_at: site.created_at,
-      refreshed_at: site.refreshed_at ?? null,
-    }));
-
-    const latest_screenshots = (
-      recentImagesResult as D1Result<RecentImageRow>
-    ).results.map((image) => ({
-      id: image.id,
-      site_id: image.site_id,
-      key: image.key,
-      page_url: image.page_url.replace(/\/+$/, ""),
-      size_in_bytes: image.size_in_bytes,
-      generated_at: image.generated_at,
-      url_base: image.url_base,
     }));
 
     return {
       total_websites: totalWebsites,
-      total_images: totalImages,
-      can_generate_more: !hasExceededLimit,
-      has_exceeded_limit: hasExceededLimit,
-      images_limit: IMAGES_LIMIT,
       websites,
-      latest_screenshots,
     };
   },
 );

@@ -9,6 +9,6 @@ order: 60
 
 ```html
 {{ $baseURL := "https://mosaic.praveenjuge.com/use?url=" }} {{ $pageURL :=
-.Page.Permalink }} {{ $ogImageURL := printf "%s%s" $baseURL $pageURL }}
-<meta property="og:image" content="{{ $ogImageURL }}" />
+.Page.Permalink }} {{ $ogImageURL := printf "%s%s" $baseURL ($pageURL |
+urlquery) }} <meta property="og:image" content="{{ $ogImageURL }}" />
 ```

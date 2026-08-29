@@ -4,9 +4,10 @@ import { useState } from "react";
 
 interface CopyButtonProps {
   text: string;
+  ariaLabel?: string;
 }
 
-export function CopyButton({ text }: CopyButtonProps) {
+export function CopyButton({ text, ariaLabel = "Copy URL to clipboard" }: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -22,7 +23,7 @@ export function CopyButton({ text }: CopyButtonProps) {
       size="icon"
       onClick={copyToClipboard}
       className="relative size-4 p-0"
-      aria-label="Copy URL to clipboard"
+      aria-label={ariaLabel}
     >
       <span
         className={`absolute inset-0 flex items-center justify-center transition duration-300 ${isCopied ? "scale-0" : "scale-100"}`}

@@ -19,11 +19,15 @@ const guideLinks = getGuideLinks();
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
-  const getMetaTag = (isHomePage: boolean) =>
-    `<meta property="og:image" content="${buildSiteOgImageUrl(
-      publicEnv.siteUrl,
-      isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`,
-    )}" />`;
+
+  const homeMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+    publicEnv.siteUrl,
+    finalWebsiteUrl,
+  )}" />`;
+  const subpageMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+    publicEnv.siteUrl,
+    `${finalWebsiteUrl}/your_slug`,
+  )}" />`;
 
   const renderCodeBlock = (content: string) => (
     <div className="bg-muted relative w-full rounded p-2 pr-4 font-mono text-xs font-medium whitespace-pre-wrap">
@@ -64,7 +68,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             </TabsList>
             {["home", "subpages"].map((tab) => (
               <TabsContent key={tab} value={tab}>
-                {renderCodeBlock(getMetaTag(tab === "home"))}
+                {renderCodeBlock(tab === "home" ? homeMetaTag : subpageMetaTag)}
               </TabsContent>
             ))}
           </Tabs>

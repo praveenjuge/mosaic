@@ -1,15 +1,19 @@
 ---
-title: "Refresh OG Images for a Website"
-description: "Regenerate screenshots after you update your design or content."
+title: "How Mosaic Refreshes OG Images"
+description: "Learn how automatic shared-cache refresh keeps screenshots current."
 category: "Guides"
 publishedAt: "2025-06-20T12:05:00.000Z"
 ---
 
-After making major design or content changes, you might want new screenshots for your pages.
+Mosaic refreshes shared OG images automatically. There is no verification,
+signature, or manual purge workflow.
 
-1. **Sign in to Mosaic** and go to **Websites**.
-2. Open the actions for the site and choose **Refresh OG Images**.
-3. Confirm the action. All previously cached images will be deleted.
-4. Visit your pages again to trigger creation of fresh OG images.
+1. The first request for a page creates a shared cached screenshot.
+2. Requests reuse that image for up to 30 days.
+3. After expiry, the next eligible request creates a fresh screenshot.
+4. During heavy traffic, Mosaic can keep serving the previous image until
+   generation capacity is available.
 
-Refreshing ensures your previews always match the latest version of your site.
+Social platforms may also cache previews independently. Their own card debugger
+or re-scrape tool can be used when you need that platform to fetch the current
+Mosaic image again.

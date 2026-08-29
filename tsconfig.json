@@ -18,7 +18,8 @@
     "jsx": "react-jsx",
     "incremental": false,
     "types": [
-      "vite/client"
+      "vite/client",
+      "bun"
     ],
     "paths": {
       "content-collections": [

@@ -1,20 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { env, waitUntil } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 
 /**
  * Serves OG images directly from R2 through the Worker at `/i/<r2key>`.
  *
  * The application origin serves both the app and its images.
  *
- * R2 keys contain slashes (`<prefix>/<hash>.jpeg` or `demo/<hash>.jpeg`), so
+ * R2 keys contain slashes (`global/<hash>.jpeg`), so
  * this is a splat route and the key is read from the path after `/i/`.
  *
- * Images are content-addressed: `refreshSiteImages` rotates the R2 prefix, so
- * a refreshed image gets a brand-new key. That makes immutable, long-lived
- * caching safe — a stale key is simply orphaned and never re-requested.
+ * R2 is the authoritative source for every request. Avoiding the colo-local
+ * Cache API prevents a CDN response from outliving the shared D1 expiry and
+ * keeps GET/HEAD consistent.
  */
 
-const IMAGE_CACHE_CONTROL = "public, max-age=31536000, immutable";
+const IMAGE_CACHE_CONTROL = "private, no-store";
 
 const imageCorsHeaders: Record<string, string> = {
   "Access-Control-Allow-Origin": "*",
@@ -54,29 +54,17 @@ function buildImageHeaders(object: R2Object): Headers {
   return headers;
 }
 
-function edgeCache(): Cache {
-  return (caches as unknown as { default: Cache })["default"];
-}
-
 async function serveImage(request: Request): Promise<Response> {
   const key = extractR2Key(request);
   if (!key) return notFound();
 
-  const cache = edgeCache();
-  const cached = await cache.match(request);
-  if (cached) return cached;
-
   const object = await env.OG_BUCKET.get(key);
   if (!object) return notFound();
 
-  const response = new Response(object.body, {
+  return new Response(object.body, {
     status: 200,
     headers: buildImageHeaders(object),
   });
-
-  // Populate the edge cache without blocking the response.
-  waitUntil(cache.put(request, response.clone()));
-  return response;
 }
 
 async function headImage(request: Request): Promise<Response> {

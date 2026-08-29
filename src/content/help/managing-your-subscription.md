@@ -14,19 +14,20 @@ manage your subscription.
 
 ### Free Plan
 
-- 500 OG images per month
+- Automatic shared OG image cache
 - Unlimited websites
 - Community forum support
 
 ### Pro Plan ($19/month)
 
-- 5,000 OG images per month
+- Automatic shared OG image cache
+- Unlimited websites
 - Priority email support
 - Advanced analytics
 
 ### Pro Yearly Plan ($199/year)
 
-- Unlimited OG images
+- Automatic shared OG image cache
 - Unlimited websites
 - Priority email support
 - Advanced analytics

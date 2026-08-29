@@ -20,7 +20,7 @@ export class PageComponent {
     this.meta.updateTag({
       property: "og:image",
       content:
-        "https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug",
+        "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
     });
   }
 }

@@ -45,11 +45,11 @@ into Bear Blog and add OG images to your posts:
   ```yaml
   title: How to integrate Mosaic in BearBlog.dev
   link: how-to-integrate-mosaic-in-bearblogdev
-  meta_image: https://mosaic.praveenjuge.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev
+  meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev%2Fhow-to-integrate-mosaic-in-bearblogdev
   ```
 
-  - The `meta_image` field should contain the Mosaic image URL with the **link**
-    parameter appended to it.
+  - The `meta_image` field should contain the Mosaic endpoint with its `url`
+    query parameter set to the encoded post link.
   - If you haven’t created a custom link for your post, simply publish your post
     with the title attribute first. Bear Blog will automatically generate a
     link, which you can then use in the `meta_image` field when you republish
@@ -69,7 +69,7 @@ template to automatically include a Mosaic OG image. Here’s how:
 
 ```yaml
 title:
-meta_image: https://mosaic.praveenjuge.com/use?url=https://yourblog.bearblog.dev
+meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev
 ___
 ```
 
@@ -80,13 +80,9 @@ pre-filled. All you need to do is update the **URL** with the correct post link.
 
 ---
 
-### Optional: Updating the OG Image After a Theme Change
+### Updating the OG Image After a Theme Change
 
 If you've recently updated your Bear Blog theme and want the OG images to
-reflect the new design, there's no need to manually update each post. Simply
-head over to Mosaic, locate your website, and click the **Refresh** button. This
-will delete all existing OG images for that website, and new ones will be
-automatically generated when you visit the pages again, ensuring everything
-stays in sync with your new theme!
-
-![](/images/screenshot-202024-09-16-20at-209.06.25-e2-80-afpm-c1MT.png)
+reflect the new design, there is no manual step in Mosaic. Shared images refresh
+automatically after 30 days. If a social platform still shows an older preview,
+use that platform's card debugger or re-scrape tool to ask it to fetch again.

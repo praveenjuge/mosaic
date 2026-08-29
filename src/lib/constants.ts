@@ -6,5 +6,17 @@ export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 export const website_description =
   "Transform your website's Open Graph social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.";
 
-// Global image limit for all users
-export const IMAGES_LIMIT = 10000;
+/** Shared images are regenerated after 30 days. */
+export const GLOBAL_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+/** Maximum fresh production screenshots generated across the service per day. */
+export const PRODUCTION_DAILY_GENERATION_LIMIT = 500;
+
+/** Maximum fresh production screenshots generated for one client per day. */
+export const PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT = 50;
+
+/** Maximum anonymous demo screenshots generated across the service per UTC day. */
+export const DEMO_DAILY_GENERATION_LIMIT = 100;
+
+/** Maximum demo screenshots generated for one client per UTC day. */
+export const DEMO_CLIENT_DAILY_GENERATION_LIMIT = 10;

@@ -1,81 +1,55 @@
 import { getDb } from "@/lib/db";
-import { publicEnv } from "@/lib/env";
-import type { ImageRecord, Site } from "@/lib/types";
-import { buildSiteOgImageUrl, extractHostname } from "@/lib/url";
+import type { Site } from "@/lib/types";
+import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
-import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
-
-// ── Helpers ─────────────────────────────────────────────────────────
 
 function generateR2Prefix() {
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-// ── List Sites ──────────────────────────────────────────────────────
-
-export const listSitesForUser = createServerFn()
-  .middleware([authMiddleware])
-  .handler(async ({ context }): Promise<Site[]> => {
-    // Read-only query — use a read session to hit the nearest replica
-    const session = getDb().withSession();
-    const result = await session
-      .prepare("SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC")
-      .bind(context.userId)
-      .all<Site>();
-
-    return result.results;
-  });
-
-// ── Add Site ────────────────────────────────────────────────────────
+function normalizePublicHostname(value: string): string {
+  const websiteUrl = parseWebsiteUrl(value);
+  const error = validateOutboundUrl(websiteUrl);
+  if (error) throw new Error(error);
+  return websiteUrl.hostname;
+}
 
 const addSiteSchema = z.object({
-  url_base: z.string(),
+  url_base: z.string().trim().min(1).max(2048),
 });
 
 export const addSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(addSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
-    const normalizedUrl = extractHostname(data.url_base);
+    const hostname = normalizePublicHostname(data.url_base);
     const db = getDb();
-
     const existing = await db
       .prepare("SELECT id FROM sites WHERE user_id = ? AND url_base = ?")
-      .bind(context.userId, normalizedUrl)
+      .bind(context.userId, hostname)
       .first<{ id: number }>();
+    if (existing) throw new Error("This website already exists in your list.");
 
-    if (existing) {
-      throw new Error("This website already exists in your list.");
-    }
-
-    const r2Prefix = generateR2Prefix();
-
-    const insertResult = await db
+    const insert = await db
       .prepare(
-        "INSERT INTO sites (user_id, url_base, image_count, r2_prefix) VALUES (?, ?, 0, ?)",
+        `INSERT INTO sites (user_id, url_base, image_count, r2_prefix)
+         VALUES (?, ?, 0, ?)`,
       )
-      .bind(context.userId, normalizedUrl, r2Prefix)
+      .bind(context.userId, hostname, generateR2Prefix())
       .run();
-
-    const newSite = await db
+    const site = await db
       .prepare("SELECT * FROM sites WHERE id = ?")
-      .bind(insertResult.meta.last_row_id)
+      .bind(insert.meta.last_row_id)
       .first<Site>();
-
-    if (!newSite) {
-      throw new Error("Failed to create website. Please try again.");
-    }
-
-    return newSite;
+    if (!site) throw new Error("Failed to add website. Please try again.");
+    return site;
   });
 
-// ── Edit Site ───────────────────────────────────────────────────────
-
 const editSiteSchema = z.object({
-  siteId: z.number(),
-  url_base: z.string(),
+  siteId: z.number().int().positive(),
+  url_base: z.string().trim().min(1).max(2048),
 });
 
 export const editSite = createServerFn({ method: "POST" })
@@ -83,150 +57,39 @@ export const editSite = createServerFn({ method: "POST" })
   .inputValidator(editSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
     const db = getDb();
-
     const existing = await db
       .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
       .bind(data.siteId, context.userId)
       .first<Site>();
+    if (!existing) throw new Error("Website not found or access denied.");
 
-    if (!existing) {
-      throw new Error("Website not found or access denied.");
-    }
-
-    const normalizedUrl = extractHostname(data.url_base);
-
+    const hostname = normalizePublicHostname(data.url_base);
     const duplicate = await db
       .prepare(
-        "SELECT id FROM sites WHERE user_id = ? AND url_base = ? AND id != ?",
+        `SELECT id FROM sites
+         WHERE user_id = ? AND url_base = ? AND id != ?`,
       )
-      .bind(context.userId, normalizedUrl, data.siteId)
+      .bind(context.userId, hostname, data.siteId)
       .first<{ id: number }>();
-
-    if (duplicate) {
-      throw new Error("This website already exists in your list.");
-    }
+    if (duplicate) throw new Error("This website already exists in your list.");
+    if (hostname === existing.url_base) return existing;
 
     await db
-      .prepare("UPDATE sites SET url_base = ? WHERE id = ?")
-      .bind(normalizedUrl, data.siteId)
+      .prepare("UPDATE sites SET url_base = ? WHERE id = ? AND user_id = ?")
+      .bind(hostname, data.siteId, context.userId)
       .run();
-
-    return { ...existing, url_base: normalizedUrl };
+    return { ...existing, url_base: hostname };
   });
 
-// ── Delete Site ─────────────────────────────────────────────────────
-
-const deleteSiteSchema = z.object({
-  siteId: z.number(),
-});
+const deleteSiteSchema = z.object({ siteId: z.number().int().positive() });
 
 export const deleteSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
   .inputValidator(deleteSiteSchema)
   .handler(async ({ context, data }): Promise<void> => {
-    const db = getDb();
-
-    const existing = await db
-      .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
+    const result = await getDb()
+      .prepare("DELETE FROM sites WHERE id = ? AND user_id = ?")
       .bind(data.siteId, context.userId)
-      .first<Site>();
-
-    if (!existing) {
-      throw new Error("Website not found.");
-    }
-
-    // Delete site row first for immediate user feedback — cascades to images via FK
-    await db.prepare("DELETE FROM sites WHERE id = ?").bind(data.siteId).run();
-
-    // Clean up R2 objects in the background — don't block the response
-    const r2Prefix = existing.r2_prefix;
-    waitUntil(
-      (async () => {
-        let cursor: string | undefined;
-        do {
-          const listed = await env.OG_BUCKET.list({
-            prefix: `${r2Prefix}/`,
-            cursor,
-          });
-          if (listed.objects.length > 0) {
-            await Promise.all(
-              listed.objects.map((obj) => env.OG_BUCKET.delete(obj.key)),
-            );
-          }
-          cursor = listed.truncated ? listed.cursor : undefined;
-        } while (cursor);
-      })().catch((err) =>
-        console.error("[DELETE] R2 cleanup failed for prefix:", r2Prefix, err),
-      ),
-    );
-  });
-
-// ── Refresh Site Images ─────────────────────────────────────────────
-
-const refreshSiteSchema = z.object({
-  siteId: z.number(),
-});
-
-export const refreshSiteImages = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .inputValidator(refreshSiteSchema)
-  .handler(async ({ context, data }): Promise<void> => {
-    const db = getDb();
-
-    const existing = await db
-      .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
-      .bind(data.siteId, context.userId)
-      .first<Site>();
-
-    if (!existing) {
-      throw new Error("Website not found or access denied.");
-    }
-
-    // 1. Collect page URLs before deleting (needed for edge cache purge)
-    const imageRows = await db
-      .prepare("SELECT page_url FROM images WHERE site_id = ?")
-      .bind(data.siteId)
-      .all<Pick<ImageRecord, "page_url">>();
-
-    // 2. Purge edge cache for each page URL
-    const cache = (caches as unknown as { default: Cache })["default"];
-    const purgePromises = imageRows.results.map((row) => {
-      const cacheRequest = new Request(
-        buildSiteOgImageUrl(publicEnv.siteUrl, row.page_url),
-        { method: "GET" },
-      );
-      return cache.delete(cacheRequest).catch((err) => {
-        console.error("[REFRESH] Cache purge failed for:", row.page_url, err);
-      });
-    });
-    await Promise.all(purgePromises);
-
-    // 3. Delete all R2 objects under the current r2_prefix
-    const oldPrefix = existing.r2_prefix;
-    let cursor: string | undefined;
-    do {
-      const listed = await env.OG_BUCKET.list({
-        prefix: `${oldPrefix}/`,
-        cursor,
-      });
-      if (listed.objects.length > 0) {
-        // R2 delete accepts up to 1000 keys at once
-        const keys = listed.objects.map((obj) => obj.key);
-        await env.OG_BUCKET.delete(keys);
-      }
-      cursor = listed.truncated ? listed.cursor : undefined;
-    } while (cursor);
-
-    // 4. Generate a new r2_prefix for fresh namespace
-    const newR2Prefix = generateR2Prefix();
-
-    // 5. Batch D1: delete image rows + update site with new prefix and reset count
-    await db.batch([
-      db.prepare("DELETE FROM images WHERE site_id = ?").bind(data.siteId),
-      db
-        .prepare(
-          "UPDATE sites SET r2_prefix = ?, image_count = 0, refreshed_at = datetime('now') WHERE id = ?",
-        )
-        .bind(newR2Prefix, data.siteId),
-    ]);
+      .run();
+    if (result.meta.changes === 0) throw new Error("Website not found.");
   });

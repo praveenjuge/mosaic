@@ -31,31 +31,19 @@ interface Plan {
   planType: PlanType;
 }
 
-const LANDING_PAGE_LIMITS = {
-  FREE: 500,
-  PRO: 5000,
-  PRO_YEARLY: 999999,
-} as const;
-
-function formatPlanLimit(limit: number): string {
-  return limit >= 999999
-    ? "Unlimited OG Images"
-    : `${limit.toLocaleString()} OG Images`;
-}
-
 const PLANS: Record<PlanType, PlanInfo> = {
   free: {
-    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.FREE),
+    images_display: "Automatic Shared OG Cache",
     websites: "Unlimited Websites",
     support: "Community Forum Support",
   },
   pro: {
-    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO),
+    images_display: "Automatic Shared OG Cache",
     websites: "Unlimited Websites",
     support: "Priority Email Support",
   },
   "pro-yearly": {
-    images_display: formatPlanLimit(LANDING_PAGE_LIMITS.PRO_YEARLY),
+    images_display: "Automatic Shared OG Cache",
     websites: "Unlimited Websites",
     support: "Priority Email Support",
   },

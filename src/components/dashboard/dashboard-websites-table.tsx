@@ -15,20 +15,21 @@ import { publicEnv } from "@/lib/env";
 import type { DashboardStats } from "@/lib/types";
 import { buildSiteOgImageUrl } from "@/lib/url";
 
-function formatRelativeTime(dateString: string): string {
-  const date = new Date(dateString + "Z"); // D1 datetime('now') is UTC
-  const now = new Date();
-  const diffMs = now.getTime() - date.getTime();
-  const diffSeconds = Math.floor(diffMs / 1000);
-  const diffMinutes = Math.floor(diffSeconds / 60);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffSeconds < 60) return "just now";
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return date.toLocaleDateString();
+function UsageUrl({ targetUrl }: { targetUrl: string }) {
+  const usageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
+  return (
+    <div className="flex items-center gap-1">
+      <a
+        href={usageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="max-w-lg truncate font-medium"
+      >
+        {decodeURIComponent(usageUrl)}
+      </a>
+      <CopyButton text={usageUrl} />
+    </div>
+  );
 }
 
 function WebsiteRow({
@@ -37,7 +38,6 @@ function WebsiteRow({
   website: DashboardStats["websites"][number];
 }) {
   const fullUrl = `https://${website.url_base}`;
-  const ogImageUsageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, fullUrl);
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
 
   return (
@@ -62,36 +62,10 @@ function WebsiteRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-1">
-          <a
-            href={ogImageUsageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="max-w-lg truncate font-medium"
-          >
-            {decodeURIComponent(ogImageUsageUrl)}
-          </a>
-          <CopyButton text={decodeURIComponent(ogImageUsageUrl)} />
-        </div>
+        <UsageUrl targetUrl={fullUrl} />
       </TableCell>
       <TableCell className="py-0">
-        {website.image_count === 0 ? (
-          <WebsiteInfoModal websiteUrl={website.url_base} />
-        ) : (
-          website.image_count
-        )}
-      </TableCell>
-      <TableCell className="py-0">
-        {website.refreshed_at ? (
-          <span
-            className="text-muted-foreground text-sm"
-            title={new Date(website.refreshed_at + "Z").toLocaleString()}
-          >
-            {formatRelativeTime(website.refreshed_at)}
-          </span>
-        ) : (
-          <span className="text-muted-foreground text-sm">Never</span>
-        )}
+        <WebsiteInfoModal websiteUrl={website.url_base} />
       </TableCell>
       <TableCell className="flex items-center p-0.5">
         <WebsiteActions websiteId={website.id} currentUrl={website.url_base} />
@@ -117,8 +91,7 @@ export function DashboardWebsitesTable({
             <TableRow>
               <TableHead>Website</TableHead>
               <TableHead>URL</TableHead>
-              <TableHead>OG Images</TableHead>
-              <TableHead>Last Refreshed</TableHead>
+              <TableHead>Setup</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>

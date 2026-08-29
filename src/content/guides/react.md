@@ -17,7 +17,7 @@ function BlogPost({ post }) {
       <meta property="og:title" content={post.title} />
       <meta
         property="og:image"
-        content={`https://mosaic.praveenjuge.com/use?url=yourwebsite.com/${post.slug}`}
+        content={`https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${post.slug}`)}`}
       />
       <meta property="og:type" content="article" />
       <h1>{post.title}</h1>
@@ -38,7 +38,7 @@ export default function Page() {
       <Helmet>
         <meta
           property="og:image"
-          content="https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug"
+          content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug"
         />
         <meta property="og:type" content="website" />
       </Helmet>

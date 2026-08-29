@@ -1,135 +1,107 @@
-/**
- * D1 query helpers for the /use OG image generation endpoint.
- *
- * These are plain async functions (not server functions) that accept
- * a D1Database or D1DatabaseSession parameter. They are called directly
- * from the /use route handler which already has access to env.DB.
- */
-
-import { IMAGES_LIMIT } from "@/lib/constants";
-import type { SiteSummary } from "@/lib/types";
+import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
 import { extractHostname, extractUrlParts } from "@/lib/url";
 
-export type { SiteSummary };
+type D1Queryable = Pick<D1Database, "prepare">;
 
-/** Accepts either a full D1Database or a read-only D1DatabaseSession. */
-type D1Queryable = Pick<D1Database, "prepare" | "batch">;
+export type GlobalImage = {
+  key: string;
+  expiresAt: number;
+};
 
-// ── getSitesForUrlBase ──────────────────────────────────────────────
-
-/**
- * Find all sites matching a given URL base and select the first site
- * whose owner hasn't exceeded the global image limit.
- *
- * Uses a single query with a correlated subquery to fetch per-user
- * image totals, avoiding N+1 sequential D1 round-trips.
- */
-export async function getSitesForUrlBase(
+/** Production generation is available only for a hostname saved by a user. */
+export async function isHostnameAssociated(
   db: D1Queryable,
-  urlBase: string,
-): Promise<{ sites: SiteSummary[]; selectedSite: SiteSummary | null }> {
-  const normalizedUrlBase = extractHostname(urlBase);
-
-  const matchingSites = await db
-    .prepare(
-      `SELECT s.id, s.user_id, s.url_base, s.r2_prefix,
-              (SELECT COALESCE(SUM(image_count), 0)
-                 FROM sites
-                WHERE user_id = s.user_id) AS user_total
-         FROM sites s
-        WHERE s.url_base = ?
-        ORDER BY s.created_at ASC`,
-    )
-    .bind(normalizedUrlBase)
-    .all<{
-      id: number;
-      user_id: string;
-      url_base: string;
-      r2_prefix: string;
-      user_total: number;
-    }>();
-
-  if (matchingSites.results.length === 0) {
-    return { sites: [], selectedSite: null };
-  }
-
-  const sites: SiteSummary[] = matchingSites.results.map((row) => ({
-    siteId: row.id,
-    url_base: row.url_base,
-    r2Prefix: row.r2_prefix,
-  }));
-
-  // Pick the first site whose owner is under the image limit
-  let selectedSite: SiteSummary | null = null;
-  for (const row of matchingSites.results) {
-    if (row.user_total < IMAGES_LIMIT) {
-      selectedSite = {
-        siteId: row.id,
-        url_base: row.url_base,
-        r2Prefix: row.r2_prefix,
-      };
-      break;
-    }
-  }
-
-  return { sites, selectedSite };
+  hostname: string,
+): Promise<boolean> {
+  const normalized = extractHostname(hostname);
+  const row = await db
+    .prepare("SELECT 1 AS found FROM sites WHERE url_base = ? LIMIT 1")
+    .bind(normalized)
+    .first<{ found: number }>();
+  return row !== null;
 }
 
-// ── findCachedImageKey ───────────────────────────────────────────────
-
-/**
- * Look up an existing image record in D1 by page URL and site IDs.
- * Returns the R2 key if a cached image exists, null otherwise.
- * This avoids multiple R2 HEAD requests by checking D1 first.
- */
-export async function findCachedImageKey(
+export async function findGlobalImage(
   db: D1Queryable,
   pageUrl: string,
-  siteIds: number[],
-): Promise<string | null> {
-  if (siteIds.length === 0) return null;
-
+): Promise<GlobalImage | null> {
   const { sanitizedUrl } = extractUrlParts(pageUrl);
-  const placeholders = siteIds.map(() => "?").join(", ");
-
-  const result = await db
+  const row = await db
     .prepare(
-      `SELECT key FROM images
-       WHERE page_url = ? AND site_id IN (${placeholders})
-       LIMIT 1`,
+      `SELECT key, expires_at
+       FROM global_images
+       WHERE page_url = ?`,
     )
-    .bind(sanitizedUrl, ...siteIds)
-    .first<{ key: string }>();
+    .bind(sanitizedUrl)
+    .first<{ key: string; expires_at: number }>();
 
-  return result?.key ?? null;
+  return row ? { key: row.key, expiresAt: row.expires_at } : null;
 }
 
-// ── recordImage ─────────────────────────────────────────────────────
-
-/**
- * Insert an image record into the images table and increment the
- * site's image_count in a single batched D1 call. This reduces
- * two sequential round trips to one.
- */
-export async function recordImage(
+export async function acquireGenerationLock(
   db: D1Database,
-  siteId: number,
+  pageUrl: string,
+): Promise<string | null> {
+  const { sanitizedUrl } = extractUrlParts(pageUrl);
+  const now = Date.now();
+  const leaseToken = crypto.randomUUID();
+  const result = await db
+    .prepare(
+      `INSERT INTO generation_locks (page_url, lease_token, expires_at)
+       VALUES (?, ?, ?)
+       ON CONFLICT(page_url) DO UPDATE SET
+         lease_token = excluded.lease_token,
+         expires_at = excluded.expires_at
+       WHERE generation_locks.expires_at < ?
+       RETURNING lease_token`,
+    )
+    .bind(sanitizedUrl, leaseToken, now + 60_000, now)
+    .first<{ lease_token: string }>();
+  return result?.lease_token ?? null;
+}
+
+export async function releaseGenerationLock(
+  db: D1Database,
+  pageUrl: string,
+  leaseToken: string,
+): Promise<void> {
+  const { sanitizedUrl } = extractUrlParts(pageUrl);
+  await db
+    .prepare(
+      `DELETE FROM generation_locks
+       WHERE page_url = ? AND lease_token = ?`,
+    )
+    .bind(sanitizedUrl, leaseToken)
+    .run();
+}
+
+export async function recordGlobalImage(
+  db: D1Database,
   imageKey: string,
   pageUrl: string,
   imageSize: number,
 ): Promise<void> {
-  const { sanitizedUrl } = extractUrlParts(pageUrl);
+  const { sanitizedUrl, urlBase } = extractUrlParts(pageUrl);
   const now = Date.now();
-
-  await db.batch([
-    db
-      .prepare(
-        `INSERT INTO images (site_id, key, page_url, size_in_bytes, generated_at)
-         VALUES (?, ?, ?, ?, ?)`,
-      )
-      .bind(siteId, imageKey, sanitizedUrl, imageSize, now),
-    db
-      .prepare(`UPDATE sites SET image_count = image_count + 1 WHERE id = ?`)
-      .bind(siteId),
-  ]);
+  await db
+    .prepare(
+      `INSERT INTO global_images
+         (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(page_url) DO UPDATE SET
+         hostname = excluded.hostname,
+         key = excluded.key,
+         size_in_bytes = excluded.size_in_bytes,
+         generated_at = excluded.generated_at,
+         expires_at = excluded.expires_at`,
+    )
+    .bind(
+      sanitizedUrl,
+      urlBase,
+      imageKey,
+      imageSize,
+      now,
+      now + GLOBAL_IMAGE_TTL_MS,
+    )
+    .run();
 }

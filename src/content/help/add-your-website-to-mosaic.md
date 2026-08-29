@@ -8,7 +8,13 @@ publishedAt: "2024-07-18T14:25:38.421Z"
 - **Go to [Mosaic Dashboard](https://mosaic.praveenjuge.com)**
 - **Click on the "Add Website" Button**
 - **Enter Your Website URL**
+- **Click "Add Website"**
+- **Copy the ready-to-use OG URL** from your dashboard
 
-That's it! You can now generate this website's screenshot as an OG image.
+That is all. Mosaic does not require a verification file, token, or signature.
+The website is saved as a bookmark in your account, and the hostname becomes
+available to the shared OG image service.
 
-Once generated, copy the OG image URL from your Mosaic dashboard and place it in your site's `<meta property="og:image" />` tag to start sharing.
+Use the generated URL in your site's `<meta property="og:image" />` tag. Change
+the encoded page URL for subpages. Mosaic shares each canonical page image
+across users and refreshes it automatically.
