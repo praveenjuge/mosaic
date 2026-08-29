@@ -16,6 +16,7 @@ import {
   fetchPageHtml,
   resolvePublicPageUrl,
 } from "@/lib/metadata";
+import { shouldRejectUseDocumentNavigation } from "@/lib/request";
 import {
   buildPublicImageUrl,
   ensureWebsiteProtocol,
@@ -417,7 +418,10 @@ async function handleProductionRequest(
  * - `mode=demo` → {@link handleDemoRequest}
  * - (default)   → {@link handleProductionRequest}
  */
-export async function handleUseRequest(request: Request): Promise<Response> {
+export async function handleUseRequest(
+  request: Request,
+  options: { allowDocumentNavigation?: boolean } = {},
+): Promise<Response> {
   try {
     const requestUrl = new URL(request.url);
     const url = requestUrl.searchParams.get("url");
@@ -431,8 +435,10 @@ export async function handleUseRequest(request: Request): Promise<Response> {
     // is an image endpoint, so rejecting navigations breaks redirect-assisted
     // self-recursion while preserving social crawler image requests.
     if (
-      request.headers.get("Sec-Fetch-Mode") === "navigate" ||
-      request.headers.get("Sec-Fetch-Dest") === "document"
+      shouldRejectUseDocumentNavigation(
+        request,
+        options.allowDocumentNavigation ?? false,
+      )
     ) {
       return createJsonResponse(
         { error: "This endpoint cannot be used as a document target." },
