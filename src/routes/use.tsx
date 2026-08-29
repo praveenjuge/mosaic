@@ -1,5 +1,5 @@
+import { corsHeaders, handleUseRequest } from "@/lib/og-generation";
 import { createFileRoute } from "@tanstack/react-router";
-import { handleUseRequest, corsHeaders } from "@/lib/og-generation";
 
 export const Route = createFileRoute("/use")({
   server: {

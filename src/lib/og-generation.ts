@@ -17,6 +17,10 @@ import {
   resolvePublicPageUrl,
 } from "@/lib/metadata";
 import {
+  isMosaicRendererRequest,
+  MOSAIC_RENDERER_USER_AGENT,
+} from "@/lib/request";
+import {
   buildPublicImageUrl,
   ensureWebsiteProtocol,
   extractUrlParts,
@@ -181,6 +185,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const browser = env.BROWSER as unknown as BrowserRunBinding;
   const response = await browser.quickAction("screenshot", {
     url,
+    userAgent: MOSAIC_RENDERER_USER_AGENT,
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
@@ -427,15 +432,12 @@ export async function handleUseRequest(request: Request): Promise<Response> {
       return createJsonResponse({ error: "URL parameter is required" }, 400);
     }
 
-    // Browser Run reaches a screenshot target as a document navigation. /use
-    // is an image endpoint, so rejecting navigations breaks redirect-assisted
-    // self-recursion while preserving social crawler image requests.
-    if (
-      request.headers.get("Sec-Fetch-Mode") === "navigate" ||
-      request.headers.get("Sec-Fetch-Dest") === "document"
-    ) {
+    // A captured page can redirect Chromium back to /use. The renderer's
+    // deny-only marker stops recursion without relying on optional Fetch
+    // Metadata or restricting ordinary browsers and social crawlers.
+    if (isMosaicRendererRequest(request)) {
       return createJsonResponse(
-        { error: "This endpoint cannot be used as a document target." },
+        { error: "Recursive screenshot request blocked." },
         400,
       );
     }
