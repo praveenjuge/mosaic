@@ -15,6 +15,19 @@ import { publicEnv } from "@/lib/env";
 import type { DashboardStats } from "@/lib/types";
 import { buildSiteOgImageUrl } from "@/lib/url";
 
+function formatRelativeTime(timestamp: number): string {
+  const diffMs = Math.max(0, Date.now() - timestamp);
+  const diffMinutes = Math.floor(diffMs / 60_000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return new Date(timestamp).toLocaleDateString();
+}
+
 function UsageUrl({ targetUrl }: { targetUrl: string }) {
   const usageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
   return (
@@ -65,7 +78,23 @@ function WebsiteRow({
         <UsageUrl targetUrl={fullUrl} />
       </TableCell>
       <TableCell className="py-0">
-        <WebsiteInfoModal websiteUrl={website.url_base} />
+        {website.image_count === 0 ? (
+          <WebsiteInfoModal websiteUrl={website.url_base} />
+        ) : (
+          website.image_count
+        )}
+      </TableCell>
+      <TableCell className="py-0">
+        {website.last_generated_at ? (
+          <span
+            className="text-muted-foreground text-sm"
+            title={new Date(website.last_generated_at).toLocaleString()}
+          >
+            {formatRelativeTime(website.last_generated_at)}
+          </span>
+        ) : (
+          <span className="text-muted-foreground text-sm">Never</span>
+        )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
         <WebsiteActions websiteId={website.id} currentUrl={website.url_base} />
@@ -91,7 +120,8 @@ export function DashboardWebsitesTable({
             <TableRow>
               <TableHead>Website</TableHead>
               <TableHead>URL</TableHead>
-              <TableHead>Setup</TableHead>
+              <TableHead>OG Images</TableHead>
+              <TableHead>Last Generated</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
