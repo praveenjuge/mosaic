@@ -48,8 +48,8 @@ into Bear Blog and add OG images to your posts:
   meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev%2Fhow-to-integrate-mosaic-in-bearblogdev
   ```
 
-  - The `meta_image` field should contain the Mosaic image URL with the **link**
-    parameter appended to it.
+  - The `meta_image` field should contain the Mosaic endpoint with its `url`
+    query parameter set to the encoded post link.
   - If you haven’t created a custom link for your post, simply publish your post
     with the title attribute first. Bear Blog will automatically generate a
     link, which you can then use in the `meta_image` field when you republish
