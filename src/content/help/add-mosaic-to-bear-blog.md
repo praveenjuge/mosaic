@@ -45,7 +45,7 @@ into Bear Blog and add OG images to your posts:
   ```yaml
   title: How to integrate Mosaic in BearBlog.dev
   link: how-to-integrate-mosaic-in-bearblogdev
-  meta_image: https://mosaic.praveenjuge.com/use?url=https://yourblog.bearblog.dev/how-to-integrate-mosaic-in-bearblogdev
+  meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev%2Fhow-to-integrate-mosaic-in-bearblogdev&sig=SIGNATURE
   ```
 
   - The `meta_image` field should contain the Mosaic image URL with the **link**
@@ -69,7 +69,7 @@ template to automatically include a Mosaic OG image. Here’s how:
 
 ```yaml
 title:
-meta_image: https://mosaic.praveenjuge.com/use?url=https://yourblog.bearblog.dev
+meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev&sig=SIGNATURE
 ___
 ```
 

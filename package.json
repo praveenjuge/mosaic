@@ -26,6 +26,7 @@
     "predev": "tsc --noEmit",
     "preview": "vite preview",
     "start": "vite preview",
+    "test": "VITE_SITE_URL=https://mosaic.example VITE_CLERK_PUBLISHABLE_KEY=pk_test bun test",
     "cf-typegen": "wrangler types"
   },
   "cloudflare": {
@@ -87,6 +88,7 @@
     "@rolldown/plugin-babel": "^0.2.3",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.3.0",
+    "@types/bun": "^1.4.0",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",

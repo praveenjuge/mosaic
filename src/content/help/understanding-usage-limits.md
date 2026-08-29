@@ -26,7 +26,11 @@ management. Here's what you need to know.
 
 - Limits reset on the first day of each month
 - Each unique URL counts as one image generation
-- Re-generating the same URL (refresh) doesn't count against your limit
+- Refreshing deletes stored images, but their original generation still counts
+  toward the current billing month
+- Every page URL must carry its own HMAC signature, so third parties cannot
+  create arbitrary billable URL variants against your allowance
+- Failed screenshot or storage attempts do not consume the monthly allowance
 
 ### Website Management
 
@@ -69,7 +73,7 @@ Need more capacity? You can upgrade anytime:
 
 ## Tips for Managing Usage
 
-1. **Use descriptive URLs**: Mosaic caches images per unique URL
+1. **Use stable canonical URLs**: query-string variations create distinct images
 2. **Batch updates**: Make multiple page changes before regenerating
 3. **Monitor analytics**: Pro users can track which pages generate the most
    images

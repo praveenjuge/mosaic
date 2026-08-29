@@ -8,6 +8,9 @@ export interface Site {
   r2_prefix: string;
   created_at: string;
   refreshed_at: string | null;
+  verification_token: string | null;
+  verified_at: string | null;
+  generation_secret: string | null;
 }
 
 export interface ImageRecord {
@@ -59,6 +62,9 @@ export type DashboardStats = {
     image_count: number;
     created_at: string;
     refreshed_at: string | null;
+    verification_token: string | null;
+    verified_at: string | null;
+    generation_secret: string | null;
   }>;
   latest_screenshots: Array<{
     id: number;
@@ -76,6 +82,8 @@ export type DashboardStats = {
 /** Lightweight site info used by the /use OG generation endpoint. */
 export type SiteSummary = {
   siteId: number;
+  userId: string;
   url_base: string;
   r2Prefix: string;
+  generationSecret: string;
 };

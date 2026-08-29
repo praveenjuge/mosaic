@@ -11,9 +11,12 @@ import {
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
+import { VerifyWebsite } from "@/components/websites/VerifyWebsite";
 import { publicEnv } from "@/lib/env";
+import { signGenerationUrl } from "@/lib/generation-signature";
 import type { DashboardStats } from "@/lib/types";
 import { buildSiteOgImageUrl } from "@/lib/url";
+import { useEffect, useState } from "react";
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString + "Z"); // D1 datetime('now') is UTC
@@ -31,13 +34,54 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString();
 }
 
+function SignedUsageUrl({
+  targetUrl,
+  secret,
+}: {
+  targetUrl: string;
+  secret: string | null;
+}) {
+  const [signature, setSignature] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setSignature("");
+    if (secret) {
+      void signGenerationUrl(secret, targetUrl).then((value) => {
+        if (!cancelled) setSignature(value);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [secret, targetUrl]);
+
+  if (!secret || !signature) {
+    return <span className="text-muted-foreground">Verify to activate</span>;
+  }
+
+  const usageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl, signature);
+  return (
+    <div className="flex items-center gap-1">
+      <a
+        href={usageUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="max-w-lg truncate font-medium"
+      >
+        {decodeURIComponent(usageUrl)}
+      </a>
+      <CopyButton text={usageUrl} />
+    </div>
+  );
+}
+
 function WebsiteRow({
   website,
 }: {
   website: DashboardStats["websites"][number];
 }) {
   const fullUrl = `https://${website.url_base}`;
-  const ogImageUsageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, fullUrl);
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
 
   return (
@@ -62,21 +106,27 @@ function WebsiteRow({
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-1">
-          <a
-            href={ogImageUsageUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="max-w-lg truncate font-medium"
-          >
-            {decodeURIComponent(ogImageUsageUrl)}
-          </a>
-          <CopyButton text={decodeURIComponent(ogImageUsageUrl)} />
-        </div>
+        <VerifyWebsite
+          siteId={website.id}
+          hostname={website.url_base}
+          token={website.verification_token}
+          verifiedAt={website.verified_at}
+          generationSecret={website.generation_secret}
+        />
+      </TableCell>
+      <TableCell>
+        <SignedUsageUrl
+          targetUrl={fullUrl}
+          secret={website.generation_secret}
+        />
       </TableCell>
       <TableCell className="py-0">
         {website.image_count === 0 ? (
-          <WebsiteInfoModal websiteUrl={website.url_base} />
+          <WebsiteInfoModal
+            websiteUrl={website.url_base}
+            generationSecret={website.generation_secret}
+            verified={Boolean(website.verified_at)}
+          />
         ) : (
           website.image_count
         )}
@@ -116,6 +166,7 @@ export function DashboardWebsitesTable({
           <TableHeader>
             <TableRow>
               <TableHead>Website</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>URL</TableHead>
               <TableHead>OG Images</TableHead>
               <TableHead>Last Refreshed</TableHead>

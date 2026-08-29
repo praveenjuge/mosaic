@@ -38,6 +38,18 @@
     "binding": "BROWSER",
     "remote": true,
   },
+  "ratelimits": [
+    {
+      "name": "DEMO_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 5, "period": 60 },
+    },
+    {
+      "name": "SITE_RATE_LIMITER",
+      "namespace_id": "1002",
+      "simple": { "limit": 30, "period": 60 },
+    },
+  ],
   "secrets": {
     "required": ["CLERK_SECRET_KEY"],
   },

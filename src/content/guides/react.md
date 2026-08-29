@@ -7,6 +7,8 @@ svgLight: "react_light"
 svgDark: "react_dark"
 ---
 
+> Replace `SIGNATURE` with the HMAC for the exact HTTPS page URL. Generate it only on your server or during the build; see [Use the Mosaic API](/help/use-the-mosaic-api).
+
 ## In React 19+, render meta tags directly
 
 ```jsx
@@ -17,7 +19,7 @@ function BlogPost({ post }) {
       <meta property="og:title" content={post.title} />
       <meta
         property="og:image"
-        content={`https://mosaic.praveenjuge.com/use?url=yourwebsite.com/${post.slug}`}
+        content={`https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${post.slug}`)}&sig=SIGNATURE`}
       />
       <meta property="og:type" content="article" />
       <h1>{post.title}</h1>
@@ -38,7 +40,7 @@ export default function Page() {
       <Helmet>
         <meta
           property="og:image"
-          content="https://mosaic.praveenjuge.com/use?url=yourwebsite.com/your_slug"
+          content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug&amp;sig=SIGNATURE"
         />
         <meta property="og:type" content="website" />
       </Helmet>

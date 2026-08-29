@@ -12,18 +12,50 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getGuideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
+import { signGenerationUrl } from "@/lib/generation-signature";
 import { buildSiteOgImageUrl } from "@/lib/url";
 import { Code, ExternalLink, Ghost } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const guideLinks = getGuideLinks();
 
-export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
+export function WebsiteInfoModal({
+  websiteUrl,
+  generationSecret,
+  verified,
+}: {
+  websiteUrl: string;
+  generationSecret: string | null;
+  verified: boolean;
+}) {
   const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
-  const getMetaTag = (isHomePage: boolean) =>
-    `<meta property="og:image" content="${buildSiteOgImageUrl(
-      publicEnv.siteUrl,
-      isHomePage ? finalWebsiteUrl : `${finalWebsiteUrl}/your_slug`,
-    )}" />`;
+  const [homeSignature, setHomeSignature] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    setHomeSignature("");
+    if (generationSecret) {
+      void signGenerationUrl(generationSecret, finalWebsiteUrl).then(
+        (signature) => {
+          if (!cancelled) setHomeSignature(signature);
+        },
+      );
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [finalWebsiteUrl, generationSecret]);
+
+  const homeMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+    publicEnv.siteUrl,
+    finalWebsiteUrl,
+    homeSignature,
+  )}" />`;
+  const subpageMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+    publicEnv.siteUrl,
+    `${finalWebsiteUrl}/your_slug`,
+    "SIGN_THIS_EXACT_URL_ON_YOUR_SERVER",
+  )}" />`;
 
   const renderCodeBlock = (content: string) => (
     <div className="bg-muted relative w-full rounded p-2 pr-4 font-mono text-xs font-medium whitespace-pre-wrap">
@@ -37,7 +69,12 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="sm" variant="outline" className="h-7">
+        <Button
+          size="sm"
+          variant="outline"
+          className="h-7"
+          disabled={!verified || !generationSecret || !homeSignature}
+        >
           <Code className="size-4 stroke-2" />
           Add to Your Website
         </Button>
@@ -64,7 +101,7 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             </TabsList>
             {["home", "subpages"].map((tab) => (
               <TabsContent key={tab} value={tab}>
-                {renderCodeBlock(getMetaTag(tab === "home"))}
+                {renderCodeBlock(tab === "home" ? homeMetaTag : subpageMetaTag)}
               </TabsContent>
             ))}
           </Tabs>

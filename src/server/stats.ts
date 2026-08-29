@@ -1,7 +1,7 @@
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 import { getDb } from "@/lib/db";
-import { IMAGES_LIMIT } from "@/lib/constants";
+import { getPlanImageLimit, IMAGES_LIMIT } from "@/lib/constants";
 import type { DashboardStats, RecentImageRow, Site } from "@/lib/types";
 
 // ── Helpers ─────────────────────────────────────────────────────────
@@ -40,8 +40,7 @@ export const getDashboardStats = createServerFn().handler(
     // slightly stale data, so we can hit the nearest read replica.
     const session = db.withSession();
 
-    // Batch both queries into a single D1 round trip
-    const [sitesResult, recentImagesResult] = await session.batch([
+    const [sitesResult, recentImagesResult, usageResult] = await session.batch([
       session
         .prepare(
           "SELECT * FROM sites WHERE user_id = ? ORDER BY created_at DESC",
@@ -57,17 +56,28 @@ export const getDashboardStats = createServerFn().handler(
            LIMIT 10`,
         )
         .bind(userId),
+      session
+        .prepare(
+          `SELECT plan, CASE
+             WHEN period_start =
+               CAST(strftime('%s', 'now', 'start of month') AS INTEGER) * 1000
+               THEN COALESCE(generated_total, 0)
+             ELSE 0
+           END AS generated_total
+           FROM user_usage WHERE user_id = ?`,
+        )
+        .bind(userId),
     ]);
 
     const sites = (sitesResult as D1Result<Site>).results;
 
-    // Compute totals from image_count column
-    const totalImages = sites.reduce(
-      (sum, site) => sum + (site.image_count ?? 0),
-      0,
-    );
+    const usage = (
+      usageResult as D1Result<{ generated_total: number; plan: string }>
+    ).results[0];
+    const totalImages = usage?.generated_total ?? 0;
+    const imagesLimit = getPlanImageLimit(usage?.plan);
     const totalWebsites = sites.length;
-    const hasExceededLimit = totalImages >= IMAGES_LIMIT;
+    const hasExceededLimit = totalImages >= imagesLimit;
 
     // Return raw data — formatting happens on the client
     const websites = sites.map((site) => ({
@@ -76,6 +86,9 @@ export const getDashboardStats = createServerFn().handler(
       image_count: site.image_count ?? 0,
       created_at: site.created_at,
       refreshed_at: site.refreshed_at ?? null,
+      verification_token: site.verification_token ?? null,
+      verified_at: site.verified_at ?? null,
+      generation_secret: site.generation_secret ?? null,
     }));
 
     const latest_screenshots = (
@@ -95,7 +108,7 @@ export const getDashboardStats = createServerFn().handler(
       total_images: totalImages,
       can_generate_more: !hasExceededLimit,
       has_exceeded_limit: hasExceededLimit,
-      images_limit: IMAGES_LIMIT,
+      images_limit: imagesLimit,
       websites,
       latest_screenshots,
     };

@@ -11,18 +11,32 @@
  */
 
 import { getDb } from "@/lib/db";
-import { extractMetadata, fetchPageHtml } from "@/lib/metadata";
+import { verifyGenerationSignature } from "@/lib/generation-signature";
+import {
+  extractMetadata,
+  fetchPageHtml,
+  resolvePublicPageUrl,
+} from "@/lib/metadata";
 import {
   buildPublicImageUrl,
   ensureWebsiteProtocol,
   extractUrlParts,
+  isSelfReferentialUseUrl,
+  validateOutboundUrl,
 } from "@/lib/url";
 import {
+  refundUserGeneration,
+  reserveDemoGeneration,
+  reserveProductionGeneration,
+} from "@/server/generation-usage";
+import {
+  acquireGenerationLock,
   findCachedImageKey,
-  getSitesForUrlBase,
+  getSiteForUrlBase,
   recordImage,
+  releaseGenerationLock,
 } from "@/server/og";
-import { env, waitUntil } from "cloudflare:workers";
+import { env } from "cloudflare:workers";
 
 // ── CORS Headers ────────────────────────────────────────────────────
 
@@ -67,8 +81,6 @@ export function getR2Key(
 
 // ── URL Validation ──────────────────────────────────────────────────
 
-const LOCALHOST_HOSTNAMES = new Set(["localhost", "127.0.0.1", "0.0.0.0"]);
-
 interface UrlValidationResult {
   isValid: boolean;
   validatedUrl?: URL;
@@ -81,10 +93,7 @@ interface UrlValidationResult {
  * - Rejects malformed URLs and non-HTTP(S) protocols.
  * - Blocks localhost/127.0.0.1/0.0.0.0 in production.
  */
-export function validateUrl(
-  url: string,
-  isProduction: boolean,
-): UrlValidationResult {
+export function validateUrl(url: string): UrlValidationResult {
   let parsedUrl: URL;
 
   try {
@@ -93,12 +102,9 @@ export function validateUrl(
     return { isValid: false, error: "Invalid URL provided" };
   }
 
-  if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-    return { isValid: false, error: "Invalid URL provided" };
-  }
-
-  if (isProduction && LOCALHOST_HOSTNAMES.has(parsedUrl.hostname)) {
-    return { isValid: false, error: "Local URLs are not allowed" };
+  const validationError = validateOutboundUrl(parsedUrl);
+  if (validationError) {
+    return { isValid: false, error: validationError };
   }
 
   return { isValid: true, validatedUrl: parsedUrl };
@@ -129,17 +135,34 @@ export function createJsonResponse(
 }
 
 /**
- * Create a 307 redirect response with CORS headers and long-lived cache control.
+ * Create a revocable 307 redirect. R2 remains the source of truth, so site
+ * deletion and refresh take effect immediately without per-colo cache purges.
  */
 export function createRedirectResponse(location: string): Response {
   return new Response(null, {
     status: 307,
     headers: {
       Location: location,
-      "Cache-Control": "public, max-age=31536000, immutable",
+      "Cache-Control": "private, no-store",
       ...corsHeaders,
     },
   });
+}
+
+function createFallbackRedirectResponse(request: Request): Response {
+  return createRedirectResponse(
+    new URL("/images/mosaic-example-og-f9e253a9.png", request.url).toString(),
+  );
+}
+
+function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+  }
+  return `data:image/jpeg;base64,${btoa(binary)}`;
 }
 
 // ── Screenshot Helper ───────────────────────────────────────────────
@@ -162,41 +185,44 @@ export function createRedirectResponse(location: string): Response {
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling).
  */
-export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  // `BROWSER` is typed as a plain `Fetcher` by the bundled runtime types;
-  // cast to the Quick Action surface until those types include `quickAction`.
+/**
+ * Render a URL with Browser Run's first-class Quick Action binding. The caller
+ * resolves and validates the redirect chain before invoking this paid sink.
+ */
+export async function takeScreenshot(
+  url: string,
+): Promise<ArrayBuffer> {
   const browser = env.BROWSER as unknown as BrowserRunBinding;
   const response = await browser.quickAction("screenshot", {
     url,
     viewport: { width: 1560, height: 819 },
-    gotoOptions: { waitUntil: "networkidle2", timeout: 15000 },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
     screenshotOptions: { type: "jpeg", quality: 85 },
   });
-
   if (!response.ok) {
-    const text = await response.text().catch(() => "");
-    throw new Error(
-      `Browser Rendering quick action returned ${response.status}: ${text}`,
-    );
+    const message = await response.text().catch(() => "");
+    throw new Error(`Browser Run returned ${response.status}: ${message}`);
   }
-
   return response.arrayBuffer();
 }
 
 // ── Demo Mode Handler ───────────────────────────────────────────────
 
-/** Cache-Control for demo JSON responses (1 hour). */
-const DEMO_CACHE_CONTROL = "public, max-age=3600";
+const DEMO_CACHE_CONTROL = "private, no-store";
 
 /**
  * Handle a demo-mode request: fetch page metadata and generate a
  * screenshot in parallel, returning a JSON response with both.
  *
- * Demo images are stored under the `demo/` R2 prefix and are not
- * tracked in D1.
+ * Demo screenshots are returned inline instead of being persisted in R2.
+ * A fast per-client limiter and a durable global daily budget protect the
+ * shared Browser Run allowance before paid work begins.
  */
-async function handleDemoRequest(url: string): Promise<Response> {
+async function handleDemoRequest(
+  request: Request,
+  url: string,
+): Promise<Response> {
   // Normalize URL — demo accepts bare hostnames like "example.com"
   let normalizedUrl: string;
   try {
@@ -209,60 +235,62 @@ async function handleDemoRequest(url: string): Promise<Response> {
   }
 
   // Validate
-  const { isValid, error } = validateUrl(normalizedUrl, true);
+  const { isValid, error, validatedUrl } = validateUrl(normalizedUrl);
   if (!isValid) {
     return createJsonResponse({ error }, 400);
   }
 
-  // Parse URL for metadata fetching
-  let parsedUrl: URL;
-  try {
-    parsedUrl = new URL(normalizedUrl);
-  } catch {
-    return createJsonResponse({ error: "Invalid URL provided" }, 400);
+  const requestHostname = new URL(request.url).hostname;
+  if (
+    !validatedUrl ||
+    isSelfReferentialUseUrl(validatedUrl, requestHostname)
+  ) {
+    return createJsonResponse(
+      { error: "URL may not target this service's /use endpoint." },
+      400,
+    );
   }
 
-  const { sanitizedUrl } = extractUrlParts(normalizedUrl);
+  const { sanitizedUrl } = extractUrlParts(validatedUrl.toString());
+  const parsedUrl = new URL(sanitizedUrl);
+  const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
+  const rateLimit = await env.DEMO_RATE_LIMITER.limit({ key: clientKey });
+  if (!rateLimit.success) {
+    return createJsonResponse(
+      { error: "Too many demo requests. Please try again in a minute." },
+      429,
+      { "Retry-After": "60" },
+    );
+  }
+
+  const db = getDb();
+  const reserved = await reserveDemoGeneration(db, clientKey);
+  if (!reserved) {
+    return createJsonResponse(
+      {
+        normalizedUrl: sanitizedUrl,
+        title: "",
+        description: "",
+        image: "",
+        imageUrl: new URL(
+          "/images/mosaic-example-og-f9e253a9.png",
+          request.url,
+        ).toString(),
+        notice: "Live screenshot capacity is currently busy. Showing an example image.",
+      },
+      200,
+      { "Cache-Control": DEMO_CACHE_CONTROL },
+    );
+  }
 
   // Fetch metadata and generate screenshot in parallel
   const [metadata, screenshotResult] = await Promise.allSettled([
-    fetchPageHtml(parsedUrl).then((html) => extractMetadata(html, parsedUrl)),
-    (async () => {
-      const cacheKey = await generateCacheKey(normalizedUrl);
-      const imageKey = getR2Key(cacheKey, undefined, true);
-
-      // Check R2 cache first
-      const cached = await env.OG_BUCKET.head(imageKey);
-      if (cached) {
-        return {
-          imageUrl: buildPublicImageUrl(imageKey),
-          cached: true,
-        };
-      }
-
-      // Take screenshot
-      const imageBuffer = await takeScreenshot(normalizedUrl);
-
-      // Store in R2
-      try {
-        await env.OG_BUCKET.put(imageKey, imageBuffer, {
-          httpMetadata: { contentType: "image/jpeg" },
-        });
-        return {
-          imageUrl: buildPublicImageUrl(imageKey),
-          cached: false,
-        };
-      } catch {
-        // R2 put failure — return base64 fallback
-        const base64 = btoa(
-          String.fromCharCode(...new Uint8Array(imageBuffer)),
-        );
-        return {
-          imageUrl: `data:image/jpeg;base64,${base64}`,
-          cached: false,
-        };
-      }
-    })(),
+    fetchPageHtml(parsedUrl, requestHostname).then((html) =>
+      extractMetadata(html, parsedUrl),
+    ),
+    resolvePublicPageUrl(parsedUrl, requestHostname).then((finalUrl) =>
+      takeScreenshot(finalUrl.toString()),
+    ),
   ]);
 
   // Extract metadata result
@@ -276,7 +304,7 @@ async function handleDemoRequest(url: string): Promise<Response> {
   let screenshotError: string | undefined;
 
   if (screenshotResult.status === "fulfilled") {
-    imageUrl = screenshotResult.value.imageUrl;
+    imageUrl = arrayBufferToDataUrl(screenshotResult.value);
   } else {
     screenshotError =
       screenshotResult.reason instanceof Error
@@ -308,30 +336,39 @@ async function handleDemoRequest(url: string): Promise<Response> {
 async function handleProductionRequest(
   request: Request,
   url: string,
+  signature: string | null,
+  firstParty: boolean,
 ): Promise<Response> {
   // Validate URL (always production in Workers)
-  const { isValid, error } = validateUrl(url, true);
-  if (!isValid) {
+  const { isValid, error, validatedUrl } = validateUrl(url);
+  if (!isValid || !validatedUrl) {
     return createJsonResponse({ error }, 400);
   }
 
-  // Edge cache check
-  const cache = (caches as unknown as { default: Cache })["default"];
-  const cachedResponse = await cache.match(request);
-  if (cachedResponse) {
-    return cachedResponse;
+  const requestHostname = new URL(request.url).hostname;
+  if (isSelfReferentialUseUrl(validatedUrl, requestHostname)) {
+    return createJsonResponse(
+      { error: "URL may not target this service's /use endpoint." },
+      400,
+    );
   }
 
-  // Run cache key generation and D1 site lookup in parallel.
-  // Use a read session for the lookup — it can hit the nearest replica.
-  const { urlBase } = extractUrlParts(url);
-  const readSession = getDb().withSession();
-  const [cacheKey, sitesResult] = await Promise.all([
-    generateCacheKey(url),
-    getSitesForUrlBase(readSession, urlBase),
+  const { urlBase, sanitizedUrl } = extractUrlParts(validatedUrl.toString());
+  const configuredHostname = new URL(
+    import.meta.env.VITE_SITE_URL as string,
+  ).hostname;
+  const isApprovedFirstParty =
+    firstParty &&
+    validatedUrl.search === "" &&
+    (validatedUrl.hostname === requestHostname ||
+      validatedUrl.hostname === configuredHostname);
+  const db = getDb();
+  const [cacheKey, selectedSite] = await Promise.all([
+    generateCacheKey(sanitizedUrl),
+    getSiteForUrlBase(db, urlBase),
   ]);
 
-  if (sitesResult.sites.length === 0) {
+  if (!selectedSite) {
     return createJsonResponse(
       {
         error: "Website must be added to Mosaic before generating OG images",
@@ -340,69 +377,104 @@ async function handleProductionRequest(
     );
   }
 
-  // Check D1 for an existing image record instead of looping R2 HEAD calls
-  const siteIds = sitesResult.sites.map((s) => s.siteId);
-  const existingKey = await findCachedImageKey(readSession, url, siteIds);
-  if (existingKey) {
-    const response = createRedirectResponse(buildPublicImageUrl(existingKey));
-    waitUntil(cache.put(request, response.clone()));
-    return response;
-  }
-
-  // Check image limit
-  const selectedSite = sitesResult.selectedSite;
-  if (!selectedSite) {
+  if (
+    !isApprovedFirstParty &&
+    (!signature ||
+      !(await verifyGenerationSignature(
+        selectedSite.generationSecret,
+        sanitizedUrl,
+        signature,
+      )))
+  ) {
     return createJsonResponse(
-      {
-        error: "OG image limit exceeded. Please contact support.",
-      },
+      { error: "A valid signature for this exact page URL is required." },
       403,
     );
   }
 
-  const imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
-
-  // Take screenshot (cache miss)
-  let imageBuffer: ArrayBuffer;
-  try {
-    imageBuffer = await takeScreenshot(url);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("[USE] Screenshot failed:", message);
-    return createJsonResponse({ error: "Failed to take screenshot" }, 500);
+  const existingKey = await findCachedImageKey(
+    db,
+    sanitizedUrl,
+    selectedSite.siteId,
+  );
+  if (existingKey) {
+    return createRedirectResponse(buildPublicImageUrl(existingKey));
   }
 
-  // Store in R2
+  const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
+  const rateLimit = await env.SITE_RATE_LIMITER.limit({
+    key: `${selectedSite.siteId}:${clientKey}`,
+  });
+  if (!rateLimit.success) {
+    return createFallbackRedirectResponse(request);
+  }
+
+  const leaseToken = await acquireGenerationLock(
+    db,
+    selectedSite.siteId,
+    sanitizedUrl,
+  );
+  if (!leaseToken) {
+    return createJsonResponse(
+      { error: "This image is already being generated. Please retry shortly." },
+      503,
+      { "Retry-After": "2", "Cache-Control": "no-store" },
+    );
+  }
+
+  const reservation = await reserveProductionGeneration(
+    db,
+    selectedSite.userId,
+  );
+  if (!reservation.reserved) {
+    await releaseGenerationLock(
+      db,
+      selectedSite.siteId,
+      sanitizedUrl,
+      leaseToken,
+    );
+    return createFallbackRedirectResponse(request);
+  }
+
+  const imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
+  let committed = false;
   try {
+    const finalUrl = await resolvePublicPageUrl(
+      new URL(sanitizedUrl),
+      requestHostname,
+    );
+    const imageBuffer = await takeScreenshot(finalUrl.toString());
     await env.OG_BUCKET.put(imageKey, imageBuffer, {
       httpMetadata: { contentType: "image/jpeg" },
     });
 
-    // Best-effort D1 record via waitUntil — don't block the response
-    waitUntil(
-      recordImage(
-        getDb(),
-        selectedSite.siteId,
-        imageKey,
-        url,
-        imageBuffer.byteLength,
-      ).catch((err) => console.error("[USE] recordImage failed:", err)),
+    const inserted = await recordImage(
+      db,
+      selectedSite.siteId,
+      imageKey,
+      sanitizedUrl,
+      imageBuffer.byteLength,
     );
+    committed = inserted;
+    if (!inserted) console.info("[USE] Concurrent image already recorded");
 
-    const response = createRedirectResponse(buildPublicImageUrl(imageKey));
-    waitUntil(cache.put(request, response.clone()));
-    return response;
+    return createRedirectResponse(buildPublicImageUrl(imageKey));
   } catch (err) {
-    // R2 put failure — return base64 fallback
-    console.error("[USE] R2 put failed, returning base64 fallback:", err);
-    const base64 = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
-    return createJsonResponse(
-      {
-        imageUrl: `data:image/jpeg;base64,${base64}`,
-        cached: false,
-        fallback: true,
-      },
-      200,
+    console.error("[USE] Failed to generate or persist image:", err);
+    return createFallbackRedirectResponse(request);
+  } finally {
+    if (!committed) {
+      await refundUserGeneration(db, selectedSite.userId).catch((error) =>
+        console.error("[USE] Failed to refund generation allowance:", error),
+      );
+    }
+    await releaseGenerationLock(
+      db,
+      selectedSite.siteId,
+      sanitizedUrl,
+      leaseToken,
+    ).catch((error) =>
+      console.error("[USE] Failed to release generation lock:", error),
     );
   }
 }
@@ -421,16 +493,31 @@ export async function handleUseRequest(request: Request): Promise<Response> {
     const requestUrl = new URL(request.url);
     const url = requestUrl.searchParams.get("url");
     const mode = requestUrl.searchParams.get("mode");
+    const signature = requestUrl.searchParams.get("sig");
+    const firstParty = requestUrl.searchParams.get("self") === "1";
 
     if (!url) {
       return createJsonResponse({ error: "URL parameter is required" }, 400);
     }
 
-    if (mode === "demo") {
-      return handleDemoRequest(url);
+    // Browser Run reaches a screenshot target as a document navigation. /use
+    // is an image endpoint, so rejecting navigations breaks redirect-assisted
+    // self-recursion while preserving social crawler image requests.
+    if (
+      request.headers.get("Sec-Fetch-Mode") === "navigate" ||
+      request.headers.get("Sec-Fetch-Dest") === "document"
+    ) {
+      return createJsonResponse(
+        { error: "This endpoint cannot be used as a document target." },
+        400,
+      );
     }
 
-    return handleProductionRequest(request, url);
+    if (mode === "demo") {
+      return handleDemoRequest(request, url);
+    }
+
+    return handleProductionRequest(request, url, signature, firstParty);
   } catch (err) {
     console.error("[USE] Unhandled error:", err);
     return createJsonResponse({ error: "Internal server error" }, 500);

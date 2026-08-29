@@ -1,4 +1,10 @@
-import { addSite, editSite, deleteSite, refreshSiteImages } from "@/server/sites";
+import {
+  addSite,
+  deleteSite,
+  editSite,
+  refreshSiteImages,
+  verifySite,
+} from "@/server/sites";
 import { toast } from "sonner";
 import { useRouter } from "@tanstack/react-router";
 
@@ -25,10 +31,10 @@ export function useWebsiteActions() {
     try {
       if ("siteId" in args && args.siteId) {
         await editSite({ data: { siteId: args.siteId, url_base: url } });
-        toast.success("Website updated successfully");
+        toast.success("Website updated. Verify the new hostname to activate it.");
       } else {
         await addSite({ data: { url_base: url } });
-        toast.success("Website added successfully");
+        toast.success("Website added. Verify ownership to activate it.");
       }
 
       router.invalidate();
@@ -65,9 +71,22 @@ export function useWebsiteActions() {
     }
   }
 
+  async function verifyWebsite(siteId: number) {
+    try {
+      await verifySite({ data: { siteId } });
+      toast.success("Website ownership verified");
+      router.invalidate();
+      return true;
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      return false;
+    }
+  }
+
   return {
     removeWebsite,
     refreshWebsite,
     saveWebsite,
+    verifyWebsite,
   };
 }
