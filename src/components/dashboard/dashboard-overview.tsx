@@ -26,8 +26,8 @@ export function DashboardOverview({
           </Card>
           <Card>
             <CardHeader className="px-4">
-              <CardTitle>Automatic</CardTitle>
-              <CardDescription>Shared OG image refresh</CardDescription>
+              <CardTitle>{formatNumber(dashboardStats.total_images)}</CardTitle>
+              <CardDescription>OG Images</CardDescription>
             </CardHeader>
           </Card>
         </div>

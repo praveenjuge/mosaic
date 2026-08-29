@@ -17,8 +17,8 @@ import {
 export function DashboardSkeleton() {
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {Array.from({ length: 3 }).map((_, index) => (
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        {Array.from({ length: 2 }).map((_, index) => (
           <Card key={index}>
             <CardHeader>
               <CardTitle>
@@ -38,6 +38,9 @@ export function DashboardSkeleton() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>
+                <Skeleton className="h-4 w-16" />
+              </TableHead>
               <TableHead>
                 <Skeleton className="h-4 w-16" />
               </TableHead>
@@ -65,6 +68,9 @@ export function DashboardSkeleton() {
                   <Skeleton className="h-4 w-8" />
                 </TableCell>
                 <TableCell>
+                  <Skeleton className="h-4 w-16" />
+                </TableCell>
+                <TableCell>
                   <Skeleton className="h-8 w-16" />
                 </TableCell>
               </TableRow>
@@ -81,9 +87,6 @@ export function DashboardSkeleton() {
             <TableRow>
               <TableHead>
                 <Skeleton className="h-4 w-16" />
-              </TableHead>
-              <TableHead>
-                <Skeleton className="h-4 w-20" />
               </TableHead>
               <TableHead>
                 <Skeleton className="h-4 w-16" />
@@ -107,9 +110,6 @@ export function DashboardSkeleton() {
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-16" />
-                </TableCell>
-                <TableCell>
-                  <Skeleton className="h-4 w-20" />
                 </TableCell>
                 <TableCell>
                   <Skeleton className="h-4 w-20" />
