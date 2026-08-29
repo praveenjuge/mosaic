@@ -197,12 +197,6 @@ export function buildUseEndpointUrl(baseUrl: string, targetUrl: string) {
   return endpoint.toString();
 }
 
-export function buildUsePreviewUrl(baseUrl: string, targetUrl: string) {
-  const endpoint = new URL(buildUseEndpointUrl(baseUrl, targetUrl));
-  endpoint.searchParams.set("preview", "1");
-  return endpoint.toString();
-}
-
 export function buildPublicImageUrl(
   key: string,
   baseUrl = DEFAULT_PUBLIC_IMAGE_BASE_URL,

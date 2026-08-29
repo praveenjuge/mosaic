@@ -1,51 +1,30 @@
 import { describe, expect, test } from "bun:test";
-import {
-  isDocumentNavigation,
-  shouldRejectUseDocumentNavigation,
-} from "./request";
+import { isMosaicRendererRequest, MOSAIC_RENDERER_USER_AGENT } from "./request";
 
 describe("request intent", () => {
-  test.each([
-    ["navigate", "empty"],
-    ["no-cors", "document"],
-    ["navigate", "document"],
-  ])("recognizes document navigation mode=%s dest=%s", (mode, destination) => {
+  test("recognizes Mosaic's Browser Run deny marker", () => {
     const request = new Request("https://mosaic.example/use", {
       headers: {
-        "Sec-Fetch-Mode": mode,
-        "Sec-Fetch-Dest": destination,
+        "User-Agent": MOSAIC_RENDERER_USER_AGENT,
       },
     });
 
-    expect(isDocumentNavigation(request)).toBe(true);
+    expect(isMosaicRendererRequest(request)).toBe(true);
   });
 
-  test("does not classify an image subresource as a document navigation", () => {
+  test("recognizes the marker when a runtime appends browser details", () => {
     const request = new Request("https://mosaic.example/use", {
       headers: {
-        "Sec-Fetch-Mode": "no-cors",
-        "Sec-Fetch-Dest": "image",
+        "User-Agent": `${MOSAIC_RENDERER_USER_AGENT} Chromium/140`,
       },
     });
 
-    expect(isDocumentNavigation(request)).toBe(false);
+    expect(isMosaicRendererRequest(request)).toBe(true);
   });
 
-  test("does not infer intent when optional Fetch Metadata is absent", () => {
+  test("keeps ordinary and metadata-free public requests usable", () => {
     const request = new Request("https://mosaic.example/use");
 
-    expect(isDocumentNavigation(request)).toBe(false);
-  });
-
-  test("rejects anonymous documents but permits signed-in previews", () => {
-    const request = new Request("https://mosaic.example/use", {
-      headers: {
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-Dest": "document",
-      },
-    });
-
-    expect(shouldRejectUseDocumentNavigation(request, false)).toBe(true);
-    expect(shouldRejectUseDocumentNavigation(request, true)).toBe(false);
+    expect(isMosaicRendererRequest(request)).toBe(false);
   });
 });

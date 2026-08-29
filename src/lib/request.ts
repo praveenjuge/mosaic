@@ -1,25 +1,15 @@
 /**
- * Whether a request is trying to load an endpoint as a browser document.
+ * Deny marker assigned to Mosaic's own Cloudflare Browser Run session.
  *
- * Browser Run sends these Fetch Metadata headers when a captured page redirects
- * back to Mosaic. Their presence is a useful recursion signal; their absence is
- * not proof of request intent because social crawlers may omit them.
+ * If a captured page redirects back to `/use`, Chromium preserves this user
+ * agent and the request is stopped before another screenshot can be started.
+ * This is intentionally a deny-only marker: spoofing it cannot grant access.
  */
-export function isDocumentNavigation(request: Request): boolean {
-  return (
-    request.headers.get("Sec-Fetch-Mode") === "navigate" ||
-    request.headers.get("Sec-Fetch-Dest") === "document"
-  );
-}
+export const MOSAIC_RENDERER_USER_AGENT = "MosaicBrowserRun/1.0";
 
-/**
- * Block a concrete browser-navigation signal unless the route has independently
- * authorized the explicit preview intent. The unsigned image endpoint remains
- * public so social crawlers do not depend on auth or optional request headers.
- */
-export function shouldRejectUseDocumentNavigation(
-  request: Request,
-  allowDocumentNavigation: boolean,
-): boolean {
-  return isDocumentNavigation(request) && !allowDocumentNavigation;
+export function isMosaicRendererRequest(request: Request): boolean {
+  return (
+    request.headers.get("User-Agent")?.includes(MOSAIC_RENDERER_USER_AGENT) ??
+    false
+  );
 }

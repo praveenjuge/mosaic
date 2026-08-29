@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildUseEndpointUrl,
-  buildUsePreviewUrl,
   extractUrlParts,
   isBlockedOutboundHostname,
   isSelfReferentialUseUrl,
@@ -88,19 +87,5 @@ describe("canonical OG page identity", () => {
       "https://example.com/page?view=full",
     );
     expect(endpoint.searchParams.has("sig")).toBe(false);
-  });
-
-  test("keeps authenticated preview intent out of the copied endpoint URL", () => {
-    const targetUrl = "https://example.com/page?view=full";
-    const publicEndpoint = new URL(
-      buildUseEndpointUrl("https://mosaic.example", targetUrl),
-    );
-    const previewEndpoint = new URL(
-      buildUsePreviewUrl("https://mosaic.example", targetUrl),
-    );
-
-    expect(publicEndpoint.searchParams.has("preview")).toBe(false);
-    expect(previewEndpoint.searchParams.get("preview")).toBe("1");
-    expect(previewEndpoint.searchParams.get("url")).toBe(targetUrl);
   });
 });
