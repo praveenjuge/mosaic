@@ -1,12 +1,6 @@
-import {
-  addSite,
-  deleteSite,
-  editSite,
-  refreshSiteImages,
-  verifySite,
-} from "@/server/sites";
-import { toast } from "sonner";
+import { addSite, deleteSite, editSite } from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
+import { toast } from "sonner";
 
 type SaveWebsiteArgs =
   | { siteId?: undefined; url: string }
@@ -31,10 +25,10 @@ export function useWebsiteActions() {
     try {
       if ("siteId" in args && args.siteId) {
         await editSite({ data: { siteId: args.siteId, url_base: url } });
-        toast.success("Website updated. Verify the new hostname to activate it.");
+        toast.success("Website updated and ready to use.");
       } else {
         await addSite({ data: { url_base: url } });
-        toast.success("Website added. Verify ownership to activate it.");
+        toast.success("Website added and ready to use.");
       }
 
       router.invalidate();
@@ -57,36 +51,8 @@ export function useWebsiteActions() {
     }
   }
 
-  async function refreshWebsite(siteId: number) {
-    try {
-      await refreshSiteImages({ data: { siteId } });
-      toast.success(
-        "Images refreshed successfully. New screenshots will generate on next visit.",
-      );
-      router.invalidate();
-      return true;
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      return false;
-    }
-  }
-
-  async function verifyWebsite(siteId: number) {
-    try {
-      await verifySite({ data: { siteId } });
-      toast.success("Website ownership verified");
-      router.invalidate();
-      return true;
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      return false;
-    }
-  }
-
   return {
     removeWebsite,
-    refreshWebsite,
     saveWebsite,
-    verifyWebsite,
   };
 }

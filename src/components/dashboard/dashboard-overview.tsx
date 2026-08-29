@@ -5,20 +5,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { DashboardStats } from "@/lib/types";
-import { formatLimit, formatNumber } from "@/lib/utils";
-
-function ImagesStatCard({ count, limit }: { count: number; limit: number }) {
-  return (
-    <Card>
-      <CardHeader className="px-4">
-        <CardTitle>
-          {formatNumber(count)}/{formatLimit(limit)}
-        </CardTitle>
-        <CardDescription>OG Images</CardDescription>
-      </CardHeader>
-    </Card>
-  );
-}
+import { formatNumber } from "@/lib/utils";
 
 export function DashboardOverview({
   dashboardStats,
@@ -37,10 +24,12 @@ export function DashboardOverview({
               <CardDescription>Websites</CardDescription>
             </CardHeader>
           </Card>
-          <ImagesStatCard
-            count={dashboardStats.total_images}
-            limit={dashboardStats.images_limit}
-          />
+          <Card>
+            <CardHeader className="px-4">
+              <CardTitle>Automatic</CardTitle>
+              <CardDescription>Shared OG image refresh</CardDescription>
+            </CardHeader>
+          </Card>
         </div>
       </div>
     </div>

@@ -12,49 +12,21 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getGuideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
-import { signGenerationUrl } from "@/lib/generation-signature";
 import { buildSiteOgImageUrl } from "@/lib/url";
 import { Code, ExternalLink, Ghost } from "lucide-react";
-import { useEffect, useState } from "react";
 
 const guideLinks = getGuideLinks();
 
-export function WebsiteInfoModal({
-  websiteUrl,
-  generationSecret,
-  verified,
-}: {
-  websiteUrl: string;
-  generationSecret: string | null;
-  verified: boolean;
-}) {
+export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
-  const [homeSignature, setHomeSignature] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    setHomeSignature("");
-    if (generationSecret) {
-      void signGenerationUrl(generationSecret, finalWebsiteUrl).then(
-        (signature) => {
-          if (!cancelled) setHomeSignature(signature);
-        },
-      );
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, [finalWebsiteUrl, generationSecret]);
 
   const homeMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
     publicEnv.siteUrl,
     finalWebsiteUrl,
-    homeSignature,
   )}" />`;
   const subpageMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
     publicEnv.siteUrl,
     `${finalWebsiteUrl}/your_slug`,
-    "SIGN_THIS_EXACT_URL_ON_YOUR_SERVER",
   )}" />`;
 
   const renderCodeBlock = (content: string) => (
@@ -69,12 +41,7 @@ export function WebsiteInfoModal({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7"
-          disabled={!verified || !generationSecret || !homeSignature}
-        >
+        <Button size="sm" variant="outline" className="h-7">
           <Code className="size-4 stroke-2" />
           Add to Your Website
         </Button>

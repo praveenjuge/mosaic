@@ -31,7 +31,7 @@ function StatsLoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       <StatCardSkeleton titleWidth="w-16" description="Websites" />
-      <StatCardSkeleton titleWidth="w-16" description="OG Images" />
+      <StatCardSkeleton titleWidth="w-24" description="OG image refresh" />
     </div>
   );
 }
@@ -54,8 +54,8 @@ export default function HomeQuickStats({ stats }: HomeQuickStatsProps) {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>0</CardTitle>
-            <CardDescription>OG Images</CardDescription>
+            <CardTitle>Automatic</CardTitle>
+            <CardDescription>OG image refresh</CardDescription>
           </CardHeader>
         </Card>
       </div>
@@ -76,8 +76,8 @@ export default function HomeQuickStats({ stats }: HomeQuickStatsProps) {
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>{formatNumber(stats.total_images)}</CardTitle>
-          <CardDescription>OG Images</CardDescription>
+          <CardTitle>Automatic</CardTitle>
+          <CardDescription>OG image refresh</CardDescription>
         </CardHeader>
       </Card>
     </div>

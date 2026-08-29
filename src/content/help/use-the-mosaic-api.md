@@ -8,48 +8,20 @@ publishedAt: "2025-06-20T12:10:00.000Z"
 Mosaic provides a simple API for on-demand OG images. Send a `GET` request to:
 
 ```txt
-https://mosaic.praveenjuge.com/use?url=YOUR_URL&sig=HMAC_SIGNATURE
+https://mosaic.praveenjuge.com/use?url=YOUR_URL
 ```
 
-Replace `YOUR_URL` with the page you want a screenshot of. The hostname must be
-verified in your account before the production API accepts it. The API redirects
-to a stored image when one exists. Use `mode=demo` to test without storing an
-image.
+Replace `YOUR_URL` with the encoded HTTPS page URL you want to capture. Add the
+page's hostname to any Mosaic account once, then use the endpoint directly—no
+verification file, token, or signature is required. Images are cached globally
+by canonical page URL and refreshed automatically after 30 days.
 
-`HMAC_SIGNATURE` is the lowercase hex HMAC-SHA256 signature of the exact,
-normalized page URL, using the generation secret shown after verification.
-Generate it only on your server or during your site build. Never expose the
-secret in browser JavaScript. A different path or query needs a new signature.
-
-```ts
-const secretBytes = Uint8Array.from(
-  generationSecret.match(/.{2}/g) ?? [],
-  (byte) => Number.parseInt(byte, 16),
-);
-const normalized = new URL(pageUrl);
-normalized.hash = "";
-const canonicalUrl = normalized.toString().replace(/\/+$/, "");
-const key = await crypto.subtle.importKey(
-  "raw",
-  secretBytes,
-  { name: "HMAC", hash: "SHA-256" },
-  false,
-  ["sign"],
-);
-const signed = await crypto.subtle.sign(
-  "HMAC",
-  key,
-  new TextEncoder().encode(canonicalUrl),
-);
-const signature = Array.from(new Uint8Array(signed), (byte) =>
-  byte.toString(16).padStart(2, "0"),
-).join("");
-```
+Use `mode=demo` to test a public URL without storing an image.
 
 Example using `curl`:
 
 ```bash
-curl "https://mosaic.praveenjuge.com/use?url=https://example.com&sig=HMAC_SIGNATURE"
+curl "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fexample.com"
 ```
 
-The response is a `307` redirect to the generated OG image.
+The response is a `307` redirect to the cached or newly generated OG image.

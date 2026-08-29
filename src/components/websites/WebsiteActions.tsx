@@ -22,7 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis, Pencil, RefreshCcw, Trash } from "lucide-react";
+import { Ellipsis, Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
@@ -35,11 +35,9 @@ interface WebsiteActionsProps {
 export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [refreshOpen, setRefreshOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { removeWebsite, refreshWebsite, saveWebsite } = useWebsiteActions();
+  const { removeWebsite, saveWebsite } = useWebsiteActions();
 
   const handleEditSubmit = async (url: string) => {
     setIsSaving(true);
@@ -69,20 +67,6 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
     }
   };
 
-  const handleRefreshAction = async () => {
-    setIsRefreshing(true);
-
-    try {
-      const didRefresh = await refreshWebsite(websiteId);
-
-      if (didRefresh) {
-        setRefreshOpen(false);
-      }
-    } finally {
-      setIsRefreshing(false);
-    }
-  };
-
   return (
     <>
       <DropdownMenu>
@@ -96,10 +80,6 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             <Pencil className="stroke-2" />
             Edit
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => setRefreshOpen(true)}>
-            <RefreshCcw className="stroke-2" />
-            Refresh Images
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -129,37 +109,6 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
         </DialogContent>
       </Dialog>
 
-      {/* Refresh Alert Dialog */}
-      <AlertDialog open={refreshOpen} onOpenChange={setRefreshOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <img
-              src="/illustrations/refresh-image.png"
-              alt="Refresh Images"
-              width={300}
-              height={300}
-              className="w-full"
-            />
-            <AlertDialogTitle>
-              Refresh Images for {currentUrl}?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              All existing OG images will be deleted and regenerated on next
-              request. This may briefly affect social media previews until new
-              images are created.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isRefreshing}>
-              Cancel
-            </AlertDialogCancel>
-            <Button onClick={handleRefreshAction} disabled={isRefreshing}>
-              {isRefreshing ? <LoadingSpinner size={18} /> : "Yes, Refresh"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       {/* Delete Alert Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
@@ -171,12 +120,11 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
               height={300}
               className="w-full"
             />
-            <AlertDialogTitle>
-              Delete Website {currentUrl}?
-            </AlertDialogTitle>
+            <AlertDialogTitle>Delete Website {currentUrl}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this website? This action cannot
-              be undone.
+              This removes the website from your account. Shared cached images
+              are unaffected and continue refreshing automatically while any
+              Mosaic user has this hostname saved.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

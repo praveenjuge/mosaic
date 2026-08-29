@@ -26,17 +26,17 @@ const FAQS: FAQ[] = [
   {
     question: "How does the Free plan work?",
     answer:
-      "The Free plan gives you 500 OG images per month for one website. Perfect for personal projects or trying out the service.",
+      "The Free plan lets you save unlimited websites and use Mosaic's automatic shared OG image cache. There is no verification or signing setup.",
   },
   {
     question: "What are the benefits of upgrading to Pro?",
     answer:
-      "Pro plans offer higher limits (5,000 images/month or unlimited for yearly), unlimited websites, priority email support, and advanced analytics. Pro Yearly also includes custom branding options.",
+      "Pro plans add priority email support and advanced features. The shared OG image cache works the same across plans, so your metadata URLs stay simple.",
   },
   {
-    question: "What happens when I hit my plan limit?",
+    question: "What happens during heavy traffic?",
     answer:
-      "New images won't be generated until your next billing cycle, but your existing ones stay available. You can upgrade to a higher plan anytime for more capacity.",
+      "Mosaic protects the service with daily generation budgets. If a budget is temporarily exhausted, it serves an existing cached image or a safe fallback instead of breaking your social preview.",
   },
   {
     question: "Can I cancel my subscription anytime?",
@@ -46,12 +46,12 @@ const FAQS: FAQ[] = [
   {
     question: "How often are OG images refreshed?",
     answer:
-      "Images are generated once per page and cached. You can manually refresh them from your dashboard if needed.",
+      "Images are cached by canonical page URL and refresh automatically after 30 days. No manual refresh is required.",
   },
   {
     question: "What image format is used?",
     answer:
-      "All OG images are generated as high-quality PNG files at 1200x630 pixels, the standard size for social media previews.",
+      "OG images are generated as high-quality JPEG files at 1200x630 pixels, the standard size for social media previews.",
   },
 ];
 

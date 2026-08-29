@@ -7,8 +7,6 @@ svgLight: "html5"
 svgDark: "html5"
 ---
 
-> Replace `SIGNATURE` with the HMAC for the exact HTTPS page URL. Generate it only on your server or during the build; see [Use the Mosaic API](/help/use-the-mosaic-api).
-
 ## Add meta tags in the `<head>` section
 
 ```html
@@ -18,13 +16,13 @@ svgDark: "html5"
     <meta property="og:title" content="Your Page Title" />
     <meta
       property="og:image"
-      content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug&amp;sig=SIGNATURE"
+      content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug"
     />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:image"
-      content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug&amp;sig=SIGNATURE"
+      content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug"
     />
   </head>
   <body>

@@ -1,6 +1,6 @@
 ---
-title: "How Often Should You Refresh OG Images? A Guide to Mosaic’s Refresh Tool"
-description: "Advice on refresh frequency based on site design changes, product launches, or seasonal content."
+title: "How Often Does Mosaic Refresh OG Images?"
+description: "How the automatic shared cache stays current after site changes."
 publishedAt: "2025-05-08T05:40:06.907Z"
 category: "Articles"
 ---
@@ -12,29 +12,27 @@ often should you update them? Here are a few guidelines to keep in mind.
 ## Update after design changes
 
 A major website redesign or even small tweaks to your layout can affect how your
-pages look when captured. If you’ve refreshed your site’s look and feel, take a
-moment to refresh your OG images so that your social previews match the new
-design.
+pages look when captured. Mosaic refreshes cached images automatically after 30
+days, so there is no dashboard action to run.
 
 ## Refresh for product launches
 
-Launching a new product or feature is a perfect time to regenerate your OG
-images. Updated screenshots showcase your newest offerings right away, helping
-you build excitement as soon as the announcement goes live.
+Launching a new product or feature may happen before the cache expires. Social
+platforms also keep their own caches, so use that platform's card debugger or
+re-scrape tool when an immediate preview update matters.
 
 ## Consider seasonal content
 
-If your site features seasonal promotions or time‑sensitive content, schedule a
-refresh when those pages change. It’s a quick way to keep your social shares
-relevant, whether you’re kicking off a holiday sale or highlighting a
-limited‑time event.
+For seasonal or time-sensitive pages, keep the page URL stable and allow the
+automatic refresh to replace the shared screenshot. Use a new canonical page
+URL only when the content truly represents a new page.
 
 ## How Mosaic can help
 
-Mosaic’s Refresh tool lets you update screenshots on demand or set up automated
-routines. Whether you’re responding to a site update or gearing up for a new
-campaign, it takes just a click to regenerate your OG images.
+Mosaic stores one screenshot per canonical page URL, shares it across users,
+and refreshes it after 30 days. If generation capacity is temporarily busy, the
+older image remains available instead of breaking the social preview.
 
 Keeping your OG images up to date ensures that your content always looks its
-best when shared. With Mosaic’s help, you can refresh as often as your design,
-product updates, or seasonal campaigns require.
+best when shared without requiring site owners to manage image files or signing
+keys.

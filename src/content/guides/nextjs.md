@@ -7,8 +7,6 @@ svgLight: "nextjs_icon_dark"
 svgDark: "nextjs_icon_dark"
 ---
 
-> Replace `SIGNATURE` with the HMAC for the exact HTTPS page URL. Generate it only on your server or during the build; see [Use the Mosaic API](/help/use-the-mosaic-api).
-
 ## Use the metadata export in your layout or page files
 
 ```typescript
@@ -18,7 +16,7 @@ export const metadata: Metadata = {
   openGraph: {
     images: [
       {
-        url: "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug&sig=SIGNATURE",
+        url: "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
         width: 1200,
         height: 630,
         alt: "Open Graph Image",
@@ -43,7 +41,7 @@ export async function generateMetadata({
     openGraph: {
       images: [
         {
-          url: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${slug}`)}&sig=SIGNATURE`,
+          url: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${slug}`)}`,
           width: 1200,
           height: 630,
           alt: `Open Graph Image for ${slug}`,

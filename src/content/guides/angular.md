@@ -5,8 +5,6 @@ description: "Get started with integrating Mosaic into your Angular project."
 order: 80
 ---
 
-> Replace `SIGNATURE` with the HMAC for the exact HTTPS page URL. Generate it only on your server or during the build; see [Use the Mosaic API](/help/use-the-mosaic-api).
-
 ## Use Angular's `Meta` service
 
 ```typescript
@@ -22,7 +20,7 @@ export class PageComponent {
     this.meta.updateTag({
       property: "og:image",
       content:
-        "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug&sig=SIGNATURE",
+        "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
     });
   }
 }

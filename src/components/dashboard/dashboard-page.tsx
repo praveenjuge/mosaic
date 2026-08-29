@@ -1,7 +1,6 @@
 import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
 import type { DashboardStats } from "@/lib/types";
 import { useAuth } from "@clerk/tanstack-react-start";
-import { DashboardLatestImages } from "./dashboard-latest-images";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardSkeleton } from "./dashboard-skeleton";
 import { DashboardWebsitesTable } from "./dashboard-websites-table";
@@ -29,9 +28,6 @@ export default function DashboardPage({
     <div className="flex flex-col gap-10">
       <DashboardOverview dashboardStats={dashboardStats} />
       <DashboardWebsitesTable dashboardStats={dashboardStats} />
-      <DashboardLatestImages
-        latestScreenshots={dashboardStats.latest_screenshots}
-      />
     </div>
   );
 }

@@ -6,12 +6,12 @@ import { env } from "cloudflare:workers";
  *
  * The application origin serves both the app and its images.
  *
- * R2 keys contain slashes (`<prefix>/<hash>.jpeg` or `demo/<hash>.jpeg`), so
+ * R2 keys contain slashes (`global/<hash>.jpeg`), so
  * this is a splat route and the key is read from the path after `/i/`.
  *
  * R2 is the authoritative source for every request. Avoiding the colo-local
- * Cache API makes delete and refresh immediately revocable and keeps GET/HEAD
- * consistent.
+ * Cache API prevents a CDN response from outliving the shared D1 expiry and
+ * keeps GET/HEAD consistent.
  */
 
 const IMAGE_CACHE_CONTROL = "private, no-store";

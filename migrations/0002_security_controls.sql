@@ -1,47 +1,38 @@
--- Security controls for hostname ownership, bounded generation, and race-safe
--- image identity. Existing registrations receive a challenge but remain
--- inactive until their owners prove control of the hostname.
+-- Shared OG cache. Website registrations remain user-owned bookmarks, while
+-- generated images belong to the service-wide canonical URL cache.
+CREATE TABLE global_images (
+  page_url      TEXT PRIMARY KEY,
+  hostname      TEXT    NOT NULL,
+  key           TEXT    NOT NULL UNIQUE,
+  size_in_bytes INTEGER NOT NULL,
+  generated_at  INTEGER NOT NULL,
+  expires_at    INTEGER NOT NULL
+);
 
-ALTER TABLE sites ADD COLUMN verification_token TEXT;
-ALTER TABLE sites ADD COLUMN verified_at TEXT;
-ALTER TABLE sites ADD COLUMN generation_secret TEXT;
+CREATE INDEX idx_global_images_hostname
+  ON global_images(hostname);
 
-UPDATE sites
-SET verification_token = lower(hex(randomblob(32)));
+-- Preserve existing cached images without assigning their page history to a
+-- new user. If duplicates exist globally, keep the earliest generated record.
+INSERT INTO global_images
+  (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
+SELECT i.page_url, s.url_base, i.key, i.size_in_bytes, i.generated_at,
+       i.generated_at + 2592000000
+FROM images i
+JOIN sites s ON s.id = i.site_id
+WHERE i.id = (
+  SELECT MIN(existing.id)
+  FROM images existing
+  WHERE existing.page_url = i.page_url
+);
 
-CREATE UNIQUE INDEX idx_sites_verified_url_base
-  ON sites(url_base)
-  WHERE verified_at IS NOT NULL;
-
-CREATE UNIQUE INDEX idx_images_site_id_page_url
-  ON images(site_id, page_url);
-
--- One request owns generation for a canonical page at a time. Expired leases
--- can be reclaimed after a Worker failure.
+-- One request owns generation for a canonical page at a time. The lease token
+-- prevents an expired worker from releasing a newer worker's lock.
 CREATE TABLE generation_locks (
-  site_id     INTEGER NOT NULL REFERENCES sites(id) ON DELETE CASCADE,
-  page_url    TEXT    NOT NULL,
+  page_url    TEXT PRIMARY KEY,
   lease_token TEXT    NOT NULL,
-  expires_at  INTEGER NOT NULL,
-  PRIMARY KEY (site_id, page_url)
+  expires_at  INTEGER NOT NULL
 );
-
--- Paid generation is metered independently of revocable image rows so a
--- refresh or delete/re-add cycle cannot reset usage within the billing month.
-CREATE TABLE user_usage (
-  user_id         TEXT PRIMARY KEY,
-  plan            TEXT NOT NULL DEFAULT 'free'
-                  CHECK (plan IN ('free', 'pro', 'pro-yearly')),
-  period_start    INTEGER NOT NULL,
-  generated_total INTEGER NOT NULL DEFAULT 0 CHECK (generated_total >= 0)
-);
-
-INSERT INTO user_usage (user_id, period_start, generated_total)
-SELECT user_id,
-       CAST(strftime('%s', 'now', 'start of month') AS INTEGER) * 1000,
-       COALESCE(SUM(image_count), 0)
-FROM sites
-GROUP BY user_id;
 
 -- Durable per-scope windows complement the fast, colo-local Rate Limiting
 -- bindings. The primary key makes each conditional increment atomic in D1.

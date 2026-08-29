@@ -6,19 +6,14 @@ export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 export const website_description =
   "Transform your website's Open Graph social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.";
 
-export const PLAN_IMAGE_LIMITS = {
-  free: 500,
-  pro: 5_000,
-  "pro-yearly": 999_999,
-} as const;
+/** Shared images are regenerated after 30 days. */
+export const GLOBAL_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-export type BillingPlan = keyof typeof PLAN_IMAGE_LIMITS;
-export const DEFAULT_BILLING_PLAN: BillingPlan = "free";
-export const IMAGES_LIMIT = PLAN_IMAGE_LIMITS[DEFAULT_BILLING_PLAN];
+/** Maximum fresh production screenshots generated across the service per day. */
+export const PRODUCTION_DAILY_GENERATION_LIMIT = 500;
 
-export function getPlanImageLimit(plan: string | null | undefined): number {
-  return PLAN_IMAGE_LIMITS[plan as BillingPlan] ?? IMAGES_LIMIT;
-}
+/** Maximum fresh production screenshots generated for one client per day. */
+export const PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT = 50;
 
 /** Maximum anonymous demo screenshots generated across the service per UTC day. */
 export const DEMO_DAILY_GENERATION_LIMIT = 100;

@@ -7,11 +7,10 @@
  * - `mode=demo` — fetches page metadata + generates a screenshot,
  *   returns JSON for the demo UI. No D1 tracking.
  * - (default) — production OG generation with D1 site lookup,
- *   image limit checks, and 307 redirect responses.
+ *   shared-cache controls and 307 redirect responses.
  */
 
 import { getDb } from "@/lib/db";
-import { verifyGenerationSignature } from "@/lib/generation-signature";
 import {
   extractMetadata,
   fetchPageHtml,
@@ -25,15 +24,14 @@ import {
   validateOutboundUrl,
 } from "@/lib/url";
 import {
-  refundUserGeneration,
   reserveDemoGeneration,
   reserveProductionGeneration,
 } from "@/server/generation-usage";
 import {
   acquireGenerationLock,
-  findCachedImageKey,
-  getSiteForUrlBase,
-  recordImage,
+  findGlobalImage,
+  isHostnameAssociated,
+  recordGlobalImage,
   releaseGenerationLock,
 } from "@/server/og";
 import { env } from "cloudflare:workers";
@@ -65,18 +63,10 @@ export async function generateCacheKey(url: string): Promise<string> {
 /**
  * Build the R2 object key for a cached OG image.
  *
- * - Demo mode always uses `demo/{cacheKey}.jpeg` regardless of prefix.
- * - Production uses `{prefix}/{cacheKey}.jpeg`.
+ * Production images use a service-owned global namespace.
  */
-export function getR2Key(
-  cacheKey: string,
-  prefix?: string,
-  isDemo?: boolean,
-): string {
-  if (isDemo) {
-    return `demo/${cacheKey}.jpeg`;
-  }
-  return `${prefix}/${cacheKey}.jpeg`;
+export function getR2Key(cacheKey: string): string {
+  return `global/${cacheKey}.jpeg`;
 }
 
 // ── URL Validation ──────────────────────────────────────────────────
@@ -135,8 +125,8 @@ export function createJsonResponse(
 }
 
 /**
- * Create a revocable 307 redirect. R2 remains the source of truth, so site
- * deletion and refresh take effect immediately without per-colo cache purges.
+ * Redirect to the current service-owned image. D1 controls automatic renewal,
+ * so this response is not cached independently of the global image record.
  */
 export function createRedirectResponse(location: string): Response {
   return new Response(null, {
@@ -160,7 +150,9 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
   let binary = "";
   const chunkSize = 0x8000;
   for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(...bytes.subarray(offset, offset + chunkSize));
+    binary += String.fromCharCode(
+      ...bytes.subarray(offset, offset + chunkSize),
+    );
   }
   return `data:image/jpeg;base64,${btoa(binary)}`;
 }
@@ -185,13 +177,7 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling).
  */
-/**
- * Render a URL with Browser Run's first-class Quick Action binding. The caller
- * resolves and validates the redirect chain before invoking this paid sink.
- */
-export async function takeScreenshot(
-  url: string,
-): Promise<ArrayBuffer> {
+export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const browser = env.BROWSER as unknown as BrowserRunBinding;
   const response = await browser.quickAction("screenshot", {
     url,
@@ -241,10 +227,7 @@ async function handleDemoRequest(
   }
 
   const requestHostname = new URL(request.url).hostname;
-  if (
-    !validatedUrl ||
-    isSelfReferentialUseUrl(validatedUrl, requestHostname)
-  ) {
+  if (!validatedUrl || isSelfReferentialUseUrl(validatedUrl, requestHostname)) {
     return createJsonResponse(
       { error: "URL may not target this service's /use endpoint." },
       400,
@@ -276,7 +259,8 @@ async function handleDemoRequest(
           "/images/mosaic-example-og-f9e253a9.png",
           request.url,
         ).toString(),
-        notice: "Live screenshot capacity is currently busy. Showing an example image.",
+        notice:
+          "Live screenshot capacity is currently busy. Showing an example image.",
       },
       200,
       { "Cache-Control": DEMO_CACHE_CONTROL },
@@ -329,15 +313,11 @@ async function handleDemoRequest(
 // ── Production Mode Handler ─────────────────────────────────────────
 
 /**
- * Handle a production-mode request: look up the site in D1, check
- * image limits, generate a screenshot on cache miss, store in R2,
- * record metadata in D1, and return a 307 redirect.
+ * Handle unsigned production generation against the shared canonical cache.
  */
 async function handleProductionRequest(
   request: Request,
   url: string,
-  signature: string | null,
-  firstParty: boolean,
 ): Promise<Response> {
   // Validate URL (always production in Workers)
   const { isValid, error, validatedUrl } = validateUrl(url);
@@ -354,21 +334,14 @@ async function handleProductionRequest(
   }
 
   const { urlBase, sanitizedUrl } = extractUrlParts(validatedUrl.toString());
-  const configuredHostname = new URL(
-    import.meta.env.VITE_SITE_URL as string,
-  ).hostname;
-  const isApprovedFirstParty =
-    firstParty &&
-    validatedUrl.search === "" &&
-    (validatedUrl.hostname === requestHostname ||
-      validatedUrl.hostname === configuredHostname);
   const db = getDb();
-  const [cacheKey, selectedSite] = await Promise.all([
+  const [cacheKey, isAssociated, cachedImage] = await Promise.all([
     generateCacheKey(sanitizedUrl),
-    getSiteForUrlBase(db, urlBase),
+    isHostnameAssociated(db, urlBase),
+    findGlobalImage(db, sanitizedUrl),
   ]);
 
-  if (!selectedSite) {
+  if (!isAssociated) {
     return createJsonResponse(
       {
         error: "Website must be added to Mosaic before generating OG images",
@@ -377,44 +350,23 @@ async function handleProductionRequest(
     );
   }
 
-  if (
-    !isApprovedFirstParty &&
-    (!signature ||
-      !(await verifyGenerationSignature(
-        selectedSite.generationSecret,
-        sanitizedUrl,
-        signature,
-      )))
-  ) {
-    return createJsonResponse(
-      { error: "A valid signature for this exact page URL is required." },
-      403,
-    );
-  }
-
-  const existingKey = await findCachedImageKey(
-    db,
-    sanitizedUrl,
-    selectedSite.siteId,
-  );
-  if (existingKey) {
-    return createRedirectResponse(buildPublicImageUrl(existingKey));
+  if (cachedImage && cachedImage.expiresAt > Date.now()) {
+    return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
   }
 
   const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
-  const rateLimit = await env.SITE_RATE_LIMITER.limit({
-    key: `${selectedSite.siteId}:${clientKey}`,
-  });
+  const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: clientKey });
   if (!rateLimit.success) {
-    return createFallbackRedirectResponse(request);
+    return cachedImage
+      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      : createFallbackRedirectResponse(request);
   }
 
-  const leaseToken = await acquireGenerationLock(
-    db,
-    selectedSite.siteId,
-    sanitizedUrl,
-  );
+  const leaseToken = await acquireGenerationLock(db, sanitizedUrl);
   if (!leaseToken) {
+    if (cachedImage) {
+      return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
+    }
     return createJsonResponse(
       { error: "This image is already being generated. Please retry shortly." },
       503,
@@ -422,22 +374,15 @@ async function handleProductionRequest(
     );
   }
 
-  const reservation = await reserveProductionGeneration(
-    db,
-    selectedSite.userId,
-  );
-  if (!reservation.reserved) {
-    await releaseGenerationLock(
-      db,
-      selectedSite.siteId,
-      sanitizedUrl,
-      leaseToken,
-    );
-    return createFallbackRedirectResponse(request);
+  const reserved = await reserveProductionGeneration(db, clientKey);
+  if (!reserved) {
+    await releaseGenerationLock(db, sanitizedUrl, leaseToken);
+    return cachedImage
+      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      : createFallbackRedirectResponse(request);
   }
 
-  const imageKey = getR2Key(cacheKey, selectedSite.r2Prefix, false);
-  let committed = false;
+  const imageKey = getR2Key(cacheKey);
   try {
     const finalUrl = await resolvePublicPageUrl(
       new URL(sanitizedUrl),
@@ -448,32 +393,16 @@ async function handleProductionRequest(
       httpMetadata: { contentType: "image/jpeg" },
     });
 
-    const inserted = await recordImage(
-      db,
-      selectedSite.siteId,
-      imageKey,
-      sanitizedUrl,
-      imageBuffer.byteLength,
-    );
-    committed = inserted;
-    if (!inserted) console.info("[USE] Concurrent image already recorded");
+    await recordGlobalImage(db, imageKey, sanitizedUrl, imageBuffer.byteLength);
 
     return createRedirectResponse(buildPublicImageUrl(imageKey));
   } catch (err) {
     console.error("[USE] Failed to generate or persist image:", err);
-    return createFallbackRedirectResponse(request);
+    return cachedImage
+      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      : createFallbackRedirectResponse(request);
   } finally {
-    if (!committed) {
-      await refundUserGeneration(db, selectedSite.userId).catch((error) =>
-        console.error("[USE] Failed to refund generation allowance:", error),
-      );
-    }
-    await releaseGenerationLock(
-      db,
-      selectedSite.siteId,
-      sanitizedUrl,
-      leaseToken,
-    ).catch((error) =>
+    await releaseGenerationLock(db, sanitizedUrl, leaseToken).catch((error) =>
       console.error("[USE] Failed to release generation lock:", error),
     );
   }
@@ -493,8 +422,6 @@ export async function handleUseRequest(request: Request): Promise<Response> {
     const requestUrl = new URL(request.url);
     const url = requestUrl.searchParams.get("url");
     const mode = requestUrl.searchParams.get("mode");
-    const signature = requestUrl.searchParams.get("sig");
-    const firstParty = requestUrl.searchParams.get("self") === "1";
 
     if (!url) {
       return createJsonResponse({ error: "URL parameter is required" }, 400);
@@ -517,7 +444,7 @@ export async function handleUseRequest(request: Request): Promise<Response> {
       return handleDemoRequest(request, url);
     }
 
-    return handleProductionRequest(request, url, signature, firstParty);
+    return handleProductionRequest(request, url);
   } catch (err) {
     console.error("[USE] Unhandled error:", err);
     return createJsonResponse({ error: "Internal server error" }, 500);

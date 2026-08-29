@@ -67,7 +67,9 @@ function ipv4ToNumber(hostname: string): number | null {
   const octets = hostname.split(".");
   if (octets.length !== 4) return null;
   const values = octets.map(Number);
-  if (values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) {
+  if (
+    values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)
+  ) {
     return null;
   }
   return values.reduce((total, value) => total * 256 + value, 0) >>> 0;
@@ -95,6 +97,23 @@ export function isBlockedOutboundHostname(hostname: string): boolean {
   }
 
   if (!normalized.includes(":")) return false;
+
+  const mappedIpv4 = normalized.match(
+    /^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/,
+  );
+  if (mappedIpv4) {
+    const address =
+      (Number.parseInt(mappedIpv4[1], 16) * 0x10000 +
+        Number.parseInt(mappedIpv4[2], 16)) >>>
+      0;
+    if (
+      PRIVATE_IPV4_RANGES.some(
+        ([first, last]) => address >= first && address <= last,
+      )
+    ) {
+      return true;
+    }
+  }
 
   return (
     normalized === "::" ||
@@ -134,13 +153,13 @@ export function validateOutboundUrl(
   if (candidate.protocol !== "http:" && candidate.protocol !== "https:") {
     return "Only HTTP and HTTPS URLs are supported.";
   }
+  if (candidate.username || candidate.password) {
+    return "URLs with embedded credentials are not allowed.";
+  }
   if (isBlockedOutboundHostname(candidate.hostname)) {
     return "Local and private network URLs are not allowed.";
   }
-  if (
-    requestHostname &&
-    isSelfReferentialUseUrl(candidate, requestHostname)
-  ) {
+  if (requestHostname && isSelfReferentialUseUrl(candidate, requestHostname)) {
     return "URL may not target this service's /use endpoint.";
   }
   return null;
@@ -172,14 +191,9 @@ export function cleanDisplayUrl(value: string) {
 
 // ── URL builders (OG / R2 / use endpoint) ───────────────────────────
 
-export function buildUseEndpointUrl(
-  baseUrl: string,
-  targetUrl: string,
-  signature?: string,
-) {
+export function buildUseEndpointUrl(baseUrl: string, targetUrl: string) {
   const endpoint = new URL("use", ensureTrailingSlash(baseUrl));
   endpoint.searchParams.set("url", targetUrl);
-  if (signature) endpoint.searchParams.set("sig", signature);
   return endpoint.toString();
 }
 
@@ -190,18 +204,12 @@ export function buildPublicImageUrl(
   return new URL(key, ensureTrailingSlash(baseUrl)).toString();
 }
 
-export function buildSiteOgImageUrl(
-  siteUrl: string,
-  targetUrl: string,
-  signature?: string,
-) {
-  return buildUseEndpointUrl(siteUrl, targetUrl, signature);
+export function buildSiteOgImageUrl(siteUrl: string, targetUrl: string) {
+  return buildUseEndpointUrl(siteUrl, targetUrl);
 }
 
 export function getOgImageUrl(slug: string) {
   const normalizedSlug = slug.replace(/^\//, "");
   const targetUrl = new URL(normalizedSlug, publicEnv.siteUrl).toString();
-  const endpoint = new URL(buildUseEndpointUrl(publicEnv.siteUrl, targetUrl));
-  endpoint.searchParams.set("self", "1");
-  return endpoint.toString();
+  return buildUseEndpointUrl(publicEnv.siteUrl, targetUrl);
 }

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  buildUseEndpointUrl,
   extractUrlParts,
   isBlockedOutboundHostname,
   isSelfReferentialUseUrl,
@@ -18,6 +19,8 @@ describe("outbound URL security", () => {
     "::1",
     "fd00::1",
     "fe80::1",
+    "::ffff:ac10:1",
+    "::ffff:a9fe:101",
   ])("blocks non-public hostname %s", (hostname) => {
     expect(isBlockedOutboundHostname(hostname)).toBe(true);
   });
@@ -52,14 +55,37 @@ describe("outbound URL security", () => {
       ),
     ).toContain("/use endpoint");
   });
+
+  test("blocks URLs with embedded credentials", () => {
+    expect(
+      validateOutboundUrl(new URL("https://user:secret@example.com/page")),
+    ).toContain("credentials");
+  });
 });
 
 describe("canonical OG page identity", () => {
   test("preserves the query but removes fragments and trailing slashes", () => {
-    expect(extractUrlParts("https://example.com/page/?view=full#section")).toEqual({
+    expect(
+      extractUrlParts("https://example.com/page/?view=full#section"),
+    ).toEqual({
       urlBase: "example.com",
       path: "/page/?view=full",
       sanitizedUrl: "https://example.com/page/?view=full",
     });
+  });
+
+  test("builds a directly usable unsigned endpoint URL", () => {
+    const endpoint = new URL(
+      buildUseEndpointUrl(
+        "https://mosaic.example",
+        "https://example.com/page?view=full",
+      ),
+    );
+
+    expect(endpoint.pathname).toBe("/use");
+    expect(endpoint.searchParams.get("url")).toBe(
+      "https://example.com/page?view=full",
+    );
+    expect(endpoint.searchParams.has("sig")).toBe(false);
   });
 });

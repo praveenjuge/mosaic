@@ -1,85 +1,45 @@
-/**
- * D1 query helpers for the /use OG image generation endpoint.
- *
- * These are plain async functions (not server functions) that accept
- * a D1Database or D1DatabaseSession parameter. They are called directly
- * from the /use route handler which already has access to env.DB.
- */
-
-import type { SiteSummary } from "@/lib/types";
+import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
 import { extractHostname, extractUrlParts } from "@/lib/url";
 
-export type { SiteSummary };
+type D1Queryable = Pick<D1Database, "prepare">;
 
-/** Accepts either a full D1Database or a read-only D1DatabaseSession. */
-type D1Queryable = Pick<D1Database, "prepare" | "batch">;
+export type GlobalImage = {
+  key: string;
+  expiresAt: number;
+};
 
-// ── getSiteForUrlBase ───────────────────────────────────────────────
-
-/**
- * Find the single verified owner for a hostname.
- */
-export async function getSiteForUrlBase(
+/** Production generation is available only for a hostname saved by a user. */
+export async function isHostnameAssociated(
   db: D1Queryable,
-  urlBase: string,
-): Promise<SiteSummary | null> {
-  const normalizedUrlBase = extractHostname(urlBase);
-
+  hostname: string,
+): Promise<boolean> {
+  const normalized = extractHostname(hostname);
   const row = await db
-    .prepare(
-      `SELECT id, user_id, url_base, r2_prefix, generation_secret
-       FROM sites
-       WHERE url_base = ? AND verified_at IS NOT NULL
-       LIMIT 1`,
-    )
-    .bind(normalizedUrlBase)
-    .first<{
-      id: number;
-      user_id: string;
-      url_base: string;
-      r2_prefix: string;
-      generation_secret: string;
-    }>();
-
-  if (!row?.generation_secret) return null;
-  return {
-    siteId: row.id,
-    userId: row.user_id,
-    url_base: row.url_base,
-    r2Prefix: row.r2_prefix,
-    generationSecret: row.generation_secret,
-  };
+    .prepare("SELECT 1 AS found FROM sites WHERE url_base = ? LIMIT 1")
+    .bind(normalized)
+    .first<{ found: number }>();
+  return row !== null;
 }
 
-// ── findCachedImageKey ───────────────────────────────────────────────
-
-/**
- * Look up an existing image record in D1 by page URL and site IDs.
- * Returns the R2 key if a cached image exists, null otherwise.
- * This avoids multiple R2 HEAD requests by checking D1 first.
- */
-export async function findCachedImageKey(
+export async function findGlobalImage(
   db: D1Queryable,
   pageUrl: string,
-  siteId: number,
-): Promise<string | null> {
+): Promise<GlobalImage | null> {
   const { sanitizedUrl } = extractUrlParts(pageUrl);
-
-  const result = await db
+  const row = await db
     .prepare(
-      `SELECT key FROM images
-       WHERE page_url = ? AND site_id = ?
-       LIMIT 1`,
+      `SELECT key, expires_at
+       FROM global_images
+       WHERE page_url = ?`,
     )
-    .bind(sanitizedUrl, siteId)
-    .first<{ key: string }>();
+    .bind(sanitizedUrl)
+    .first<{ key: string; expires_at: number }>();
 
-  return result?.key ?? null;
+  return row ? { key: row.key, expiresAt: row.expires_at } : null;
 }
 
 export async function acquireGenerationLock(
   db: D1Database,
-  siteId: number,
   pageUrl: string,
 ): Promise<string | null> {
   const { sanitizedUrl } = extractUrlParts(pageUrl);
@@ -87,23 +47,21 @@ export async function acquireGenerationLock(
   const leaseToken = crypto.randomUUID();
   const result = await db
     .prepare(
-      `INSERT INTO generation_locks
-         (site_id, page_url, lease_token, expires_at)
-       VALUES (?, ?, ?, ?)
-       ON CONFLICT(site_id, page_url) DO UPDATE SET
+      `INSERT INTO generation_locks (page_url, lease_token, expires_at)
+       VALUES (?, ?, ?)
+       ON CONFLICT(page_url) DO UPDATE SET
          lease_token = excluded.lease_token,
          expires_at = excluded.expires_at
        WHERE generation_locks.expires_at < ?
        RETURNING lease_token`,
     )
-    .bind(siteId, sanitizedUrl, leaseToken, now + 60_000, now)
+    .bind(sanitizedUrl, leaseToken, now + 60_000, now)
     .first<{ lease_token: string }>();
   return result?.lease_token ?? null;
 }
 
 export async function releaseGenerationLock(
   db: D1Database,
-  siteId: number,
   pageUrl: string,
   leaseToken: string,
 ): Promise<void> {
@@ -111,44 +69,39 @@ export async function releaseGenerationLock(
   await db
     .prepare(
       `DELETE FROM generation_locks
-       WHERE site_id = ? AND page_url = ? AND lease_token = ?`,
+       WHERE page_url = ? AND lease_token = ?`,
     )
-    .bind(siteId, sanitizedUrl, leaseToken)
+    .bind(sanitizedUrl, leaseToken)
     .run();
 }
 
-// ── recordImage ─────────────────────────────────────────────────────
-
-/**
- * Insert an image record and increment the stored-image count. Returns false
- * when another concurrent request already recorded the same canonical URL.
- */
-export async function recordImage(
+export async function recordGlobalImage(
   db: D1Database,
-  siteId: number,
   imageKey: string,
   pageUrl: string,
   imageSize: number,
-): Promise<boolean> {
-  const { sanitizedUrl } = extractUrlParts(pageUrl);
+): Promise<void> {
+  const { sanitizedUrl, urlBase } = extractUrlParts(pageUrl);
   const now = Date.now();
-
-  const [insertResult] = await db.batch([
-    db
-      .prepare(
-        `INSERT OR IGNORE INTO images
-           (site_id, key, page_url, size_in_bytes, generated_at)
-         VALUES (?, ?, ?, ?, ?)`,
-      )
-      .bind(siteId, imageKey, sanitizedUrl, imageSize, now),
-    db
-      .prepare(
-        `UPDATE sites
-         SET image_count = image_count + 1
-         WHERE id = ? AND changes() = 1`,
-      )
-      .bind(siteId),
-  ]);
-
-  return insertResult.meta.changes === 1;
+  await db
+    .prepare(
+      `INSERT INTO global_images
+         (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
+       VALUES (?, ?, ?, ?, ?, ?)
+       ON CONFLICT(page_url) DO UPDATE SET
+         hostname = excluded.hostname,
+         key = excluded.key,
+         size_in_bytes = excluded.size_in_bytes,
+         generated_at = excluded.generated_at,
+         expires_at = excluded.expires_at`,
+    )
+    .bind(
+      sanitizedUrl,
+      urlBase,
+      imageKey,
+      imageSize,
+      now,
+      now + GLOBAL_IMAGE_TTL_MS,
+    )
+    .run();
 }
