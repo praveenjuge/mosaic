@@ -2,12 +2,12 @@ import {
   type LucideIcon,
   ChartBarIncreasing,
   Globe,
-  Heart,
   Image,
   ImagePlus,
   LayoutDashboard,
   Puzzle,
   RefreshCcw,
+  Share2,
 } from "lucide-react";
 
 interface Feature {
@@ -19,43 +19,43 @@ interface Feature {
 const FEATURES: Feature[] = [
   {
     icon: ImagePlus,
-    title: "Automated OG Images",
-    description: "Create Images automatically as soon as you publish.",
+    title: "Automatic screenshots",
+    description: "Mosaic captures the page when a preview is requested.",
   },
   {
     icon: Puzzle,
-    title: "Seamless Integrations",
-    description: "Add a single script tag to get started in minutes.",
+    title: "One meta tag",
+    description: "Point og:image at Mosaic. No script, no SDK.",
   },
   {
-    icon: Heart,
-    title: "Beautiful Social Previews",
-    description: "Engage your audience with eye-catching OG images.",
+    icon: Share2,
+    title: "Shared cache",
+    description: "The same page URL shares one image across everyone.",
   },
   {
     icon: Image,
-    title: "Retina-Ready Quality",
-    description: "Crisp images delivered in high resolution.",
+    title: "1200x630 JPEG",
+    description: "Standard social size, served as a JPEG.",
   },
   {
     icon: Globe,
-    title: "Global CDN",
-    description: "Fast delivery from edge locations worldwide.",
+    title: "Cloudflare edge",
+    description: "Cached images are served from Cloudflare.",
   },
   {
     icon: LayoutDashboard,
-    title: "Simple Dashboard",
-    description: "Manage multiple websites in one place.",
+    title: "Simple dashboard",
+    description: "Save sites and copy the image URL.",
   },
   {
     icon: RefreshCcw,
-    title: "Refresh OG Images",
-    description: "Update previews whenever your design changes.",
+    title: "30-day refresh",
+    description: "Shared images regenerate automatically after 30 days.",
   },
   {
     icon: ChartBarIncreasing,
-    title: "Advanced Analytics",
-    description: "Track impressions and usage on every image.",
+    title: "Generation budgets",
+    description: "Daily limits; cached images keep serving if we hit them.",
   },
 ];
 

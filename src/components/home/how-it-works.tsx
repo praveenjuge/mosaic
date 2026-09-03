@@ -2,18 +2,16 @@ import { cn } from "@/lib/utils";
 
 const steps = [
   {
-    title: "Add your Website",
-    description: "Connect your site to Mosaic with just a few clicks",
+    title: "Add your website",
+    description: "Save the site URL in Mosaic so the hostname is allowed.",
   },
   {
-    title: "We Generate an OG Image",
-    description:
-      "Mosaic automatically grabs a beautiful OG Image of your website's hero section",
+    title: "We screenshot the page",
+    description: "The first request captures a 1200x630 preview of that URL.",
   },
   {
-    title: "Add the OG Image to Your Site",
-    description:
-      "Insert the generated link in your meta tags for instant previews",
+    title: "Add the image to your site",
+    description: "Put the Mosaic URL in your og:image meta tag.",
   },
 ];
 
