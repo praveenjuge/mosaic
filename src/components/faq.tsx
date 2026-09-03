@@ -31,7 +31,7 @@ const FAQS: FAQ[] = [
   {
     question: "What are the benefits of upgrading to Pro?",
     answer:
-      "Pro plans add priority email support and advanced features. The shared OG image cache works the same across plans, so your metadata URLs stay simple.",
+      "Pro plans add priority email support. The shared OG image cache works the same across plans, so your metadata URLs stay simple.",
   },
   {
     question: "What happens during heavy traffic?",

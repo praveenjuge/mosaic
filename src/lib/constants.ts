@@ -4,7 +4,7 @@ export const website_name = "Mosaic";
 export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 
 export const website_description =
-  "Transform your website's Open Graph social images by automating the process using screenshots. Say goodbye to the hassle of designing OG images for every page — let your beautiful website do the talking.";
+  "Mosaic generates Open Graph images by screenshotting your pages. Add one meta tag. Images cache by URL and refresh after 30 days.";
 
 /** Shared images are regenerated after 30 days. */
 export const GLOBAL_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;

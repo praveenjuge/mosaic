@@ -4,7 +4,7 @@ import { getDashboardStats } from "@/server/stats";
 import { createFileRoute } from "@tanstack/react-router";
 
 const homeDescription =
-  "Instantly turn your website's hero sections into stunning OG images-no design skills needed. Boost brand visibility and drive clicks with automated, high-converting social previews.";
+  "Mosaic captures your page at 1200x630 and serves that image as the social preview. Add the URL to your og:image tag.";
 
 export const Route = createFileRoute("/_public/")({
   beforeLoad: async () => {

@@ -23,15 +23,12 @@ manage your subscription.
 - Automatic shared OG image cache
 - Unlimited websites
 - Priority email support
-- Advanced analytics
 
 ### Pro Yearly Plan ($199/year)
 
 - Automatic shared OG image cache
 - Unlimited websites
 - Priority email support
-- Advanced analytics
-- Custom branding options
 - Save $29 compared to monthly billing
 
 ## Upgrading Your Plan

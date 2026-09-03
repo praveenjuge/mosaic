@@ -48,13 +48,12 @@ function HeroSection() {
     <section className="mx-auto flex w-full max-w-2xl flex-col items-center gap-4 text-center">
       <div className="space-y-2">
         <h1 className="text-4xl font-semibold tracking-tighter text-balance md:text-5xl">
-          Instant beautiful OG images from your website.{" "}
+          OG images from a screenshot of your site.{" "}
           <span className="text-primary">No design needed.</span>
         </h1>
         <p className="text-muted-foreground text-base text-balance md:text-lg">
-          Instantly turn your website’s hero sections into stunning OG images—no
-          design skills needed. Boost brand visibility and drive clicks with
-          automated, high-converting social previews.
+          Mosaic captures your page at 1200x630 and serves that image as the
+          social preview. Add the URL to your og:image tag.
         </p>
       </div>
       <AuthButton />
