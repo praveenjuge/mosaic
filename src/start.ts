@@ -41,14 +41,25 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-XSS-Protection", "1; mode=block");
 
-    const vary = new Set(
-      (headers.get("Vary") ?? "")
+    const contentType = headers.get("Content-Type")?.toLowerCase() ?? "";
+    const canNegotiateRepresentation =
+      contentType.includes("text/html") ||
+      contentType.includes("text/markdown") ||
+      contentType.includes("application/json");
+
+    if (canNegotiateRepresentation) {
+      const vary = (headers.get("Vary") ?? "")
         .split(",")
         .map((value) => value.trim())
-        .filter(Boolean),
-    );
-    vary.add("Accept");
-    headers.set("Vary", Array.from(vary).join(", "));
+        .filter(Boolean);
+      const normalizedVary = new Set(vary.map((value) => value.toLowerCase()));
+
+      if (!normalizedVary.has("*") && !normalizedVary.has("accept")) {
+        vary.push("Accept");
+      }
+
+      headers.set("Vary", vary.join(", "));
+    }
 
     return {
       ...result,
