@@ -1,5 +1,6 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
+import { addAcceptToVary } from "@/lib/vary";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import {
   createCsrfMiddleware,
@@ -41,25 +42,7 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-XSS-Protection", "1; mode=block");
 
-    const contentType = headers.get("Content-Type")?.toLowerCase() ?? "";
-    const canNegotiateRepresentation =
-      contentType.includes("text/html") ||
-      contentType.includes("text/markdown") ||
-      contentType.includes("application/json");
-
-    if (canNegotiateRepresentation) {
-      const vary = (headers.get("Vary") ?? "")
-        .split(",")
-        .map((value) => value.trim())
-        .filter(Boolean);
-      const normalizedVary = new Set(vary.map((value) => value.toLowerCase()));
-
-      if (!normalizedVary.has("*") && !normalizedVary.has("accept")) {
-        vary.push("Accept");
-      }
-
-      headers.set("Vary", vary.join(", "));
-    }
+    addAcceptToVary(headers);
 
     return {
       ...result,
