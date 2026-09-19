@@ -41,6 +41,15 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-XSS-Protection", "1; mode=block");
 
+    const vary = new Set(
+      (headers.get("Vary") ?? "")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+    );
+    vary.add("Accept");
+    headers.set("Vary", Array.from(vary).join(", "));
+
     return {
       ...result,
       response: new Response(result.response.body, {
