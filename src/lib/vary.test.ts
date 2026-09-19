@@ -41,6 +41,14 @@ describe("addAcceptToVary", () => {
     expect(responseHeaders.get("Vary")).toBe("*");
   });
 
+  test("does not match a distinct media type containing an allowed string", () => {
+    const responseHeaders = headers("application/json-seq");
+
+    addAcceptToVary(responseHeaders);
+
+    expect(responseHeaders.get("Vary")).toBeNull();
+  });
+
   test("does not vary non-negotiable assets", () => {
     const responseHeaders = headers("image/png");
 
