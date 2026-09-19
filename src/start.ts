@@ -1,5 +1,6 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
+import { addAcceptToVary } from "@/lib/vary";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import {
   createCsrfMiddleware,
@@ -40,6 +41,8 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
     headers.set("X-DNS-Prefetch-Control", "on");
     headers.set("X-Frame-Options", "DENY");
     headers.set("X-XSS-Protection", "1; mode=block");
+
+    addAcceptToVary(headers);
 
     return {
       ...result,
