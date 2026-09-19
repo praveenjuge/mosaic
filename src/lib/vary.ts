@@ -5,9 +5,10 @@ const negotiableContentTypes = [
 ];
 
 export function addAcceptToVary(headers: Headers): void {
-  const contentType = headers.get("Content-Type")?.toLowerCase() ?? "";
+  const mediaType =
+    headers.get("Content-Type")?.split(";", 1)[0]?.trim().toLowerCase() ?? "";
 
-  if (!negotiableContentTypes.some((type) => contentType.includes(type))) {
+  if (!negotiableContentTypes.includes(mediaType)) {
     return;
   }
 
