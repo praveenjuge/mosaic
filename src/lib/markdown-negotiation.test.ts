@@ -42,6 +42,22 @@ describe("prefersMarkdown", () => {
   test("matches media types case-insensitively", () => {
     expect(prefersMarkdown("Text/Markdown")).toBe(true);
   });
+
+  test("prefers the most specific range over a wildcard", () => {
+    expect(
+      prefersMarkdown("text/markdown;q=0.8, text/html;q=0, */*;q=1"),
+    ).toBe(true);
+  });
+
+  test("lets a wildcard HTML range beat weaker Markdown", () => {
+    expect(prefersMarkdown("text/markdown;q=0.5, text/*;q=0.9")).toBe(false);
+  });
+
+  test("prefers Markdown over a weaker specific HTML range", () => {
+    expect(
+      prefersMarkdown("text/markdown;q=0.5, text/html;q=0.4, */*;q=0.9"),
+    ).toBe(true);
+  });
 });
 
 describe("matchMarkdownPath", () => {
@@ -129,13 +145,18 @@ describe("markdownNegotiationResponse", () => {
     ).toBeNull();
   });
 
-  test("falls through when the resolver has no matching content", () => {
-    expect(
-      markdownNegotiationResponse(
-        request("text/markdown", "GET", "/help/missing"),
-        resolver,
-      ),
-    ).toBeNull();
+  test("answers a Markdown 404 when content is missing", async () => {
+    const response = markdownNegotiationResponse(
+      request("text/markdown", "GET", "/help/missing"),
+      resolver,
+    );
+
+    expect(response?.status).toBe(404);
+    expect(response?.headers.get("Content-Type")).toBe(
+      "text/markdown; charset=utf-8",
+    );
+    expect(response?.headers.get("Vary")).toBe("Accept");
+    expect(await response?.text()).toBe("# Not Found\n");
   });
 
   test("answers HEAD requests with headers only", async () => {
