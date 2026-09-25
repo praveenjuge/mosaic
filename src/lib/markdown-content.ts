@@ -8,11 +8,10 @@
 
 import llmsTxt from "@/content/llms.txt?raw";
 import { getGuide, getHelpArticle, getLegalDocuments } from "@/lib/content";
-import type { MarkdownContentRef } from "@/lib/markdown-negotiation";
-
-function toMarkdownDocument(title: string, content: string): string {
-  return `# ${title}\n\n${content.trim()}\n`;
-}
+import {
+  type MarkdownContentRef,
+  toMarkdownDocument,
+} from "@/lib/markdown-negotiation";
 
 export function resolveMarkdownContent(ref: MarkdownContentRef): string | null {
   switch (ref.kind) {
@@ -32,7 +31,13 @@ export function resolveMarkdownContent(ref: MarkdownContentRef): string | null {
       return guide ? toMarkdownDocument(guide.title, guide.content) : null;
     }
     case "legal": {
-      return getLegalDocuments()
+      const documents = getLegalDocuments();
+
+      if (documents.length === 0) {
+        return null;
+      }
+
+      return documents
         .map((document) => toMarkdownDocument(document.title, document.content))
         .join("\n---\n\n");
     }
