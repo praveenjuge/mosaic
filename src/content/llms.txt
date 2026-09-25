@@ -1,0 +1,28 @@
+# Mosaic
+
+> Mosaic creates Open Graph images automatically from website screenshots so shared links have a current, branded social preview without manual design work.
+
+## When to use Mosaic
+
+Use Mosaic when you need to:
+
+- Generate Open Graph images from a website's existing hero section.
+- Keep social previews current as a page changes.
+- Manage OG images for several websites from one dashboard.
+- Add automated previews to a framework or static site without designing every image by hand.
+
+Mosaic is best suited to founders, developers, and content teams that already have a public website and want screenshot-based link previews. It is not an image editor or a general-purpose screenshot API.
+
+## Product and setup
+
+- [Home and pricing](https://mosaic.praveenjuge.com/): Product overview, examples, and Free, Pro monthly, and Pro yearly plans.
+- [Help and support](https://mosaic.praveenjuge.com/help): Product help, account guidance, and troubleshooting.
+- [Framework guides](https://mosaic.praveenjuge.com/help/guides/react): Start with the React guide; related guides cover Next.js, Astro, Nuxt, Remix, Svelte, and other platforms.
+- [Use the Mosaic API](https://mosaic.praveenjuge.com/help/use-the-mosaic-api): API usage and examples.
+- [Legal information](https://mosaic.praveenjuge.com/legal): Privacy policy, terms of service, and refund policy.
+
+## Discovery and support
+
+- [Sitemap](https://mosaic.praveenjuge.com/sitemap.xml): Index of public pages and guides.
+- [Robots policy](https://mosaic.praveenjuge.com/robots.txt): Crawler access rules.
+- [Contact support](mailto:hello@praveenjuge.com): Email support.
