@@ -65,11 +65,13 @@ export function prefersMarkdown(acceptHeader: string | null): boolean {
     return false;
   }
 
-  const htmlQ = Math.max(
-    qualityFor(entries, "text/html") ?? 0,
-    qualityFor(entries, "text/*") ?? 0,
-    qualityFor(entries, "*/*") ?? 0,
-  );
+  // The most specific matching range wins: an explicit text/html entry sets
+  // HTML's quality even when a wildcard range is present.
+  const htmlQ =
+    qualityFor(entries, "text/html") ??
+    qualityFor(entries, "text/*") ??
+    qualityFor(entries, "*/*") ??
+    0;
 
   return markdownQ >= htmlQ;
 }
@@ -130,14 +132,23 @@ export function markdownNegotiationResponse(
   }
 
   const markdown = resolveMarkdown(ref);
-  if (markdown === null) {
+  const notFound = markdown === null;
+
+  if (notFound && request.method !== "GET" && request.method !== "HEAD") {
     return null;
   }
 
-  return new Response(request.method === "HEAD" ? null : markdown, {
-    headers: {
-      "Content-Type": markdownContentType,
-      Vary: "Accept",
+  // A recognized content path with no matching document answers 404 in
+  // Markdown instead of falling through to the SSR handler, which rejects
+  // non-HTML requests with a 500.
+  return new Response(
+    request.method === "HEAD" ? null : notFound ? "# Not Found\n" : markdown,
+    {
+      status: notFound ? 404 : 200,
+      headers: {
+        "Content-Type": markdownContentType,
+        Vary: "Accept",
+      },
     },
-  });
+  );
 }
