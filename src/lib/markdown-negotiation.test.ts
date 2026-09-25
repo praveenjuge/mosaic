@@ -83,6 +83,13 @@ describe("matchMarkdownPath", () => {
     expect(matchMarkdownPath("/legal")).toEqual({ kind: "legal" });
   });
 
+  test("decodes encoded slugs", () => {
+    expect(matchMarkdownPath("/help/hello%2Dworld")).toEqual({
+      kind: "help",
+      slug: "hello-world",
+    });
+  });
+
   test("tolerates a trailing slash", () => {
     expect(matchMarkdownPath("/help/hello-world/")).toEqual({
       kind: "help",
@@ -177,9 +184,24 @@ describe("toMarkdownDocument", () => {
     );
   });
 
-  test("does not duplicate an existing title heading", () => {
+  test("removes a source heading that repeats the title", () => {
     expect(
-      toMarkdownDocument("Managing Your Subscription", "# Subscription\n\nBody."),
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Managing Your Subscription\n\nBody.",
+      ),
     ).toBe("# Managing Your Subscription\n\nBody.\n");
+  });
+
+  test("keeps an opening section heading that is not the title", () => {
+    expect(
+      toMarkdownDocument("React", "## In React 19+, render meta tags\n\nBody."),
+    ).toBe("# React\n\n## In React 19+, render meta tags\n\nBody.\n");
+  });
+
+  test("keeps a source heading that differs from the title", () => {
+    expect(toMarkdownDocument("Managing Your Subscription", "# Subscription\n\nBody.")).toBe(
+      "# Managing Your Subscription\n\n# Subscription\n\nBody.\n",
+    );
   });
 });
