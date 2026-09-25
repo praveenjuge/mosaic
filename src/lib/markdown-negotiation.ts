@@ -17,6 +17,12 @@ export type MarkdownContentRef =
 
 const markdownContentType = "text/markdown; charset=utf-8";
 
+/** Composes a Markdown document with a single title heading. */
+export function toMarkdownDocument(title: string, content: string): string {
+  const body = content.trim().replace(/^#[^\n]*\n+/, "");
+  return `# ${title}\n\n${body}\n`;
+}
+
 type AcceptEntry = { type: string; q: number };
 
 function parseAcceptHeader(header: string): AcceptEntry[] {
