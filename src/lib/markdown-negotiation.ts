@@ -17,10 +17,20 @@ export type MarkdownContentRef =
 
 const markdownContentType = "text/markdown; charset=utf-8";
 
-/** Composes a Markdown document with a single title heading. */
+/** Composes a Markdown document headed by the page title. */
 export function toMarkdownDocument(title: string, content: string): string {
-  const body = content.trim().replace(/^#[^\n]*\n+/, "");
-  return `# ${title}\n\n${body}\n`;
+  const trimmed = content.trim();
+  const heading = trimmed.match(/^# ([^\n]+?)\s*\n/);
+
+  if (
+    heading &&
+    heading[1].trim().toLowerCase() === title.trim().toLowerCase()
+  ) {
+    // Drop the source heading only when it repeats the page title.
+    return `# ${title}\n\n${trimmed.slice(heading[0].length)}\n`;
+  }
+
+  return `# ${title}\n\n${trimmed}\n`;
 }
 
 type AcceptEntry = { type: string; q: number };
@@ -77,11 +87,19 @@ export function prefersMarkdown(acceptHeader: string | null): boolean {
 }
 
 function normalizePathname(pathname: string): string {
-  if (pathname.length > 1 && pathname.endsWith("/")) {
-    return pathname.slice(0, -1);
+  let decoded = pathname;
+
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    // Keep the raw pathname when it is not validly encoded.
   }
 
-  return pathname;
+  if (decoded.length > 1 && decoded.endsWith("/")) {
+    return decoded.slice(0, -1);
+  }
+
+  return decoded;
 }
 
 /** Maps public content routes to their Markdown source; null elsewhere. */
