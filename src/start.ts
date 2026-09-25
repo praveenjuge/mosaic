@@ -1,4 +1,6 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
+import { resolveMarkdownContent } from "@/lib/markdown-content";
+import { markdownNegotiationResponse } from "@/lib/markdown-negotiation";
 import { publicEnv } from "@/lib/env";
 import { addAcceptToVary } from "@/lib/vary";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
@@ -55,6 +57,21 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
   },
 );
 
+const markdownNegotiationMiddleware = createMiddleware({
+  type: "request",
+}).server(async ({ request, next }) => {
+  const response = markdownNegotiationResponse(
+    request,
+    resolveMarkdownContent,
+  );
+
+  if (response) {
+    return response;
+  }
+
+  return next();
+});
+
 export const startInstance = createStart(() => {
   return {
     requestMiddleware: [
@@ -65,6 +82,7 @@ export const startInstance = createStart(() => {
         signUpUrl: signUpPath,
       }),
       securityHeadersMiddleware,
+      markdownNegotiationMiddleware,
     ],
   };
 });
