@@ -4,6 +4,7 @@ import {
   markdownNegotiationResponse,
   matchMarkdownPath,
   prefersMarkdown,
+  toMarkdownDocument,
 } from "./markdown-negotiation";
 
 const browserAccept =
@@ -145,5 +146,19 @@ describe("markdownNegotiationResponse", () => {
 
     expect(response?.status).toBe(200);
     expect(await response?.text()).toBe("");
+  });
+});
+
+describe("toMarkdownDocument", () => {
+  test("prepends the title as the heading", () => {
+    expect(toMarkdownDocument("Hello World!", "Welcome to Mosaic.")).toBe(
+      "# Hello World!\n\nWelcome to Mosaic.\n",
+    );
+  });
+
+  test("does not duplicate an existing title heading", () => {
+    expect(
+      toMarkdownDocument("Managing Your Subscription", "# Subscription\n\nBody."),
+    ).toBe("# Managing Your Subscription\n\nBody.\n");
   });
 });
