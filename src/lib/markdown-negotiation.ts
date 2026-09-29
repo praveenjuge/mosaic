@@ -13,7 +13,8 @@ export type MarkdownContentRef =
   | { kind: "home" }
   | { kind: "help"; slug: string }
   | { kind: "guide"; slug: string }
-  | { kind: "legal" };
+  | { kind: "legal" }
+  | { kind: "not-found" };
 
 const markdownContentType = "text/markdown; charset=utf-8";
 
@@ -124,7 +125,30 @@ export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
     return { kind: "help", slug: helpMatch[1] };
   }
 
-  return null;
+  // Leave known app, API, redirect and static paths to their existing handlers.
+  // Unrecognized page URLs otherwise reach TanStack's HTML-only SSR handler,
+  // which responds 500 to an agent asking for Markdown instead of a 404.
+  const reserved = [
+    "/dashboard",
+    "/sign-in",
+    "/sign-up",
+    "/i",
+    "/use",
+    "/api",
+    "/blog",
+    "/help",
+    "/legal",
+    "/_",
+    "/.well-known",
+  ];
+  if (
+    reserved.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)) ||
+    /\.[a-z0-9]+$/i.test(path)
+  ) {
+    return null;
+  }
+
+  return { kind: "not-found" };
 }
 
 /**
@@ -151,16 +175,18 @@ export function markdownNegotiationResponse(
 
   const markdown = resolveMarkdown(ref);
   const notFound = markdown === null;
-
-  if (notFound && request.method !== "GET" && request.method !== "HEAD") {
-    return null;
-  }
+  const origin = new URL(request.url).origin;
+  const errorBody = `# Page not found\n\nThe requested page does not exist. [Browse the help guides](${origin}/help) or [see the sitemap](${origin}/sitemap.xml).\n`;
 
   // A recognized content path with no matching document answers 404 in
   // Markdown instead of falling through to the SSR handler, which rejects
   // non-HTML requests with a 500.
   return new Response(
-    request.method === "HEAD" ? null : notFound ? "# Not Found\n" : markdown,
+    request.method === "HEAD"
+      ? null
+      : notFound
+        ? errorBody
+        : markdown,
     {
       status: notFound ? 404 : 200,
       headers: {
