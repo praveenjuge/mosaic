@@ -30,6 +30,8 @@ export function resolveMarkdownContent(ref: MarkdownContentRef): string | null {
       const guide = getGuide(ref.slug);
       return guide ? toMarkdownDocument(guide.title, guide.content) : null;
     }
+    case "not-found":
+      return null;
     case "legal": {
       const documents = getLegalDocuments();
 
