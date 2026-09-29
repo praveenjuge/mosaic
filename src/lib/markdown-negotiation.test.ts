@@ -107,7 +107,8 @@ describe("matchMarkdownPath", () => {
     expect(matchMarkdownPath("/unknown")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/unknown/nested")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/help")).toBeNull();
-    expect(matchMarkdownPath("/help/guides")).toBeNull();
+    expect(matchMarkdownPath("/help/guides")).toEqual({ kind: "not-found" });
+    expect(matchMarkdownPath("/legal/privacy-policy")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/sign-in")).toBeNull();
   });
 });
@@ -172,6 +173,18 @@ describe("markdownNegotiationResponse", () => {
     const body = await response?.text();
     expect(body?.length).toBeGreaterThan(20);
     expect(body).toContain("https://mosaic.example/help");
+    expect(body).toContain("https://mosaic.example/sitemap.xml");
+  });
+
+  test("uses the configured origin for recovery links", async () => {
+    const response = markdownNegotiationResponse(
+      request("text/markdown", "GET", "/missing"),
+      resolver,
+      "https://mosaic.praveenjuge.com",
+    );
+    const body = await response?.text();
+    expect(body).toContain("https://mosaic.praveenjuge.com/help");
+    expect(body).not.toContain("mosaic.example/help");
   });
 
   test("answers a Markdown 404 when content is missing", async () => {
