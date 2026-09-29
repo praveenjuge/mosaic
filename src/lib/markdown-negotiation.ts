@@ -103,7 +103,7 @@ function normalizePathname(pathname: string): string {
   return decoded;
 }
 
-/** Maps public content routes to their Markdown source; null elsewhere. */
+/** Maps content routes and unknown pages to Markdown; leaves app and asset routes alone. */
 export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
   const path = normalizePathname(pathname);
 
@@ -128,6 +128,8 @@ export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
   // Leave known app, API, redirect and static paths to their existing handlers.
   // Unrecognized page URLs otherwise reach TanStack's HTML-only SSR handler,
   // which responds 500 to an agent asking for Markdown instead of a 404.
+  if (path === "/help") return null;
+
   const reserved = [
     "/dashboard",
     "/sign-in",
@@ -136,8 +138,6 @@ export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
     "/use",
     "/api",
     "/blog",
-    "/help",
-    "/legal",
     "/_",
     "/.well-known",
   ];
@@ -152,13 +152,13 @@ export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
 }
 
 /**
- * Returns a Markdown response when the request prefers Markdown and the path
- * has Markdown content, otherwise null so the request continues to the
- * normal HTML pipeline.
+ * Returns Markdown for recognized content or a 404 recovery document for
+ * unknown public pages. Other requests continue through the normal pipeline.
  */
 export function markdownNegotiationResponse(
   request: Request,
   resolveMarkdown: (ref: MarkdownContentRef) => string | null,
+  siteOrigin = new URL(request.url).origin,
 ): Response | null {
   if (request.method !== "GET" && request.method !== "HEAD") {
     return null;
@@ -175,8 +175,9 @@ export function markdownNegotiationResponse(
 
   const markdown = resolveMarkdown(ref);
   const notFound = markdown === null;
-  const origin = new URL(request.url).origin;
-  const errorBody = `# Page not found\n\nThe requested page does not exist. [Browse the help guides](${origin}/help) or [see the sitemap](${origin}/sitemap.xml).\n`;
+  const errorBody = notFound
+    ? `# Page not found\n\nThe requested page does not exist. [Browse the help guides](${siteOrigin}/help) or [see the sitemap](${siteOrigin}/sitemap.xml).\n`
+    : null;
 
   // A recognized content path with no matching document answers 404 in
   // Markdown instead of falling through to the SSR handler, which rejects
