@@ -99,8 +99,16 @@ describe("matchMarkdownPath", () => {
 
   test("does not match other routes", () => {
     expect(matchMarkdownPath("/dashboard")).toBeNull();
+    expect(matchMarkdownPath("/dashboard/missing")).toBeNull();
+    expect(matchMarkdownPath("/api/missing")).toBeNull();
+    expect(matchMarkdownPath("/i/missing")).toBeNull();
+    expect(matchMarkdownPath("/blog/missing")).toBeNull();
+    expect(matchMarkdownPath("/missing.png")).toBeNull();
+    expect(matchMarkdownPath("/unknown")).toEqual({ kind: "not-found" });
+    expect(matchMarkdownPath("/unknown/nested")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/help")).toBeNull();
-    expect(matchMarkdownPath("/help/guides")).toBeNull();
+    expect(matchMarkdownPath("/help/guides")).toEqual({ kind: "not-found" });
+    expect(matchMarkdownPath("/legal/privacy-policy")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/sign-in")).toBeNull();
   });
 });
@@ -152,6 +160,33 @@ describe("markdownNegotiationResponse", () => {
     ).toBeNull();
   });
 
+  test("answers a useful Markdown 404 for an unknown public page", async () => {
+    const response = markdownNegotiationResponse(
+      request("text/markdown", "GET", "/__ora-404-probe-unknown"),
+      resolver,
+    );
+    expect(response?.status).toBe(404);
+    expect(response?.headers.get("Content-Type")).toBe(
+      "text/markdown; charset=utf-8",
+    );
+    expect(response?.headers.get("Vary")).toBe("Accept");
+    const body = await response?.text();
+    expect(body?.length).toBeGreaterThan(20);
+    expect(body).toContain("https://mosaic.example/help");
+    expect(body).toContain("https://mosaic.example/sitemap.xml");
+  });
+
+  test("uses the configured origin for recovery links", async () => {
+    const response = markdownNegotiationResponse(
+      request("text/markdown", "GET", "/missing"),
+      resolver,
+      "https://mosaic.praveenjuge.com",
+    );
+    const body = await response?.text();
+    expect(body).toContain("https://mosaic.praveenjuge.com/help");
+    expect(body).not.toContain("mosaic.example/help");
+  });
+
   test("answers a Markdown 404 when content is missing", async () => {
     const response = markdownNegotiationResponse(
       request("text/markdown", "GET", "/help/missing"),
@@ -163,7 +198,7 @@ describe("markdownNegotiationResponse", () => {
       "text/markdown; charset=utf-8",
     );
     expect(response?.headers.get("Vary")).toBe("Accept");
-    expect(await response?.text()).toBe("# Not Found\n");
+    expect(await response?.text()).toContain("https://mosaic.example/help");
   });
 
   test("answers HEAD requests with headers only", async () => {

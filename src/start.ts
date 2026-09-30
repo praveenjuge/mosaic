@@ -63,6 +63,7 @@ const markdownNegotiationMiddleware = createMiddleware({
   const response = markdownNegotiationResponse(
     request,
     resolveMarkdownContent,
+    new URL(publicEnv.siteUrl).origin,
   );
 
   if (response) {
