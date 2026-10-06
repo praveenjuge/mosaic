@@ -70,9 +70,10 @@ export function nonHtmlErrorResponse(
 
   const { pathname } = new URL(request.url);
 
-  // Framework endpoints such as /_serverFn/<id> are called with non-HTML
-  // Accept headers and must reach their handlers.
-  if (pathname.startsWith("/_")) {
+  // TanStack server-function calls go to /_serverFn/<id> with non-HTML Accept
+  // headers and must reach their handler. Other /_ URLs are ordinary
+  // unknown pages.
+  if (pathname.startsWith("/_serverFn/")) {
     return null;
   }
 
