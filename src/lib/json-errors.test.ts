@@ -23,6 +23,11 @@ describe("acceptsHtml", () => {
     expect(acceptsHtml("text/*")).toBe(false);
   });
 
+  test("honors an explicit text wildcard refusal", () => {
+    expect(acceptsHtml("text/*;q=0, */*;q=1")).toBe(false);
+    expect(acceptsHtml("text/html, text/*;q=0")).toBe(true);
+  });
+
   test("rejects JSON, plain text, and zero-quality HTML", () => {
     expect(acceptsHtml("application/json")).toBe(false);
     expect(acceptsHtml("text/plain")).toBe(false);
@@ -93,6 +98,13 @@ describe("nonHtmlErrorResponse", () => {
         resolve,
       ),
     ).toBeNull();
+  });
+
+  test("answers unknown underscore pages with a 404 problem", () => {
+    expect(
+      nonHtmlErrorResponse(get("/_missing", "application/json"), resolve)
+        ?.status,
+    ).toBe(404);
   });
 
   test("sends no body for HEAD", async () => {
