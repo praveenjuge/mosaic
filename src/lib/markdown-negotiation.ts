@@ -100,10 +100,18 @@ export function acceptsHtml(acceptHeader: string | null): boolean {
   }
 
   const entries = parseAcceptHeader(acceptHeader);
-  const quality =
-    qualityFor(entries, "text/html") ?? qualityFor(entries, "*/*") ?? 0;
+  const html = qualityFor(entries, "text/html");
 
-  return quality > 0;
+  if (html !== undefined) {
+    return html > 0;
+  }
+
+  // An explicit refusal of text/* also refuses HTML, whatever the full wildcard says.
+  if (qualityFor(entries, "text/*") === 0) {
+    return false;
+  }
+
+  return (qualityFor(entries, "*/*") ?? 0) > 0;
 }
 
 function normalizePathname(pathname: string): string {
