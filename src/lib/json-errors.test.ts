@@ -13,11 +13,14 @@ function get(path: string, accept: string | null, method = "GET") {
 }
 
 describe("acceptsHtml", () => {
-  test("accepts HTML, text and wildcard ranges", () => {
+  test("accepts HTML and full wildcard ranges", () => {
     expect(acceptsHtml("text/html")).toBe(true);
-    expect(acceptsHtml("text/*")).toBe(true);
     expect(acceptsHtml("*/*")).toBe(true);
     expect(acceptsHtml(null)).toBe(true);
+  });
+
+  test("rejects a text wildcard, which the SSR handler turns into a 500", () => {
+    expect(acceptsHtml("text/*")).toBe(false);
   });
 
   test("rejects JSON, plain text, and zero-quality HTML", () => {
@@ -62,6 +65,34 @@ describe("nonHtmlErrorResponse", () => {
 
     expect(response?.status).toBe(406);
     expect((await response?.json()).code).toBe("not_acceptable");
+  });
+
+  test("answers the help index with a 406 problem", async () => {
+    const response = nonHtmlErrorResponse(
+      get("/help", "application/json"),
+      resolve,
+    );
+
+    expect(response?.status).toBe(406);
+    expect((await response?.json()).code).toBe("not_acceptable");
+    expect(
+      nonHtmlErrorResponse(get("/help/", "application/json"), resolve)?.status,
+    ).toBe(406);
+  });
+
+  test("answers a text wildcard request instead of reaching SSR", () => {
+    expect(nonHtmlErrorResponse(get("/nope", "text/*"), resolve)?.status).toBe(
+      404,
+    );
+  });
+
+  test("passes framework server-function calls through", () => {
+    expect(
+      nonHtmlErrorResponse(
+        get("/_serverFn/abc123", "application/json"),
+        resolve,
+      ),
+    ).toBeNull();
   });
 
   test("sends no body for HEAD", async () => {
