@@ -12,6 +12,16 @@ function get(path: string, accept: string | null, method = "GET") {
   });
 }
 
+type Problem = { code: string; resolution: string };
+
+async function problemBody(response: Response | null): Promise<Problem> {
+  if (!response) {
+    throw new Error("Expected a problem response");
+  }
+
+  return (await response.json()) as Problem;
+}
+
 describe("acceptsHtml", () => {
   test("accepts HTML and full wildcard ranges", () => {
     expect(acceptsHtml("text/html")).toBe(true);
@@ -48,7 +58,7 @@ describe("nonHtmlErrorResponse", () => {
     );
     expect(response?.headers.get("Vary")).toBe("Accept");
 
-    const body = await response?.json();
+    const body = await problemBody(response);
     expect(body.code).toBe("not_found");
     expect(body.resolution).toContain("https://mosaic.example/help");
   });
@@ -69,7 +79,7 @@ describe("nonHtmlErrorResponse", () => {
     );
 
     expect(response?.status).toBe(406);
-    expect((await response?.json()).code).toBe("not_acceptable");
+    expect((await problemBody(response)).code).toBe("not_acceptable");
   });
 
   test("answers the help index with a 406 problem", async () => {
@@ -79,7 +89,7 @@ describe("nonHtmlErrorResponse", () => {
     );
 
     expect(response?.status).toBe(406);
-    expect((await response?.json()).code).toBe("not_acceptable");
+    expect((await problemBody(response)).code).toBe("not_acceptable");
     expect(
       nonHtmlErrorResponse(get("/help/", "application/json"), resolve)?.status,
     ).toBe(406);
