@@ -1,4 +1,5 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
+import { nonHtmlErrorResponse } from "@/lib/json-errors";
 import { resolveMarkdownContent } from "@/lib/markdown-content";
 import { markdownNegotiationResponse } from "@/lib/markdown-negotiation";
 import { publicEnv } from "@/lib/env";
@@ -68,6 +69,16 @@ const markdownNegotiationMiddleware = createMiddleware({
 
   if (response) {
     return response;
+  }
+
+  const errorResponse = nonHtmlErrorResponse(
+    request,
+    resolveMarkdownContent,
+    new URL(publicEnv.siteUrl).origin,
+  );
+
+  if (errorResponse) {
+    return errorResponse;
   }
 
   return next();

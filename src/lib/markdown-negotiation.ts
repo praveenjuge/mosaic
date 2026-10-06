@@ -87,6 +87,33 @@ export function prefersMarkdown(acceptHeader: string | null): boolean {
   return markdownQ >= htmlQ;
 }
 
+/**
+ * True when the Accept header lets the client take an HTML page the way
+ * TanStack Start's SSR handler checks it: an explicit text/html range or a
+ * full wildcard with a non-zero quality. A text wildcard alone is not enough
+ * for that handler, so it does not count. A missing header counts as
+ * accepting anything.
+ */
+export function acceptsHtml(acceptHeader: string | null): boolean {
+  if (!acceptHeader) {
+    return true;
+  }
+
+  const entries = parseAcceptHeader(acceptHeader);
+  const html = qualityFor(entries, "text/html");
+
+  if (html !== undefined) {
+    return html > 0;
+  }
+
+  // An explicit refusal of text/* also refuses HTML, whatever the full wildcard says.
+  if (qualityFor(entries, "text/*") === 0) {
+    return false;
+  }
+
+  return (qualityFor(entries, "*/*") ?? 0) > 0;
+}
+
 function normalizePathname(pathname: string): string {
   let decoded = pathname;
 
