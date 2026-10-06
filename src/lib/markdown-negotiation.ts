@@ -87,6 +87,26 @@ export function prefersMarkdown(acceptHeader: string | null): boolean {
   return markdownQ >= htmlQ;
 }
 
+/**
+ * True when the Accept header lets the client take an HTML page: HTML itself
+ * or a text wildcard or full wildcard range with a non-zero quality. A
+ * missing header counts as accepting anything.
+ */
+export function acceptsHtml(acceptHeader: string | null): boolean {
+  if (!acceptHeader) {
+    return true;
+  }
+
+  const entries = parseAcceptHeader(acceptHeader);
+  const quality =
+    qualityFor(entries, "text/html") ??
+    qualityFor(entries, "text/*") ??
+    qualityFor(entries, "*/*") ??
+    0;
+
+  return quality > 0;
+}
+
 function normalizePathname(pathname: string): string {
   let decoded = pathname;
 
