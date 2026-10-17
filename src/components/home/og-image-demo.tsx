@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
 
 interface DemoData {
   normalizedUrl: string;
@@ -11,80 +11,58 @@ interface DemoData {
   image: string;
   imageUrl: string | null;
   error?: string;
+  /** Set when the live screenshot was skipped and an example is shown. */
+  notice?: string;
 }
 
-interface ImageContainerProps {
+type Preview = { title: string; description: string; url: string };
+
+interface PreviewCardProps {
   isLoading: boolean;
-  src: string | null;
+  src: string;
   alt: string;
-  isScreenshotLoading?: boolean;
+  preview: Preview;
 }
 
-function ImageContainer({
-  isLoading,
-  src,
-  alt,
-  isScreenshotLoading,
-}: ImageContainerProps) {
-  const showSkeleton = isLoading || isScreenshotLoading;
-
+function PreviewCard({ isLoading, src, alt, preview }: PreviewCardProps) {
   return (
-    <div className="relative h-52 w-full">
-      {showSkeleton ? (
-        <Skeleton className="bg-primary size-full rounded-none" />
-      ) : src ? (
-        <>
-          <Skeleton className="absolute inset-0 size-full rounded-none" />
-          <img
-            src={src}
-            alt={alt}
-            width={600}
-            height={250}
-            className="relative size-full object-cover"
-          />
-        </>
-      ) : (
-        <div className="bg-muted flex size-full items-center justify-center">
-          <p>No OG image available</p>
-        </div>
-      )}
+    <div className="flex w-full flex-col overflow-hidden rounded-lg">
+      <div className="relative h-52 w-full">
+        {isLoading ? (
+          <Skeleton className="bg-primary size-full rounded-none" />
+        ) : (
+          <>
+            <Skeleton className="absolute inset-0 size-full rounded-none" />
+            <img
+              src={src}
+              alt={alt}
+              width={600}
+              height={250}
+              className="relative size-full object-cover"
+            />
+          </>
+        )}
+      </div>
+      <div className="bg-muted flex flex-col gap-0.5 p-3.5">
+        {isLoading ? (
+          <>
+            <Skeleton className="h-4 w-3/4" />
+            <Skeleton className="h-8 w-full" />
+            <Skeleton className="h-4 w-1/2" />
+          </>
+        ) : (
+          <>
+            <p className="line-clamp-1 font-semibold">{preview.title}</p>
+            <p className="line-clamp-2">{preview.description}</p>
+            <p className="text-muted-foreground">{preview.url}</p>
+          </>
+        )}
+      </div>
     </div>
   );
 }
 
-interface ContentContainerProps {
-  isLoading: boolean;
-  title: string;
-  description: string;
-  url: string;
-}
-
-function ContentContainer({
-  isLoading,
-  title,
-  description,
-  url,
-}: ContentContainerProps) {
-  return (
-    <div className="bg-muted flex flex-col gap-0.5 p-3.5">
-      {isLoading ? (
-        <>
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-8 w-full" />
-          <Skeleton className="h-4 w-1/2" />
-        </>
-      ) : (
-        <>
-          <p className="line-clamp-1 font-semibold">{title}</p>
-          <p className="line-clamp-2">{description}</p>
-          <p className="text-muted-foreground">{url}</p>
-        </>
-      )}
-    </div>
-  );
-}
-
-const defaultData = {
+const defaultPreview: Preview = {
   title: "To Use or Not to Use Auto Layout in Figma",
   description:
     "The debate on whether or not to use Auto Layout in Figma is a hot topic that frequently surfaces on Twitter. Based on my experience with this…",
@@ -98,53 +76,46 @@ export default function OGImageDemo() {
   const [inputUrl, setInputUrl] = useState("");
   const [demoData, setDemoData] = useState<DemoData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [isScreenshotLoading, setIsScreenshotLoading] = useState(false);
   const [error, setError] = useState("");
-  const [mosaicImageUrl, setMosaicImageUrl] = useState(fallbackMosaicImage);
 
-  const fetchOGData = async () => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (!inputUrl) {
       setError("Please enter a URL");
       return;
     }
 
     setIsLoading(true);
-    setIsScreenshotLoading(true);
     setError("");
-
     try {
       const response = await fetch(
         `/use?url=${encodeURIComponent(inputUrl)}&mode=demo`,
       );
       const data: DemoData = await response.json();
-
       setDemoData(data);
-
       if (data.error) {
         setError(data.error);
-        setMosaicImageUrl(fallbackMosaicImage);
-      } else if (data.imageUrl) {
-        setMosaicImageUrl(data.imageUrl);
-      } else {
+      } else if (!data.imageUrl) {
         setError("Failed to generate OG Image. Using fallback image.");
       }
     } catch (err) {
-      console.log("Error fetching data:", err);
-      const errorMessage =
+      setError(
         err instanceof Error
           ? err.message
-          : "Failed to load data. Please check if the URL is correct and try again!";
-      setError(errorMessage);
+          : "Failed to load data. Please check if the URL is correct and try again!",
+      );
     } finally {
       setIsLoading(false);
-      setIsScreenshotLoading(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    fetchOGData();
+  const preview: Preview = {
+    title: demoData?.title ?? defaultPreview.title,
+    description: demoData?.description ?? defaultPreview.description,
+    url: demoData?.normalizedUrl ?? defaultPreview.url,
   };
+  const mosaicImage =
+    (!demoData?.error && demoData?.imageUrl) || fallbackMosaicImage;
 
   return (
     <div className="relative mx-auto max-w-4xl pb-16">
@@ -169,25 +140,22 @@ export default function OGImageDemo() {
           <CornerDownRight className="size-4" />
         </Button>
       </form>
-      {error && (
+      {error ? (
         <p className="text-destructive mb-6 text-center" role="alert">
           {error}
         </p>
-      )}
+      ) : demoData?.notice ? (
+        <p className="text-muted-foreground mb-6 text-center" role="status">
+          {demoData.notice}
+        </p>
+      ) : null}
       <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
-        <div className="divide-y- border- flex w-full flex-col overflow-hidden rounded-lg">
-          <ImageContainer
-            isLoading={isLoading}
-            src={demoData?.image || fallbackOriginalImage}
-            alt="Original Open Graph Image"
-          />
-          <ContentContainer
-            isLoading={isLoading}
-            title={demoData?.title ?? defaultData.title}
-            description={demoData?.description ?? defaultData.description}
-            url={demoData?.normalizedUrl ?? defaultData.url}
-          />
-        </div>
+        <PreviewCard
+          isLoading={isLoading}
+          src={demoData?.image || fallbackOriginalImage}
+          alt="Original Open Graph Image"
+          preview={preview}
+        />
         <span
           className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
           aria-hidden="true"
@@ -195,20 +163,12 @@ export default function OGImageDemo() {
           <ArrowRight className="hidden size-7 md:block" />
           <ArrowDown className="size-7 md:hidden" />
         </span>
-        <div className="divide-y- border- flex w-full flex-col overflow-hidden rounded-lg">
-          <ImageContainer
-            isLoading={isLoading}
-            src={mosaicImageUrl}
-            alt="Mosaic Open Graph Image"
-            isScreenshotLoading={isScreenshotLoading}
-          />
-          <ContentContainer
-            isLoading={isLoading}
-            title={demoData?.title ?? defaultData.title}
-            description={demoData?.description ?? defaultData.description}
-            url={demoData?.normalizedUrl ?? defaultData.url}
-          />
-        </div>
+        <PreviewCard
+          isLoading={isLoading}
+          src={mosaicImage}
+          alt="Mosaic Open Graph Image"
+          preview={preview}
+        />
       </div>
     </div>
   );

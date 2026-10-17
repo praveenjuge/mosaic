@@ -1,7 +1,6 @@
 import DashboardPage from "@/components/dashboard/dashboard-page";
 import HomeSignedOut from "@/components/home/homesignedout";
 import { buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/url";
 import { getDashboardStats } from "@/server/stats";
 import { createFileRoute } from "@tanstack/react-router";
 
@@ -19,7 +18,6 @@ export const Route = createFileRoute("/_public/")({
     buildSeoMeta({
       title: "Simplify Your Open Graph Image Creation.",
       description: homeDescription,
-      image: getOgImageUrl(""),
       path: "/",
     }),
 });

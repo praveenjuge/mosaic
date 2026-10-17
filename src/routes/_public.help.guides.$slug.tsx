@@ -1,6 +1,5 @@
 import { ArticlePage } from "@/components/help/article-page";
-import { absoluteUrl, buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/url";
+import { buildArticleHead } from "@/lib/seo";
 import { getGuide } from "@/server/content";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
@@ -14,33 +13,13 @@ export const Route = createFileRoute("/_public/help/guides/$slug")({
     return { guide };
   },
   component: GuidePage,
-  head: ({ loaderData, params }) => {
-    const title = loaderData?.guide.title;
-    const description = loaderData?.guide.description;
-    const seo = buildSeoMeta({
-      title,
-      description,
-      image: getOgImageUrl(`help/guides/${params.slug}`),
+  head: ({ loaderData, params }) =>
+    buildArticleHead({
       path: `/help/guides/${params.slug}`,
-      type: "article",
-    });
-
-    return {
-      ...seo,
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "TechArticle",
-            headline: title,
-            description,
-            url: absoluteUrl(`/help/guides/${params.slug}`),
-          }),
-        },
-      ],
-    };
-  },
+      title: loaderData?.guide.title,
+      description: loaderData?.guide.description,
+      schemaType: "TechArticle",
+    }),
 });
 
 function GuidePage() {

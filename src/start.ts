@@ -42,9 +42,6 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
       "max-age=63072000; includeSubDomains; preload",
     );
     headers.set("X-Content-Type-Options", "nosniff");
-    headers.set("X-DNS-Prefetch-Control", "on");
-    headers.set("X-Frame-Options", "DENY");
-    headers.set("X-XSS-Protection", "1; mode=block");
 
     addAcceptToVary(headers);
 

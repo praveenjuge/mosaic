@@ -11,13 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicRouteImport } from './routes/_public'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as UseRouteImport } from './routes/use'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as ISplatRouteImport } from './routes/i.$'
 import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
 import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
@@ -33,19 +31,14 @@ const PublicRoute = PublicRouteImport.update({
   id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogRoute = BlogRouteImport.update({
-  id: '/blog',
-  path: '/blog',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
-  id: '/llms.txt',
-  path: '/llms.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
   id: '/robots.txt',
   path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const UseRoute = UseRouteImport.update({
@@ -62,11 +55,6 @@ const PublicLegalRoute = PublicLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
   getParentRoute: () => PublicRoute,
-} as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BlogRoute,
 } as any)
 const ISplatRoute = ISplatRouteImport.update({
   id: '/i/$',
@@ -101,12 +89,10 @@ const PublicHelpGuidesSlugRoute = PublicHelpGuidesSlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
-  '/blog': typeof BlogRouteWithChildren
-  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
-  '/blog/$slug': typeof BlogSlugRoute
   '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
@@ -116,12 +102,10 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
-  '/blog': typeof BlogRouteWithChildren
-  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
-  '/blog/$slug': typeof BlogSlugRoute
   '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
@@ -133,12 +117,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
-  '/blog': typeof BlogRouteWithChildren
-  '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/use': typeof UseRoute
   '/_public/legal': typeof PublicLegalRoute
-  '/blog/$slug': typeof BlogSlugRoute
   '/i/$': typeof ISplatRoute
   '/_public/': typeof PublicIndexRoute
   '/_auth/sign-in/$': typeof AuthSignInSplatRoute
@@ -151,12 +133,10 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/blog'
-    | '/llms.txt'
     | '/robots.txt'
+    | '/sitemap.xml'
     | '/use'
     | '/legal'
-    | '/blog/$slug'
     | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -166,12 +146,10 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/blog'
-    | '/llms.txt'
     | '/robots.txt'
+    | '/sitemap.xml'
     | '/use'
     | '/legal'
-    | '/blog/$slug'
     | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
@@ -182,12 +160,10 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_auth'
     | '/_public'
-    | '/blog'
-    | '/llms.txt'
     | '/robots.txt'
+    | '/sitemap.xml'
     | '/use'
     | '/_public/legal'
-    | '/blog/$slug'
     | '/i/$'
     | '/_public/'
     | '/_auth/sign-in/$'
@@ -200,9 +176,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   PublicRoute: typeof PublicRouteWithChildren
-  BlogRoute: typeof BlogRouteWithChildren
-  LlmsDottxtRoute: typeof LlmsDottxtRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   UseRoute: typeof UseRoute
   ISplatRoute: typeof ISplatRoute
 }
@@ -223,25 +198,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llms.txt': {
-      id: '/llms.txt'
-      path: '/llms.txt'
-      fullPath: '/llms.txt'
-      preLoaderRoute: typeof LlmsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/robots.txt': {
       id: '/robots.txt'
       path: '/robots.txt'
       fullPath: '/robots.txt'
       preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/use': {
@@ -264,13 +232,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/legal'
       preLoaderRoute: typeof PublicLegalRouteImport
       parentRoute: typeof PublicRoute
-    }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
-      parentRoute: typeof BlogRoute
     }
     '/i/$': {
       id: '/i/$'
@@ -348,22 +309,11 @@ const PublicRouteChildren: PublicRouteChildren = {
 const PublicRouteWithChildren =
   PublicRoute._addFileChildren(PublicRouteChildren)
 
-interface BlogRouteChildren {
-  BlogSlugRoute: typeof BlogSlugRoute
-}
-
-const BlogRouteChildren: BlogRouteChildren = {
-  BlogSlugRoute: BlogSlugRoute,
-}
-
-const BlogRouteWithChildren = BlogRoute._addFileChildren(BlogRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   PublicRoute: PublicRouteWithChildren,
-  BlogRoute: BlogRouteWithChildren,
-  LlmsDottxtRoute: LlmsDottxtRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   UseRoute: UseRoute,
   ISplatRoute: ISplatRoute,
 }

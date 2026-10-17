@@ -162,12 +162,15 @@ export type Content = {
   markdownPages: Record<string, string>;
 };
 
-export async function loadContent(contentDir: string): Promise<Content> {
+export async function loadContent(
+  contentDir: string,
+  llmsTxtPath: string,
+): Promise<Content> {
   const [help, guideFiles, legal, llmsTxt] = await Promise.all([
     loadCollection(path.join(contentDir, "help"), helpSchema),
     loadCollection(path.join(contentDir, "guides"), guideSchema),
     loadCollection(path.join(contentDir, "legal"), legalSchema),
-    readFile(path.join(contentDir, "llms.txt"), "utf8"),
+    readFile(llmsTxtPath, "utf8"),
   ]);
   help.sort((a, b) => b.entry.publishedAt.localeCompare(a.entry.publishedAt));
   guideFiles.sort((a, b) => a.entry.order - b.entry.order);
@@ -233,6 +236,8 @@ export async function loadContent(contentDir: string): Promise<Content> {
 
 export function mosaicContent(
   contentDir = path.resolve("src/content"),
+  // Served as a static file too; the home page's Markdown mirror reuses it.
+  llmsTxtPath = path.resolve("public/llms.txt"),
 ): Plugin {
   let content: Promise<Content> | undefined;
 
@@ -245,14 +250,14 @@ export function mosaicContent(
     async load(id) {
       if (!id.startsWith(`\0${VIRTUAL_PREFIX}`)) return;
       const key = id.slice(VIRTUAL_PREFIX.length + 1) as keyof Content;
-      content ??= loadContent(contentDir);
+      content ??= loadContent(contentDir, llmsTxtPath);
       const value = (await content)[key];
       if (value === undefined) this.error(`Unknown content module: ${key}`);
       return `export default ${JSON.stringify(value)};`;
     },
     configureServer(server) {
       const reload = (file: string) => {
-        if (!file.startsWith(contentDir)) return;
+        if (!file.startsWith(contentDir) && file !== llmsTxtPath) return;
         content = undefined;
         for (const environment of Object.values(server.environments)) {
           const graph = environment.moduleGraph;
@@ -263,7 +268,7 @@ export function mosaicContent(
         }
         server.ws.send({ type: "full-reload" });
       };
-      server.watcher.add(contentDir);
+      server.watcher.add([contentDir, llmsTxtPath]);
       server.watcher.on("add", reload);
       server.watcher.on("change", reload);
       server.watcher.on("unlink", reload);

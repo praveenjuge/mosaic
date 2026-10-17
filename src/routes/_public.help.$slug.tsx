@@ -1,6 +1,5 @@
 import { ArticlePage } from "@/components/help/article-page";
-import { absoluteUrl, buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/url";
+import { buildArticleHead } from "@/lib/seo";
 import { getHelpArticle } from "@/server/content";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
@@ -14,32 +13,14 @@ export const Route = createFileRoute("/_public/help/$slug")({
     return { help };
   },
   component: HelpArticlePage,
-  head: ({ loaderData, params }) => {
-    const seo = buildSeoMeta({
+  head: ({ loaderData, params }) =>
+    buildArticleHead({
+      path: `/help/${params.slug}`,
       title: loaderData?.help.title,
       description: loaderData?.help.description,
-      image: getOgImageUrl(`help/${params.slug}`),
-      path: `/help/${params.slug}`,
-      type: "article",
-    });
-
-    return {
-      ...seo,
-      scripts: [
-        {
-          type: "application/ld+json",
-          children: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "Article",
-            headline: loaderData?.help.title,
-            description: loaderData?.help.description,
-            datePublished: loaderData?.help.publishedAt,
-            url: absoluteUrl(`/help/${params.slug}`),
-          }),
-        },
-      ],
-    };
-  },
+      schemaType: "Article",
+      datePublished: loaderData?.help.publishedAt,
+    }),
 });
 
 function HelpArticlePage() {

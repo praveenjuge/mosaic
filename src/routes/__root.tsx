@@ -1,6 +1,5 @@
 /// <reference types="vite/client" />
 
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import {
   authenticatedHomePath,
@@ -25,6 +24,7 @@ import {
   createRootRouteWithContext,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { ThemeProvider } from "next-themes";
 import { Suspense, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
@@ -82,7 +82,7 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
     ],
   }),
-  // Server-handler routes (/use, /i/*, robots.txt, llms.txt) answer before
+  // Server-handler routes (/use, /i/*, robots.txt) answer before
   // the router runs, so this never runs for them.
   beforeLoad: async () => ({ auth: await fetchRouteAuth() }),
   errorComponent: (props) => (

@@ -3,11 +3,10 @@ import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import { defineConfig, loadEnv, type Plugin } from "vite";
-import { APP_ROUTE_PREFIXES, matchesPathPrefix } from "./src/lib/app-routes";
+import { defineConfig, loadEnv } from "vite";
 import { mosaicContent } from "./src/lib/content-plugin";
 
-function resolveSiteHost(siteUrl: string | undefined) {
+function validateSiteUrl(siteUrl: string | undefined) {
   if (!siteUrl) {
     throw new Error("VITE_SITE_URL is required.");
   }
@@ -25,8 +24,6 @@ function resolveSiteHost(siteUrl: string | undefined) {
   ) {
     throw new Error("VITE_SITE_URL must be an origin without a path or query.");
   }
-
-  return parsed.origin;
 }
 
 /**
@@ -46,34 +43,9 @@ function shouldUseRemoteBindings() {
   return Boolean(process.env.CLOUDFLARE_API_TOKEN);
 }
 
-// The home page renders the signed-in dashboard, so it is never prerendered.
-const prerenderBlockedPaths = ["/", ...APP_ROUTE_PREFIXES];
-
-const staticAssetPattern =
-  /\.(avif|css|gif|ico|jpe?g|js|json|map|png|svg|webp|woff2?)$/i;
-
-function exitAfterCloudflarePrerender(): Plugin {
-  return {
-    name: "mosaic:exit-after-cloudflare-prerender",
-    apply: "build",
-    enforce: "post",
-    buildApp: {
-      order: "post",
-      async handler() {
-        if (process.env.TSS_PRERENDERING !== "true") return;
-
-        // Cloudflare's prerender preview can leave workerd handles open after the sitemap is written.
-        setImmediate(() => {
-          process.exit(process.exitCode ?? 0);
-        });
-      },
-    },
-  };
-}
-
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
-  const siteHost = resolveSiteHost(env.VITE_SITE_URL);
+  validateSiteUrl(env.VITE_SITE_URL);
 
   return {
     build: {
@@ -92,37 +64,15 @@ export default defineConfig(({ command, mode }) => {
       mosaicContent(),
       cloudflare({
         viteEnvironment: { name: "ssr" },
-        // Builds never need remote bindings. Prerendered routes (/help,
-        // /legal) never touch Browser Run, and a remote proxy that can't
+        // Builds never need remote bindings, and a remote proxy that can't
         // authenticate (for example, a workers.dev subdomain behind Cloudflare
-        // Access) fails the whole `vite build`. Prerendering runs in a Vite
-        // preview server, so `command` alone doesn't identify it.
-        remoteBindings:
-          command === "serve" &&
-          process.env.TSS_PRERENDERING !== "true" &&
-          shouldUseRemoteBindings(),
+        // Access) would fail the whole `vite build`.
+        remoteBindings: command === "serve" && shouldUseRemoteBindings(),
       }),
       ...tanstackStart({
-        pages: [{ path: "/help" }, { path: "/legal" }],
-        prerender: {
-          autoStaticPathsDiscovery: true,
-          autoSubfolderIndex: true,
-          crawlLinks: true,
-          enabled: true,
-          failOnError: true,
-          filter: (page) => {
-            if (staticAssetPattern.test(page.path)) return false;
-
-            return !matchesPathPrefix(page.path, prerenderBlockedPaths);
-          },
-        },
         router: {
           generatedRouteTree: "./routeTree.gen.ts",
           routesDirectory: "./routes",
-        },
-        sitemap: {
-          enabled: true,
-          host: siteHost,
         },
         spa: {
           enabled: false,
@@ -134,7 +84,6 @@ export default defineConfig(({ command, mode }) => {
         presets: [reactCompilerPreset()],
       }),
       tailwindcss(),
-      exitAfterCloudflarePrerender(),
     ],
     resolve: {
       tsconfigPaths: true,
