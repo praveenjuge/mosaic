@@ -1,8 +1,8 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
+import { publicEnv } from "@/lib/env";
 import { nonHtmlErrorResponse } from "@/lib/json-errors";
 import { resolveMarkdownContent } from "@/lib/markdown-content";
 import { markdownNegotiationResponse } from "@/lib/markdown-negotiation";
-import { publicEnv } from "@/lib/env";
 import { addAcceptToVary } from "@/lib/vary";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import {

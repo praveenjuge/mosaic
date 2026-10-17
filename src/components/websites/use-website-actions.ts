@@ -3,8 +3,7 @@ import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
 type SaveWebsiteArgs =
-  | { siteId?: undefined; url: string }
-  | { siteId: number; url: string };
+  { siteId?: undefined; url: string } | { siteId: number; url: string };
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;

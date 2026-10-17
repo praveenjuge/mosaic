@@ -25,7 +25,7 @@ function GuidePage() {
           <CardDescription>{guide.description}</CardDescription>
         </CardHeader>
         <CardContent
-          className="prose prose-slate dark:prose-invert mt-4 max-w-none [&>pre]:overflow-x-auto [&_pre]:overflow-x-auto"
+          className="prose prose-slate dark:prose-invert mt-4 max-w-none [&_pre]:overflow-x-auto [&>pre]:overflow-x-auto"
           dangerouslySetInnerHTML={{ __html: guide.contentHtml }}
         />
       </Card>

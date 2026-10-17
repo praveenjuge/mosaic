@@ -10,10 +10,7 @@
  *   shared-cache controls and 307 redirect responses.
  */
 
-import {
-  recordGenerationEvent,
-  type GenerationOutcome,
-} from "@/lib/analytics";
+import { recordGenerationEvent, type GenerationOutcome } from "@/lib/analytics";
 import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { getDb } from "@/lib/db";
 import {

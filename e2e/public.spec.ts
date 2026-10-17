@@ -16,7 +16,10 @@ test("live demo generates a screenshot", async ({ page }) => {
     .poll(() =>
       page.evaluate(() => {
         const form = document.querySelector("form");
-        return !!form && Object.keys(form).some((key) => key.startsWith("__reactProps"));
+        return (
+          !!form &&
+          Object.keys(form).some((key) => key.startsWith("__reactProps"))
+        );
       }),
     )
     .toBe(true);

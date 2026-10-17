@@ -7,7 +7,10 @@ interface CopyButtonProps {
   ariaLabel?: string;
 }
 
-export function CopyButton({ text, ariaLabel = "Copy URL to clipboard" }: CopyButtonProps) {
+export function CopyButton({
+  text,
+  ariaLabel = "Copy URL to clipboard",
+}: CopyButtonProps) {
   const [isCopied, setIsCopied] = useState(false);
 
   const copyToClipboard = () => {
@@ -33,7 +36,7 @@ export function CopyButton({ text, ariaLabel = "Copy URL to clipboard" }: CopyBu
       <span
         className={`absolute inset-0 flex items-center justify-center transition duration-300 ${isCopied ? "scale-100" : "scale-0"}`}
       >
-        <Check className="size-4 stroke-2 text-primary" />
+        <Check className="text-primary size-4 stroke-2" />
       </span>
     </Button>
   );

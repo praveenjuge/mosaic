@@ -36,8 +36,8 @@ automatically.
 
 To see the difference, compare a manual design with a screenshot-based image:
 
-| Manual Design                        | Screenshot-Based                   |
-| ------------------------------------ | ---------------------------------- |
+| Manual Design                                 | Screenshot-Based                            |
+| --------------------------------------------- | ------------------------------------------- |
 | ![](/images/original-example-og-814873d7.jpg) | ![](/images/mosaic-example-og-f9e253a9.png) |
 
 Both images link to the same page, but the automated version is always up to

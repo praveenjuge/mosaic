@@ -169,7 +169,9 @@ export function matchMarkdownPath(pathname: string): MarkdownContentRef | null {
     "/.well-known",
   ];
   if (
-    reserved.some((prefix) => path === prefix || path.startsWith(`${prefix}/`)) ||
+    reserved.some(
+      (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+    ) ||
     /\.[a-z0-9]+$/i.test(path)
   ) {
     return null;
@@ -210,11 +212,7 @@ export function markdownNegotiationResponse(
   // Markdown instead of falling through to the SSR handler, which rejects
   // non-HTML requests with a 500.
   return new Response(
-    request.method === "HEAD"
-      ? null
-      : notFound
-        ? errorBody
-        : markdown,
+    request.method === "HEAD" ? null : notFound ? errorBody : markdown,
     {
       status: notFound ? 404 : 200,
       headers: {

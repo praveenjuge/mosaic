@@ -17,10 +17,7 @@ const builtConfig = JSON.parse(
   readFileSync("./dist/server/wrangler.json", "utf8"),
 );
 delete builtConfig.browser?.remote;
-writeFileSync(
-  "./dist/server/wrangler.test.json",
-  JSON.stringify(builtConfig),
-);
+writeFileSync("./dist/server/wrangler.test.json", JSON.stringify(builtConfig));
 
 const server = createTestHarness({
   workers: [

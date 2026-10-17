@@ -7,10 +7,7 @@ import {
 import type { D1Queryable } from "@/lib/db";
 
 type BudgetScope =
-  | "demo-client"
-  | "demo-global"
-  | "production-client"
-  | "production-global";
+  "demo-client" | "demo-global" | "production-client" | "production-global";
 
 function utcDayStart(timestamp = Date.now()): number {
   const date = new Date(timestamp);
@@ -99,7 +96,10 @@ export function reserveDemoGeneration(db: D1Queryable, clientKey: string) {
   );
 }
 
-export function reserveProductionGeneration(db: D1Queryable, clientKey: string) {
+export function reserveProductionGeneration(
+  db: D1Queryable,
+  clientKey: string,
+) {
   return reserveClientAndGlobalBudget(
     db,
     "production-client",
