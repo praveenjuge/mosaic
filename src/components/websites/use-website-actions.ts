@@ -2,8 +2,7 @@ import { addSite, deleteSite, editSite } from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
-type SaveWebsiteArgs =
-  { siteId?: undefined; url: string } | { siteId: number; url: string };
+type SaveWebsiteArgs = { siteId?: number; url: string };
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -22,7 +21,7 @@ export function useWebsiteActions() {
     }
 
     try {
-      if ("siteId" in args && args.siteId) {
+      if (args.siteId) {
         await editSite({ data: { siteId: args.siteId, url_base: url } });
         toast.success("Website updated and ready to use.");
       } else {

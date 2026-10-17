@@ -193,8 +193,7 @@ describe("negotiateResponse", () => {
 
   test("leaves app routes, assets, and non-GET requests alone", () => {
     for (const path of [
-      "/dashboard",
-      "/dashboard/missing",
+      "/use",
       "/i/global/a.jpeg",
       "/blog/missing",
       "/sign-in",

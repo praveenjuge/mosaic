@@ -82,20 +82,9 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
     ],
   }),
-  beforeLoad: async ({ location }) => {
-    // Skip the Clerk auth() call for API/asset routes that don't need it. These
-    // are public and must not depend on Clerk — notably `/i/<key>` OG images,
-    // where a Clerk outage would otherwise break social embeds.
-    const skipAuthExact = ["/use", "/robots.txt"];
-    const { pathname } = location;
-    if (skipAuthExact.includes(pathname) || pathname.startsWith("/i/")) {
-      return { auth: { userId: null, isAuthenticated: false } };
-    }
-
-    return {
-      auth: await fetchRouteAuth(),
-    };
-  },
+  // Server-handler routes (/use, /i/*, robots.txt, llms.txt) answer before
+  // the router runs, so this never runs for them.
+  beforeLoad: async () => ({ auth: await fetchRouteAuth() }),
   errorComponent: (props) => (
     <RootDocument>
       <DefaultCatchBoundary {...props} />

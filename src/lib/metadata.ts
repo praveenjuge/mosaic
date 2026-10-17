@@ -131,12 +131,13 @@ async function fetchPublicPage(
   throw new Error("The website redirected too many times.");
 }
 
+/** Fetch a page's HTML along with the URL its redirects ended at. */
 export async function fetchPageHtml(
   url: URL,
   requestHostname: string,
-): Promise<string> {
-  const { response } = await fetchPublicPage(url, requestHostname);
-  return response.text();
+): Promise<{ html: string; finalUrl: URL }> {
+  const { response, finalUrl } = await fetchPublicPage(url, requestHostname);
+  return { html: await response.text(), finalUrl };
 }
 
 /** Resolve and validate every server redirect before Browser Run navigation. */

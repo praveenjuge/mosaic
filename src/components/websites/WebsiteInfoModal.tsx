@@ -14,6 +14,26 @@ import { guideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
 import { buildUseEndpointUrl } from "@/lib/url";
 import { Code, ExternalLink, Ghost } from "lucide-react";
+import type { ReactNode } from "react";
+
+function ExternalTextLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: ReactNode;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary flex items-center font-medium"
+    >
+      {children} <ExternalLink className="ml-1 size-3.5 stroke-2" />
+    </a>
+  );
+}
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
@@ -64,11 +84,12 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
                 Sub Pages
               </TabsTrigger>
             </TabsList>
-            {["home", "subpages"].map((tab) => (
-              <TabsContent key={tab} value={tab}>
-                {renderCodeBlock(tab === "home" ? homeMetaTag : subpageMetaTag)}
-              </TabsContent>
-            ))}
+            <TabsContent value="home">
+              {renderCodeBlock(homeMetaTag)}
+            </TabsContent>
+            <TabsContent value="subpages">
+              {renderCodeBlock(subpageMetaTag)}
+            </TabsContent>
           </Tabs>
 
           <div className="flex flex-wrap gap-2">
@@ -77,19 +98,12 @@ export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
             ))}
           </div>
 
-          {["Learn more about Open Graph", "Validate your metadata"].map(
-            (text, index) => (
-              <a
-                key={index}
-                href={index === 0 ? "https://ogp.me/" : "https://metatags.io/"}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary flex items-center font-medium"
-              >
-                {text} <ExternalLink className="ml-1 size-3.5 stroke-2" />
-              </a>
-            ),
-          )}
+          <ExternalTextLink href="https://ogp.me/">
+            Learn more about Open Graph
+          </ExternalTextLink>
+          <ExternalTextLink href="https://metatags.io/">
+            Validate your metadata
+          </ExternalTextLink>
         </div>
       </DialogContent>
     </Dialog>

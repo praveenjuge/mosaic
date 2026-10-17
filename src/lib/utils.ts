@@ -5,6 +5,11 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+/**
+ * SSR and hydration must produce the same string, so the timezone is fixed
+ * and the string is built from parts: some browsers' `toLocaleString` puts a
+ * narrow no-break space before AM/PM where workerd uses a plain space.
+ */
 export function formatDate(timestamp: number): string {
   const parts = new Intl.DateTimeFormat("en-US", {
     year: "numeric",

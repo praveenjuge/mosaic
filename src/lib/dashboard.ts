@@ -1,43 +1,19 @@
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
 import { stripTrailingSlashes } from "@/lib/url";
 
-export type DashboardSiteRow = {
-  id: number;
-  url_base: string;
-  created_at: string;
-};
-
-export type DashboardImageAggregateRow = {
-  hostname: string;
-  image_count: number;
-  last_generated_at: number;
-};
-
-export type DashboardImageRow = DashboardImageSummary;
+export type DashboardWebsiteRow = DashboardStats["websites"][number];
 
 export function buildDashboardStats(
-  sites: DashboardSiteRow[],
-  imageAggregates: DashboardImageAggregateRow[],
-  latestImages: DashboardImageRow[],
+  websites: DashboardWebsiteRow[],
+  latestImages: DashboardImageSummary[],
 ): DashboardStats {
-  const imagesByHostname = new Map(
-    imageAggregates.map((row) => [row.hostname, row]),
-  );
-
   return {
-    total_websites: sites.length,
-    total_images: imageAggregates.reduce(
-      (total, row) => total + row.image_count,
+    total_websites: websites.length,
+    total_images: websites.reduce(
+      (total, website) => total + website.image_count,
       0,
     ),
-    websites: sites.map((site) => {
-      const imageStats = imagesByHostname.get(site.url_base);
-      return {
-        ...site,
-        image_count: imageStats?.image_count ?? 0,
-        last_generated_at: imageStats?.last_generated_at ?? null,
-      };
-    }),
+    websites,
     latest_screenshots: latestImages.map((image) => ({
       ...image,
       page_url: stripTrailingSlashes(image.page_url),

@@ -7,7 +7,7 @@ import type { FormEvent } from "react";
 type WebsiteUrlFormProps = {
   defaultValue?: string;
   isSubmitting: boolean;
-  onSubmit: (url: string) => void | Promise<void>;
+  onSubmit: (url: string) => void;
   submitLabel: string;
 };
 
@@ -17,12 +17,10 @@ export function WebsiteUrlForm({
   onSubmit,
   submitLabel,
 }: WebsiteUrlFormProps) {
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
-    const url = formData.get("website")?.toString() ?? "";
-
-    await onSubmit(url);
+    onSubmit(formData.get("website")?.toString() ?? "");
   };
 
   return (
