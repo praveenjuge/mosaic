@@ -609,9 +609,20 @@ describe("/use answers and guards", () => {
     assert.match(body.notice ?? "", /capacity is currently busy/);
     assert.equal(await budgetCount("demo-client"), 0);
     assert.equal(await budgetCount("demo-global"), 100);
+
+    // With both budgets open, both are reserved.
+    const env = await worker.getEnv();
+    await env.DB.prepare("DELETE FROM generation_budgets").run();
+    await server
+      .fetch(`/use?url=https://${testHost()}/&mode=demo`, {
+        headers: { "CF-Connecting-IP": "203.0.113.10" },
+      })
+      .then((r) => r.arrayBuffer());
+    assert.equal(await budgetCount("demo-client"), 1);
+    assert.equal(await budgetCount("demo-global"), 1);
   });
 
-  test("refunds the service's demo budget when the client's is spent", async () => {
+  test("leaves the service's demo budget alone when the client's is spent", async () => {
     await setBudget("demo-client", "203.0.113.9", 10);
 
     const response = await server.fetch(
@@ -621,6 +632,6 @@ describe("/use answers and guards", () => {
     const body = (await response.json()) as { notice?: string };
     assert.match(body.notice ?? "", /capacity is currently busy/);
     assert.equal(await budgetCount("demo-client"), 10);
-    assert.equal(await budgetCount("demo-global"), 0);
+    assert.equal(await budgetCount("demo-global"), null);
   });
 });

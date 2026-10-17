@@ -438,11 +438,13 @@ async function waitForFirstImage(pageUrl: string): Promise<string | null> {
 }
 
 /**
- * Pages whose stale image this isolate is already refreshing. The lock
- * dedupes across isolates; this skips its rate limit and D1 writes when a
- * burst of crawler hits lands on one isolate.
+ * When this isolate started refreshing each stale page. The lock dedupes
+ * across isolates; this skips its rate limit and D1 writes when a burst of
+ * crawler hits lands on one isolate. An entry older than the lock's lease is
+ * ignored, in case the runtime stopped the refresh before it cleaned up.
  */
-const refreshing = new Set<string>();
+const refreshing = new Map<string, number>();
+const REFRESH_LEASE_MS = 60_000;
 
 async function handleProductionRequest(
   request: Request,
@@ -499,8 +501,9 @@ async function handleProductionRequest(
       // Serve the stale image now and refresh it after the response, so
       // social crawlers never wait for a screenshot they would time out on.
       recordGenerationEvent({ outcome: "stale_hit", hostname });
-      if (!refreshing.has(pageUrl)) {
-        refreshing.add(pageUrl);
+      const startedAt = refreshing.get(pageUrl);
+      if (!startedAt || Date.now() - startedAt > REFRESH_LEASE_MS) {
+        refreshing.set(pageUrl, Date.now());
         waitUntil(
           generateImage(db, target, clientKey(request)).finally(() =>
             refreshing.delete(pageUrl),
@@ -572,9 +575,10 @@ export async function handleUseRequest(request: Request): Promise<Response> {
       requestHostname,
       requestOrigin,
     };
-    return searchParams.get("mode") === "demo"
+    // Awaited so the catch below answers rejections too.
+    return await (searchParams.get("mode") === "demo"
       ? handleDemoRequest(request, target)
-      : handleProductionRequest(request, target);
+      : handleProductionRequest(request, target));
   } catch (error) {
     console.error("[USE] Unhandled error:", error);
     return json({ error: "Internal server error" }, 500);
