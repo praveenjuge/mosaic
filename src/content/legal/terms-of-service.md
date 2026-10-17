@@ -35,7 +35,7 @@ We reserve the right to terminate or suspend access to our services at any time 
 
 ### Subscription Terms and Pricing
 
-We offer a free plan and paid subscriptions. Pricing and terms may change over time.
+Mosaic is free to use today. If we add paid plans, we'll show the price and terms before you're charged. Pricing and terms may change over time.
 
 ### User-Generated Content
 

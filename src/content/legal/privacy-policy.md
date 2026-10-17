@@ -15,16 +15,15 @@ We collect:
 - Account information (email address and sign-in details)
 - The website hostnames you add to your account
 - Screenshots of requested public pages (Cloudflare R2) and metadata such as page URL and generation time (Cloudflare D1)
-- Billing information (payment method, billing address) for paid plans
 - Usage data: hostname, outcome, and timing of each image request (Cloudflare Workers Analytics Engine)
 - Technical information (IP address, device information, browser type) and request logs
+
+Mosaic doesn't take payments today. If that changes, we'll update this policy before we collect any billing information.
 
 ### Use of Information
 
 - To provide, maintain, and improve our services
-- To process payments and fulfill orders
 - To communicate with you about our services and updates
-- To personalize your experience and provide relevant content
 - To prevent abuse, including rate limiting with daily per-IP counts
 - To comply with legal obligations and enforce our policies
 
@@ -32,12 +31,11 @@ We collect:
 
 - Encryption of data in transit and at rest
 - Access controls and authentication mechanisms
-- Regular security audits and vulnerability testing
 - Secure data storage and backup procedures
 
 ### Third-Party Services
 
-We may share your personal information with service providers that help operate our services, such as Clerk (authentication), Cloudflare (hosting, storage, screenshots, analytics), and payment processors.
+We may share your personal information with service providers that help operate our services, such as Clerk (authentication) and Cloudflare (hosting, storage, screenshots, analytics).
 
 ### Your Rights
 
