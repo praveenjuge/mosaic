@@ -24,9 +24,9 @@ function normalizePublicHostname(value: string): string {
 function warmAfterResponse(hostname: string, userId: string) {
   const requestUrl = getRequest().url;
   waitUntil(
-    forgetUnregisteredHostname(requestUrl, hostname).catch((error) =>
-      console.error("[SITES] Failed to clear cached /use answer:", error),
-    ),
+    forgetUnregisteredHostname(requestUrl, hostname).catch((error) => {
+      console.error("[SITES] Failed to clear cached /use answer:", error);
+    }),
   );
   waitUntil(warmSiteImage(hostname, requestUrl, `user:${userId}`));
 }

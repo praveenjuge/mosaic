@@ -129,8 +129,9 @@ export async function acquireGenerationLock(
     findGlobalImageStatement(db, pageUrl),
   ]);
   if (lock.results.length === 0) return null;
-  const row = (image as D1Result<{ key: string; expires_at: number }>)
-    .results[0];
+  const row = (
+    image as D1Result<{ key: string; expires_at: number }>
+  ).results.at(0);
   return {
     leaseToken,
     current: row ? { key: row.key, expiresAt: row.expires_at } : null,

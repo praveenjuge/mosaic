@@ -1,7 +1,7 @@
 import { DAILY_GENERATION_LIMITS } from "@/lib/constants";
 import type { D1Queryable } from "@/lib/db";
 
-type GenerationKind = keyof typeof DAILY_GENERATION_LIMITS;
+type GenerationKind = "production" | "demo";
 type BudgetScope = `${GenerationKind}-${"client" | "global"}`;
 
 function utcDayStart(timestamp = Date.now()): number {
