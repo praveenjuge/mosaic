@@ -23,11 +23,25 @@ export default defineConfig({
     screenshot: "only-on-failure",
     trace: "retain-on-failure",
   },
+  // Visual baselines are only valid in the pinned Playwright image, so the
+  // visual project exists only when scripts/visual-test.sh runs it there.
+  // That image renders identically run to run, so comparisons stay strict.
+  snapshotPathTemplate: "{testDir}/__screenshots__/{arg}{ext}",
   projects: [
     {
       name: "chromium",
+      testIgnore: "visual.spec.ts",
       use: { ...devices["Desktop Chrome"], launchOptions: { executablePath } },
     },
+    ...(process.env.MOSAIC_VISUAL === "1"
+      ? [
+          {
+            name: "visual",
+            testMatch: "visual.spec.ts",
+            use: { ...devices["Desktop Chrome"] },
+          },
+        ]
+      : []),
   ],
   // The dev server is used, not `vite preview`, because only dev falls back
   // to local Puppeteer when Browser Run Quick Actions are unavailable.
