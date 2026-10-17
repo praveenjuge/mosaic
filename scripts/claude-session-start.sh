@@ -13,16 +13,7 @@ cd "${CLAUDE_PROJECT_DIR:-$(dirname "$0")/..}"
 
 bun install --frozen-lockfile
 
-# Real values set as environment variables in the cloud environment take
-# precedence over .env.local, so placeholders only fill the gaps.
-if [ ! -f .env.local ]; then
-  cat > .env.local <<'ENV'
-VITE_SITE_URL=http://localhost:3000
-# Placeholder that decodes to a valid key shape for the reserved `.invalid` domain.
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuaW52YWxpZCQ=
-CLERK_SECRET_KEY=clerk-secret-placeholder
-ENV
-fi
+bash scripts/write-placeholder-env.sh
 
 bun run db:migrate:local
 bun run db:seed:local

@@ -12,13 +12,6 @@ concurrency:
 permissions:
   contents: read
 
-# Placeholder values: CI never talks to Cloudflare or Clerk. The `pk_live_`
-# shape skips Clerk's development handshake, so signed-out pages render.
-env:
-  VITE_SITE_URL: http://localhost:3000
-  VITE_CLERK_PUBLISHABLE_KEY: pk_live_Y2xlcmsuaW52YWxpZCQ=
-  CLERK_SECRET_KEY: clerk-secret-placeholder
-
 jobs:
   checks:
     name: Lint, format, types, unit tests
@@ -47,6 +40,8 @@ jobs:
         with:
           node-version: 22
       - run: bun install --frozen-lockfile
+      # Placeholder site and Clerk values; CI never talks to Cloudflare or Clerk.
+      - run: bash scripts/write-placeholder-env.sh
       - run: bun run build
       - run: bun run test:integration
 
@@ -59,6 +54,7 @@ jobs:
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
+      - run: bash scripts/write-placeholder-env.sh
       - run: bunx playwright install --with-deps chromium
       - run: bun run test:e2e
       - if: failure()
