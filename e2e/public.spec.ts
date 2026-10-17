@@ -9,6 +9,30 @@ test("home page renders the hero", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("signed-out pages link to sign-in without loading Clerk", async ({
+  page,
+}) => {
+  // Clerk development instances still redirect the page itself through a
+  // handshake, so only count scripts and API calls.
+  const clerkRequests: string[] = [];
+  page.on("request", (request) => {
+    if (
+      request.resourceType() !== "document" &&
+      /clerk/i.test(new URL(request.url()).hostname)
+    ) {
+      clerkRequests.push(request.url());
+    }
+  });
+
+  await page.goto("/");
+  await page.waitForLoadState("networkidle");
+  expect(clerkRequests).toEqual([]);
+  expect(await page.evaluate(() => "Clerk" in window)).toBe(false);
+
+  await page.getByRole("link", { name: "Log In" }).click();
+  await expect(page).toHaveURL(/\/sign-in\/?$/);
+});
+
 test("live demo generates a screenshot", async ({ page }) => {
   await page.goto("/");
   // Submitting before hydration would fall through to a native form GET.

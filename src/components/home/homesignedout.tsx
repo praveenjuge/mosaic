@@ -1,45 +1,18 @@
+import { SignUpLink } from "@/components/auth/auth-links";
 import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
-import { Button } from "@/components/ui/button";
-import { authenticatedHomePath } from "@/lib/clerk-auth";
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignUpButton,
-} from "@clerk/tanstack-react-start";
 import { MoveRight } from "lucide-react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";
 import OGImageDemo from "./og-image-demo";
 
-function AuthButtonSkeleton() {
-  return (
-    <Button size="lg" disabled>
-      Start for Free
-      <MoveRight className="size-4" strokeWidth={2} />
-    </Button>
-  );
-}
-
 function AuthButton() {
   return (
-    <>
-      <ClerkLoading>
-        <AuthButtonSkeleton />
-      </ClerkLoading>
-      <ClerkLoaded>
-        <SignUpButton
-          fallbackRedirectUrl={authenticatedHomePath}
-          forceRedirectUrl={authenticatedHomePath}
-        >
-          <Button size="lg">
-            Start for Free
-            <MoveRight className="size-4" strokeWidth={2} />
-          </Button>
-        </SignUpButton>
-      </ClerkLoaded>
-    </>
+    <SignUpLink size="lg">
+      Start for Free
+      <MoveRight className="size-4" strokeWidth={2} />
+    </SignUpLink>
   );
 }
 

@@ -1,64 +1,17 @@
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { authenticatedHomePath } from "@/lib/clerk-auth";
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignInButton,
-  SignUpButton,
-  useAuth,
-} from "@clerk/tanstack-react-start";
-import UserProfile from "./user-profile";
-
-function AuthLoadingSkeleton() {
-  return (
-    <div className="flex items-center gap-2">
-      <Skeleton className="h-8 w-16" />
-      <Skeleton className="size-8 rounded-full" />
-    </div>
-  );
-}
-
-function SignedOutButtons() {
-  return (
-    <div className="flex items-center gap-2">
-      <SignInButton
-        fallbackRedirectUrl={authenticatedHomePath}
-        forceRedirectUrl={authenticatedHomePath}
-      >
-        <Button variant="outline" size="sm">
-          Log In
-        </Button>
-      </SignInButton>
-      <SignUpButton
-        fallbackRedirectUrl={authenticatedHomePath}
-        forceRedirectUrl={authenticatedHomePath}
-      >
-        <Button size="sm">Sign Up</Button>
-      </SignUpButton>
-    </div>
-  );
-}
-
-function SignedInNav() {
-  return (
-    <nav className="flex items-center gap-2 md:gap-4">
-      <UserProfile />
-    </nav>
-  );
-}
+import { headerSignedIn } from "@/lib/clerk-chunks";
+import { useRouteContext } from "@tanstack/react-router";
+import { Suspense } from "react";
+import { AuthLoadingSkeleton, SignedOutButtons } from "./header-auth-buttons";
 
 export default function HeaderAuth() {
-  const { userId } = useAuth();
+  const { auth } = useRouteContext({ from: "__root__" });
+
+  // Signed-out pages don't load Clerk, so they get plain links.
+  if (!auth.userId) return <SignedOutButtons />;
 
   return (
-    <>
-      <ClerkLoading>
-        <AuthLoadingSkeleton />
-      </ClerkLoading>
-      <ClerkLoaded>
-        {userId ? <SignedInNav /> : <SignedOutButtons />}
-      </ClerkLoaded>
-    </>
+    <Suspense fallback={<AuthLoadingSkeleton />}>
+      <headerSignedIn.Component />
+    </Suspense>
   );
 }

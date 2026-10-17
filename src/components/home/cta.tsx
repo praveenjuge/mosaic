@@ -1,11 +1,5 @@
-import { authenticatedHomePath } from "@/lib/clerk-auth";
-import {
-  ClerkLoaded,
-  ClerkLoading,
-  SignUpButton,
-} from "@clerk/tanstack-react-start";
+import { SignUpLink } from "@/components/auth/auth-links";
 import { MoveRight } from "lucide-react";
-import { Button } from "../ui/button";
 
 export default function CTA() {
   return (
@@ -20,23 +14,10 @@ export default function CTA() {
               Generate click-worthy OG images in seconds, fully automated.
             </p>
           </div>
-          <ClerkLoading>
-            <Button size="lg" disabled>
-              Start for Free
-              <MoveRight className="size-4" strokeWidth={2} />
-            </Button>
-          </ClerkLoading>
-          <ClerkLoaded>
-            <SignUpButton
-              fallbackRedirectUrl={authenticatedHomePath}
-              forceRedirectUrl={authenticatedHomePath}
-            >
-              <Button size="lg">
-                Start for Free
-                <MoveRight className="size-4" strokeWidth={2} />
-              </Button>
-            </SignUpButton>
-          </ClerkLoaded>
+          <SignUpLink size="lg">
+            Start for Free
+            <MoveRight className="size-4" strokeWidth={2} />
+          </SignUpLink>
         </div>
       </div>
     </section>
