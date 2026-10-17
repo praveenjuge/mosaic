@@ -48,7 +48,8 @@ try {
     // pick the theme the way the theme toggle does (next-themes' storage key).
     const theme = values.dark ? "dark" : "light";
     await page.addInitScript((value) => {
-      localStorage.setItem("theme", value);
+      // Runs in the page, where localStorage exists.
+      globalThis.localStorage.setItem("theme", value);
     }, theme);
 
     for (const path of paths) {
