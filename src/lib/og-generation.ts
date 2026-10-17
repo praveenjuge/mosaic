@@ -172,13 +172,18 @@ async function handleDemoRequest(
 
 // ── Production mode ─────────────────────────────────────────────────
 
+/** Overall limit for resolving a page's redirects before a screenshot. */
+const PAGE_FETCH_DEADLINE_MS = 8_000;
+
 type GenerationResult =
   | { key: string }
   | { skipped: "rate_limited" | "locked" | "budget_exhausted" | "failed" };
 
 /**
  * Take and store a fresh screenshot of `target`, behind the rate limit,
- * generation lock and daily budget, in that order. Records the outcome.
+ * generation lock and daily budget, in that order. Records the outcome. If
+ * the image is already fresh once the lock is held, returns it instead.
+ * The lock's 60 s lease is the backstop if the Worker is stopped mid-run.
  *
  * Every screenshot gets a new R2 key (`global/<page hash>-<version>.jpeg`),
  * so an `/i/<key>` URL never changes content and can be cached for good. The
@@ -188,7 +193,6 @@ export async function generateImage(
   db: D1Queryable,
   target: Target,
   client: string,
-  previousKey: string | null,
 ): Promise<GenerationResult> {
   const { pageUrl, hostname } = target;
   const record = (
@@ -209,6 +213,12 @@ export async function generateImage(
   }
 
   try {
+    // Re-read under the lock: another request may have just refreshed the
+    // image (or a replica served an older row before the lock's write).
+    const current = await findGlobalImage(db, pageUrl);
+    if (current && current.expiresAt > Date.now()) return { key: current.key };
+    const previousKey = current?.key ?? null;
+
     if (!(await reserveGeneration(db, "production", client))) {
       record("budget_exhausted");
       return { skipped: "budget_exhausted" };
@@ -218,9 +228,12 @@ export async function generateImage(
     try {
       // Resolve and validate every server redirect before Browser Run
       // navigates; only the final URL is needed.
+      // Background runs get about 30 s after the response, so the page
+      // fetch, redirects included, must leave room for the screenshot.
       const { response, finalUrl } = await fetchPublicPage(
         target.url,
         target.requestHostname,
+        AbortSignal.timeout(PAGE_FETCH_DEADLINE_MS),
       );
       await response.body?.cancel();
       const image = await takeScreenshot(finalUrl.toString());
@@ -270,7 +283,7 @@ export async function warmSiteImage(
     const db = getDb();
     const cachedImage = await findGlobalImage(db, target.pageUrl);
     if (cachedImage && cachedImage.expiresAt > Date.now()) return;
-    await generateImage(db, target, client, cachedImage?.key ?? null);
+    await generateImage(db, target, client);
   } catch (error) {
     console.error("[USE] Failed to warm site image:", error);
   }
@@ -310,13 +323,13 @@ async function handleProductionRequest(
       // Serve the stale image now and refresh it after the response, so
       // social crawlers never wait for a screenshot they would time out on.
       recordGenerationEvent({ outcome: "stale_hit", hostname });
-      waitUntil(generateImage(db, target, clientKey(request), cachedImage.key));
+      waitUntil(generateImage(db, target, clientKey(request)));
     }
     return redirect(imageUrl(cachedImage.key));
   }
 
   // No image yet: this request waits for the first one.
-  const result = await generateImage(db, target, clientKey(request), null);
+  const result = await generateImage(db, target, clientKey(request));
   if ("key" in result) return redirect(imageUrl(result.key));
   if (result.skipped === "locked") {
     return json(

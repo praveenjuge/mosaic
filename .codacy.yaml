@@ -1,5 +1,6 @@
-# Vendored agent skills are third-party docs, and the local seed file is
-# SQLite (D1), which Codacy's T-SQL linters can't parse.
+# Vendored agent skills are third-party docs, and the local seed file and
+# migrations are SQLite (D1), which Codacy's T-SQL linters can't parse.
 exclude_paths:
   - ".agents/**"
   - "scripts/seed-local.sql"
+  - "migrations/**"

@@ -410,6 +410,23 @@ describe("/i/*", () => {
     assert.equal(other.status, 404);
   });
 
+  test("never sets cookies, even for signed-in browsers", async () => {
+    await registerSite("example.com");
+    const env = await worker.getEnv();
+    const key = `global/${pageHash}-abc123.jpeg`;
+    await env.OG_BUCKET.put(key, new Uint8Array([1]));
+    const cookie = "__session=expired; __client_uat=1760000000; __refresh_x=y";
+
+    for (const path of [`/i/${key}`, "/use?url=https://example.com/"]) {
+      const response = await server.fetch(path, {
+        headers: { Cookie: cookie },
+        redirect: "manual",
+      });
+      assert.equal(response.headers.get("Set-Cookie"), null, path);
+      await response.arrayBuffer();
+    }
+  });
+
   test("returns 404 for missing images", async () => {
     const response = await server.fetch("/i/global/missing.jpeg");
     assert.equal(response.status, 404);

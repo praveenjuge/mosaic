@@ -9,7 +9,7 @@ export {};
 
 const scripts = process.argv.slice(2);
 if (scripts.length === 0) {
-  console.error("Usage: bun scripts/run-parallel.ts <script>...");
+  console.error("Usage: bun scripts/run-parallel.ts SCRIPT [SCRIPT...]");
   process.exit(2);
 }
 

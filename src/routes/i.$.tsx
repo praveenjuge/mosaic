@@ -47,7 +47,9 @@ async function serveImage(request: Request): Promise<Response> {
   if (!object) {
     const currentKey = parsed
       ? await findImageKeyInRange(
-          getDb().withSession("first-unconstrained"),
+          // The primary: a lagging replica could still name the key that
+          // was just deleted, and misses are rare.
+          getDb().withSession("first-primary"),
           imageKeyRange(parsed.pageHash),
         )
       : null;

@@ -41,15 +41,36 @@ const escapeRegExp = (value: string) =>
 const isSameOrSubdomain = (hostname: string, host: string) =>
   hostname === host || hostname.endsWith(`.${host}`);
 
+/** The blocked hosts for a screenshot of `pageUrl`, minus its own host. */
+function blockedHosts(pageUrl: string): string[] {
+  const { hostname } = new URL(pageUrl);
+  return BLOCKED_HOSTS.filter((host) => !isSameOrSubdomain(hostname, host));
+}
+
 /**
  * Browser Run `rejectRequestPattern` entries for a screenshot of `pageUrl`.
  * A blocked host that serves the page itself (say, a screenshot of
  * posthog.com) stays allowed.
  */
 export function blockedRequestPatterns(pageUrl: string): string[] {
-  const { hostname } = new URL(pageUrl);
-  return BLOCKED_HOSTS.filter((host) => !isSameOrSubdomain(hostname, host)).map(
+  return blockedHosts(pageUrl).map(
     (host) =>
       String.raw`^https?://([^/?#]+\.)?${escapeRegExp(host)}(:\d+)?[/?#]`,
+  );
+}
+
+/**
+ * The same rule as `blockedRequestPatterns`, by hostname, for the local
+ * Puppeteer fallback.
+ */
+export function isBlockedRequest(pageUrl: string, requestUrl: string): boolean {
+  let hostname: string;
+  try {
+    ({ hostname } = new URL(requestUrl));
+  } catch {
+    return false;
+  }
+  return blockedHosts(pageUrl).some((host) =>
+    isSameOrSubdomain(hostname, host),
   );
 }

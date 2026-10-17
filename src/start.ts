@@ -39,10 +39,19 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (context) => context.handlerType === "serverFn",
 });
 
+/** The public, CORS-open endpoints. REVIEW.md: they never set cookies. */
+const PUBLIC_ENDPOINT = /^\/(use$|i\/)/;
+
 const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
-  async ({ next }) => {
+  async ({ request, next }) => {
     const result = await next();
     const headers = new Headers(result.response.headers);
+
+    // Clerk's middleware still runs for these and can refresh a session
+    // cookie, which must never ride on a shared, cacheable image response.
+    if (PUBLIC_ENDPOINT.test(new URL(request.url).pathname)) {
+      headers.delete("Set-Cookie");
+    }
 
     headers.set("Content-Security-Policy", cspHeader);
     headers.set("Referrer-Policy", "same-origin");

@@ -97,11 +97,13 @@ const MAX_REDIRECT_HOPS = 5;
 /**
  * Fetch a public page, validating every redirect hop against
  * `validateOutboundUrl`. Resolves once headers arrive, with the URL the
- * redirects ended at. The caller reads or cancels the body.
+ * redirects ended at. The caller reads or cancels the body. Each hop times
+ * out after 5 s; `deadline` can also bound all hops together.
  */
 export async function fetchPublicPage(
   url: URL,
   requestHostname: string,
+  deadline?: AbortSignal,
 ): Promise<{ response: Response; finalUrl: URL }> {
   let currentUrl = url;
 
@@ -113,7 +115,9 @@ export async function fetchPublicPage(
     try {
       response = await fetch(currentUrl.toString(), {
         redirect: "manual",
-        signal: AbortSignal.timeout(5_000),
+        signal: deadline
+          ? AbortSignal.any([AbortSignal.timeout(5_000), deadline])
+          : AbortSignal.timeout(5_000),
         headers: {
           "User-Agent": `Mozilla/5.0 (compatible; MosaicBot/1.0; +${publicEnv.siteUrl})`,
           Accept: "text/html,application/xhtml+xml",
