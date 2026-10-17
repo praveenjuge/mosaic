@@ -6,7 +6,7 @@
 // Writes full-page PNGs (default: test-results/screenshots/) and prints paths.
 import { chromium } from "@playwright/test";
 import console from "node:console";
-import { existsSync, mkdirSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
 import process from "node:process";
 import { URL } from "node:url";
@@ -23,8 +23,8 @@ const { values, positionals } = parseArgs({
 });
 
 const paths = positionals.length > 0 ? positionals : ["/"];
+// Playwright creates missing directories when it writes a screenshot.
 const outDir = resolve(values.out);
-mkdirSync(outDir, { recursive: true });
 
 // Claude Code cloud containers ship Chromium here and block browser downloads.
 const cloudChromium = "/opt/pw-browsers/chromium";
