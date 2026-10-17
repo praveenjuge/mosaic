@@ -23,7 +23,7 @@ const server = createTestHarness({
   workers: [
     {
       configPath: "./dist/server/wrangler.test.json",
-      secrets: { CLERK_SECRET_KEY: "sk_test_placeholder" },
+      secrets: { CLERK_SECRET_KEY: "clerk-secret-placeholder" },
     },
   ],
 });

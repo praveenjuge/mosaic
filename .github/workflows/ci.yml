@@ -16,8 +16,8 @@ permissions:
 # shape skips Clerk's development handshake, so signed-out pages render.
 env:
   VITE_SITE_URL: http://localhost:3000
-  VITE_CLERK_PUBLISHABLE_KEY: pk_live_Y2xlcmsuZXhhbXBsZS5jb20k
-  CLERK_SECRET_KEY: sk_live_placeholder
+  VITE_CLERK_PUBLISHABLE_KEY: pk_live_Y2xlcmsuaW52YWxpZCQ=
+  CLERK_SECRET_KEY: clerk-secret-placeholder
 
 jobs:
   checks:
@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: package.json
       - uses: actions/setup-node@v7
@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: oven-sh/setup-bun@v2
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile

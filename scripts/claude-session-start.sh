@@ -18,9 +18,9 @@ bun install --frozen-lockfile
 if [ ! -f .env.local ]; then
   cat > .env.local <<'ENV'
 VITE_SITE_URL=http://localhost:3000
-# Placeholder that decodes to a syntactically valid publishable key.
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuZXhhbXBsZS5jb20k
-CLERK_SECRET_KEY=sk_live_placeholder
+# Placeholder that decodes to a valid key shape for the reserved `.invalid` domain.
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsuaW52YWxpZCQ=
+CLERK_SECRET_KEY=clerk-secret-placeholder
 ENV
 fi
 
