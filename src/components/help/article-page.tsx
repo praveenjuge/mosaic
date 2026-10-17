@@ -32,7 +32,7 @@ export function ArticlePage({
           {subtitle ? <CardDescription>{subtitle}</CardDescription> : null}
         </CardHeader>
         <CardContent
-          className="prose prose-slate dark:prose-invert max-w-none [&_pre]:overflow-x-auto"
+          className="prose prose-slate dark:prose-invert prose-code:before:content-none prose-code:after:content-none max-w-none [&_pre]:overflow-x-auto"
           dangerouslySetInnerHTML={{ __html: html }}
         />
         {footer ? (

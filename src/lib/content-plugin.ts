@@ -245,7 +245,6 @@ export function mosaicContent(
     async load(id) {
       if (!id.startsWith(`\0${VIRTUAL_PREFIX}`)) return;
       const key = id.slice(VIRTUAL_PREFIX.length + 1) as keyof Content;
-      this.addWatchFile(contentDir);
       content ??= loadContent(contentDir);
       const value = (await content)[key];
       if (value === undefined) this.error(`Unknown content module: ${key}`);

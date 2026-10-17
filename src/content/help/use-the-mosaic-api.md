@@ -17,7 +17,7 @@ The hostname must be saved in a Mosaic account. No API key is needed.
 
 - **`307`** to the image at `/i/global/<hash>.jpeg`. The first request takes
   the screenshot. Later ones reuse it for 30 days.
-- **`307` to an older or fallback image** if a limit is reached or the
+- **`307`** to an older or fallback image if a limit is reached or the
   screenshot fails.
 - **`400`** if `url` is missing or not a public HTTP(S) address.
 - **`404`** if no account has saved the hostname.

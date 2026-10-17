@@ -10,7 +10,8 @@ import {
 } from "@tanstack/react-start";
 
 const cspHeader = [
-  "img-src 'self' https://img.clerk.com https://avatars.githubusercontent.com *;",
+  // data: lets the home page demo show its inline screenshot.
+  "img-src 'self' data: https://img.clerk.com https://avatars.githubusercontent.com *;",
   "font-src 'self' https://fonts.gstatic.com;",
   "worker-src 'self' blob:;",
   "style-src 'self' 'unsafe-inline' https://www.gstatic.com;",

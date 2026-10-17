@@ -28,11 +28,14 @@ test("live demo generates a screenshot", async ({ page }) => {
     .getByRole("button", { name: /Get a Live Demo of your new OG Image/ })
     .click();
 
-  await expect(page.getByAltText("Mosaic Open Graph Image")).toHaveAttribute(
-    "src",
-    /^data:image\/jpeg;base64,/,
-    { timeout: 60_000 },
-  );
+  const image = page.getByAltText("Mosaic Open Graph Image");
+  await expect(image).toHaveAttribute("src", /^data:image\/jpeg;base64,/, {
+    timeout: 60_000,
+  });
+  // The page's CSP must allow the inline screenshot to render.
+  await expect
+    .poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth))
+    .toBeGreaterThan(0);
 });
 
 test("help center lists guides", async ({ page }) => {
