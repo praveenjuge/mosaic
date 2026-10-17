@@ -17,13 +17,29 @@ describe("image keys", () => {
     });
   });
 
+  test("keys under an old per-site prefix parse as mutable", () => {
+    for (const key of [
+      `msk7vkfb-u4ks6195/${hash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${hash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${hash}.png`,
+    ]) {
+      expect(parseImageKey(key)).toEqual({ pageHash: hash, immutable: false });
+    }
+  });
+
   test("rejects keys Mosaic does not create", () => {
     for (const key of [
       "global/test.jpeg",
       `global/${hash}-.jpeg`,
       `global/${hash}-ABC.jpeg`,
-      `other/${hash}.jpeg`,
       `global/${hash}.jpeg/extra`,
+      `${hash}.jpeg`,
+      `a/b/${hash}.jpeg`,
+      `MSK7-U4KS/${hash}.jpeg`,
+      `../${hash}.jpeg`,
+      `msk7vkfb-u4ks6195/${hash}.webp`,
+      `msk7vkfb-u4ks6195/${hash}-abc.jpeg`,
+      `${"a".repeat(33)}/${hash}.jpeg`,
     ]) {
       expect(parseImageKey(key)).toBeNull();
     }
