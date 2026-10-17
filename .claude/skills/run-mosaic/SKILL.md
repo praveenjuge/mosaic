@@ -57,9 +57,31 @@ node scripts/screenshot-pages.mjs --dark --out <dir> /
 Prints one `status url -> file` line per page and exits 1 if any page fails to
 load or answers 400 or above (the screenshot is still saved). `--dark` selects
 the app's dark theme. Read the PNGs, then send the relevant ones to the user.
-The dashboard is the signed-in view of `/`, which needs a real Clerk user that
-placeholder keys can't provide; use `e2e/dashboard.spec.ts` with a Clerk
-development instance for that.
+The dashboard is the signed-in view of `/`. Placeholder keys can't sign in, but
+when the environment sets real Clerk development keys and
+`E2E_CLERK_USER_EMAIL` (check with `[ -n "$E2E_CLERK_USER_EMAIL" ]`), a
+throwaway Playwright spec can sign in and screenshot it. Put the spec in
+`e2e/` so it picks up the config, wait for hydration before clicking (see
+`e2e/dashboard.spec.ts`), clean up any sites it adds, and delete the spec
+afterwards:
+
+```ts
+import { clerk } from "@clerk/testing/playwright";
+import { test } from "@playwright/test";
+
+test("shot", async ({ page }) => {
+  await page.goto("/help");
+  await clerk.signIn({ page, emailAddress: process.env.E2E_CLERK_USER_EMAIL! });
+  await page.goto("/");
+  await page.screenshot({ path: "<dir>/dashboard.png", fullPage: true });
+});
+```
+
+Run it with `bunx playwright test e2e/<name>.spec.ts`. Stop your own dev server
+first: Playwright starts one on port 3000.
+
+Screenshots here are for looking. Pixel baselines live in
+`e2e/visual.spec.ts`; see "Testing" in `AGENTS.md`.
 
 ## 4. Inspect local state
 
