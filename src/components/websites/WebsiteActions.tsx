@@ -39,15 +39,17 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [isDeleting, startDeleting] = useTransition();
   const { removeWebsite, saveWebsite } = useWebsiteActions();
 
-  const handleEditSubmit = (url: string) =>
+  const handleEditSubmit = (url: string) => {
     startSaving(async () => {
       if (await saveWebsite({ siteId: websiteId, url })) setEditOpen(false);
     });
+  };
 
-  const handleDeleteAction = () =>
+  const handleDeleteAction = () => {
     startDeleting(async () => {
       if (await removeWebsite(websiteId)) setDeleteOpen(false);
     });
+  };
 
   return (
     <>

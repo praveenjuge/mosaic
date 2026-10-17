@@ -17,10 +17,11 @@ export default function AddWebsite() {
   const [isSaving, startSaving] = useTransition();
   const { saveWebsite } = useWebsiteActions();
 
-  const handleSubmit = (url: string) =>
+  const handleSubmit = (url: string) => {
     startSaving(async () => {
       if (await saveWebsite({ url })) setOpen(false);
     });
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
