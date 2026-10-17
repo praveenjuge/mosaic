@@ -29,12 +29,26 @@ Run these before pushing; CI (`.github/workflows/ci.yml`) runs all of them.
 
 ## Local, cloud, and CI environments
 
-- Remote bindings are opt-in (`shouldUseRemoteBindings()` in `vite.config.ts`). They turn on only when `CLOUDFLARE_API_TOKEN` is set or `MOSAIC_REMOTE_BINDINGS=1`, never in Workers Builds; `MOSAIC_REMOTE_BINDINGS=0` forces them off. A `wrangler login` alone is not detected.
+- Remote bindings are opt-in and dev-only (`shouldUseRemoteBindings()` in `vite.config.ts`); `vite build` never uses them. In dev they turn on only when `CLOUDFLARE_API_TOKEN` is set or `MOSAIC_REMOTE_BINDINGS=1`, never in Workers Builds; `MOSAIC_REMOTE_BINDINGS=0` forces them off. A `wrangler login` alone is not detected.
+- The account's workers.dev subdomain is behind Cloudflare Access, so the remote proxy also needs `CLOUDFLARE_ACCESS_CLIENT_ID` and `CLOUDFLARE_ACCESS_CLIENT_SECRET` (an Access service token). Without them `bun run dev` fails with "Failed to start the remote proxy session"; restart with `MOSAIC_REMOTE_BINDINGS=0`.
 - Only `BROWSER` is remote; D1 and R2 always use local state in `.wrangler/`, so development never writes to production storage.
 - Without remote bindings, `takeScreenshot()` falls back in dev to local Puppeteer (`src/lib/local-screenshot.ts`) against a Chrome that Miniflare downloads. Local Chrome needs `CI=1` when running as root (Miniflare only passes `--no-sandbox` then).
-- Claude Code cloud sessions run `scripts/claude-session-start.sh` via the SessionStart hook in `.claude/settings.json`: it installs dependencies, writes placeholder Clerk keys to `.env.local`, migrates and seeds local D1, and exports `CI=1`. Placeholder keys use the `pk_live_` shape because Clerk development keys force a handshake redirect to the (fake) Frontend API.
+- Claude Code cloud sessions run `scripts/claude-session-start.sh` via the SessionStart hook in `.claude/settings.json`: it installs dependencies, writes placeholder Clerk keys to `.env.local`, migrates and seeds local D1, exports `CI=1`, and exports `MOSAIC_REMOTE_BINDINGS=0` unless the environment sets it or provides Access credentials. Sessions with more than one repository skip repository hooks, so run the script from the environment's setup script there. Placeholder keys use the `pk_live_` shape because Clerk development keys force a handshake redirect to the (fake) Frontend API.
+- A PostToolUse hook (`scripts/claude-post-edit.sh`) runs Prettier on each file Claude edits and `bun run cf-typegen` after `wrangler.jsonc` changes.
 - Deploys, remote migrations, and secret changes are denied to agents in `.claude/settings.json`; a human runs them.
 - Worker Previews (`bun run deploy:preview`) use the `previews` block in `wrangler.jsonc`, bound to preview-only D1 (`mosaic-preview`), R2 (`mosaic-og-preview`), rate limiter namespaces, and Analytics Engine dataset.
+- In cloud sessions the Cloudflare account is reachable through the claude.ai Cloudflare connector (D1, R2, Workers, docs). The `cloudflare-observability` server in `.mcp.json` needs an OAuth sign-in, so it only works in local sessions.
+
+## Seeing changes
+
+The user can't open a dev server that runs in a cloud container. After UI or generation changes, use the `run-mosaic` skill: start dev, call `/use`, screenshot pages with `node scripts/screenshot-pages.mjs`, look at the images, and send them to the user. The dev server also serves the Local Explorer API (`/cdn-cgi/local/explorer/api`) for local D1, R2, and SQL over request traces and logs.
+
+Project skills and agents in `.claude/`:
+
+- `run-mosaic` — run the app, generate images, screenshot pages, inspect local state
+- `new-migration` — add a D1 migration the safe way
+- `add-binding` — add a Cloudflare binding everywhere it must appear (production, previews, types, docs)
+- `security-reviewer` subagent — checks a diff against `REVIEW.md` before a PR
 
 ## Project Structure
 
@@ -49,10 +63,12 @@ src/
 └── styles/          # Global app styles
 migrations/          # Ordered Wrangler D1 migrations
 public/              # Static assets
-scripts/             # Session-start hook and local D1 seed data
+scripts/             # Claude Code hooks, page screenshots, and local D1 seed data
 tests/integration/   # Built-Worker integration tests (node --test)
 e2e/                 # Playwright end-to-end tests
-.agents/skills/      # Agent skills (TanStack Start, Cloudflare), linked from .claude/skills/
+.agents/skills/      # Vendored agent skills (TanStack Start, Cloudflare), linked from .claude/skills/
+.claude/skills/      # Also holds Mosaic's own skills (run-mosaic, new-migration, add-binding)
+.claude/agents/      # Subagents (security-reviewer)
 ```
 
 ## Coding Standards & Best Practices
