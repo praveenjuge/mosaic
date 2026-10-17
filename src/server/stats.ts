@@ -9,18 +9,12 @@ import type { DashboardStats } from "@/lib/types";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 
-// ── Helpers ─────────────────────────────────────────────────────────
-
-function getEmptyDashboardStats(): DashboardStats {
-  return {
-    total_websites: 0,
-    total_images: 0,
-    websites: [],
-    latest_screenshots: [],
-  };
-}
-
-// ── Dashboard Stats ─────────────────────────────────────────────────
+const EMPTY_DASHBOARD_STATS: DashboardStats = {
+  total_websites: 0,
+  total_images: 0,
+  websites: [],
+  latest_screenshots: [],
+};
 
 /**
  * Fetch dashboard stats for the current user.
@@ -33,7 +27,7 @@ export const getDashboardStats = createServerFn().handler(
   async (): Promise<DashboardStats> => {
     const { userId } = await auth();
     if (!userId) {
-      return getEmptyDashboardStats();
+      return EMPTY_DASHBOARD_STATS;
     }
 
     const db = getDb();

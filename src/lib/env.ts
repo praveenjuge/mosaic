@@ -1,4 +1,4 @@
-function ensureTrailingSlash(url: string) {
+export function ensureTrailingSlash(url: string) {
   return url.endsWith("/") ? url : `${url}/`;
 }
 

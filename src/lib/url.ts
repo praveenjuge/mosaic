@@ -1,4 +1,4 @@
-import { publicEnv } from "./env";
+import { ensureTrailingSlash, publicEnv } from "./env";
 
 // OG images are served by the Worker itself at `/i/<r2key>` (no separate
 // R2 custom domain). R2 keys contain slashes, so this is a splat route.
@@ -7,45 +7,26 @@ export const DEFAULT_PUBLIC_IMAGE_BASE_URL = new URL(
   publicEnv.siteUrl,
 ).toString();
 
-// ── Low-level URL manipulation ──────────────────────────────────────
+// ── Parsing ─────────────────────────────────────────────────────────
 
-const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
-const TRAILING_SLASH_PATTERN = /\/+$/;
-
-function trimUrl(value: string) {
-  return value.trim();
+export function stripTrailingSlashes(value: string) {
+  return value.replace(/\/+$/, "");
 }
 
-export function ensureTrailingSlash(url: string) {
-  return url.endsWith("/") ? url : `${url}/`;
-}
-
-export function ensureWebsiteProtocol(value: string) {
-  const trimmed = trimUrl(value);
-
+/** Parse user input as an HTTP(S) URL, adding `https://` to bare hostnames. */
+export function parseWebsiteUrl(value: string): URL {
+  const trimmed = value.trim();
   if (!trimmed) {
     throw new Error("Please enter a valid website URL.");
   }
 
-  return HTTP_PROTOCOL_PATTERN.test(trimmed) ? trimmed : `https://${trimmed}`;
-}
-
-export function parseWebsiteUrl(value: string) {
-  const parsed = new URL(ensureWebsiteProtocol(value));
-
+  const parsed = new URL(
+    /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`,
+  );
   if (!["http:", "https:"].includes(parsed.protocol)) {
     throw new Error("Only HTTP and HTTPS URLs are supported.");
   }
-
   return parsed;
-}
-
-export function stripTrailingSlashes(value: string) {
-  return value.replace(TRAILING_SLASH_PATTERN, "");
-}
-
-export function stripUrlProtocol(value: string) {
-  return value.replace(/^https?:\/\//, "");
 }
 
 // ── Outbound URL security ──────────────────────────────────────────
@@ -135,7 +116,7 @@ export function isSelfReferentialUseUrl(
   candidate: URL,
   requestHostname: string,
 ): boolean {
-  if (candidate.pathname.replace(/\/+$/, "") !== "/use") return false;
+  if (stripTrailingSlashes(candidate.pathname) !== "/use") return false;
 
   const hostname = candidate.hostname.toLowerCase();
   const configuredHostname = new URL(publicEnv.siteUrl).hostname.toLowerCase();
@@ -165,31 +146,27 @@ export function validateOutboundUrl(
   return null;
 }
 
-// ── Domain extraction ───────────────────────────────────────────────
+// ── Canonical page identity ─────────────────────────────────────────
 
-export function extractHostname(value: string) {
-  return parseWebsiteUrl(value).hostname;
-}
-
-export function extractUrlParts(fullUrl: string) {
-  const parsed = parseWebsiteUrl(fullUrl);
-  parsed.hash = "";
-  const sanitizedUrl = stripTrailingSlashes(parsed.toString());
-
+/**
+ * A page's identity in the shared cache: the URL without its fragment or
+ * trailing slashes. `global_images` rows are keyed by `pageUrl`, so changing
+ * this orphans every cached image.
+ */
+export function canonicalPage(url: URL): { pageUrl: string; hostname: string } {
+  const copy = new URL(url);
+  copy.hash = "";
   return {
-    urlBase: parsed.hostname,
-    path: `${parsed.pathname}${parsed.search}${parsed.hash}` || "/",
-    sanitizedUrl,
+    pageUrl: stripTrailingSlashes(copy.toString()),
+    hostname: copy.hostname,
   };
 }
 
-// ── Display helpers ─────────────────────────────────────────────────
-
 export function cleanDisplayUrl(value: string) {
-  return stripUrlProtocol(stripTrailingSlashes(value));
+  return stripTrailingSlashes(value).replace(/^https?:\/\//, "");
 }
 
-// ── URL builders (OG / R2 / use endpoint) ───────────────────────────
+// ── URL builders ────────────────────────────────────────────────────
 
 export function buildUseEndpointUrl(baseUrl: string, targetUrl: string) {
   const endpoint = new URL("use", ensureTrailingSlash(baseUrl));
@@ -204,12 +181,8 @@ export function buildPublicImageUrl(
   return new URL(key, ensureTrailingSlash(baseUrl)).toString();
 }
 
-export function buildSiteOgImageUrl(siteUrl: string, targetUrl: string) {
-  return buildUseEndpointUrl(siteUrl, targetUrl);
-}
-
+/** The `/use` URL that screenshots one of Mosaic's own pages. */
 export function getOgImageUrl(slug: string) {
-  const normalizedSlug = slug.replace(/^\//, "");
-  const targetUrl = new URL(normalizedSlug, publicEnv.siteUrl).toString();
-  return buildUseEndpointUrl(publicEnv.siteUrl, targetUrl);
+  const targetUrl = new URL(slug.replace(/^\//, ""), publicEnv.siteUrl);
+  return buildUseEndpointUrl(publicEnv.siteUrl, targetUrl.toString());
 }

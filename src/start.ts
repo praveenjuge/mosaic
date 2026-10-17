@@ -1,8 +1,6 @@
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 import { publicEnv } from "@/lib/env";
-import { nonHtmlErrorResponse } from "@/lib/json-errors";
-import { resolveMarkdownContent } from "@/lib/markdown-content";
-import { markdownNegotiationResponse } from "@/lib/markdown-negotiation";
+import { negotiateResponse } from "@/lib/markdown-negotiation";
 import { addAcceptToVary } from "@/lib/vary";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import {
@@ -24,6 +22,8 @@ const cspHeader = [
 ]
   .filter(Boolean)
   .join(" ");
+
+const siteOrigin = new URL(publicEnv.siteUrl).origin;
 
 const csrfMiddleware = createCsrfMiddleware({
   filter: (context) => context.handlerType === "serverFn",
@@ -58,30 +58,13 @@ const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
   },
 );
 
-const markdownNegotiationMiddleware = createMiddleware({
+const contentNegotiationMiddleware = createMiddleware({
   type: "request",
 }).server(async ({ request, next }) => {
-  const response = markdownNegotiationResponse(
-    request,
-    resolveMarkdownContent,
-    new URL(publicEnv.siteUrl).origin,
-  );
-
-  if (response) {
-    return response;
-  }
-
-  const errorResponse = nonHtmlErrorResponse(
-    request,
-    resolveMarkdownContent,
-    new URL(publicEnv.siteUrl).origin,
-  );
-
-  if (errorResponse) {
-    return errorResponse;
-  }
-
-  return next();
+  // Imported here so the Markdown mirror stays out of the client bundle.
+  const { default: markdownPages } =
+    await import("virtual:mosaic-content/markdownPages");
+  return negotiateResponse(request, markdownPages, siteOrigin) ?? next();
 });
 
 export const startInstance = createStart(() => {
@@ -94,7 +77,7 @@ export const startInstance = createStart(() => {
         signUpUrl: signUpPath,
       }),
       securityHeadersMiddleware,
-      markdownNegotiationMiddleware,
+      contentNegotiationMiddleware,
     ],
   };
 });

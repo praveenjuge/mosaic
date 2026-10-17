@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   buildUseEndpointUrl,
-  extractUrlParts,
+  canonicalPage,
   isBlockedOutboundHostname,
   isSelfReferentialUseUrl,
   validateOutboundUrl,
@@ -66,11 +66,14 @@ describe("outbound URL security", () => {
 describe("canonical OG page identity", () => {
   test("preserves the query but removes fragments and trailing slashes", () => {
     expect(
-      extractUrlParts("https://example.com/page/?view=full#section"),
+      canonicalPage(new URL("https://example.com/page/?view=full#section")),
     ).toEqual({
-      urlBase: "example.com",
-      path: "/page/?view=full",
-      sanitizedUrl: "https://example.com/page/?view=full",
+      hostname: "example.com",
+      pageUrl: "https://example.com/page/?view=full",
+    });
+    expect(canonicalPage(new URL("https://Example.com/docs//"))).toEqual({
+      hostname: "example.com",
+      pageUrl: "https://example.com/docs",
     });
   });
 

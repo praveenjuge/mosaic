@@ -6,8 +6,19 @@ import {
 } from "@/lib/constants";
 import type { D1Queryable } from "@/lib/db";
 
-type BudgetScope =
-  "demo-client" | "demo-global" | "production-client" | "production-global";
+const DAILY_LIMITS = {
+  demo: {
+    client: DEMO_CLIENT_DAILY_GENERATION_LIMIT,
+    global: DEMO_DAILY_GENERATION_LIMIT,
+  },
+  production: {
+    client: PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT,
+    global: PRODUCTION_DAILY_GENERATION_LIMIT,
+  },
+} as const;
+
+type GenerationKind = keyof typeof DAILY_LIMITS;
+type BudgetScope = `${GenerationKind}-${"client" | "global"}`;
 
 function utcDayStart(timestamp = Date.now()): number {
   const date = new Date(timestamp);
@@ -57,55 +68,26 @@ async function refundWindowBudget(
     .run();
 }
 
-async function reserveClientAndGlobalBudget(
+/**
+ * Reserve one screenshot against the client's and the service's daily
+ * budgets. A client reservation is refunded when the global budget is spent.
+ */
+export async function reserveGeneration(
   db: D1Queryable,
-  clientScope: "demo-client" | "production-client",
-  globalScope: "demo-global" | "production-global",
+  kind: GenerationKind,
   clientKey: string,
-  clientLimit: number,
-  globalLimit: number,
 ): Promise<boolean> {
-  const clientReserved = await reserveWindowBudget(
-    db,
-    clientScope,
-    clientKey,
-    clientLimit,
-  );
-  if (!clientReserved) return false;
+  const limits = DAILY_LIMITS[kind];
+  const clientScope = `${kind}-client` as const;
 
-  const globalReserved = await reserveWindowBudget(
-    db,
-    globalScope,
-    "service",
-    globalLimit,
-  );
-  if (!globalReserved) {
-    await refundWindowBudget(db, clientScope, clientKey);
+  if (!(await reserveWindowBudget(db, clientScope, clientKey, limits.client))) {
+    return false;
   }
-  return globalReserved;
-}
-
-export function reserveDemoGeneration(db: D1Queryable, clientKey: string) {
-  return reserveClientAndGlobalBudget(
-    db,
-    "demo-client",
-    "demo-global",
-    clientKey,
-    DEMO_CLIENT_DAILY_GENERATION_LIMIT,
-    DEMO_DAILY_GENERATION_LIMIT,
-  );
-}
-
-export function reserveProductionGeneration(
-  db: D1Queryable,
-  clientKey: string,
-) {
-  return reserveClientAndGlobalBudget(
-    db,
-    "production-client",
-    "production-global",
-    clientKey,
-    PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT,
-    PRODUCTION_DAILY_GENERATION_LIMIT,
-  );
+  if (
+    await reserveWindowBudget(db, `${kind}-global`, "service", limits.global)
+  ) {
+    return true;
+  }
+  await refundWindowBudget(db, clientScope, clientKey);
+  return false;
 }

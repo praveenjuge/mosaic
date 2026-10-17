@@ -25,7 +25,7 @@ for _ in $(seq 1 90); do
 done
 ```
 
-- Port 3000. `predev` type-checks first, so a type error stops startup.
+- Port 3000.
 - `Failed to start the remote proxy session ... behind Cloudflare Access` means
   remote bindings are on without Access credentials. Restart with
   `MOSAIC_REMOTE_BINDINGS=0` to use local Chrome (cloud sessions set this by

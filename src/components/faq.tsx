@@ -51,7 +51,7 @@ const FAQS: FAQ[] = [
   {
     question: "What image format is used?",
     answer:
-      "OG images are generated as high-quality JPEG files at 1200x630 pixels, the standard size for social media previews.",
+      "OG images are JPEG screenshots taken at 1560×819 pixels, the 1.91:1 shape social networks use for link previews.",
   },
 ];
 

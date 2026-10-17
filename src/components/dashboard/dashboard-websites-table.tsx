@@ -13,7 +13,7 @@ import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
 import { publicEnv } from "@/lib/env";
 import type { DashboardStats } from "@/lib/types";
-import { buildSiteOgImageUrl } from "@/lib/url";
+import { buildUseEndpointUrl } from "@/lib/url";
 
 function formatRelativeTime(timestamp: number): string {
   const diffMs = Math.max(0, Date.now() - timestamp);
@@ -31,7 +31,7 @@ function formatRelativeTime(timestamp: number): string {
 }
 
 function UsageUrl({ targetUrl }: { targetUrl: string }) {
-  const usageUrl = buildSiteOgImageUrl(publicEnv.siteUrl, targetUrl);
+  const usageUrl = buildUseEndpointUrl(publicEnv.siteUrl, targetUrl);
   return (
     <div className="flex items-center gap-1">
       <a

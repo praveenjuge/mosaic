@@ -5,7 +5,7 @@ import {
   website_subtitle,
 } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
-import { buildSiteOgImageUrl } from "@/lib/url";
+import { buildUseEndpointUrl } from "@/lib/url";
 
 type SeoConfig = {
   description?: string;
@@ -34,7 +34,7 @@ export function buildSeoMeta({
 }: SeoConfig) {
   const canonicalUrl = absoluteUrl(path);
   const resolvedImage =
-    image ?? buildSiteOgImageUrl(publicEnv.siteUrl, publicEnv.siteUrl);
+    image ?? buildUseEndpointUrl(publicEnv.siteUrl, publicEnv.siteUrl);
   const resolvedTitle = pageTitle(title);
 
   return {

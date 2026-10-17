@@ -1,6 +1,6 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { GuideLinkItem } from "@/lib/content";
+import type { GuideLink as GuideLinkItem } from "@/lib/content";
 import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";

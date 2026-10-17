@@ -44,10 +44,8 @@ after(async () => {
 
 async function registerSite(urlBase: string) {
   const env = await worker.getEnv();
-  await env.DB.prepare(
-    "INSERT INTO sites (user_id, url_base, r2_prefix) VALUES (?, ?, ?)",
-  )
-    .bind("user_test", urlBase, `user_test/${urlBase}`)
+  await env.DB.prepare("INSERT INTO sites (user_id, url_base) VALUES (?, ?)")
+    .bind("user_test", urlBase)
     .run();
 }
 

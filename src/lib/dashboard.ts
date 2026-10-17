@@ -1,4 +1,5 @@
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
+import { stripTrailingSlashes } from "@/lib/url";
 
 export type DashboardSiteRow = {
   id: number;
@@ -39,7 +40,7 @@ export function buildDashboardStats(
     }),
     latest_screenshots: latestImages.map((image) => ({
       ...image,
-      page_url: image.page_url.replace(/\/+$/, ""),
+      page_url: stripTrailingSlashes(image.page_url),
     })),
   };
 }

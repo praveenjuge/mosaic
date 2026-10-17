@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
+import { mosaicContent } from "./src/lib/content-plugin";
 
 function resolveSiteHost(siteUrl: string | undefined) {
   if (!siteUrl) {
@@ -93,6 +94,7 @@ export default defineConfig(({ command, mode }) => {
     },
     envPrefix: ["VITE_"],
     plugins: [
+      mosaicContent(),
       cloudflare({
         viteEnvironment: { name: "ssr" },
         // Builds never need remote bindings. Prerendered routes (/help,
