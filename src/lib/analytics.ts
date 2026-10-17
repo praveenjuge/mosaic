@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 
 export type GenerationOutcome =
   | "cache_hit"
+  | "stale_hit"
   | "generated"
   | "failed"
   | "rate_limited"

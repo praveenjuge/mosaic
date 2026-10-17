@@ -53,4 +53,20 @@ describe("extractMetadata", () => {
       image: "https://cdn.example.com/i.png",
     });
   });
+
+  test("stops reading the page at <body>", async () => {
+    const encoder = new TextEncoder();
+    // A body that never ends: extraction must not wait for it.
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(
+          encoder.encode(
+            `<head><meta property="og:title" content="Head title"></head><body>`,
+          ),
+        );
+      },
+    });
+    const metadata = await extractMetadata(new Response(body), baseUrl);
+    expect(metadata.title).toBe("Head title");
+  });
 });

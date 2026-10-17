@@ -37,6 +37,22 @@ export async function findGlobalImage(
   return row ? { key: row.key, expiresAt: row.expires_at } : null;
 }
 
+/** The current image key of the page whose images fall in `keyRange`. */
+export async function findImageKeyInRange(
+  db: D1Queryable,
+  [low, high]: [string, string],
+): Promise<string | null> {
+  const row = await db
+    .prepare(
+      `SELECT key FROM global_images
+       WHERE key >= ? AND key <= ?
+       LIMIT 1`,
+    )
+    .bind(low, high)
+    .first<{ key: string }>();
+  return row?.key ?? null;
+}
+
 export async function acquireGenerationLock(
   db: D1Queryable,
   pageUrl: string,

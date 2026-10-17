@@ -1,7 +1,10 @@
 import { getDb } from "@/lib/db";
+import { warmSiteImage } from "@/lib/og-generation";
 import type { Site } from "@/lib/types";
 import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
+import { getRequest } from "@tanstack/react-start/server";
+import { waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
 
@@ -10,6 +13,16 @@ function normalizePublicHostname(value: string): string {
   const error = validateOutboundUrl(websiteUrl);
   if (error) throw new Error(error);
   return websiteUrl.hostname;
+}
+
+/**
+ * Screenshot a newly saved website's home page after the response, so the
+ * first social crawler finds an image ready. Runs behind the same rate limit,
+ * lock, and daily budget as `/use`, counted against the user.
+ */
+function warmAfterResponse(hostname: string, userId: string) {
+  const requestHostname = new URL(getRequest().url).hostname;
+  waitUntil(warmSiteImage(hostname, requestHostname, `user:${userId}`));
 }
 
 const addSiteSchema = z.object({
@@ -30,6 +43,7 @@ export const addSite = createServerFn({ method: "POST" })
       .bind(context.userId, normalizePublicHostname(data.url_base))
       .first<Site>();
     if (!site) throw new Error("This website already exists in your list.");
+    warmAfterResponse(site.url_base, context.userId);
     return site;
   });
 
@@ -51,7 +65,10 @@ export const editSite = createServerFn({ method: "POST" })
       )
       .bind(normalizePublicHostname(data.url_base), data.siteId, context.userId)
       .first<Site>();
-    if (site) return site;
+    if (site) {
+      warmAfterResponse(site.url_base, context.userId);
+      return site;
+    }
 
     // No row: either the site isn't this user's, or the new hostname is
     // already in their list (the unique index ignored the update).

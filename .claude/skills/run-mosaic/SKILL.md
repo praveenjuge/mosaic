@@ -40,7 +40,7 @@ curl -sL -o og.jpeg -w "%{http_code} %{content_type} %{url_effective}\n" \
   "http://localhost:3000/use?url=https://example.com"
 ```
 
-`/use` answers 307 to `/i/global/<hash>.jpeg`. `example.com` is registered by
+`/use` answers 307 to `/i/global/<hash>-<version>.jpeg`; each new screenshot gets a new version, and an expired image is served at once while the new one is taken in the background. `example.com` is registered by
 `bun run db:seed:local`; other hosts need a row in `sites` first (copy the
 insert in `scripts/seed-local.sql`). Open the
 JPEG with the Read tool to check it. Repeated runs can hit the daily demo

@@ -1,3 +1,4 @@
+import { blockedRequestPatterns } from "@/lib/blocked-requests";
 import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
 import { env } from "cloudflare:workers";
@@ -16,7 +17,8 @@ import { env } from "cloudflare:workers";
  *
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
- * (analytics beacons, websockets, long-polling).
+ * (analytics beacons, websockets, long-polling), and blocks known tracker
+ * hosts so the network goes idle sooner.
  *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
  * same options run through local Puppeteer instead.
@@ -28,6 +30,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     userAgent: MOSAIC_RENDERER_USER_AGENT,
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
+    rejectRequestPattern: blockedRequestPatterns(url),
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
     screenshotOptions: { type: "jpeg", quality: 85 },
   };

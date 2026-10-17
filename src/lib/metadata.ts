@@ -14,13 +14,15 @@ const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
  * Read Open Graph, Twitter Card, and fallback metadata from a page response.
  * Meta tags are matched on either `property` or `name`, in any attribute
  * order. Only the first `<title>` counts, so inline SVG titles are ignored.
+ * Reading stops at `<body>`, so large pages don't download past their head.
  */
 export async function extractMetadata(response: Response, baseUrl: URL) {
   const meta = new Map<string, string>();
   let titleCount = 0;
   let titleTag = "";
+  let reachedBody = false;
 
-  await new HTMLRewriter()
+  const transformed = new HTMLRewriter()
     .on("meta[content]", {
       element(element) {
         const key = (
@@ -38,8 +40,20 @@ export async function extractMetadata(response: Response, baseUrl: URL) {
         if (titleCount === 1) titleTag += text;
       },
     })
-    .transform(response)
-    .arrayBuffer();
+    .on("body", {
+      element() {
+        reachedBody = true;
+      },
+    })
+    .transform(response);
+
+  const reader = transformed.body?.getReader();
+  if (reader) {
+    while (!reachedBody && !(await reader.read()).done) {
+      // The rewriter's handlers collect metadata as chunks stream through.
+    }
+    await reader.cancel();
+  }
 
   const first = (...keys: string[]) =>
     keys.map((key) => meta.get(key)).find(Boolean) ?? "";

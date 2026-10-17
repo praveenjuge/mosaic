@@ -21,6 +21,26 @@ export const fetchRouteAuth = createServerFn().handler(
   },
 );
 
+/** The part of the browser's `window.Clerk` that route auth reads. */
+type BrowserClerk = { loaded?: boolean; user?: { id: string } | null };
+
+/**
+ * Auth for route `beforeLoad`. Server rendering asks Clerk's middleware. In
+ * the browser, once Clerk has loaded, its client state answers, so client
+ * navigations don't wait on a server round trip. Server functions still
+ * check `auth()` themselves; this only picks what to render.
+ */
+export async function getRouteAuth(): Promise<RouteAuth> {
+  if (typeof window !== "undefined") {
+    const clerk = (window as { Clerk?: BrowserClerk }).Clerk;
+    if (clerk?.loaded) {
+      const userId = clerk.user?.id ?? null;
+      return { userId, isAuthenticated: userId !== null };
+    }
+  }
+  return fetchRouteAuth();
+}
+
 export function sanitizeRedirectPath(redirectUrl?: string) {
   if (
     !redirectUrl ||

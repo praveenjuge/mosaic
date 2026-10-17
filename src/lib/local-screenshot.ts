@@ -29,6 +29,19 @@ export async function takeLocalScreenshot(
     const page = await context.newPage();
     if (options.userAgent) await page.setUserAgent(options.userAgent);
     if (options.viewport) await page.setViewport(options.viewport);
+    const rejected = (options.rejectRequestPattern ?? []).map(
+      (pattern) => new RegExp(pattern),
+    );
+    if (rejected.length > 0) {
+      await page.setRequestInterception(true);
+      page.on("request", (request) => {
+        if (rejected.some((pattern) => pattern.test(request.url()))) {
+          void request.abort();
+        } else {
+          void request.continue();
+        }
+      });
+    }
     await page.goto(options.url, {
       waitUntil: options.gotoOptions?.waitUntil,
       timeout: options.gotoOptions?.timeout,

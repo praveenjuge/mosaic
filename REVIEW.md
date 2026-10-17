@@ -18,10 +18,15 @@ when reviewing a pull request:
 
 ## Correctness
 
-- Image responses stay `private, no-store`: D1 `expires_at` is the source of
-  truth for renewal, and the same R2 key is reused when an image regenerates.
+- `/use` redirects stay `private, no-store`: D1 `expires_at` is the source of
+  truth for renewal. Each screenshot gets a new versioned R2 key
+  (`src/lib/image-key.ts`), so only `/i/*` responses for versioned keys may be
+  `immutable` and cached; nothing may ever write different bytes to an
+  existing versioned key.
 - Generation keeps its guards in order: rate limit, generation lock, daily
-  budget, then screenshot. The lock is always released.
+  budget, then screenshot, all inside `generateImage()`. The lock is always
+  released. Background work (stale refreshes, warming a new site) goes
+  through `generateImage()` too.
 - Schema changes come with a new file in `migrations/`; existing migrations
   are never edited.
 - `wrangler.jsonc` changes are mirrored in the `previews` block when they add

@@ -28,14 +28,17 @@ test("signed-in users can add, edit, and delete a website", async ({
   // Clicking before hydration would do nothing or fall through to a native
   // form GET.
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const button = document.querySelector("main button");
-        return (
-          !!button &&
-          Object.keys(button).some((key) => key.startsWith("__reactProps"))
-        );
-      }),
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const button = document.querySelector("main button");
+          return (
+            !!button &&
+            Object.keys(button).some((key) => key.startsWith("__reactProps"))
+          );
+        }),
+      // A cold dev server can take a while to compile and hydrate the page.
+      { timeout: 30_000 },
     )
     .toBe(true);
 
