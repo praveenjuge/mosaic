@@ -1,19 +1,17 @@
 ---
 title: "How Mosaic Refreshes OG Images"
-description: "Learn how automatic shared-cache refresh keeps screenshots current."
+description: "Mosaic retakes each page's screenshot automatically after 30 days."
 category: "Guides"
 publishedAt: "2025-06-20T12:05:00.000Z"
 ---
 
-Mosaic refreshes shared OG images automatically. There is no verification,
-signature, or manual purge workflow.
+Mosaic refreshes images on its own. There's no refresh button.
 
-1. The first request for a page creates a shared cached screenshot.
-2. Requests reuse that image for up to 30 days.
-3. After expiry, the next eligible request creates a fresh screenshot.
-4. During heavy traffic, Mosaic can keep serving the previous image until
-   generation capacity is available.
+1. The first request for a page URL takes a screenshot and caches it.
+2. For the next 30 days, every request gets that cached image.
+3. After 30 days, the next request takes a new screenshot.
+4. If a daily limit is reached or the capture fails, it keeps serving the
+   previous image.
 
-Social platforms may also cache previews independently. Their own card debugger
-or re-scrape tool can be used when you need that platform to fetch the current
-Mosaic image again.
+Social platforms cache previews too. Use their card debugger or re-scrape tool
+to make them fetch the current image.

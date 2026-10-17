@@ -1,26 +1,16 @@
 ---
 title: "Docusaurus"
 slug: "docusaurus"
-description: "Get started with integrating Mosaic into your Docusaurus project."
+description: "Set og:image from Docusaurus front matter."
 order: 110
 ---
 
-## Use the `Head` component in your pages
+Docusaurus turns the `image` front matter of a doc, blog post, or Markdown page into `og:image`:
 
-```jsx
-import Head from "@docusaurus/Head";
-
-export default function MyPage() {
-  return (
-    <>
-      <Head>
-        <meta
-          property="og:image"
-          content="https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug"
-        />
-      </Head>
-      <div>Your content</div>
-    </>
-  );
-}
+```mdx
+---
+image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fdocs%2Fyour_slug
+---
 ```
+
+In React pages, use `<Head>` from `@docusaurus/Head`.

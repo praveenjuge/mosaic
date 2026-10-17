@@ -15,10 +15,9 @@
     "incremental": false,
     "types": ["vite/client", "bun"],
     "paths": {
-      "content-collections": ["./.content-collections/generated"],
       "@/*": ["./src/*", "./*"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "worker-configuration.d.ts"],
-  "exclude": ["node_modules", "dist", "d1", ".content-collections", ".wrangler"]
+  "exclude": ["node_modules", "dist", "d1", ".wrangler"]
 }

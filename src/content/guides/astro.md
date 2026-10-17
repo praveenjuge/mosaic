@@ -1,28 +1,27 @@
 ---
 title: "Astro"
 slug: "astro"
-description: "Get started with integrating Mosaic into your Astro project."
+description: "Give every page an image from your Astro layout."
 order: 40
 svgLight: "astro-icon-light"
 svgDark: "astro-icon-dark"
 ---
 
-## Define variables in frontmatter and use them in `<head>`
-
 ```astro
 ---
-const title = "Your Page Title";
-const ogImage = "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug";
+// src/layouts/Layout.astro
+const pageUrl = new URL(Astro.url.pathname, Astro.site);
+const ogImage = `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(pageUrl.href)}`;
 ---
 
 <html lang="en">
   <head>
-    <title>{title}</title>
-    <meta property="og:title" content={title} />
     <meta property="og:image" content={ogImage} />
   </head>
   <body>
-    <h1>{title}</h1>
+    <slot />
   </body>
 </html>
 ```
+
+Set `site` in `astro.config.mjs` to your production URL.

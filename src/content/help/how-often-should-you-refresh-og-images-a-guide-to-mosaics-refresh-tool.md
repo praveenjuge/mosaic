@@ -1,38 +1,31 @@
 ---
 title: "How Often Does Mosaic Refresh OG Images?"
-description: "How the automatic shared cache stays current after site changes."
+description: "What Mosaic's automatic 30-day refresh means after a redesign, a launch, or a seasonal change."
 publishedAt: "2025-05-08T05:40:06.907Z"
 category: "Articles"
 ---
 
-When you share a link on social media, the preview image can make all the
-difference. Mosaic makes it easy to generate these images automatically, but how
-often should you update them? Here are a few guidelines to keep in mind.
+Mosaic keeps one screenshot per page URL and refreshes it automatically. There
+is no refresh button or tool to run. Here's how that plays out.
 
-## Update after design changes
+## After a redesign
 
-A major website redesign or even small tweaks to your layout can affect how your
-pages look when captured. Mosaic refreshes cached images automatically after 30
-days, so there is no dashboard action to run.
+Your old screenshot stays in use until it's 30 days old. The next request after
+that takes a new one with your new design.
 
-## Refresh for product launches
+## For a launch
 
-Launching a new product or feature may happen before the cache expires. Social
-platforms also keep their own caches, so use that platform's card debugger or
-re-scrape tool when an immediate preview update matters.
+You can't make Mosaic retake a screenshot sooner. Social platforms also keep
+their own copy of each preview. Their card debugger or re-scrape tool makes them
+fetch the image Mosaic has now.
 
-## Consider seasonal content
+## For seasonal pages
 
-For seasonal or time-sensitive pages, keep the page URL stable and allow the
-automatic refresh to replace the shared screenshot. Use a new canonical page
-URL only when the content truly represents a new page.
+Keep the page URL the same and let the 30-day refresh update it. Only use a new
+URL when the page is truly new content. Every distinct URL, including different
+query strings, gets its own screenshot.
 
-## How Mosaic can help
+## When Mosaic is busy
 
-Mosaic stores one screenshot per canonical page URL, shares it across users,
-and refreshes it after 30 days. If generation capacity is temporarily busy, the
-older image remains available instead of breaking the social preview.
-
-Keeping your OG images up to date ensures that your content always looks its
-best when shared without requiring site owners to manage image files or signing
-keys.
+Mosaic has daily limits on new screenshots. If a refresh can't happen right
+away, it keeps serving the older image, so your preview doesn't break.

@@ -1,25 +1,20 @@
 ---
-title: "How are we able to rate limit based on IP with Caddy"
-description: "Step-by-step guide to setting up IP-based rate limiting in Caddy for enhanced security and performance."
+title: "How We Rate Limited by IP with Caddy"
+description: "How we set up IP-based rate limiting in Caddy with the caddy-ratelimit plugin."
 publishedAt: "2024-10-04T07:51:36.232Z"
 category: "Articles"
 ---
 
-I am not starting another Caddy vs Nginx war, but I’ve decided to go with Caddy.
-I was impressed when I heard that I am getting HTTPS configuration and renewal
-parts automated out-of-the-box with Caddy. Plus, it can take advantage of all
-the cores of the system, which I believe should be a good thing. I am always up
-for using all the available resources and putting them to good use.
+_This post describes an earlier Mosaic backend. Mosaic now runs on Cloudflare
+Workers and uses Cloudflare's rate limiting instead._
 
-If you are very interested in reading about benchmarks done with Nginx and
-Caddy, here’s one for you all.
-<https://blog.tjll.net/reverse-proxy-hot-dog-eating-contest-caddy-vs-nginx/>
+We picked Caddy as our reverse proxy because it sets up and renews HTTPS on its
+own and uses all CPU cores. If you want numbers, here's a
+[Caddy vs Nginx benchmark](https://blog.tjll.net/reverse-proxy-hot-dog-eating-contest-caddy-vs-nginx/).
 
-Let’s get started with understanding how easy it is to implement IP-based rate
-limiting on Caddy. Here’s a simplified version of the Caddyfile we have in one
-of our services.
+Here's a simplified version of the Caddyfile from one of our services:
 
-```docker
+```txt
 subdomain.example.com {
         encode gzip zstd
 
@@ -63,33 +58,24 @@ subdomain.example.com {
 }
 ```
 
-## Building Caddy
+## Build Caddy with the plugin
 
-Caddy doesn't come with plugins installed with it, but you can build your caddy
-binary using `xcaddy` and give whatever power pack you want it to have and in
-our case rate rate-limiting option.
-
-From the HTTP`. handlers` that support rate limiting as per
-[Caddy’s site](https://caddyserver.com/docs/modules/http.handlers.rate_limit),
-we went ahead with mholt’s implementation because it was easy to understand, and
-gave us the simplest way to do the task we wanted to do.
-<https://github.com/mholt/caddy-ratelimit>
-
-You build your caddy using `xcaddy` by following the command
+Caddy doesn't ship with rate limiting. Of the
+[rate limit modules](https://caddyserver.com/docs/modules/http.handlers.rate_limit),
+we chose [mholt/caddy-ratelimit](https://github.com/mholt/caddy-ratelimit)
+because it was the simplest. Build a Caddy binary that includes it with
+`xcaddy`:
 
 ```bash
 xcaddy build --with github.com/mholt/caddy-ratelimit
 ```
 
-This will output a caddy binary which you should replace your caddy with. You
-can find where your caddy resides by simply running `which caddy` and that is
-the one you want to replace with.
+Then replace your existing binary with the new one. Run `which caddy` to find
+where it lives.
 
-## The `rate_limit` directives
+## The `rate_limit` directive
 
-We are not going over all the directives but focus only on the `rate_limit` one.
-
-```
+```txt
 rate_limit {
         zone default {
                 key {remote_host}
@@ -99,14 +85,11 @@ rate_limit {
 }
 ```
 
-You can define a zone under the `rate_limit` directive and give it a name, in
-our case we had only one zone, so we gave it `default` as an identifier. The way
-we wanted to rate-limit is by using the IP, which is the `remote_host` and we
-wanted to allow 45 requests in a window of 30s. Anything above will return a 429
-as the response.
+- `zone default` names the zone. We only needed one.
+- `key {remote_host}` counts requests per client IP.
+- `events 45` and `window 30s` allow 45 requests every 30 seconds. Anything
+  over that gets a `429` response.
 
-There is so much we can factor in for writing rate_limit logic, and you can also
-write rate limits at the application server as well, but this helps us block a
-few unnecessary attacks and there by helping us not to load the application
-server. This prevents DOS, but not DDOS because DDOS have their IPs rotated and
-they will not be picked up by this rate limit logic.
+You can also rate limit in the application itself. Doing it in Caddy stops
+abusive traffic before it reaches the app server. It helps against a DoS from a
+single IP, but not a DDoS, where requests come from many rotating IPs.

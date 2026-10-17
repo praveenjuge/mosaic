@@ -1,21 +1,22 @@
 import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
 import type { D1Queryable } from "@/lib/db";
-import { extractHostname, extractUrlParts } from "@/lib/url";
 
 export type GlobalImage = {
   key: string;
   expiresAt: number;
 };
 
+// Every helper takes the canonical `pageUrl` and `hostname` from
+// `canonicalPage()` in src/lib/url.ts.
+
 /** Production generation is available only for a hostname saved by a user. */
 export async function isHostnameAssociated(
   db: D1Queryable,
   hostname: string,
 ): Promise<boolean> {
-  const normalized = extractHostname(hostname);
   const row = await db
     .prepare("SELECT 1 AS found FROM sites WHERE url_base = ? LIMIT 1")
-    .bind(normalized)
+    .bind(hostname)
     .first<{ found: number }>();
   return row !== null;
 }
@@ -24,14 +25,13 @@ export async function findGlobalImage(
   db: D1Queryable,
   pageUrl: string,
 ): Promise<GlobalImage | null> {
-  const { sanitizedUrl } = extractUrlParts(pageUrl);
   const row = await db
     .prepare(
       `SELECT key, expires_at
        FROM global_images
        WHERE page_url = ?`,
     )
-    .bind(sanitizedUrl)
+    .bind(pageUrl)
     .first<{ key: string; expires_at: number }>();
 
   return row ? { key: row.key, expiresAt: row.expires_at } : null;
@@ -41,7 +41,6 @@ export async function acquireGenerationLock(
   db: D1Queryable,
   pageUrl: string,
 ): Promise<string | null> {
-  const { sanitizedUrl } = extractUrlParts(pageUrl);
   const now = Date.now();
   const leaseToken = crypto.randomUUID();
   const result = await db
@@ -54,7 +53,7 @@ export async function acquireGenerationLock(
        WHERE generation_locks.expires_at < ?
        RETURNING lease_token`,
     )
-    .bind(sanitizedUrl, leaseToken, now + 60_000, now)
+    .bind(pageUrl, leaseToken, now + 60_000, now)
     .first<{ lease_token: string }>();
   return result?.lease_token ?? null;
 }
@@ -64,23 +63,21 @@ export async function releaseGenerationLock(
   pageUrl: string,
   leaseToken: string,
 ): Promise<void> {
-  const { sanitizedUrl } = extractUrlParts(pageUrl);
   await db
     .prepare(
       `DELETE FROM generation_locks
        WHERE page_url = ? AND lease_token = ?`,
     )
-    .bind(sanitizedUrl, leaseToken)
+    .bind(pageUrl, leaseToken)
     .run();
 }
 
 export async function recordGlobalImage(
   db: D1Queryable,
+  page: { pageUrl: string; hostname: string },
   imageKey: string,
-  pageUrl: string,
   imageSize: number,
 ): Promise<void> {
-  const { sanitizedUrl, urlBase } = extractUrlParts(pageUrl);
   const now = Date.now();
   await db
     .prepare(
@@ -95,8 +92,8 @@ export async function recordGlobalImage(
          expires_at = excluded.expires_at`,
     )
     .bind(
-      sanitizedUrl,
-      urlBase,
+      page.pageUrl,
+      page.hostname,
       imageKey,
       imageSize,
       now,

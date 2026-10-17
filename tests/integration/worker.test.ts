@@ -44,10 +44,8 @@ after(async () => {
 
 async function registerSite(urlBase: string) {
   const env = await worker.getEnv();
-  await env.DB.prepare(
-    "INSERT INTO sites (user_id, url_base, r2_prefix) VALUES (?, ?, ?)",
-  )
-    .bind("user_test", urlBase, `user_test/${urlBase}`)
+  await env.DB.prepare("INSERT INTO sites (user_id, url_base) VALUES (?, ?)")
+    .bind("user_test", urlBase)
     .run();
 }
 
@@ -123,6 +121,91 @@ describe("/use", () => {
       response.headers.get("Location"),
       new URL("/i/global/cached.jpeg", url).toString(),
     );
+
+    // A bare hostname resolves to the same canonical page.
+    const bare = await server.fetch("/use?url=example.com", {
+      redirect: "manual",
+    });
+    assert.equal(
+      bare.headers.get("Location"),
+      response.headers.get("Location"),
+    );
+  });
+
+  test("refuses private and self-referential targets", async () => {
+    for (const target of [
+      "localhost:3000",
+      "http://127.0.0.1/",
+      "https://user:pass@example.com/",
+      "https://mosaic.account.workers.dev/use",
+    ]) {
+      const response = await server.fetch(
+        `/use?url=${encodeURIComponent(target)}`,
+      );
+      assert.equal(response.status, 400, target);
+    }
+  });
+});
+
+describe("content negotiation", () => {
+  test("serves Markdown mirrors of content pages", async () => {
+    const pages = {
+      "/": /^# Mosaic\n[\s\S]*\/help\/guides\//,
+      "/help": /^# Help\n[\s\S]*\]\(\/help\/guides\/nextjs\)/,
+      "/help/guides/nextjs": /^# Next\.js\n/,
+      "/help/use-the-mosaic-api": /^# Use the Mosaic API\n/,
+      "/legal": /^# Privacy Policy\n[\s\S]*\n---\n/,
+    };
+    for (const [path, body] of Object.entries(pages)) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "text/markdown" },
+      });
+      assert.equal(response.status, 200, path);
+      assert.match(
+        response.headers.get("Content-Type") ?? "",
+        /^text\/markdown/,
+        path,
+      );
+      assert.match(await response.text(), body, path);
+    }
+  });
+
+  test("still serves content pages as HTML to browsers", async (t) => {
+    for (const path of ["/help", "/help/guides/nextjs", "/legal"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "text/html,application/xhtml+xml,*/*;q=0.8" },
+        redirect: "manual",
+      });
+      // A build with real Clerk development keys (some cloud sessions) sends
+      // signed-out page requests to Clerk's handshake first. CI builds with
+      // placeholder keys, so it always checks the rendered page.
+      if (response.headers.get("Location")?.includes("/v1/client/handshake")) {
+        t.skip("Clerk development keys redirect to the handshake");
+        return;
+      }
+      assert.equal(response.status, 200, path);
+      assert.match(response.headers.get("Content-Type") ?? "", /^text\/html/);
+      assert.match(await response.text(), /<html/, path);
+    }
+  });
+
+  test("answers JSON requests for pages with problem documents", async () => {
+    for (const path of ["/", "/legal", "/help/guides/nextjs"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "application/json" },
+      });
+      assert.equal(response.status, 406, path);
+    }
+    for (const path of ["/nope", "/help/missing"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "application/json" },
+      });
+      assert.equal(response.status, 404, path);
+      assert.equal(
+        ((await response.json()) as { code: string }).code,
+        "not_found",
+      );
+    }
   });
 });
 
@@ -141,6 +224,19 @@ describe("/i/*", () => {
       new Uint8Array(await response.arrayBuffer()),
       new Uint8Array([1, 2, 3]),
     );
+  });
+
+  test("answers HEAD with headers only", async () => {
+    const env = await worker.getEnv();
+    await env.OG_BUCKET.put("global/head.jpeg", new Uint8Array([1, 2, 3]));
+
+    const response = await server.fetch("/i/global/head.jpeg", {
+      method: "HEAD",
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Content-Type"), "image/jpeg");
+    assert.ok(response.headers.get("ETag"));
+    assert.equal((await response.arrayBuffer()).byteLength, 0);
   });
 
   test("returns 404 for missing images", async () => {

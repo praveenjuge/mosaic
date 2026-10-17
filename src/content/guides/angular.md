@@ -1,23 +1,18 @@
 ---
 title: "Angular"
 slug: "angular"
-description: "Get started with integrating Mosaic into your Angular project."
+description: "Use Angular's Meta service."
 order: 80
 ---
 
-## Use Angular's `Meta` service
-
 ```typescript
-import { Component } from "@angular/core";
+import { Component, inject } from "@angular/core";
 import { Meta } from "@angular/platform-browser";
 
-@Component({
-  selector: "app-page",
-  template: "<h1>My Page</h1>",
-})
+@Component({ selector: "app-page", template: "<h1>My page</h1>" })
 export class PageComponent {
-  constructor(private meta: Meta) {
-    this.meta.updateTag({
+  constructor() {
+    inject(Meta).updateTag({
       property: "og:image",
       content:
         "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
@@ -25,3 +20,5 @@ export class PageComponent {
   }
 }
 ```
+
+Crawlers don't run JavaScript, so enable SSR (`ng add @angular/ssr`).

@@ -1,5 +1,5 @@
 import { UserButton } from "@clerk/tanstack-react-start";
-import { dark } from "@clerk/themes";
+import { dark } from "@clerk/ui/themes";
 import { useTheme } from "next-themes";
 
 export default function UserProfile() {
@@ -8,14 +8,14 @@ export default function UserProfile() {
   return (
     <UserButton
       appearance={{
-        baseTheme: resolvedTheme === "dark" ? dark : undefined,
+        theme: resolvedTheme === "dark" ? dark : undefined,
         elements: {
           userButtonPopoverFooter: "!hidden",
         },
       }}
       userProfileProps={{
         appearance: {
-          baseTheme: resolvedTheme === "dark" ? dark : undefined,
+          theme: resolvedTheme === "dark" ? dark : undefined,
         },
       }}
     />

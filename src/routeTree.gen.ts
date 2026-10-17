@@ -9,36 +9,28 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as UseRouteImport } from './routes/use'
-import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
-import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
-import { Route as BlogRouteImport } from './routes/blog'
-import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as PublicRouteImport } from './routes/_public'
+import { Route as BlogRouteImport } from './routes/blog'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as UseRouteImport } from './routes/use'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
-import { Route as ISplatRouteImport } from './routes/i.$'
-import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
-import { Route as PublicHelpRouteImport } from './routes/_public.help'
+import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ISplatRouteImport } from './routes/i.$'
+import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
+import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
 import { Route as PublicHelpIndexRouteImport } from './routes/_public.help.index'
 import { Route as PublicHelpSlugRouteImport } from './routes/_public.help.$slug'
-import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
-import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
 import { Route as PublicHelpGuidesSlugRouteImport } from './routes/_public.help.guides.$slug'
 
-const UseRoute = UseRouteImport.update({
-  id: '/use',
-  path: '/use',
+const AuthRoute = AuthRouteImport.update({
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
-  id: '/robots.txt',
-  path: '/robots.txt',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
-  id: '/llms.txt',
-  path: '/llms.txt',
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BlogRoute = BlogRouteImport.update({
@@ -46,68 +38,66 @@ const BlogRoute = BlogRouteImport.update({
   path: '/blog',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PublicRoute = PublicRouteImport.update({
-  id: '/_public',
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/_auth',
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UseRoute = UseRouteImport.update({
+  id: '/use',
+  path: '/use',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => PublicRoute,
-} as any).lazy(() => import('./routes/_public.index.lazy').then((d) => d.Route))
-const ISplatRoute = ISplatRouteImport.update({
-  id: '/i/$',
-  path: '/i/$',
-  getParentRoute: () => rootRouteImport,
+} as any)
+const PublicLegalRoute = PublicLegalRouteImport.update({
+  id: '/legal',
+  path: '/legal',
+  getParentRoute: () => PublicRoute,
 } as any)
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
-const PublicLegalRoute = PublicLegalRouteImport.update({
-  id: '/legal',
-  path: '/legal',
-  getParentRoute: () => PublicRoute,
-} as any).lazy(() => import('./routes/_public.legal.lazy').then((d) => d.Route))
-const PublicHelpRoute = PublicHelpRouteImport.update({
-  id: '/help',
-  path: '/help',
-  getParentRoute: () => PublicRoute,
-} as any)
-const PublicHelpIndexRoute = PublicHelpIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => PublicHelpRoute,
-} as any)
-const PublicHelpSlugRoute = PublicHelpSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => PublicHelpRoute,
-} as any).lazy(() =>
-  import('./routes/_public.help.$slug.lazy').then((d) => d.Route),
-)
-const AuthSignUpSplatRoute = AuthSignUpSplatRouteImport.update({
-  id: '/sign-up/$',
-  path: '/sign-up/$',
-  getParentRoute: () => AuthRoute,
+const ISplatRoute = ISplatRouteImport.update({
+  id: '/i/$',
+  path: '/i/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignInSplatRoute = AuthSignInSplatRouteImport.update({
   id: '/sign-in/$',
   path: '/sign-in/$',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSignUpSplatRoute = AuthSignUpSplatRouteImport.update({
+  id: '/sign-up/$',
+  path: '/sign-up/$',
+  getParentRoute: () => AuthRoute,
+} as any)
+const PublicHelpIndexRoute = PublicHelpIndexRouteImport.update({
+  id: '/help/',
+  path: '/help/',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicHelpSlugRoute = PublicHelpSlugRouteImport.update({
+  id: '/help/$slug',
+  path: '/help/$slug',
+  getParentRoute: () => PublicRoute,
+} as any)
 const PublicHelpGuidesSlugRoute = PublicHelpGuidesSlugRouteImport.update({
-  id: '/guides/$slug',
-  path: '/guides/$slug',
-  getParentRoute: () => PublicHelpRoute,
-} as any).lazy(() =>
-  import('./routes/_public.help.guides.$slug.lazy').then((d) => d.Route),
-)
+  id: '/help/guides/$slug',
+  path: '/help/guides/$slug',
+  getParentRoute: () => PublicRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
@@ -115,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
-  '/help': typeof PublicHelpRouteWithChildren
   '/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/i/$': typeof ISplatRoute
@@ -148,7 +137,6 @@ export interface FileRoutesById {
   '/llms.txt': typeof LlmsDottxtRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/use': typeof UseRoute
-  '/_public/help': typeof PublicHelpRouteWithChildren
   '/_public/legal': typeof PublicLegalRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/i/$': typeof ISplatRoute
@@ -167,7 +155,6 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/robots.txt'
     | '/use'
-    | '/help'
     | '/legal'
     | '/blog/$slug'
     | '/i/$'
@@ -199,7 +186,6 @@ export interface FileRouteTypes {
     | '/llms.txt'
     | '/robots.txt'
     | '/use'
-    | '/_public/help'
     | '/_public/legal'
     | '/blog/$slug'
     | '/i/$'
@@ -223,32 +209,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/use': {
-      id: '/use'
-      path: '/use'
-      fullPath: '/use'
-      preLoaderRoute: typeof UseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/robots.txt': {
-      id: '/robots.txt'
-      path: '/robots.txt'
-      fullPath: '/robots.txt'
-      preLoaderRoute: typeof RobotsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/llms.txt': {
-      id: '/llms.txt'
-      path: '/llms.txt'
-      fullPath: '/llms.txt'
-      preLoaderRoute: typeof LlmsDottxtRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/blog': {
-      id: '/blog'
-      path: '/blog'
-      fullPath: '/blog'
-      preLoaderRoute: typeof BlogRouteImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public': {
@@ -258,11 +223,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_auth': {
-      id: '/_auth'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof AuthRouteImport
+    '/blog': {
+      id: '/blog'
+      path: '/blog'
+      fullPath: '/blog'
+      preLoaderRoute: typeof BlogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/use': {
+      id: '/use'
+      path: '/use'
+      fullPath: '/use'
+      preLoaderRoute: typeof UseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_public/': {
@@ -272,12 +258,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicIndexRouteImport
       parentRoute: typeof PublicRoute
     }
-    '/i/$': {
-      id: '/i/$'
-      path: '/i/$'
-      fullPath: '/i/$'
-      preLoaderRoute: typeof ISplatRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_public/legal': {
+      id: '/_public/legal'
+      path: '/legal'
+      fullPath: '/legal'
+      preLoaderRoute: typeof PublicLegalRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/blog/$slug': {
       id: '/blog/$slug'
@@ -286,40 +272,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
-    '/_public/legal': {
-      id: '/_public/legal'
-      path: '/legal'
-      fullPath: '/legal'
-      preLoaderRoute: typeof PublicLegalRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/help': {
-      id: '/_public/help'
-      path: '/help'
-      fullPath: '/help'
-      preLoaderRoute: typeof PublicHelpRouteImport
-      parentRoute: typeof PublicRoute
-    }
-    '/_public/help/': {
-      id: '/_public/help/'
-      path: '/'
-      fullPath: '/help/'
-      preLoaderRoute: typeof PublicHelpIndexRouteImport
-      parentRoute: typeof PublicHelpRoute
-    }
-    '/_public/help/$slug': {
-      id: '/_public/help/$slug'
-      path: '/$slug'
-      fullPath: '/help/$slug'
-      preLoaderRoute: typeof PublicHelpSlugRouteImport
-      parentRoute: typeof PublicHelpRoute
-    }
-    '/_auth/sign-up/$': {
-      id: '/_auth/sign-up/$'
-      path: '/sign-up/$'
-      fullPath: '/sign-up/$'
-      preLoaderRoute: typeof AuthSignUpSplatRouteImport
-      parentRoute: typeof AuthRoute
+    '/i/$': {
+      id: '/i/$'
+      path: '/i/$'
+      fullPath: '/i/$'
+      preLoaderRoute: typeof ISplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_auth/sign-in/$': {
       id: '/_auth/sign-in/$'
@@ -328,12 +286,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSignInSplatRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/sign-up/$': {
+      id: '/_auth/sign-up/$'
+      path: '/sign-up/$'
+      fullPath: '/sign-up/$'
+      preLoaderRoute: typeof AuthSignUpSplatRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_public/help/': {
+      id: '/_public/help/'
+      path: '/help'
+      fullPath: '/help/'
+      preLoaderRoute: typeof PublicHelpIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/help/$slug': {
+      id: '/_public/help/$slug'
+      path: '/help/$slug'
+      fullPath: '/help/$slug'
+      preLoaderRoute: typeof PublicHelpSlugRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/_public/help/guides/$slug': {
       id: '/_public/help/guides/$slug'
-      path: '/guides/$slug'
+      path: '/help/guides/$slug'
       fullPath: '/help/guides/$slug'
       preLoaderRoute: typeof PublicHelpGuidesSlugRouteImport
-      parentRoute: typeof PublicHelpRoute
+      parentRoute: typeof PublicRoute
     }
   }
 }
@@ -350,32 +329,20 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
-interface PublicHelpRouteChildren {
+interface PublicRouteChildren {
+  PublicLegalRoute: typeof PublicLegalRoute
+  PublicIndexRoute: typeof PublicIndexRoute
   PublicHelpSlugRoute: typeof PublicHelpSlugRoute
   PublicHelpIndexRoute: typeof PublicHelpIndexRoute
   PublicHelpGuidesSlugRoute: typeof PublicHelpGuidesSlugRoute
 }
 
-const PublicHelpRouteChildren: PublicHelpRouteChildren = {
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicLegalRoute: PublicLegalRoute,
+  PublicIndexRoute: PublicIndexRoute,
   PublicHelpSlugRoute: PublicHelpSlugRoute,
   PublicHelpIndexRoute: PublicHelpIndexRoute,
   PublicHelpGuidesSlugRoute: PublicHelpGuidesSlugRoute,
-}
-
-const PublicHelpRouteWithChildren = PublicHelpRoute._addFileChildren(
-  PublicHelpRouteChildren,
-)
-
-interface PublicRouteChildren {
-  PublicHelpRoute: typeof PublicHelpRouteWithChildren
-  PublicLegalRoute: typeof PublicLegalRoute
-  PublicIndexRoute: typeof PublicIndexRoute
-}
-
-const PublicRouteChildren: PublicRouteChildren = {
-  PublicHelpRoute: PublicHelpRouteWithChildren,
-  PublicLegalRoute: PublicLegalRoute,
-  PublicIndexRoute: PublicIndexRoute,
 }
 
 const PublicRouteWithChildren =

@@ -10,21 +10,19 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getGuideLinks } from "@/lib/content";
+import { guideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
-import { buildSiteOgImageUrl } from "@/lib/url";
+import { buildUseEndpointUrl } from "@/lib/url";
 import { Code, ExternalLink, Ghost } from "lucide-react";
-
-const guideLinks = getGuideLinks();
 
 export function WebsiteInfoModal({ websiteUrl }: { websiteUrl: string }) {
   const finalWebsiteUrl = `https://${decodeURIComponent(websiteUrl)}`;
 
-  const homeMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+  const homeMetaTag = `<meta property="og:image" content="${buildUseEndpointUrl(
     publicEnv.siteUrl,
     finalWebsiteUrl,
   )}" />`;
-  const subpageMetaTag = `<meta property="og:image" content="${buildSiteOgImageUrl(
+  const subpageMetaTag = `<meta property="og:image" content="${buildUseEndpointUrl(
     publicEnv.siteUrl,
     `${finalWebsiteUrl}/your_slug`,
   )}" />`;

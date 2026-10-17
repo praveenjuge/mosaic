@@ -1,28 +1,56 @@
 # Mosaic
 
-> Mosaic creates Open Graph images automatically from website screenshots so shared links have a current, branded social preview without manual design work.
+> Mosaic turns a screenshot of a web page into its Open Graph image. Add your website's hostname in the dashboard, then point the page's `og:image` meta tag at `https://mosaic.praveenjuge.com/use?url=<URL-encoded page URL>`.
 
-## When to use Mosaic
+How it works:
 
-Use Mosaic when you need to:
+- The first request for a page screenshots it, stores the image, and returns a 307 redirect to it. Later requests redirect to the cached image, and images regenerate automatically after 30 days.
+- Only hostnames added in the dashboard work, matched exactly (`www.example.com` and `example.com` are different). Other hostnames get a 404 error.
+- If a screenshot fails or a limit is reached, Mosaic redirects to the previous image or a placeholder.
+- Mosaic is not an image editor or a general-purpose screenshot API.
 
-- Generate Open Graph images from a website's existing hero section.
-- Keep social previews current as a page changes.
-- Manage OG images for several websites from one dashboard.
-- Add automated previews to a framework or static site without designing every image by hand.
+## Docs
 
-Mosaic is best suited to founders, developers, and content teams that already have a public website and want screenshot-based link previews. It is not an image editor or a general-purpose screenshot API.
+- [Add Your Website to Mosaic](https://mosaic.praveenjuge.com/help/add-your-website-to-mosaic): Add your site in the dashboard and copy its OG image link.
+- [Use the Mosaic API](https://mosaic.praveenjuge.com/help/use-the-mosaic-api): The `/use` endpoint and its responses.
+- [Understanding Usage Limits](https://mosaic.praveenjuge.com/help/understanding-usage-limits): Daily screenshot limits and what happens when one is reached.
+- [How Mosaic Refreshes OG Images](https://mosaic.praveenjuge.com/help/refresh-og-images-for-a-website): Automatic 30-day refresh.
+- [Delete a Website from Mosaic](https://mosaic.praveenjuge.com/help/delete-a-website-from-mosaic): Remove a website and what happens to its images.
+- [Help center](https://mosaic.praveenjuge.com/help): All help articles and guides.
 
-## Product and setup
+## Framework guides
 
-- [Home and pricing](https://mosaic.praveenjuge.com/): Product overview, examples, and Free, Pro monthly, and Pro yearly plans.
-- [Help and support](https://mosaic.praveenjuge.com/help): Product help, account guidance, and troubleshooting.
-- [Framework guides](https://mosaic.praveenjuge.com/help/guides/react): Start with the React guide; related guides cover Next.js, Astro, Nuxt, Remix, Svelte, and other platforms.
-- [Use the Mosaic API](https://mosaic.praveenjuge.com/help/use-the-mosaic-api): API usage and examples.
+- [Next.js](https://mosaic.praveenjuge.com/help/guides/nextjs)
+- [React](https://mosaic.praveenjuge.com/help/guides/react)
+- [Remix](https://mosaic.praveenjuge.com/help/guides/remix)
+- [Astro](https://mosaic.praveenjuge.com/help/guides/astro)
+- [Nuxt](https://mosaic.praveenjuge.com/help/guides/nuxt)
+- [Hugo](https://mosaic.praveenjuge.com/help/guides/hugo)
+- [HTML](https://mosaic.praveenjuge.com/help/guides/html)
+- [Angular](https://mosaic.praveenjuge.com/help/guides/angular)
+- [SvelteKit](https://mosaic.praveenjuge.com/help/guides/svelte)
+- [WordPress](https://mosaic.praveenjuge.com/help/guides/wordpress)
+- [Docusaurus](https://mosaic.praveenjuge.com/help/guides/docusaurus)
+- [Dub](https://mosaic.praveenjuge.com/help/guides/dub)
+- [Mintlify](https://mosaic.praveenjuge.com/help/guides/mintlify)
+- [Add Mosaic to Bear Blog](https://mosaic.praveenjuge.com/help/add-mosaic-to-bear-blog)
+
+## Account and billing
+
+- [Home and pricing](https://mosaic.praveenjuge.com/): Free ($0), Pro ($19/month), and Pro Yearly ($199/year) plans.
+- [Create a New Account](https://mosaic.praveenjuge.com/help/create-a-new-account)
+- [Log In to Your Account](https://mosaic.praveenjuge.com/help/log-in-to-your-account)
+- [Change Your Account Password](https://mosaic.praveenjuge.com/help/change-your-account-password)
+- [Managing Your Subscription](https://mosaic.praveenjuge.com/help/managing-your-subscription)
+- [Accessing Technical Support](https://mosaic.praveenjuge.com/help/accessing-technical-support): Email [hello@praveenjuge.com](mailto:hello@praveenjuge.com).
 - [Legal information](https://mosaic.praveenjuge.com/legal): Privacy policy, terms of service, and refund policy.
 
-## Discovery and support
+## Optional
 
-- [Sitemap](https://mosaic.praveenjuge.com/sitemap.xml): Index of public pages and guides.
-- [Robots policy](https://mosaic.praveenjuge.com/robots.txt): Crawler access rules.
-- [Contact support](mailto:hello@praveenjuge.com): Email support.
+- [Sitemap](https://mosaic.praveenjuge.com/sitemap.xml): Every public page, including older articles not listed here.
+- [Top 5 Benefits of Screenshot-Based OG Images vs. Manual Designs](https://mosaic.praveenjuge.com/help/top-5-benefits-of-screenshot-based-og-images-vs-manual-designs)
+- [Designing Hero Sections That Pop in OG Thumbnails](https://mosaic.praveenjuge.com/help/designing-hero-sections-that-pop-in-og-thumbnails)
+- [How Often Does Mosaic Refresh OG Images?](https://mosaic.praveenjuge.com/help/how-often-should-you-refresh-og-images-a-guide-to-mosaics-refresh-tool)
+- [How Mosaic Helps Founders Manage Multiple Sites](https://mosaic.praveenjuge.com/help/how-mosaic-helps-founders-manage-multiple-sites)
+- [Why Personalized OG Images Beat Boring or Missing Ones](https://mosaic.praveenjuge.com/help/why-do-you-need-personalised-og-imags-why-skip-boring-or-no-og-images)
+- [Why Every Modern Website Needs Automated OG Images in 2025](https://mosaic.praveenjuge.com/help/why-every-modern-website-needs-automated-og-images-in-2025)

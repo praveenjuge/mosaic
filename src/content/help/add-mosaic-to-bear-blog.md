@@ -1,71 +1,43 @@
 ---
 title: "Add Mosaic to Bear Blog"
+description: "Use Bear Blog's meta_image attribute to give each post a Mosaic OG image."
 category: "Guides"
 publishedAt: "2024-09-16T17:21:41.891Z"
 ---
 
-### Prerequisites
+## Before you start
 
-- **Have a Bear Blog**
+1. Have a blog on [Bear Blog](https://bearblog.dev/). Its address looks like
+   `yourblog.bearblog.dev`.
+2. Sign in to Mosaic and add that hostname as a website. If your blog uses a
+   custom domain, add the custom domain instead.
+3. Copy the OG image link from the **URL** column of the Websites table.
 
-  First, ensure you’ve created your Bear Blog at
-  [bearblog.dev](https://bearblog.dev/). Your blog URL will look something like
-  `yourblogname.bearblog.dev`. For example, check out our blog at
-  [naveenhonestraj.bearblog.dev](https://naveenhonestraj.bearblog.dev/).
+## Add an OG image to a post
 
-- **Sign up for Mosaic**
+Bear Blog is fully hosted, so you set the image in each post's attributes. There
+is nothing to build or deploy.
 
-  Next, sign up for Mosaic and add your Bear Blog website to it. Our onboarding
-  widget will guide you through this process, making it quick and easy to get
-  started.
+1. Create a post or edit an existing one.
+2. Add a `meta_image` attribute. Set it to the Mosaic endpoint, with the post's
+   full URL (encoded) as the `url` parameter:
 
-- **Get the URL from Mosaic**
+   ```yaml
+   title: How to integrate Mosaic in BearBlog.dev
+   link: how-to-integrate-mosaic-in-bearblogdev
+   meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev%2Fhow-to-integrate-mosaic-in-bearblogdev
+   ```
 
-  Once your website is set up in Mosaic, you’ll find the OG image URL under the
-  **URL column** of your site’s page. Copy this URL, as you’ll need it for the
-  integration.
+3. Publish the post.
 
----
+No `link` yet? Publish once so Bear Blog creates one from the title. Then add
+that link to `meta_image` and publish again.
 
-### How to Add Mosaic to Bear Blog
+![Bear Blog post editor with title, link, and meta_image attributes](/images/screenshot-202024-09-16-20at-209.05.07-e2-80-afpm-AzMT.png)
 
-Bear Blog is different from many modern blog platforms because it’s a fully
-hosted solution, meaning you don’t need to build and deploy it locally. You can
-simply log in and create blog posts with ease. Here’s how to integrate Mosaic
-into Bear Blog and add OG images to your posts:
+## Pre-fill new posts (optional)
 
-- **Create or edit a blog post**
-
-  Start by either creating a new post or editing an existing one.
-
-- **Add the** `meta_image` **attribute**
-
-  In your post, you can add the following attributes to include an OG image:
-
-  ```yaml
-  title: How to integrate Mosaic in BearBlog.dev
-  link: how-to-integrate-mosaic-in-bearblogdev
-  meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearblog.dev%2Fhow-to-integrate-mosaic-in-bearblogdev
-  ```
-
-  - The `meta_image` field should contain the Mosaic endpoint with its `url`
-    query parameter set to the encoded post link.
-  - If you haven’t created a custom link for your post, simply publish your post
-    with the title attribute first. Bear Blog will automatically generate a
-    link, which you can then use in the `meta_image` field when you republish
-    your post.
-
-  **Tip:** This method allows you to dynamically generate beautiful OG images
-  for your blog posts.
-
-![](/images/screenshot-202024-09-16-20at-209.05.07-e2-80-afpm-AzMT.png)
-
----
-
-### Updating Your Bear Blog Template (Optional)
-
-If you want to make this process even easier, you can update your Bear Blog’s
-template to automatically include a Mosaic OG image. Here’s how:
+Bear Blog's post template fills in every new post. Add `meta_image` there:
 
 ```yaml
 title:
@@ -73,16 +45,13 @@ meta_image: https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourblog.bearbl
 ___
 ```
 
-By updating the template, every new post will have the OG image field
-pre-filled. All you need to do is update the **URL** with the correct post link.
+In each new post, change the encoded URL to that post's address. If you leave
+the home page URL, every post shares the home page image.
 
-![](/images/screenshot-202024-09-16-20at-209.05.17-e2-80-afpm-A5MT.png)
+![Bear Blog post template with a meta_image attribute](/images/screenshot-202024-09-16-20at-209.05.17-e2-80-afpm-A5MT.png)
 
----
+## After a theme change
 
-### Updating the OG Image After a Theme Change
-
-If you've recently updated your Bear Blog theme and want the OG images to
-reflect the new design, there is no manual step in Mosaic. Shared images refresh
-automatically after 30 days. If a social platform still shows an older preview,
-use that platform's card debugger or re-scrape tool to ask it to fetch again.
+There is no refresh button. Mosaic takes a new screenshot on the first request
+after an image is 30 days old. Social platforms also cache previews, so use
+their card debugger or re-scrape tool to make them fetch the image again.

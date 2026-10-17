@@ -7,13 +7,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { HelpCategory } from "@/lib/content";
+import { guideLinks, helpCategories, type HelpCategory } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail } from "lucide-react";
-import { Route as HelpRoute } from "./_public.help";
 
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";
@@ -102,12 +101,10 @@ function ContactSection() {
 }
 
 function HelpPage() {
-  const { guides, helpCategories } = HelpRoute.useLoaderData();
-
   return (
     <div className="mx-auto grid w-full max-w-2xl gap-6 py-4 md:py-10">
       <HelpHeader />
-      <Guides guides={guides} />
+      <Guides guides={guideLinks} />
       <HelpCategoriesSection helpCategories={helpCategories} />
       <ContactSection />
     </div>

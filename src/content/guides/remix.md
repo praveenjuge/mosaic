@@ -1,25 +1,21 @@
 ---
 title: "Remix"
 slug: "remix"
-description: "Get started with integrating Mosaic into your Remix project."
+description: "Set og:image from a React Router or Remix meta export."
 order: 30
 svgLight: "remix_light"
 svgDark: "remix_dark"
 ---
 
-## Use the `meta` export in your route
-
 ```typescript
-import type { MetaFunction } from "@remix-run/node";
+import type { MetaFunction } from "react-router"; // Remix v2: "@remix-run/node"
 
-export const meta: MetaFunction = () => {
-  return [
-    {
-      property: "og:image",
-      content:
-        "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
-    },
-    { property: "og:type", content: "website" },
-  ];
-};
+export const meta: MetaFunction = ({ location }) => [
+  {
+    property: "og:image",
+    content: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com${location.pathname}`)}`,
+  },
+];
 ```
+
+Only the deepest matching route's `meta` applies.

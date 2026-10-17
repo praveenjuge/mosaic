@@ -1,44 +1,41 @@
 ---
 title: "Understanding Usage Limits"
-description: "Learn how Mosaic's shared OG image cache and service limits work."
+description: "How Mosaic's daily screenshot limits work and what happens when one is reached."
 category: "Guides"
 publishedAt: "2025-06-13T11:30:36.000Z"
 ---
 
-# Understanding Usage Limits
+Mosaic takes one screenshot per page URL and shares it with everyone. Only new
+screenshots count toward limits, not cached images.
 
-Mosaic uses a shared cache so the same page is captured once and reused for
-everyone. There is no per-user image counter or signature setup.
+## Daily screenshot limits
 
-## How Limits Work
+- **`/use` links:** 50 new screenshots per client IP per day, and 500 per day
+  across the service, with a short-term cap of 30 per client IP per minute.
+- **Home page demo:** 10 per client IP per day, and 100 per day across the
+  service.
 
-### OG Image Generation
+Days reset at midnight UTC. The client is whoever requests the image, usually a
+social platform's crawler. Limits are the same on every plan.
 
-- A canonical page URL maps to one shared cached image
-- Cached images refresh automatically after 30 days
-- Requests normally reuse the cached image without taking a new screenshot
-- Mosaic applies per-client and service-wide daily generation budgets to protect
-  reliability and cost
-- When a budget is exhausted, Mosaic serves the stale cached image when one is
-  available, or a safe fallback image for a first request
+## When a limit is reached
 
-### Website Management
+`/use` still redirects to an image:
 
-- You can save websites to your account without ownership verification
-- More than one user can save the same hostname
-- Saving a website does not expose its page list, cache history, or other users
-- Removing a website only removes your association; it does not delete shared
-  images
+- You get the page's older cached image, if it has one.
+- Otherwise you get a fallback example image until a screenshot can be taken.
+
+## Websites
+
+- Add as many websites as you like, with no ownership check.
+- Several accounts can save the same hostname without seeing each other.
+- If no account has a hostname saved, `/use` returns a 404 error for it.
 
 ## Tips
 
-1. **Use stable canonical URLs**: query-string variations create distinct cache
-   entries
-2. **Use the page's final HTTPS URL**: redirects are followed safely before a
-   screenshot is generated
-3. **Let refresh happen automatically**: there is no manual purge step
+1. **Keep URLs stable.** Each distinct URL, including different query strings,
+   gets its own screenshot.
+2. **Use the page's final HTTPS URL.** Mosaic follows redirects, but a direct
+   link is cleaner.
 
-## Need Help?
-
-If you have questions about your usage or limits, contact support at
-hello@praveenjuge.com.
+Questions about limits? Email hello@praveenjuge.com.

@@ -1,8 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  type MarkdownContentRef,
-  markdownNegotiationResponse,
-  matchMarkdownPath,
+  acceptsHtml,
+  negotiateResponse,
   prefersMarkdown,
   toMarkdownDocument,
 } from "./markdown-negotiation";
@@ -60,79 +59,49 @@ describe("prefersMarkdown", () => {
   });
 });
 
-describe("matchMarkdownPath", () => {
-  test("maps the homepage to the site mirror", () => {
-    expect(matchMarkdownPath("/")).toEqual({ kind: "home" });
+describe("acceptsHtml", () => {
+  test("accepts HTML and full wildcard ranges", () => {
+    expect(acceptsHtml(browserAccept)).toBe(true);
+    expect(acceptsHtml("*/*")).toBe(true);
+    expect(acceptsHtml(null)).toBe(true);
   });
 
-  test("maps help articles", () => {
-    expect(matchMarkdownPath("/help/hello-world")).toEqual({
-      kind: "help",
-      slug: "hello-world",
-    });
+  test("rejects a text wildcard, which the SSR handler turns into a 500", () => {
+    expect(acceptsHtml("text/*")).toBe(false);
   });
 
-  test("maps framework guides", () => {
-    expect(matchMarkdownPath("/help/guides/react")).toEqual({
-      kind: "guide",
-      slug: "react",
-    });
+  test("honors an explicit text wildcard refusal", () => {
+    expect(acceptsHtml("text/*;q=0, */*")).toBe(false);
   });
 
-  test("maps the legal overview", () => {
-    expect(matchMarkdownPath("/legal")).toEqual({ kind: "legal" });
-  });
-
-  test("decodes encoded slugs", () => {
-    expect(matchMarkdownPath("/help/hello%2Dworld")).toEqual({
-      kind: "help",
-      slug: "hello-world",
-    });
-  });
-
-  test("tolerates a trailing slash", () => {
-    expect(matchMarkdownPath("/help/hello-world/")).toEqual({
-      kind: "help",
-      slug: "hello-world",
-    });
-  });
-
-  test("does not match other routes", () => {
-    expect(matchMarkdownPath("/dashboard")).toBeNull();
-    expect(matchMarkdownPath("/dashboard/missing")).toBeNull();
-    expect(matchMarkdownPath("/api/missing")).toBeNull();
-    expect(matchMarkdownPath("/i/missing")).toBeNull();
-    expect(matchMarkdownPath("/blog/missing")).toBeNull();
-    expect(matchMarkdownPath("/missing.png")).toBeNull();
-    expect(matchMarkdownPath("/unknown")).toEqual({ kind: "not-found" });
-    expect(matchMarkdownPath("/unknown/nested")).toEqual({ kind: "not-found" });
-    expect(matchMarkdownPath("/help")).toBeNull();
-    expect(matchMarkdownPath("/help/guides")).toEqual({ kind: "not-found" });
-    expect(matchMarkdownPath("/legal/privacy-policy")).toEqual({
-      kind: "not-found",
-    });
-    expect(matchMarkdownPath("/sign-in")).toBeNull();
+  test("rejects JSON, plain text, and zero-quality HTML", () => {
+    expect(acceptsHtml("application/json")).toBe(false);
+    expect(acceptsHtml("text/plain")).toBe(false);
+    expect(acceptsHtml("text/html;q=0, */*")).toBe(false);
   });
 });
 
-describe("markdownNegotiationResponse", () => {
-  const resolver = (ref: MarkdownContentRef) =>
-    ref.kind === "home" ? "# Mosaic\n" : null;
+describe("negotiateResponse", () => {
+  const pages = {
+    "/": "# Mosaic\n",
+    "/help": "# Help\n",
+    "/help/hello-world": "# Hello\n",
+  };
 
-  function request(accept: string, method = "GET", path = "/") {
+  function get(path: string, accept: string | null, method = "GET") {
     return new Request(`https://mosaic.example${path}`, {
-      headers: { Accept: accept },
+      headers: accept === null ? {} : { Accept: accept },
       method,
     });
   }
 
-  test("serves Markdown for the homepage instead of the SSR 500", async () => {
-    const response = markdownNegotiationResponse(
-      request("text/markdown"),
-      resolver,
-    );
+  async function problemCode(response: Response | null) {
+    return ((await response?.json()) as { code: string }).code;
+  }
 
-    expect(response).not.toBeNull();
+  test("serves Markdown for a content page instead of the SSR 500", async () => {
+    const response = negotiateResponse(get("/", "text/markdown"), pages);
+
     expect(response?.status).toBe(200);
     expect(response?.headers.get("Content-Type")).toBe(
       "text/markdown; charset=utf-8",
@@ -141,47 +110,33 @@ describe("markdownNegotiationResponse", () => {
     expect(await response?.text()).toBe("# Mosaic\n");
   });
 
-  test("keeps serving HTML for browser requests", () => {
-    expect(
-      markdownNegotiationResponse(request(browserAccept), resolver),
-    ).toBeNull();
-  });
-
-  test("does not intercept non-GET methods", () => {
-    expect(
-      markdownNegotiationResponse(request("text/markdown", "POST"), resolver),
-    ).toBeNull();
-  });
-
-  test("falls through when no Markdown content exists for the path", () => {
-    expect(
-      markdownNegotiationResponse(
-        request("text/markdown", "GET", "/dashboard"),
-        resolver,
-      ),
-    ).toBeNull();
+  test("decodes encoded paths and tolerates a trailing slash", async () => {
+    for (const path of ["/help/hello%2Dworld", "/help/hello-world/"]) {
+      const response = negotiateResponse(get(path, "text/markdown"), pages);
+      expect(await response?.text()).toBe("# Hello\n");
+    }
   });
 
   test("answers a useful Markdown 404 for an unknown public page", async () => {
-    const response = markdownNegotiationResponse(
-      request("text/markdown", "GET", "/__ora-404-probe-unknown"),
-      resolver,
-    );
-    expect(response?.status).toBe(404);
-    expect(response?.headers.get("Content-Type")).toBe(
-      "text/markdown; charset=utf-8",
-    );
-    expect(response?.headers.get("Vary")).toBe("Accept");
-    const body = await response?.text();
-    expect(body?.length).toBeGreaterThan(20);
-    expect(body).toContain("https://mosaic.example/help");
-    expect(body).toContain("https://mosaic.example/sitemap.xml");
+    for (const path of [
+      "/missing",
+      "/help/missing",
+      "/help/guides",
+      "/api/x",
+    ]) {
+      const response = negotiateResponse(get(path, "text/markdown"), pages);
+      expect(response?.status).toBe(404);
+      expect(response?.headers.get("Content-Type")).toBe(
+        "text/markdown; charset=utf-8",
+      );
+      expect(await response?.text()).toContain("https://mosaic.example/help");
+    }
   });
 
   test("uses the configured origin for recovery links", async () => {
-    const response = markdownNegotiationResponse(
-      request("text/markdown", "GET", "/missing"),
-      resolver,
+    const response = negotiateResponse(
+      get("/missing", "text/markdown"),
+      pages,
       "https://mosaic.praveenjuge.com",
     );
     const body = await response?.text();
@@ -189,28 +144,72 @@ describe("markdownNegotiationResponse", () => {
     expect(body).not.toContain("mosaic.example/help");
   });
 
-  test("answers a Markdown 404 when content is missing", async () => {
-    const response = markdownNegotiationResponse(
-      request("text/markdown", "GET", "/help/missing"),
-      resolver,
-    );
+  test("answers an unknown page asked for as JSON with a 404 problem", async () => {
+    const response = negotiateResponse(get("/nope", "application/json"), pages);
 
     expect(response?.status).toBe(404);
     expect(response?.headers.get("Content-Type")).toBe(
-      "text/markdown; charset=utf-8",
+      "application/problem+json",
     );
     expect(response?.headers.get("Vary")).toBe("Accept");
-    expect(await response?.text()).toContain("https://mosaic.example/help");
+    expect(await problemCode(response)).toBe("not_found");
+    expect(negotiateResponse(get("/api", "text/plain"), pages)?.status).toBe(
+      404,
+    );
+    expect(negotiateResponse(get("/_missing", "text/*"), pages)?.status).toBe(
+      404,
+    );
   });
 
-  test("answers HEAD requests with headers only", async () => {
-    const response = markdownNegotiationResponse(
-      request("text/markdown", "HEAD"),
-      resolver,
-    );
+  test("answers a known page asked for as JSON with a 406 problem", async () => {
+    for (const path of ["/", "/help", "/help/"]) {
+      const response = negotiateResponse(get(path, "application/json"), pages);
+      expect(response?.status).toBe(406);
+      expect(await problemCode(response)).toBe("not_acceptable");
+    }
+  });
 
-    expect(response?.status).toBe(200);
-    expect(await response?.text()).toBe("");
+  test("sends no body for HEAD", async () => {
+    const markdown = negotiateResponse(
+      get("/", "text/markdown", "HEAD"),
+      pages,
+    );
+    expect(markdown?.status).toBe(200);
+    expect(await markdown?.text()).toBe("");
+
+    const problem = negotiateResponse(
+      get("/nope", "application/json", "HEAD"),
+      pages,
+    );
+    expect(problem?.status).toBe(404);
+    expect(await problem?.text()).toBe("");
+  });
+
+  test("leaves requests that can take HTML alone", () => {
+    for (const accept of [browserAccept, "*/*", null, "text/html,*/*;q=0.8"]) {
+      expect(negotiateResponse(get("/nope", accept), pages)).toBeNull();
+    }
+  });
+
+  test("leaves app routes, assets, and non-GET requests alone", () => {
+    for (const path of [
+      "/dashboard",
+      "/dashboard/missing",
+      "/i/global/a.jpeg",
+      "/blog/missing",
+      "/sign-in",
+      "/_serverFn/abc123",
+      "/llms.txt",
+      "/missing.png",
+    ]) {
+      expect(negotiateResponse(get(path, "text/markdown"), pages)).toBeNull();
+      expect(
+        negotiateResponse(get(path, "application/json"), pages),
+      ).toBeNull();
+    }
+    expect(
+      negotiateResponse(get("/", "text/markdown", "POST"), pages),
+    ).toBeNull();
   });
 });
 

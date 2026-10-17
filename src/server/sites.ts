@@ -5,10 +5,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
 
-function generateR2Prefix() {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
-}
-
 function normalizePublicHostname(value: string): string {
   const websiteUrl = parseWebsiteUrl(value);
   const error = validateOutboundUrl(websiteUrl);
@@ -22,28 +18,18 @@ const addSiteSchema = z.object({
 
 export const addSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(addSiteSchema)
+  .validator(addSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
-    const hostname = normalizePublicHostname(data.url_base);
-    const db = getDb();
-    const existing = await db
-      .prepare("SELECT id FROM sites WHERE user_id = ? AND url_base = ?")
-      .bind(context.userId, hostname)
-      .first<{ id: number }>();
-    if (existing) throw new Error("This website already exists in your list.");
-
-    const insert = await db
+    // The unique (user_id, url_base) index turns a duplicate into no row.
+    const site = await getDb()
       .prepare(
-        `INSERT INTO sites (user_id, url_base, image_count, r2_prefix)
-         VALUES (?, ?, 0, ?)`,
+        `INSERT INTO sites (user_id, url_base) VALUES (?, ?)
+         ON CONFLICT DO NOTHING
+         RETURNING *`,
       )
-      .bind(context.userId, hostname, generateR2Prefix())
-      .run();
-    const site = await db
-      .prepare("SELECT * FROM sites WHERE id = ?")
-      .bind(insert.meta.last_row_id)
+      .bind(context.userId, normalizePublicHostname(data.url_base))
       .first<Site>();
-    if (!site) throw new Error("Failed to add website. Please try again.");
+    if (!site) throw new Error("This website already exists in your list.");
     return site;
   });
 
@@ -54,38 +40,37 @@ const editSiteSchema = z.object({
 
 export const editSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(editSiteSchema)
+  .validator(editSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
     const db = getDb();
-    const existing = await db
-      .prepare("SELECT * FROM sites WHERE id = ? AND user_id = ?")
-      .bind(data.siteId, context.userId)
-      .first<Site>();
-    if (!existing) throw new Error("Website not found or access denied.");
-
-    const hostname = normalizePublicHostname(data.url_base);
-    const duplicate = await db
+    const site = await db
       .prepare(
-        `SELECT id FROM sites
-         WHERE user_id = ? AND url_base = ? AND id != ?`,
+        `UPDATE OR IGNORE sites SET url_base = ?
+         WHERE id = ? AND user_id = ?
+         RETURNING *`,
       )
-      .bind(context.userId, hostname, data.siteId)
-      .first<{ id: number }>();
-    if (duplicate) throw new Error("This website already exists in your list.");
-    if (hostname === existing.url_base) return existing;
+      .bind(normalizePublicHostname(data.url_base), data.siteId, context.userId)
+      .first<Site>();
+    if (site) return site;
 
-    await db
-      .prepare("UPDATE sites SET url_base = ? WHERE id = ? AND user_id = ?")
-      .bind(hostname, data.siteId, context.userId)
-      .run();
-    return { ...existing, url_base: hostname };
+    // No row: either the site isn't this user's, or the new hostname is
+    // already in their list (the unique index ignored the update).
+    const owned = await db
+      .prepare("SELECT 1 FROM sites WHERE id = ? AND user_id = ?")
+      .bind(data.siteId, context.userId)
+      .first();
+    throw new Error(
+      owned
+        ? "This website already exists in your list."
+        : "Website not found or access denied.",
+    );
   });
 
 const deleteSiteSchema = z.object({ siteId: z.number().int().positive() });
 
 export const deleteSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(deleteSiteSchema)
+  .validator(deleteSiteSchema)
   .handler(async ({ context, data }): Promise<void> => {
     const result = await getDb()
       .prepare("DELETE FROM sites WHERE id = ? AND user_id = ?")

@@ -2,13 +2,13 @@
 title: "Refund Policy"
 slug: "refund-policy"
 description: "When refunds may be granted and how requests are handled."
-updatedAt: "2024-06-07T00:00:00.000Z"
+updatedAt: "2026-10-17T00:00:00.000Z"
 order: 30
 ---
 
 ### Refunds
 
-At Mosaic, we strive to provide the best possible service. Refunds may be granted when services are significantly disrupted, billed incorrectly, or unsatisfactory within the first 30 days.
+Refunds may be granted when services are significantly disrupted, billed incorrectly, or unsatisfactory within the first 30 days.
 
 ### Requesting a Refund
 

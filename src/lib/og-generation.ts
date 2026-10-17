@@ -1,38 +1,31 @@
 /**
- * OG image generation helpers and request handler.
- * Pure utility functions plus the main handleUseRequest handler
- * that uses Cloudflare native bindings (R2, Browser Rendering).
+ * The public `GET /use?url=<page>` endpoint.
  *
- * Supports two modes via the `mode` query parameter:
- * - `mode=demo` — fetches page metadata + generates a screenshot,
- *   returns JSON for the demo UI. No D1 tracking.
- * - (default) — production OG generation with D1 site lookup,
- *   shared-cache controls and 307 redirect responses.
+ * - Default: production generation. Only hostnames saved by a user are
+ *   served. A fresh shared image redirects (307) straight to `/i/<key>`; an
+ *   expired or missing one is regenerated behind the rate limit, generation
+ *   lock and daily budget, falling back to the stale or example image.
+ * - `mode=demo`: the home page demo. Returns page metadata and an inline
+ *   screenshot as JSON, without D1 image records or R2.
  */
 
 import { recordGenerationEvent, type GenerationOutcome } from "@/lib/analytics";
-import { SCREENSHOT_ENGINE } from "@/lib/constants";
+import { publicCorsHeaders } from "@/lib/cors";
 import { getDb } from "@/lib/db";
 import {
   extractMetadata,
   fetchPageHtml,
   resolvePublicPageUrl,
 } from "@/lib/metadata";
-import {
-  isMosaicRendererRequest,
-  MOSAIC_RENDERER_USER_AGENT,
-} from "@/lib/request";
+import { isMosaicRendererRequest } from "@/lib/request";
+import { takeScreenshot } from "@/lib/screenshot";
 import {
   buildPublicImageUrl,
-  ensureWebsiteProtocol,
-  extractUrlParts,
-  isSelfReferentialUseUrl,
+  canonicalPage,
+  parseWebsiteUrl,
   validateOutboundUrl,
 } from "@/lib/url";
-import {
-  reserveDemoGeneration,
-  reserveProductionGeneration,
-} from "@/server/generation-usage";
+import { reserveGeneration } from "@/server/generation-usage";
 import {
   acquireGenerationLock,
   findGlobalImage,
@@ -42,80 +35,18 @@ import {
 } from "@/server/og";
 import { env } from "cloudflare:workers";
 
-// ── CORS Headers ────────────────────────────────────────────────────
+const FALLBACK_IMAGE_PATH = "/images/mosaic-example-og-f9e253a9.png";
 
-export const corsHeaders: Record<string, string> = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+type Target = {
+  url: URL;
+  pageUrl: string;
+  hostname: string;
+  requestHostname: string;
 };
 
-// ── Cache Key Generation ────────────────────────────────────────────
+// ── Responses ───────────────────────────────────────────────────────
 
-/**
- * Compute the SHA-256 hex digest of a URL string using the Web Crypto API.
- */
-export async function generateCacheKey(url: string): Promise<string> {
-  const data = new TextEncoder().encode(url);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = new Uint8Array(hashBuffer);
-  return Array.from(hashArray)
-    .map((byte) => byte.toString(16).padStart(2, "0"))
-    .join("");
-}
-
-// ── R2 Key Construction ─────────────────────────────────────────────
-
-/**
- * Build the R2 object key for a cached OG image.
- *
- * Production images use a service-owned global namespace.
- */
-export function getR2Key(cacheKey: string): string {
-  return `global/${cacheKey}.jpeg`;
-}
-
-// ── URL Validation ──────────────────────────────────────────────────
-
-interface UrlValidationResult {
-  isValid: boolean;
-  validatedUrl?: URL;
-  error?: string;
-}
-
-/**
- * Validate a URL string for OG image generation.
- *
- * - Rejects malformed URLs and non-HTTP(S) protocols.
- * - Blocks localhost/127.0.0.1/0.0.0.0 in production.
- */
-export function validateUrl(url: string): UrlValidationResult {
-  let parsedUrl: URL;
-
-  try {
-    parsedUrl = new URL(url);
-  } catch {
-    return { isValid: false, error: "Invalid URL provided" };
-  }
-
-  const validationError = validateOutboundUrl(parsedUrl);
-  if (validationError) {
-    return { isValid: false, error: validationError };
-  }
-
-  return { isValid: true, validatedUrl: parsedUrl };
-}
-
-// ── Public Image URL ────────────────────────────────────────────────
-
-// buildPublicImageUrl is imported from @/lib/platform at the top of this file.
-
-// ── Response Helpers ────────────────────────────────────────────────
-
-/**
- * Create a JSON response with CORS headers.
- */
-export function createJsonResponse(
+function json(
   body: object,
   status: number,
   extraHeaders?: Record<string, string>,
@@ -124,7 +55,7 @@ export function createJsonResponse(
     status,
     headers: {
       "Content-Type": "application/json",
-      ...corsHeaders,
+      ...publicCorsHeaders,
       ...extraHeaders,
     },
   });
@@ -134,357 +65,253 @@ export function createJsonResponse(
  * Redirect to the current service-owned image. D1 controls automatic renewal,
  * so this response is not cached independently of the global image record.
  */
-export function createRedirectResponse(location: string): Response {
+function redirect(location: string): Response {
   return new Response(null, {
     status: 307,
     headers: {
       Location: location,
       "Cache-Control": "private, no-store",
-      ...corsHeaders,
+      ...publicCorsHeaders,
     },
   });
 }
 
-function createFallbackRedirectResponse(request: Request): Response {
-  return createRedirectResponse(
-    new URL("/images/mosaic-example-og-f9e253a9.png", request.url).toString(),
+async function sha256Hex(value: string): Promise<string> {
+  const digest = await crypto.subtle.digest(
+    "SHA-256",
+    new TextEncoder().encode(value),
   );
+  return Array.from(new Uint8Array(digest), (byte) =>
+    byte.toString(16).padStart(2, "0"),
+  ).join("");
 }
 
-function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
+function toJpegDataUrl(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
   let binary = "";
-  const chunkSize = 0x8000;
-  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
-    binary += String.fromCharCode(
-      ...bytes.subarray(offset, offset + chunkSize),
-    );
+  for (let offset = 0; offset < bytes.length; offset += 0x8000) {
+    binary += String.fromCharCode(...bytes.subarray(offset, offset + 0x8000));
   }
   return `data:image/jpeg;base64,${btoa(binary)}`;
 }
 
-// ── Screenshot Helper ───────────────────────────────────────────────
-
-/**
- * Take a JPEG screenshot of the given URL via the Cloudflare Browser Run
- * `screenshot` Quick Action, called directly through the `BROWSER` Workers
- * binding (`env.BROWSER.quickAction`).
- *
- * The engine comes from `SCREENSHOT_ENGINE`: Kitesurf (the binding's
- * `browser: "kitesurf"` option), or Chromium when that is set to "chromium".
- *
- * Using the binding talks to Browser Run directly over Cloudflare's network —
- * no account ID or API token required. Requires a compatibility date of
- * `2026-03-24` or later and a `browser` binding in `wrangler.jsonc`.
- *
- * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
- * `networkidle0` to avoid stalling on sites with persistent connections
- * (analytics beacons, websockets, long-polling).
- *
- * In dev without remote bindings, `quickAction()` is unavailable, so the
- * same options run through local Puppeteer instead.
- */
-export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  const options: BrowserRunScreenshotOptions = {
-    url,
-    ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
-    userAgent: MOSAIC_RENDERER_USER_AGENT,
-    viewport: { width: 1560, height: 819 },
-    gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
-    addStyleTag: [{ content: "* { overflow: hidden; }" }],
-    screenshotOptions: { type: "jpeg", quality: 85 },
-  };
-
-  let response: Response;
-  try {
-    response = await env.BROWSER.quickAction("screenshot", options);
-  } catch (error) {
-    if (import.meta.env.DEV) {
-      const { takeLocalScreenshot } = await import("@/lib/local-screenshot");
-      return takeLocalScreenshot(env.BROWSER, options);
-    }
-    throw error;
-  }
-  if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(`Browser Run returned ${response.status}: ${message}`);
-  }
-  return response.arrayBuffer();
+function clientKey(request: Request): string {
+  return request.headers.get("CF-Connecting-IP") ?? "unknown";
 }
 
-// ── Demo Mode Handler ───────────────────────────────────────────────
-
-const DEMO_CACHE_CONTROL = "private, no-store";
+// ── Demo mode ───────────────────────────────────────────────────────
 
 /**
- * Handle a demo-mode request: fetch page metadata and generate a
- * screenshot in parallel, returning a JSON response with both.
- *
- * Demo screenshots are returned inline instead of being persisted in R2.
- * A fast per-client limiter and a durable global daily budget protect the
- * shared Browser Run allowance before paid work begins.
+ * Fetch page metadata and take a screenshot in parallel. A per-client
+ * limiter and a global daily budget protect the shared Browser Run
+ * allowance before paid work begins.
  */
 async function handleDemoRequest(
   request: Request,
-  url: string,
+  target: Target,
 ): Promise<Response> {
-  // Normalize URL — demo accepts bare hostnames like "example.com"
-  let normalizedUrl: string;
-  try {
-    normalizedUrl = ensureWebsiteProtocol(url);
-  } catch {
-    return createJsonResponse(
-      { error: "Please enter a valid website URL." },
-      400,
-    );
-  }
+  const noStore = { "Cache-Control": "private, no-store" };
+  const client = clientKey(request);
 
-  // Validate
-  const { isValid, error, validatedUrl } = validateUrl(normalizedUrl);
-  if (!isValid) {
-    return createJsonResponse({ error }, 400);
-  }
-
-  const requestHostname = new URL(request.url).hostname;
-  if (!validatedUrl || isSelfReferentialUseUrl(validatedUrl, requestHostname)) {
-    return createJsonResponse(
-      { error: "URL may not target this service's /use endpoint." },
-      400,
-    );
-  }
-
-  const { sanitizedUrl } = extractUrlParts(validatedUrl.toString());
-  const parsedUrl = new URL(sanitizedUrl);
-  const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
-  const rateLimit = await env.DEMO_RATE_LIMITER.limit({ key: clientKey });
+  const rateLimit = await env.DEMO_RATE_LIMITER.limit({ key: client });
   if (!rateLimit.success) {
-    return createJsonResponse(
+    return json(
       { error: "Too many demo requests. Please try again in a minute." },
       429,
       { "Retry-After": "60" },
     );
   }
 
-  const db = getDb().withSession("first-unconstrained");
-  const reserved = await reserveDemoGeneration(db, clientKey);
-  if (!reserved) {
-    return createJsonResponse(
+  if (!(await reserveGeneration(getDb(), "demo", client))) {
+    return json(
       {
-        normalizedUrl: sanitizedUrl,
+        normalizedUrl: target.pageUrl,
         title: "",
         description: "",
         image: "",
-        imageUrl: new URL(
-          "/images/mosaic-example-og-f9e253a9.png",
-          request.url,
-        ).toString(),
+        imageUrl: new URL(FALLBACK_IMAGE_PATH, request.url).toString(),
         notice:
           "Live screenshot capacity is currently busy. Showing an example image.",
       },
       200,
-      { "Cache-Control": DEMO_CACHE_CONTROL },
+      noStore,
     );
   }
 
-  // Fetch metadata and generate screenshot in parallel
-  const [metadata, screenshotResult] = await Promise.allSettled([
-    fetchPageHtml(parsedUrl, requestHostname).then((html) =>
-      extractMetadata(html, parsedUrl),
+  const [metadata, screenshot] = await Promise.allSettled([
+    fetchPageHtml(target.url, target.requestHostname).then((html) =>
+      extractMetadata(html, target.url),
     ),
-    resolvePublicPageUrl(parsedUrl, requestHostname).then((finalUrl) =>
+    resolvePublicPageUrl(target.url, target.requestHostname).then((finalUrl) =>
       takeScreenshot(finalUrl.toString()),
     ),
   ]);
-
-  // Extract metadata result
   const meta =
     metadata.status === "fulfilled"
       ? metadata.value
       : { title: "", description: "", image: "" };
 
-  // Extract screenshot result
-  let imageUrl: string | null = null;
-  let screenshotError: string | undefined;
-
-  if (screenshotResult.status === "fulfilled") {
-    imageUrl = arrayBufferToDataUrl(screenshotResult.value);
-  } else {
-    screenshotError =
-      screenshotResult.reason instanceof Error
-        ? screenshotResult.reason.message
-        : "Failed to generate OG image";
-  }
-
-  return createJsonResponse(
+  return json(
     {
-      normalizedUrl: sanitizedUrl,
-      title: meta.title,
-      description: meta.description,
-      image: meta.image,
-      imageUrl,
-      ...(screenshotError ? { error: screenshotError } : {}),
+      normalizedUrl: target.pageUrl,
+      ...meta,
+      imageUrl:
+        screenshot.status === "fulfilled"
+          ? toJpegDataUrl(screenshot.value)
+          : null,
+      ...(screenshot.status === "rejected"
+        ? {
+            error:
+              screenshot.reason instanceof Error
+                ? screenshot.reason.message
+                : "Failed to generate OG image",
+          }
+        : {}),
     },
     200,
-    { "Cache-Control": DEMO_CACHE_CONTROL },
+    noStore,
   );
 }
 
-// ── Production Mode Handler ─────────────────────────────────────────
+// ── Production mode ─────────────────────────────────────────────────
 
-/**
- * Handle unsigned production generation against the shared canonical cache.
- */
 async function handleProductionRequest(
   request: Request,
-  url: string,
+  target: Target,
 ): Promise<Response> {
-  // Validate URL (always production in Workers)
-  const { isValid, error, validatedUrl } = validateUrl(url);
-  if (!isValid || !validatedUrl) {
-    return createJsonResponse({ error }, 400);
-  }
-
-  const requestHostname = new URL(request.url).hostname;
+  const { pageUrl, hostname } = target;
   // Redirect to images on the origin that served this request, not the
   // build-time site URL, so Worker Previews read from their own R2 bucket.
-  const imageBaseUrl = new URL("/i/", request.url).toString();
-  const imageUrl = (key: string) => buildPublicImageUrl(key, imageBaseUrl);
-  if (isSelfReferentialUseUrl(validatedUrl, requestHostname)) {
-    return createJsonResponse(
-      { error: "URL may not target this service's /use endpoint." },
-      400,
-    );
-  }
+  const imageUrl = (key: string) =>
+    buildPublicImageUrl(key, new URL("/i/", request.url).toString());
 
-  const { urlBase, sanitizedUrl } = extractUrlParts(validatedUrl.toString());
-  // A session lets these lookups hit the nearest D1 read replica when read
-  // replication is enabled. Later writes (locks, budgets, image records) go
-  // to the primary, and the session keeps them sequentially consistent.
+  // A session lets these lookups hit the nearest D1 read replica. Later
+  // writes go to the primary, and the session keeps them sequentially
+  // consistent.
   const db = getDb().withSession("first-unconstrained");
-  const [cacheKey, isAssociated, cachedImage] = await Promise.all([
-    generateCacheKey(sanitizedUrl),
-    isHostnameAssociated(db, urlBase),
-    findGlobalImage(db, sanitizedUrl),
+  const [isAssociated, cachedImage] = await Promise.all([
+    isHostnameAssociated(db, hostname),
+    findGlobalImage(db, pageUrl),
   ]);
   const record = (
     outcome: GenerationOutcome,
     metrics?: { durationMs: number; bytes?: number },
-  ) => recordGenerationEvent({ outcome, hostname: urlBase, ...metrics });
+  ) => recordGenerationEvent({ outcome, hostname, ...metrics });
+
+  /** Serve the stale image, or the example image when there is none. */
+  const fallback = () =>
+    redirect(
+      cachedImage
+        ? imageUrl(cachedImage.key)
+        : new URL(FALLBACK_IMAGE_PATH, request.url).toString(),
+    );
 
   if (!isAssociated) {
     record("unregistered");
-    return createJsonResponse(
-      {
-        error: "Website must be added to Mosaic before generating OG images",
-      },
+    return json(
+      { error: "Website must be added to Mosaic before generating OG images" },
       404,
     );
   }
 
   if (cachedImage && cachedImage.expiresAt > Date.now()) {
     record("cache_hit");
-    return createRedirectResponse(imageUrl(cachedImage.key));
+    return redirect(imageUrl(cachedImage.key));
   }
 
-  const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
-  const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: clientKey });
+  const client = clientKey(request);
+  const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: client });
   if (!rateLimit.success) {
     record("rate_limited");
-    return cachedImage
-      ? createRedirectResponse(imageUrl(cachedImage.key))
-      : createFallbackRedirectResponse(request);
+    return fallback();
   }
 
-  const leaseToken = await acquireGenerationLock(db, sanitizedUrl);
+  const leaseToken = await acquireGenerationLock(db, pageUrl);
   if (!leaseToken) {
     record("locked");
-    if (cachedImage) {
-      return createRedirectResponse(imageUrl(cachedImage.key));
-    }
-    return createJsonResponse(
-      { error: "This image is already being generated. Please retry shortly." },
-      503,
-      { "Retry-After": "2", "Cache-Control": "no-store" },
-    );
-  }
-
-  const reserved = await reserveProductionGeneration(db, clientKey);
-  if (!reserved) {
-    await releaseGenerationLock(db, sanitizedUrl, leaseToken);
-    record("budget_exhausted");
     return cachedImage
-      ? createRedirectResponse(imageUrl(cachedImage.key))
-      : createFallbackRedirectResponse(request);
+      ? fallback()
+      : json(
+          {
+            error:
+              "This image is already being generated. Please retry shortly.",
+          },
+          503,
+          { "Retry-After": "2", "Cache-Control": "no-store" },
+        );
   }
 
-  const imageKey = getR2Key(cacheKey);
-  const startedAt = Date.now();
   try {
-    const finalUrl = await resolvePublicPageUrl(
-      new URL(sanitizedUrl),
-      requestHostname,
-    );
-    const imageBuffer = await takeScreenshot(finalUrl.toString());
-    await env.OG_BUCKET.put(imageKey, imageBuffer, {
-      httpMetadata: { contentType: "image/jpeg" },
-    });
+    if (!(await reserveGeneration(db, "production", client))) {
+      record("budget_exhausted");
+      return fallback();
+    }
 
-    await recordGlobalImage(db, imageKey, sanitizedUrl, imageBuffer.byteLength);
-    record("generated", {
-      durationMs: Date.now() - startedAt,
-      bytes: imageBuffer.byteLength,
-    });
+    const startedAt = Date.now();
+    try {
+      const finalUrl = await resolvePublicPageUrl(
+        target.url,
+        target.requestHostname,
+      );
+      const image = await takeScreenshot(finalUrl.toString());
+      const imageKey = `global/${await sha256Hex(pageUrl)}.jpeg`;
+      await env.OG_BUCKET.put(imageKey, image, {
+        httpMetadata: { contentType: "image/jpeg" },
+      });
+      await recordGlobalImage(db, target, imageKey, image.byteLength);
 
-    return createRedirectResponse(imageUrl(imageKey));
-  } catch (err) {
-    console.error("[USE] Failed to generate or persist image:", err);
-    record("failed", { durationMs: Date.now() - startedAt });
-    return cachedImage
-      ? createRedirectResponse(imageUrl(cachedImage.key))
-      : createFallbackRedirectResponse(request);
+      record("generated", {
+        durationMs: Date.now() - startedAt,
+        bytes: image.byteLength,
+      });
+      return redirect(imageUrl(imageKey));
+    } catch (error) {
+      console.error("[USE] Failed to generate or persist image:", error);
+      record("failed", { durationMs: Date.now() - startedAt });
+      return fallback();
+    }
   } finally {
-    await releaseGenerationLock(db, sanitizedUrl, leaseToken).catch((error) =>
+    await releaseGenerationLock(db, pageUrl, leaseToken).catch((error) =>
       console.error("[USE] Failed to release generation lock:", error),
     );
   }
 }
 
-// ── Main Request Handler ────────────────────────────────────────────
+// ── Entry point ─────────────────────────────────────────────────────
 
-/**
- * Handle an incoming GET /use request.
- *
- * Routes to demo or production mode based on the `mode` query parameter:
- * - `mode=demo` → {@link handleDemoRequest}
- * - (default)   → {@link handleProductionRequest}
- */
 export async function handleUseRequest(request: Request): Promise<Response> {
   try {
-    const requestUrl = new URL(request.url);
-    const url = requestUrl.searchParams.get("url");
-    const mode = requestUrl.searchParams.get("mode");
-
-    if (!url) {
-      return createJsonResponse({ error: "URL parameter is required" }, 400);
+    const { searchParams, hostname: requestHostname } = new URL(request.url);
+    const rawUrl = searchParams.get("url");
+    if (!rawUrl) {
+      return json({ error: "URL parameter is required" }, 400);
     }
 
-    // A captured page can redirect Chromium back to /use. The renderer's
-    // deny-only marker stops recursion without relying on optional Fetch
-    // Metadata or restricting ordinary browsers and social crawlers.
+    // A captured page can redirect the browser back to /use. The renderer's
+    // deny-only marker stops recursion without restricting ordinary browsers
+    // and social crawlers.
     if (isMosaicRendererRequest(request)) {
-      return createJsonResponse(
-        { error: "Recursive screenshot request blocked." },
-        400,
-      );
+      return json({ error: "Recursive screenshot request blocked." }, 400);
     }
 
-    if (mode === "demo") {
-      return handleDemoRequest(request, url);
+    let url: URL;
+    try {
+      url = parseWebsiteUrl(rawUrl);
+    } catch {
+      return json({ error: "Please enter a valid website URL." }, 400);
+    }
+    const validationError = validateOutboundUrl(url, requestHostname);
+    if (validationError) {
+      return json({ error: validationError }, 400);
     }
 
-    return handleProductionRequest(request, url);
-  } catch (err) {
-    console.error("[USE] Unhandled error:", err);
-    return createJsonResponse({ error: "Internal server error" }, 500);
+    const page = canonicalPage(url);
+    const target = { ...page, url: new URL(page.pageUrl), requestHostname };
+    return searchParams.get("mode") === "demo"
+      ? handleDemoRequest(request, target)
+      : handleProductionRequest(request, target);
+  } catch (error) {
+    console.error("[USE] Unhandled error:", error);
+    return json({ error: "Internal server error" }, 500);
   }
 }

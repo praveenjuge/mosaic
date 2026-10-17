@@ -1,27 +1,22 @@
 ---
 title: "Change Your Account Password"
+description: "Change your Mosaic password from your account settings, or reset it if you forgot it."
 category: "Authentication"
 publishedAt: "2024-08-18T09:51:15.583Z"
 ---
 
-If you need to change your password on mosaic.praveenjuge.com, follow these simple steps:
+## If you're signed in
 
-- **Visit the Website**\
-  Go to [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com) using your preferred web browser.
+1. Click your profile picture in the top right corner.
+2. Choose **Manage account**.
+3. Open **Security** and update your password.
 
-- **Sign In**\
-  Click on the **“Sign In”** button located at the homepage.
+## If you forgot your password
 
-- **Enter Your Email**\
-  In the sign-in window, enter your email address associated with your account, and then click **Enter**.
+1. Go to [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com) and click
+   **Log In**.
+2. Enter your email and continue.
+3. Click **Forgot password?** on the password step.
+4. Follow the email you receive to set a new password.
 
-- **Forgot Password?**\
-  If you don’t remember your password, click on the **“Forgot Password”** link next to the password field.
-
-- **Follow the Instructions**\
-  You will receive an email with a code or link to reset your password. Follow the instructions provided in the email to set a new password.
-
-- **Complete the Process**\
-  Once you’ve successfully changed your password, you will be redirected to your dashboard, where you can continue using Mosaic.
-
-By following these steps, you can easily change your password and regain access to your account.
+After you reset it, you're signed in and back on your dashboard.

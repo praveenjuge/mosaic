@@ -2,7 +2,7 @@
 title: "Terms of Service"
 slug: "terms-of-service"
 description: "The rules and conditions that govern use of Mosaic."
-updatedAt: "2024-06-07T00:00:00.000Z"
+updatedAt: "2026-10-17T00:00:00.000Z"
 order: 20
 ---
 
@@ -17,6 +17,8 @@ You may need to create an account to access certain features of our services. Yo
 All content and materials provided through our services are owned by Mosaic or our licensors and are protected by intellectual property laws.
 
 ### Acceptable Use
+
+You may not use our services for:
 
 - Transmitting or uploading illegal, harmful, or offensive content
 - Engaging in fraudulent or deceptive activities
@@ -33,11 +35,11 @@ We reserve the right to terminate or suspend access to our services at any time 
 
 ### Subscription Terms and Pricing
 
-Our services are available on a subscription basis. Pricing and terms may change over time.
+We offer a free plan and paid subscriptions. Pricing and terms may change over time.
 
 ### User-Generated Content
 
-You are responsible for any content you create or upload to our services, and you grant us the license needed to operate the service.
+You are responsible for any content you create or upload to our services, including the websites you add, and you grant us the license needed to operate the service, such as capturing, storing, and serving screenshots of their pages.
 
 ### Age Restrictions
 

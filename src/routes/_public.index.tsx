@@ -1,6 +1,9 @@
+import DashboardPage from "@/components/dashboard/dashboard-page";
+import HomeSignedOut from "@/components/home/homesignedout";
 import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { getDashboardStats } from "@/server/stats";
+import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
 
 const homeDescription =
@@ -11,6 +14,7 @@ export const Route = createFileRoute("/_public/")({
     const dashboardStats = await getDashboardStats();
     return { dashboardStats };
   },
+  component: HomePage,
   head: () => {
     const seo = buildSeoMeta({
       title: "Simplify Your Open Graph Image Creation.",
@@ -24,3 +28,14 @@ export const Route = createFileRoute("/_public/")({
     };
   },
 });
+
+function HomePage() {
+  const { auth, dashboardStats } = Route.useRouteContext();
+  const { isSignedIn } = useAuth();
+
+  if (auth.isAuthenticated || isSignedIn) {
+    return <DashboardPage dashboardStats={dashboardStats} />;
+  }
+
+  return <HomeSignedOut />;
+}
