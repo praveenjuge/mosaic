@@ -23,10 +23,33 @@ Cloudflare provisions fork-specific resources from `wrangler.jsonc`. The two `VI
 bun install --frozen-lockfile
 cp .env.example .env.local
 bun run db:migrate:local
+bun run db:seed:local
 bun run dev
 ```
 
-Fill in all three variables in `.env.local` (use `http://localhost:3000` for `VITE_SITE_URL`) and run `wrangler login` first. Browser Run uses the remote `BROWSER` binding during local development, so screenshot generation requires an authenticated Cloudflare account with Browser Rendering access.
+Fill in all three variables in `.env.local` (use `http://localhost:3000` for `VITE_SITE_URL`). D1 and R2 always use local state in `.wrangler/`.
+
+Screenshots use the remote Browser Run binding when you are logged in with `wrangler login` or have `CLOUDFLARE_API_TOKEN` set. Otherwise the dev server falls back to a local Chrome driven by Puppeteer, so `/use` still works without a Cloudflare account. `MOSAIC_REMOTE_BINDINGS=1` or `0` forces either mode.
+
+`bun run db:seed:local` registers `example.com`, so `http://localhost:3000/use?url=https://example.com` generates an image right away.
+
+## Tests
+
+```sh
+bun run test               # unit tests
+bun run build && bun run test:integration  # built Worker in workerd
+bun run test:e2e           # Playwright against the dev server
+```
+
+CI runs lint, format, type, and binding-type checks plus all three suites on every pull request.
+
+## Previews
+
+`bun run deploy:preview` deploys the current branch as a Worker Preview with its own URL, bound to preview-only D1, R2, rate limiters, and Analytics Engine data (see the `previews` block in `wrangler.jsonc`).
+
+## Claude Code
+
+The repository is set up for [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web): a SessionStart hook (`.claude/settings.json`) installs dependencies, writes placeholder keys, and prepares local D1, so cloud sessions can build, test, and generate screenshots without any credentials. Project instructions live in `AGENTS.md`, which `CLAUDE.md` imports.
 
 ## License
 

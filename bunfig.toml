@@ -1,0 +1,4 @@
+[test]
+# Keeps `bun test` on unit tests. Integration tests (tests/) run under
+# `node --test` and Playwright specs (e2e/) under `playwright test`.
+root = "src"

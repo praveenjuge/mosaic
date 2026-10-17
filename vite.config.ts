@@ -27,6 +27,22 @@ function resolveSiteHost(siteUrl: string | undefined) {
   return parsed.origin;
 }
 
+/**
+ * Remote bindings proxy Browser Run calls to the real Cloudflare account, so
+ * they need Cloudflare credentials. Workers Builds' build token can't reach
+ * them, and CI or Claude Code cloud containers have no `wrangler login`, so
+ * those default to local emulation unless an API token is present.
+ * `MOSAIC_REMOTE_BINDINGS=1|0` overrides the detection either way.
+ */
+function shouldUseRemoteBindings() {
+  const override = process.env.MOSAIC_REMOTE_BINDINGS;
+  if (override) return override === "1" || override === "true";
+  if (process.env.WORKERS_CI === "1") return false;
+  if (process.env.CLOUDFLARE_API_TOKEN) return true;
+
+  return !process.env.CI && process.env.CLAUDE_CODE_REMOTE !== "true";
+}
+
 const prerenderBlockedPaths = [
   "/",
   "/dashboard",
@@ -58,7 +74,7 @@ function exitAfterCloudflarePrerender(): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const siteHost = resolveSiteHost(env.VITE_SITE_URL);
 
@@ -66,14 +82,21 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true,
     },
+    define: {
+      // Miniflare launches the local dev Chrome with an empty environment, so
+      // it can't see HTTPS_PROXY. Sandboxes that require an egress proxy, like
+      // Claude Code cloud sessions, need it passed to Puppeteer explicitly.
+      __DEV_BROWSER_PROXY__: JSON.stringify(
+        command === "serve" ? (process.env.HTTPS_PROXY ?? "") : "",
+      ),
+    },
     envPrefix: ["VITE_"],
     plugins: [
       cloudflare({
         viteEnvironment: { name: "ssr" },
-        // Prerendered routes (/help, /legal) never touch R2 or Browser Run.
-        // On Workers Builds, starting a remote proxy for those bindings can
-        // fail the whole `vite build` when the build token can't reach them.
-        remoteBindings: process.env.WORKERS_CI !== "1",
+        // Prerendered routes (/help, /legal) never touch Browser Run, and a
+        // remote proxy that can't authenticate fails the whole `vite build`.
+        remoteBindings: shouldUseRemoteBindings(),
       }),
       ...tanstackStart({
         pages: [{ path: "/help" }, { path: "/legal" }],

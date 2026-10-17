@@ -10,6 +10,11 @@
  *   shared-cache controls and 307 redirect responses.
  */
 
+import {
+  recordGenerationEvent,
+  type GenerationOutcome,
+} from "@/lib/analytics";
+import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { getDb } from "@/lib/db";
 import {
   extractMetadata,
@@ -168,10 +173,8 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * `screenshot` Quick Action, called directly through the `BROWSER` Workers
  * binding (`env.BROWSER.quickAction`).
  *
- * Uses Browser Run's default Chromium engine. Kitesurf is available on REST
- * and CDP via `?browser=kitesurf`, but the Workers Quick Action binding does
- * not yet accept an engine selector — passing `browser: "kitesurf"` in the
- * options body is rejected at runtime and breaks OG generation.
+ * The engine comes from `SCREENSHOT_ENGINE`: Chromium by default, or
+ * Kitesurf via the binding's `browser: "kitesurf"` option.
  *
  * Using the binding talks to Browser Run directly over Cloudflare's network —
  * no account ID or API token required. Requires a compatibility date of
@@ -180,17 +183,31 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling).
+ *
+ * In dev without remote bindings, `quickAction()` is unavailable, so the
+ * same options run through local Puppeteer instead.
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
-  const browser = env.BROWSER as unknown as BrowserRunBinding;
-  const response = await browser.quickAction("screenshot", {
+  const options: BrowserRunScreenshotOptions = {
     url,
+    ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
     userAgent: MOSAIC_RENDERER_USER_AGENT,
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
     screenshotOptions: { type: "jpeg", quality: 85 },
-  });
+  };
+
+  let response: Response;
+  try {
+    response = await env.BROWSER.quickAction("screenshot", options);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      const { takeLocalScreenshot } = await import("@/lib/local-screenshot");
+      return takeLocalScreenshot(env.BROWSER, options);
+    }
+    throw error;
+  }
   if (!response.ok) {
     const message = await response.text().catch(() => "");
     throw new Error(`Browser Run returned ${response.status}: ${message}`);
@@ -251,7 +268,7 @@ async function handleDemoRequest(
     );
   }
 
-  const db = getDb();
+  const db = getDb().withSession("first-unconstrained");
   const reserved = await reserveDemoGeneration(db, clientKey);
   if (!reserved) {
     return createJsonResponse(
@@ -339,14 +356,22 @@ async function handleProductionRequest(
   }
 
   const { urlBase, sanitizedUrl } = extractUrlParts(validatedUrl.toString());
-  const db = getDb();
+  // A session lets these lookups hit the nearest D1 read replica when read
+  // replication is enabled. Later writes (locks, budgets, image records) go
+  // to the primary, and the session keeps them sequentially consistent.
+  const db = getDb().withSession("first-unconstrained");
   const [cacheKey, isAssociated, cachedImage] = await Promise.all([
     generateCacheKey(sanitizedUrl),
     isHostnameAssociated(db, urlBase),
     findGlobalImage(db, sanitizedUrl),
   ]);
+  const record = (
+    outcome: GenerationOutcome,
+    metrics?: { durationMs: number; bytes?: number },
+  ) => recordGenerationEvent({ outcome, hostname: urlBase, ...metrics });
 
   if (!isAssociated) {
+    record("unregistered");
     return createJsonResponse(
       {
         error: "Website must be added to Mosaic before generating OG images",
@@ -356,12 +381,14 @@ async function handleProductionRequest(
   }
 
   if (cachedImage && cachedImage.expiresAt > Date.now()) {
+    record("cache_hit");
     return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
   }
 
   const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
   const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: clientKey });
   if (!rateLimit.success) {
+    record("rate_limited");
     return cachedImage
       ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
@@ -369,6 +396,7 @@ async function handleProductionRequest(
 
   const leaseToken = await acquireGenerationLock(db, sanitizedUrl);
   if (!leaseToken) {
+    record("locked");
     if (cachedImage) {
       return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
     }
@@ -382,12 +410,14 @@ async function handleProductionRequest(
   const reserved = await reserveProductionGeneration(db, clientKey);
   if (!reserved) {
     await releaseGenerationLock(db, sanitizedUrl, leaseToken);
+    record("budget_exhausted");
     return cachedImage
       ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
   }
 
   const imageKey = getR2Key(cacheKey);
+  const startedAt = Date.now();
   try {
     const finalUrl = await resolvePublicPageUrl(
       new URL(sanitizedUrl),
@@ -399,10 +429,15 @@ async function handleProductionRequest(
     });
 
     await recordGlobalImage(db, imageKey, sanitizedUrl, imageBuffer.byteLength);
+    record("generated", {
+      durationMs: Date.now() - startedAt,
+      bytes: imageBuffer.byteLength,
+    });
 
     return createRedirectResponse(buildPublicImageUrl(imageKey));
   } catch (err) {
     console.error("[USE] Failed to generate or persist image:", err);
+    record("failed", { durationMs: Date.now() - startedAt });
     return cachedImage
       ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
