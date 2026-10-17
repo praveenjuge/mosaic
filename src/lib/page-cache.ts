@@ -26,7 +26,7 @@ function hasOnlyTrackingParams(url: URL): boolean {
 }
 
 /** Clerk cookies that mean a session exists or may need a handshake. */
-function hasClerkSession(cookieHeader: string | null): boolean {
+export function hasClerkSession(cookieHeader: string | null): boolean {
   for (const part of (cookieHeader ?? "").split(";")) {
     const separator = part.indexOf("=");
     const name = (separator === -1 ? part : part.slice(0, separator)).trim();

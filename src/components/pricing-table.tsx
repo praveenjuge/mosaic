@@ -1,5 +1,5 @@
+import { SignUpLink } from "@/components/auth/auth-links";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -8,8 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { authenticatedHomePath } from "@/lib/clerk-auth";
-import { SignUpButton } from "@clerk/tanstack-react-start";
 import { Check } from "lucide-react";
 
 // ── Pricing Data ────────────────────────────────────────────────────
@@ -80,14 +78,9 @@ const PRICING_PLANS: Plan[] = [
 
 function PlanButton({ type }: { type: PlanType }) {
   return (
-    <SignUpButton
-      fallbackRedirectUrl={authenticatedHomePath}
-      forceRedirectUrl={authenticatedHomePath}
-    >
-      <Button className="w-full">
-        {type === "free" ? "Start Free" : "Sign Up"}
-      </Button>
-    </SignUpButton>
+    <SignUpLink className="w-full">
+      {type === "free" ? "Start Free" : "Sign Up"}
+    </SignUpLink>
   );
 }
 

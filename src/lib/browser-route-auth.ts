@@ -1,3 +1,5 @@
+import { hasClerkSession } from "@/lib/page-cache";
+
 /** Route auth as `beforeLoad` sees it. */
 export type RouteAuth = {
   userId: string | null;
@@ -23,4 +25,15 @@ export function routeAuthFromBrowserClerk(
   const userId =
     clerk.session?.status === "active" ? (clerk.user?.id ?? null) : null;
   return { userId, isAuthenticated: userId !== null };
+}
+
+/**
+ * Signed out when the browser holds no Clerk session cookie, or `null` when
+ * only the server can tell. Signed-out pages don't load Clerk, so this keeps
+ * their client navigations from asking the server who is signed in.
+ */
+export function routeAuthFromCookies(cookies: string): RouteAuth | null {
+  return hasClerkSession(cookies)
+    ? null
+    : { userId: null, isAuthenticated: false };
 }

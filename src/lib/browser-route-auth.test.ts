@@ -1,5 +1,8 @@
 import { describe, expect, test } from "bun:test";
-import { routeAuthFromBrowserClerk } from "./browser-route-auth";
+import {
+  routeAuthFromBrowserClerk,
+  routeAuthFromCookies,
+} from "./browser-route-auth";
 
 const user = { id: "user_1" };
 
@@ -33,5 +36,23 @@ describe("routeAuthFromBrowserClerk", () => {
     expect(
       routeAuthFromBrowserClerk({ loaded: true, user: null, session: null }),
     ).toEqual({ userId: null, isAuthenticated: false });
+  });
+});
+
+describe("routeAuthFromCookies", () => {
+  const signedOut = { userId: null, isAuthenticated: false };
+
+  test("signs out a browser with no Clerk session cookie", () => {
+    expect(routeAuthFromCookies("")).toEqual(signedOut);
+    expect(routeAuthFromCookies("theme=dark")).toEqual(signedOut);
+    expect(routeAuthFromCookies("__client_uat=0; theme=dark")).toEqual(
+      signedOut,
+    );
+  });
+
+  test("defers to the server when a session may exist", () => {
+    expect(routeAuthFromCookies("__session=abc")).toBeNull();
+    expect(routeAuthFromCookies("__client_uat_Ab12=1700000000")).toBeNull();
+    expect(routeAuthFromCookies("__clerk_db_jwt=dvb_1")).toBeNull();
   });
 });

@@ -36,6 +36,12 @@ describe("renderMarkdown", () => {
       '<a href="/a.png" target="_blank" rel="noopener noreferrer"><img src="/a.png" alt="Alt" loading="lazy"></a>',
     );
   });
+
+  test("sizes images from public/ so the page doesn't shift", async () => {
+    expect(
+      await renderMarkdown("![Alt](/images/mosaic-example-og-f9e253a9.png)"),
+    ).toContain('loading="lazy" width="1200" height="630"');
+  });
 });
 
 describe("loadContent", () => {

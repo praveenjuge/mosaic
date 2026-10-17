@@ -17,14 +17,25 @@ interface DemoData {
 
 type Preview = { title: string; description: string; url: string };
 
+/** An image URL, plus resized copies when it's one of the bundled examples. */
+type PreviewImage = { src: string; srcSet?: string };
+
 interface PreviewCardProps {
   isLoading: boolean;
-  src: string;
+  image: PreviewImage;
   alt: string;
   preview: Preview;
+  /** The first card's image is the largest paint on phones. */
+  priority?: boolean;
 }
 
-function PreviewCard({ isLoading, src, alt, preview }: PreviewCardProps) {
+function PreviewCard({
+  isLoading,
+  image,
+  alt,
+  preview,
+  priority = false,
+}: PreviewCardProps) {
   return (
     <div className="flex w-full flex-col overflow-hidden rounded-lg">
       <div className="relative h-52 w-full">
@@ -34,7 +45,16 @@ function PreviewCard({ isLoading, src, alt, preview }: PreviewCardProps) {
           <>
             <Skeleton className="absolute inset-0 size-full rounded-none" />
             <img
-              src={src}
+              src={image.src}
+              srcSet={image.srcSet}
+              // Cards sit side by side from `md` up, in a `max-w-4xl` row.
+              sizes={
+                image.srcSet
+                  ? "(min-width: 768px) 420px, calc(100vw - 32px)"
+                  : undefined
+              }
+              fetchPriority={priority ? "high" : undefined}
+              decoding="async"
               alt={alt}
               width={600}
               height={250}
@@ -69,8 +89,16 @@ const defaultPreview: Preview = {
   url: "praveenjuge.com",
 };
 
-const fallbackOriginalImage = "/images/original-example-og-814873d7.jpg";
-const fallbackMosaicImage = "/images/mosaic-example-og-f9e253a9.png";
+const fallbackOriginalImage: PreviewImage = {
+  src: "/images/original-example-og-864w-2b3240f3.webp",
+  srcSet:
+    "/images/original-example-og-432w-6e96ba9e.webp 432w, /images/original-example-og-864w-2b3240f3.webp 864w",
+};
+const fallbackMosaicImage: PreviewImage = {
+  src: "/images/mosaic-example-og-864w-a55bc7b7.webp",
+  srcSet:
+    "/images/mosaic-example-og-432w-68c1e9d2.webp 432w, /images/mosaic-example-og-864w-a55bc7b7.webp 864w",
+};
 
 export default function OGImageDemo() {
   const [inputUrl, setInputUrl] = useState("");
@@ -114,8 +142,12 @@ export default function OGImageDemo() {
     description: demoData?.description ?? defaultPreview.description,
     url: demoData?.normalizedUrl ?? defaultPreview.url,
   };
-  const mosaicImage =
-    (!demoData?.error && demoData?.imageUrl) || fallbackMosaicImage;
+  const originalUrl = demoData?.image;
+  const originalImage = originalUrl
+    ? { src: originalUrl }
+    : fallbackOriginalImage;
+  const mosaicUrl = !demoData?.error && demoData?.imageUrl;
+  const mosaicImage = mosaicUrl ? { src: mosaicUrl } : fallbackMosaicImage;
 
   return (
     <div className="relative mx-auto max-w-4xl pb-16">
@@ -152,9 +184,10 @@ export default function OGImageDemo() {
       <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
         <PreviewCard
           isLoading={isLoading}
-          src={demoData?.image || fallbackOriginalImage}
+          image={originalImage}
           alt="Original Open Graph Image"
           preview={preview}
+          priority
         />
         <span
           className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
@@ -165,7 +198,7 @@ export default function OGImageDemo() {
         </span>
         <PreviewCard
           isLoading={isLoading}
-          src={mosaicImage}
+          image={mosaicImage}
           alt="Mosaic Open Graph Image"
           preview={preview}
         />

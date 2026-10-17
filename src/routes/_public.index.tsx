@@ -1,3 +1,4 @@
+import HomeSignedOut from "@/components/home/homesignedout";
 import { preloadableLazy } from "@/lib/preloadable-lazy";
 import { buildSeoMeta } from "@/lib/seo";
 import { getDashboardStats } from "@/server/stats";
@@ -7,13 +8,11 @@ import { Suspense } from "react";
 const homeDescription =
   "Instantly turn your website's hero sections into stunning OG images-no design skills needed. Boost brand visibility and drive clicks with automated, high-converting social previews.";
 
-// Signed-in and signed-out visitors see different pages, so each downloads
-// only its own. The loader fetches the chunk alongside the data.
+// Most visitors are signed out, so their page ships with this route and
+// hydrates without waiting for another chunk. The dashboard has its own
+// chunk, which the loader fetches alongside the data.
 const dashboardPage = preloadableLazy(
   () => import("@/components/dashboard/dashboard-page"),
-);
-const homeSignedOut = preloadableLazy(
-  () => import("@/components/home/homesignedout"),
 );
 
 export const Route = createFileRoute("/_public/")({
@@ -22,7 +21,6 @@ export const Route = createFileRoute("/_public/")({
   loader: async ({ context }) => {
     const { userId } = context.auth;
     if (!userId) {
-      await homeSignedOut.preload();
       return { userId, dashboardStats: null };
     }
     const [dashboardStats] = await Promise.all([
@@ -52,7 +50,7 @@ function HomePage() {
       {stats ? (
         <dashboardPage.Component dashboardStats={stats} />
       ) : (
-        <homeSignedOut.Component />
+        <HomeSignedOut />
       )}
     </Suspense>
   );

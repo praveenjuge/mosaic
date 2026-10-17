@@ -1,0 +1,16 @@
+# Browser caching for static assets (Workers applies this file to files in
+# public/ and the build's assets; Worker responses set their own headers).
+# Without it every repeat visit revalidates each file before using it.
+#
+# Vite fingerprints /assets/*. Files in /images/ and /illustrations/ carry a
+# content hash in their names too: give any new or changed file there a new
+# name, or browsers keep showing the old one for a year.
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/illustrations/*
+  Cache-Control: public, max-age=31536000, immutable
