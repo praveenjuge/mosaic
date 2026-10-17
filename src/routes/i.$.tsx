@@ -33,10 +33,11 @@ async function serveImage(request: Request): Promise<Response> {
   const parsed = parseImageKey(key);
   // Query strings don't change the image, so they don't split the cache.
   const cacheKey = new Request(new URL(url.pathname, url.origin));
-  if (parsed?.immutable && !isHead) {
+  // HEAD reads the same cached copy as GET, so both describe one image.
+  if (parsed?.immutable) {
     const cached = await (await caches.open(CACHE_NAME)).match(cacheKey);
     // Cached responses have immutable headers; middleware adds to them.
-    if (cached) return new Response(cached.body, cached);
+    if (cached) return new Response(isHead ? null : cached.body, cached);
   }
 
   const object: R2Object | R2ObjectBody | null = !key

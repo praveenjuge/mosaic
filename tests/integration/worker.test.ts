@@ -383,6 +383,14 @@ describe("/i/*", () => {
       new Uint8Array(await cached.arrayBuffer()),
       new Uint8Array([4, 5, 6]),
     );
+
+    // HEAD describes the same cached image instead of redirecting.
+    const head = await server.fetch(`/i/${key}`, {
+      method: "HEAD",
+      redirect: "manual",
+    });
+    assert.equal(head.status, 200);
+    assert.equal((await head.arrayBuffer()).byteLength, 0);
   });
 
   test("redirects a replaced image to the page's current one", async () => {
