@@ -131,13 +131,17 @@ async function fetchPublicPage(
   throw new Error("The website redirected too many times.");
 }
 
-/** Fetch a page's HTML along with the URL its redirects ended at. */
+/**
+ * Fetch a page, resolving once its headers arrive with the URL its redirects
+ * ended at. The body is read in the background, so a slow body delays only
+ * the caller that awaits `html`.
+ */
 export async function fetchPageHtml(
   url: URL,
   requestHostname: string,
-): Promise<{ html: string; finalUrl: URL }> {
+): Promise<{ html: Promise<string>; finalUrl: URL }> {
   const { response, finalUrl } = await fetchPublicPage(url, requestHostname);
-  return { html: await response.text(), finalUrl };
+  return { html: response.text(), finalUrl };
 }
 
 /** Resolve and validate every server redirect before Browser Run navigation. */

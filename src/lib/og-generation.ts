@@ -139,10 +139,12 @@ async function handleDemoRequest(
   }
 
   // One fetch validates the redirect chain for the screenshot and supplies
-  // the HTML for the metadata.
+  // the HTML for the metadata. The screenshot starts once headers arrive.
   const page = fetchPageHtml(target.url, target.requestHostname);
   const [metadata, screenshot] = await Promise.allSettled([
-    page.then(({ html, finalUrl }) => extractMetadata(html, finalUrl)),
+    page.then(async ({ html, finalUrl }) =>
+      extractMetadata(await html, finalUrl),
+    ),
     page.then(({ finalUrl }) => takeScreenshot(finalUrl.toString())),
   ]);
   const meta =
