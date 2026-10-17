@@ -1,33 +1,26 @@
 /// <reference types="vite/client" />
 
-import { Toaster } from "@/components/ui/sonner";
-import {
-  authenticatedHomePath,
-  getRouteAuth,
-  signInPath,
-  signUpPath,
-} from "@/lib/clerk-auth";
+import { getRouteAuth } from "@/lib/clerk-auth";
+import { clerkShell, needsClerk, preloadClerkChunks } from "@/lib/clerk-chunks";
 import {
   website_description,
   website_name,
   website_subtitle,
 } from "@/lib/constants";
-import { publicEnv } from "@/lib/env";
 import { buildOrganizationJsonLd } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
   HeadContent,
   Outlet,
   Scripts,
   createRootRouteWithContext,
-  useRouter,
+  useMatches,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
-import { Suspense, useEffect, useRef, type ReactNode } from "react";
+import { Suspense, useState, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
@@ -93,9 +86,13 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
     ],
   }),
-  // Server-handler routes (/use, /i/*, robots.txt) answer before
-  // the router runs, so this never runs for them.
-  beforeLoad: async () => ({ auth: await getRouteAuth() }),
+  // `/use` and `/i/*` answer in src/server.ts, and server-handler routes
+  // (robots.txt) before the router runs, so this never runs for them.
+  beforeLoad: async ({ location }) => {
+    const auth = await getRouteAuth();
+    await preloadClerkChunks(auth, location.pathname);
+    return { auth };
+  },
   errorComponent: (props) => (
     <RootDocument>
       <DefaultCatchBoundary {...props} />
@@ -106,53 +103,41 @@ export const Route = createRootRouteWithContext<{}>()({
 });
 
 function RootComponent() {
-  return (
-    <ClerkProvider
-      publishableKey={publicEnv.clerkPublishableKey}
-      signInUrl={signInPath}
-      signUpUrl={signUpPath}
-      signInFallbackRedirectUrl={authenticatedHomePath}
-      signUpFallbackRedirectUrl={authenticatedHomePath}
-    >
-      <ThemeProvider
-        enableSystem
-        attribute="class"
-        defaultTheme="light"
-        disableTransitionOnChange
-      >
-        <InvalidateOnAuthChange />
-        <RootDocument>
-          <Suspense>
-            <Outlet />
-          </Suspense>
-        </RootDocument>
-      </ThemeProvider>
-    </ClerkProvider>
+  const { auth } = Route.useRouteContext();
+  // The rendered page's path, not a pending navigation's.
+  const pathname = useMatches({
+    select: (matches) => matches.at(-1)?.pathname ?? "/",
+  });
+  const clerkNeeded = needsClerk(auth, pathname);
+  // Once Clerk has started, keep it: signing out mid-session still needs it,
+  // and unmounting would remount the page.
+  const [clerkStarted, setClerkStarted] = useState(clerkNeeded);
+  if (clerkNeeded && !clerkStarted) setClerkStarted(true);
+
+  const page = (
+    <Suspense>
+      <Outlet />
+    </Suspense>
   );
-}
 
-/**
- * Route auth and cached loader data depend on who is signed in, so reload
- * them when Clerk signs a user in or out without a full page load.
- */
-function InvalidateOnAuthChange() {
-  const { isLoaded, userId } = useAuth();
-  const router = useRouter();
-  const previousUserId = useRef<string | null | undefined>(undefined);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-    const current = userId ?? null;
-    if (
-      previousUserId.current !== undefined &&
-      previousUserId.current !== current
-    ) {
-      void router.invalidate();
-    }
-    previousUserId.current = current;
-  }, [isLoaded, userId, router]);
-
-  return null;
+  return (
+    <ThemeProvider
+      enableSystem
+      attribute="class"
+      defaultTheme="light"
+      disableTransitionOnChange
+    >
+      <RootDocument>
+        {clerkNeeded || clerkStarted ? (
+          <Suspense>
+            <clerkShell.Component>{page}</clerkShell.Component>
+          </Suspense>
+        ) : (
+          page
+        )}
+      </RootDocument>
+    </ThemeProvider>
+  );
 }
 
 function RootDocument({ children }: { children: ReactNode }) {
@@ -180,7 +165,6 @@ function RootDocument({ children }: { children: ReactNode }) {
       </head>
       <body className="relative flex min-h-screen flex-col text-sm">
         {children}
-        <Toaster richColors />
         {import.meta.env.DEV ? (
           <TanStackRouterDevtools position="bottom-right" />
         ) : null}

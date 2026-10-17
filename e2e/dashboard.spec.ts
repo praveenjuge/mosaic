@@ -15,7 +15,8 @@ test("signed-in users can add, edit, and delete a website", async ({
 }) => {
   const hostname = `e2e-${Date.now()}.example.com`;
 
-  await page.goto("/help");
+  // Signed-out pages don't load Clerk; the sign-in page does.
+  await page.goto("/sign-in");
   await clerk.signIn({ page, emailAddress });
   await page.goto("/");
 

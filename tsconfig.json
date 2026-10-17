@@ -20,5 +20,5 @@
     }
   },
   "include": ["**/*.ts", "**/*.tsx", "worker-configuration.d.ts"],
-  "exclude": ["node_modules", "dist", "d1", ".wrangler"]
+  "exclude": ["node_modules", "dist", "d1", ".wrangler", ".claude/worktrees"]
 }

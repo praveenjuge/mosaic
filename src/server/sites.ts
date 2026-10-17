@@ -1,5 +1,5 @@
 import { getDb } from "@/lib/db";
-import { warmSiteImage } from "@/lib/og-generation";
+import { forgetUnregisteredHostname, warmSiteImage } from "@/lib/og-generation";
 import type { Site } from "@/lib/types";
 import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
@@ -18,11 +18,17 @@ function normalizePublicHostname(value: string): string {
 /**
  * Screenshot a newly saved website's home page after the response, so the
  * first social crawler finds an image ready. Runs behind the same rate limit,
- * lock, and daily budget as `/use`, counted against the user.
+ * lock, and daily budget as `/use`, counted against the user. Also clears
+ * this colo's cached "not registered" answer for the hostname.
  */
 function warmAfterResponse(hostname: string, userId: string) {
-  const requestHostname = new URL(getRequest().url).hostname;
-  waitUntil(warmSiteImage(hostname, requestHostname, `user:${userId}`));
+  const requestUrl = getRequest().url;
+  waitUntil(
+    forgetUnregisteredHostname(requestUrl, hostname).catch((error) => {
+      console.error("[SITES] Failed to clear cached /use answer:", error);
+    }),
+  );
+  waitUntil(warmSiteImage(hostname, requestUrl, `user:${userId}`));
 }
 
 const addSiteSchema = z.object({

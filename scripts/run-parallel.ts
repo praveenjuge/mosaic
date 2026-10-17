@@ -1,7 +1,7 @@
 /**
  * Runs package scripts at the same time and prints each one's output as a
  * block once it finishes, so logs don't interleave. Exits non-zero if any
- * script fails. Used by `bun run check:fast`:
+ * script fails. Used by `bun run check:fast` and `bun run check`:
  *   bun scripts/run-parallel.ts lint:check typecheck test
  */
 

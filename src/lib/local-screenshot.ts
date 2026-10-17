@@ -31,22 +31,33 @@ export async function takeLocalScreenshot(
     if (options.userAgent) await page.setUserAgent(options.userAgent);
     if (options.viewport) await page.setViewport(options.viewport);
     // Mirror `rejectRequestPattern` (built by `blockedRequestPatterns`) with
-    // the same hostname rule.
-    if (options.rejectRequestPattern?.length) {
+    // the same hostname rule, and `rejectResourceTypes`.
+    const rejectedTypes: string[] = options.rejectResourceTypes ?? [];
+    if (options.rejectRequestPattern?.length || rejectedTypes.length) {
       const pageUrl = options.url;
       await page.setRequestInterception(true);
       page.on("request", (request) => {
-        if (isBlockedRequest(pageUrl, request.url())) {
+        if (
+          rejectedTypes.includes(request.resourceType()) ||
+          (options.rejectRequestPattern?.length &&
+            isBlockedRequest(pageUrl, request.url()))
+        ) {
           void request.abort();
         } else {
           void request.continue();
         }
       });
     }
-    await page.goto(options.url, {
-      waitUntil: options.gotoOptions?.waitUntil,
-      timeout: options.gotoOptions?.timeout,
-    });
+    try {
+      await page.goto(options.url, {
+        waitUntil: options.gotoOptions?.waitUntil,
+        timeout: options.gotoOptions?.timeout,
+      });
+    } catch (error) {
+      // Mirror `bestAttempt`: screenshot whatever loaded before the timeout.
+      if (!options.bestAttempt || !(error instanceof Error)) throw error;
+      if (error.name !== "TimeoutError") throw error;
+    }
     for (const { content, url } of options.addStyleTag ?? []) {
       if (content) await page.addStyleTag({ content });
       else if (url) await page.addStyleTag({ url });

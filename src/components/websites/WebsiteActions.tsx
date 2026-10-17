@@ -98,10 +98,10 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <img
-              src="/illustrations/delete-website.png"
+              src="/illustrations/delete-website-720w-cb3544ac.webp"
               alt="Delete Website"
               width={300}
-              height={300}
+              height={200}
               className="w-full"
             />
             <AlertDialogTitle>Delete Website {currentUrl}?</AlertDialogTitle>

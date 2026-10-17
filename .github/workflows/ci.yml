@@ -27,8 +27,17 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
           restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+      # ESLint, Prettier, and the type checkers keep caches here. They key
+      # entries on file contents, so a fresh checkout can reuse them.
+      - uses: actions/cache@v5
+        with:
+          path: node_modules/.cache
+          key: tool-cache-${{ runner.os }}-${{ github.sha }}
+          restore-keys: tool-cache-${{ runner.os }}-
       # Runs lint, format, types, binding types, and unit tests in parallel.
       - run: bun run check:fast
+      # `typecheck` uses the TypeScript 7 preview (tsgo); CI also runs tsc.
+      - run: bun run typecheck:tsc
 
   integration:
     name: Build and integration tests
@@ -54,24 +63,35 @@ jobs:
 
   e2e:
     name: End-to-end tests
+    # Runs on the host: pulling the pinned Playwright image took longer than
+    # installing Chromium. Only the visual job needs that image.
     runs-on: ubuntu-latest
-    # The pinned Playwright image ships Chromium and its system libraries, so
-    # the job skips `playwright install --with-deps`. Keep its tag in step
-    # with @playwright/test and scripts/visual-test.sh.
-    container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
-      options: --ipc=host
     steps:
       - uses: actions/checkout@v7
-      # setup-bun needs unzip, which the image lacks; npm's bun package
-      # doesn't. packageManager pins the version.
-      - run: npm install --global "$(node -p 'require("./package.json").packageManager')"
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version-file: package.json
       - uses: actions/cache@v5
         with:
           path: ~/.bun/install/cache
-          key: bun-playwright-${{ hashFiles('bun.lock') }}
-          restore-keys: bun-playwright-
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
+      - id: playwright
+        run: echo "version=$(bun -p 'require("@playwright/test/package.json").version')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      # Skips the download when the cache restored Chromium; system
+      # libraries still come from apt.
+      - run: bunx playwright install --with-deps chromium
+      # The live demo spec screenshots with local Puppeteer, which drives a
+      # Chrome that Miniflare downloads on first use.
+      - uses: actions/cache@v5
+        with:
+          path: ~/.cache/.wrangler/chrome
+          key: miniflare-chrome-${{ runner.os }}-${{ hashFiles('node_modules/miniflare/package.json') }}
       - run: bash scripts/write-placeholder-env.sh
       - run: bun run test:e2e
       - if: failure()
@@ -88,6 +108,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      # Start pulling the pinned image (a few GB) while the next steps run;
+      # the Docker daemon joins this pull when the tests need the image.
+      - run: |
+          image=$(sed -n 's/^image="\(.*\)"$/\1/p' scripts/visual-test.sh)
+          nohup docker pull --quiet "$image" > "$RUNNER_TEMP/docker-pull.log" 2>&1 &
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
         with:
           bun-version-file: package.json

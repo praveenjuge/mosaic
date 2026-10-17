@@ -1,9 +1,18 @@
+/**
+ * Serves OG images from R2 at `/i/<r2key>`. R2 keys contain slashes
+ * (`global/<hash>-<version>.jpeg`), so the key is the rest of the path.
+ *
+ * Versioned keys never change content (see `src/lib/image-key.ts`), so their
+ * responses are immutable and kept in the colo's Cache API. A key that has
+ * been replaced by a newer screenshot redirects to the current one, so URLs
+ * copied before a refresh keep working.
+ */
+
 import { publicCorsHeaders } from "@/lib/cors";
 import { getDb } from "@/lib/db";
 import { imageKeyRange, parseImageKey } from "@/lib/image-key";
 import { buildPublicImageUrl } from "@/lib/url";
 import { findImageKeyInRange } from "@/server/og";
-import { createFileRoute } from "@tanstack/react-router";
 import { env, waitUntil } from "cloudflare:workers";
 
 const IMMUTABLE = "public, max-age=31536000, immutable";
@@ -11,15 +20,38 @@ const NO_STORE = "private, no-store";
 const CACHE_NAME = "mosaic:images";
 
 /**
- * Serves OG images from R2 at `/i/<r2key>`. R2 keys contain slashes
- * (`global/<hash>-<version>.jpeg`), so this is a splat route.
- *
- * Versioned keys never change content (see `src/lib/image-key.ts`), so their
- * responses are immutable and kept in the colo's Cache API. A key that has
- * been replaced by a newer screenshot redirects to the current one, so URLs
- * copied before a refresh keep working.
+ * Put a just-stored image in this colo's image cache, so the redirect that
+ * follows a generation doesn't have to read it back from R2. `imageUrl` is
+ * the `/i/<key>` URL the redirect points at.
  */
-async function serveImage(request: Request): Promise<Response> {
+export function cacheGeneratedImage(
+  imageUrl: string,
+  image: ArrayBuffer,
+  etag: string,
+): void {
+  const url = new URL(imageUrl);
+  // The same headers `serveImage` sends for an object Mosaic stored.
+  const response = new Response(image, {
+    headers: {
+      ...publicCorsHeaders,
+      "Content-Type": "image/jpeg",
+      "Cache-Control": IMMUTABLE,
+      ETag: etag,
+    },
+  });
+  waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) =>
+        cache.put(new Request(new URL(url.pathname, url.origin)), response),
+      )
+      .catch((error: unknown) => {
+        console.error("[IMAGE] Failed to cache generated image:", error);
+      }),
+  );
+}
+
+export async function serveImage(request: Request): Promise<Response> {
   const url = new URL(request.url);
   const raw = url.pathname.replace(/^\/+i\/+/, "");
   let key = raw;
@@ -36,7 +68,7 @@ async function serveImage(request: Request): Promise<Response> {
   // HEAD reads the same cached copy as GET, so both describe one image.
   if (parsed?.immutable) {
     const cached = await (await caches.open(CACHE_NAME)).match(cacheKey);
-    // Cached responses have immutable headers; middleware adds to them.
+    // Cached responses have immutable headers; the server entry adds to them.
     if (cached) return new Response(isHead ? null : cached.body, cached);
   }
 
@@ -78,7 +110,6 @@ async function serveImage(request: Request): Promise<Response> {
   if (!headers.has("Content-Type")) headers.set("Content-Type", "image/jpeg");
   headers.set("Cache-Control", parsed?.immutable ? IMMUTABLE : NO_STORE);
   headers.set("ETag", object.httpEtag);
-
   const body = isHead ? null : (object as R2ObjectBody).body;
   const response = new Response(body, { status: 200, headers });
   if (parsed?.immutable && !isHead) {
@@ -94,14 +125,3 @@ async function serveImage(request: Request): Promise<Response> {
   }
   return response;
 }
-
-export const Route = createFileRoute("/i/$")({
-  server: {
-    handlers: {
-      GET: ({ request }) => serveImage(request),
-      HEAD: ({ request }) => serveImage(request),
-      OPTIONS: () =>
-        new Response(null, { status: 204, headers: publicCorsHeaders }),
-    },
-  },
-});

@@ -1,5 +1,6 @@
 import {
   routeAuthFromBrowserClerk,
+  routeAuthFromCookies,
   type BrowserClerk,
   type RouteAuth,
 } from "@/lib/browser-route-auth";
@@ -29,6 +30,8 @@ export async function getRouteAuth(): Promise<RouteAuth> {
       (window as { Clerk?: BrowserClerk }).Clerk,
     );
     if (browserAuth) return browserAuth;
+    const cookieAuth = routeAuthFromCookies(document.cookie);
+    if (cookieAuth) return cookieAuth;
   }
   return fetchRouteAuth();
 }

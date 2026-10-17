@@ -1,25 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
+import { stubOutsideRequests, visualPages } from "./visual-pages";
 
 // Pixel baselines for signed-out pages. Rendering differs between Chromium
 // builds and font stacks, so these only run inside the pinned Playwright
 // image: `bun run test:visual` (and `:update` after an intended UI change).
 // Baselines live in e2e/__screenshots__/.
 
-// Third-party images (guide logos, favicons) load in CI but not in sandboxed
-// containers, so every non-local request gets the same stand-in everywhere.
-const placeholderImage = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" fill="#9ca3af"/></svg>`;
-
 async function open(page: Page, path: string, theme: "light" | "dark") {
-  await page.route(
-    (url) => url.hostname !== "localhost",
-    (route) =>
-      route.request().resourceType() === "image"
-        ? route.fulfill({
-            contentType: "image/svg+xml",
-            body: placeholderImage,
-          })
-        : route.abort(),
-  );
+  await stubOutsideRequests(page);
   // The app ignores the browser's color scheme and reads next-themes' key.
   await page.addInitScript((value) => {
     globalThis.localStorage.setItem("theme", value);
@@ -43,15 +31,7 @@ function screenshotOptions(page: Page) {
   };
 }
 
-const pages = [
-  { name: "home", path: "/" },
-  { name: "help", path: "/help" },
-  { name: "guide-nextjs", path: "/help/guides/nextjs" },
-  { name: "legal", path: "/legal" },
-  { name: "not-found", path: "/this-page-does-not-exist" },
-];
-
-for (const { name, path } of pages) {
+for (const { name, path } of visualPages) {
   test(`${name} (desktop)`, async ({ page }) => {
     await open(page, path, "light");
     await expect(page).toHaveScreenshot(

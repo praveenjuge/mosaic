@@ -14,13 +14,16 @@ export const getDashboardStats = createServerFn()
 
     // Expired images stay in the counts: their R2 objects are kept as the
     // stale fallback until a regeneration replaces the same page record.
+    // Both queries read images through the (hostname, generated_at) index.
+    // Counting `g.hostname` (never NULL for a joined row) lets the first use
+    // it as a covering index; the second still sorts the user's images.
     const [websitesResult, latestImagesResult] = await session.batch([
       session
         .prepare(
           `SELECT s.id,
                   s.url_base,
                   s.created_at,
-                  COUNT(g.page_url) AS image_count,
+                  COUNT(g.hostname) AS image_count,
                   MAX(g.generated_at) AS last_generated_at
            FROM sites s
            LEFT JOIN global_images g ON g.hostname = s.url_base

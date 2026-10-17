@@ -33,8 +33,8 @@ New pages get an image automatically, and Mosaic retakes each one every 30 days.
 
 Here's the same page with a hand-made image and a Mosaic screenshot:
 
-![Hand-designed OG image](/images/original-example-og-814873d7.jpg)
+![Hand-designed OG image](/images/original-example-og-864w-2b3240f3.webp)
 
-![Screenshot-based OG image made by Mosaic](/images/mosaic-example-og-f9e253a9.png)
+![Screenshot-based OG image made by Mosaic](/images/mosaic-example-og-864w-a55bc7b7.webp)
 
 Try screenshot-based OG images and spend your time where it matters.

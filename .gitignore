@@ -47,3 +47,6 @@ yarn-error.log*
 /test-results
 /playwright-report
 /blob-report
+
+# Claude Code worktrees (separate checkouts)
+/.claude/worktrees/

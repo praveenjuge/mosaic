@@ -4,34 +4,22 @@ import { negotiateResponse } from "@/lib/markdown-negotiation";
 import {
   isCacheablePageRequest,
   isCacheablePageResponse,
+  isStorablePageRequest,
   pageCacheKey,
 } from "@/lib/page-cache";
-import { addAcceptToVary } from "@/lib/vary";
+import { withSecurityHeaders } from "@/lib/security-headers";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
   createCsrfMiddleware,
   createMiddleware,
   createStart,
 } from "@tanstack/react-start";
 import { waitUntil } from "cloudflare:workers";
+import appCss from "./styles/app.css?url";
 
 /** Set per build by `vite.config.ts`; keys the page cache to one deploy. */
 declare const __MOSAIC_BUILD_ID__: string;
-
-const cspHeader = [
-  // data: lets the home page demo show its inline screenshot.
-  "img-src 'self' data: https://img.clerk.com https://avatars.githubusercontent.com *;",
-  "font-src 'self' https://fonts.gstatic.com;",
-  "worker-src 'self' blob:;",
-  "style-src 'self' 'unsafe-inline' https://www.gstatic.com;",
-  "frame-src 'self' https://challenges.cloudflare.com;",
-  "form-action 'self';",
-  "frame-ancestors 'none';",
-  "block-all-mixed-content;",
-  import.meta.env.PROD ? "upgrade-insecure-requests;" : "",
-]
-  .filter(Boolean)
-  .join(" ");
 
 const siteOrigin = new URL(publicEnv.siteUrl).origin;
 
@@ -39,38 +27,25 @@ const csrfMiddleware = createCsrfMiddleware({
   filter: (context) => context.handlerType === "serverFn",
 });
 
-/** The public, CORS-open endpoints. REVIEW.md: they never set cookies. */
-const PUBLIC_ENDPOINT = /^\/(use$|i\/)/;
+/**
+ * The render-blocking stylesheet and the font it names, which `__root.tsx`
+ * also links. As a `Link` header, Cloudflare can send them as 103 Early
+ * Hints (when the zone enables them) while the Worker is still rendering.
+ */
+const earlyHints = [
+  `<${appCss}>; rel=preload; as=style`,
+  `<${geistLatin}>; rel=preload; as=font; type="font/woff2"; crossorigin`,
+].join(", ");
 
+// `/use` and `/i/*` answer in `src/server.ts` and never reach these.
 const securityHeadersMiddleware = createMiddleware({ type: "request" }).server(
-  async ({ request, next }) => {
+  async ({ next }) => {
     const result = await next();
-    const headers = new Headers(result.response.headers);
-
-    // Clerk's middleware still runs for these and can refresh a session
-    // cookie, which must never ride on a shared, cacheable image response.
-    if (PUBLIC_ENDPOINT.test(new URL(request.url).pathname)) {
-      headers.delete("Set-Cookie");
+    const response = withSecurityHeaders(result.response);
+    if (response.headers.get("Content-Type")?.startsWith("text/html")) {
+      response.headers.set("Link", earlyHints);
     }
-
-    headers.set("Content-Security-Policy", cspHeader);
-    headers.set("Referrer-Policy", "same-origin");
-    headers.set(
-      "Strict-Transport-Security",
-      "max-age=63072000; includeSubDomains; preload",
-    );
-    headers.set("X-Content-Type-Options", "nosniff");
-
-    addAcceptToVary(headers);
-
-    return {
-      ...result,
-      response: new Response(result.response.body, {
-        headers,
-        status: result.response.status,
-        statusText: result.response.statusText,
-      }),
-    };
+    return { ...result, response };
   },
 );
 
@@ -84,7 +59,8 @@ const contentNegotiationMiddleware = createMiddleware({
 });
 
 const PAGE_CACHE_NAME = "mosaic:pages";
-const PAGE_CACHE_CONTROL = "public, max-age=3600";
+// Keys include the build ID, so a deploy replaces every cached page.
+const PAGE_CACHE_CONTROL = "public, max-age=86400";
 
 /**
  * Serves signed-out content pages from the colo's Cache API, so repeat
@@ -112,7 +88,10 @@ const pageCacheMiddleware = createMiddleware({ type: "request" }).server(
     }
 
     const result = await next();
-    if (isCacheablePageResponse(result.response)) {
+    if (
+      isStorablePageRequest(request) &&
+      isCacheablePageResponse(result.response)
+    ) {
       const [body, copy] = result.response.body?.tee() ?? [null, null];
       const stored = new Headers(result.response.headers);
       stored.set("Cache-Control", PAGE_CACHE_CONTROL);
