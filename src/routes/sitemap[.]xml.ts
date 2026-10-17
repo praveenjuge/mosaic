@@ -6,20 +6,22 @@ async function sitemap(): Promise<Response> {
   // Imported here so the Markdown mirror stays out of the client bundle.
   const { default: markdownPages } =
     await import("virtual:mosaic-content/markdownPages");
-  const urls = Object.keys(markdownPages).map(
-    (path) =>
-      `  <url><loc>${new URL(path.slice(1), publicEnv.siteUrl)}</loc></url>`,
-  );
-  const xml = [
-    '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ...urls,
-    "</urlset>",
-    "",
-  ].join("\n");
-  return new Response(xml, {
-    headers: { "Content-Type": "application/xml; charset=utf-8" },
+  const entries = Object.keys(markdownPages).map((path) => {
+    const loc = new URL(path.slice(1), publicEnv.siteUrl).href;
+    return `  <url><loc>${loc.replaceAll("&", "&amp;")}</loc></url>`;
   });
+  return new Response(
+    [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+      ...entries,
+      "</urlset>",
+      "",
+    ].join("\n"),
+    {
+      headers: { "Content-Type": "application/xml; charset=utf-8" },
+    },
+  );
 }
 
 export const Route = createFileRoute("/sitemap.xml")({

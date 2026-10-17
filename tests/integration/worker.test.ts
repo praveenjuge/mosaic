@@ -65,7 +65,7 @@ describe("public pages", () => {
     );
     const xml = await response.text();
     for (const path of ["/help", "/legal", "/help/guides/nextjs"]) {
-      assert.match(xml, new RegExp(`<loc>[^<]*${path}</loc>`), path);
+      assert.ok(xml.includes(`${path}</loc>`), path);
     }
     assert.doesNotMatch(xml, /\/blog|#/);
   });
