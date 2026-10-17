@@ -34,6 +34,10 @@
     "test": "VITE_SITE_URL=https://mosaic.example VITE_CLERK_PUBLISHABLE_KEY=pk_test bun test",
     "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.ts",
     "test:e2e": "playwright test",
+    "test:visual": "bash scripts/visual-test.sh",
+    "test:visual:update": "bash scripts/visual-test.sh --update-snapshots",
+    "check": "bun run check:fast && bun run build && bun run test:integration && bun run test:e2e && bun run test:visual",
+    "check:fast": "bun run lint:check && bun run format:check && bun run typecheck && bun run cf-typegen:check && bun run test",
     "cf-typegen": "wrangler types",
     "cf-typegen:check": "wrangler types --check"
   },

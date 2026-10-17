@@ -39,9 +39,11 @@ By default the dev server takes screenshots with a local Chrome driven by Puppet
 bun run test               # unit tests
 bun run build && bun run test:integration  # built Worker in workerd
 bun run test:e2e           # Playwright against the dev server
+bun run test:visual        # pixel baselines in the pinned Playwright image (Docker, Linux)
+bun run check              # everything CI runs
 ```
 
-CI runs lint, format, type, and binding-type checks plus all three suites on every pull request.
+CI runs lint, format, type, and binding-type checks plus all four suites on every pull request.
 
 ## Previews
 

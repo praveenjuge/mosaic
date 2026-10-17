@@ -30,6 +30,7 @@
     "allow": [
       "Bash(bun install:*)",
       "Bash(bun run build:*)",
+      "Bash(bun run check:*)",
       "Bash(bun run dev:*)",
       "Bash(bun run db:migrate:local:*)",
       "Bash(bun run db:seed:local:*)",
@@ -45,7 +46,8 @@
       "Bash(bunx wrangler d1 migrations apply DB --local:*)",
       "Bash(bunx wrangler d1 migrations list DB --local:*)",
       "Bash(bunx wrangler d1 migrations create DB:*)",
-      "Bash(node scripts/screenshot-pages.mjs:*)"
+      "Bash(node scripts/screenshot-pages.mjs:*)",
+      "Bash(bash scripts/visual-test.sh:*)"
     ],
     "deny": [
       "Bash(bun run deploy:*)",

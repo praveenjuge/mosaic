@@ -22,10 +22,10 @@ export const DEMO_DAILY_GENERATION_LIMIT = 100;
 export const DEMO_CLIENT_DAILY_GENERATION_LIMIT = 10;
 
 /**
- * Browser Run engine for OG screenshots. Kitesurf is cheaper and free while in
- * beta, but it is not pixel-perfect and has no WebGL or video, so Chromium
- * stays the default.
+ * Browser Run engine for every OG screenshot (production and demo). Kitesurf
+ * is cheaper and free while in beta, but it is not pixel-perfect and has no
+ * WebGL or video; set this to "chromium" to go back to full Chrome rendering.
  *
  * @see https://developers.cloudflare.com/browser-run/kitesurf/
  */
-export const SCREENSHOT_ENGINE: "chromium" | "kitesurf" = "chromium";
+export const SCREENSHOT_ENGINE: "chromium" | "kitesurf" = "kitesurf";

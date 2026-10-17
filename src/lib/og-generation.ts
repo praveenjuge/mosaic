@@ -170,8 +170,8 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * `screenshot` Quick Action, called directly through the `BROWSER` Workers
  * binding (`env.BROWSER.quickAction`).
  *
- * The engine comes from `SCREENSHOT_ENGINE`: Chromium by default, or
- * Kitesurf via the binding's `browser: "kitesurf"` option.
+ * The engine comes from `SCREENSHOT_ENGINE`: Kitesurf (the binding's
+ * `browser: "kitesurf"` option), or Chromium when that is set to "chromium".
  *
  * Using the binding talks to Browser Run directly over Cloudflare's network —
  * no account ID or API token required. Requires a compatibility date of

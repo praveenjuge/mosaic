@@ -16,6 +16,16 @@ export default async function globalSetup() {
     "--command",
     "DELETE FROM generation_budgets",
   );
+  // dashboard.spec.ts deletes the site it adds, but a failed run can leave
+  // one behind; clear those so they don't pile up in the local dashboard.
+  wrangler(
+    "d1",
+    "execute",
+    "DB",
+    "--local",
+    "--command",
+    "DELETE FROM sites WHERE url_base LIKE 'e2e-%.example.com'",
+  );
 
   if (process.env.E2E_CLERK_USER_EMAIL) {
     await clerkSetup({
