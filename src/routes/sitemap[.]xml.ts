@@ -10,6 +10,8 @@ async function sitemap(): Promise<Response> {
     const loc = new URL(path.slice(1), publicEnv.siteUrl).href;
     return `  <url><loc>${loc.replaceAll("&", "&amp;")}</loc></url>`;
   });
+  // Sitemap XML from build-time content paths, not HTML from request input.
+  // eslint-disable-next-line xss/no-mixed-html
   return new Response(
     [
       '<?xml version="1.0" encoding="UTF-8"?>',
