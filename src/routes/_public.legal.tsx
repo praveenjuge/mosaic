@@ -7,7 +7,6 @@ import {
 } from "@/components/ui/card";
 import { legalDocuments } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/url";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/legal")({
@@ -16,7 +15,6 @@ export const Route = createFileRoute("/_public/legal")({
     buildSeoMeta({
       title: "Legal Information",
       description: "We take your privacy and data seriously.",
-      image: getOgImageUrl("legal"),
       path: "/legal",
     }),
 });

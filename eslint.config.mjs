@@ -26,4 +26,11 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Codacy lints with eslint-plugin-xss, which reads the sitemap's XML as
+    // HTML. A no-op stub lets the file's disable comment resolve locally.
+    files: ["src/routes/sitemap*.ts"],
+    plugins: { xss: { rules: { "no-mixed-html": { create: () => ({}) } } } },
+    linterOptions: { reportUnusedDisableDirectives: "off" },
+  },
 );

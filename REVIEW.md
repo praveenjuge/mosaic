@@ -5,9 +5,10 @@ when reviewing a pull request:
 
 ## Security
 
-- Every outbound URL passes `validateOutboundUrl()` / `resolvePublicPageUrl()`
-  in `src/lib/url.ts` before anything fetches or screenshots it. Flag any new
-  fetch or Browser Run call that skips them (SSRF).
+- Every outbound URL passes `validateOutboundUrl()` in `src/lib/url.ts`, and
+  pages are fetched through `fetchPublicPage()` in `src/lib/metadata.ts` so
+  each redirect is validated, before anything fetches or screenshots them.
+  Flag any new fetch or Browser Run call that skips them (SSRF).
 - Server functions that read or change user data call Clerk `auth()` and scope
   every D1 query to `userId`.
 - D1 queries use `.bind()` parameters, never string interpolation.

@@ -12,11 +12,7 @@
 import { recordGenerationEvent, type GenerationOutcome } from "@/lib/analytics";
 import { publicCorsHeaders } from "@/lib/cors";
 import { getDb } from "@/lib/db";
-import {
-  extractMetadata,
-  fetchPageHtml,
-  resolvePublicPageUrl,
-} from "@/lib/metadata";
+import { extractMetadata, fetchPublicPage } from "@/lib/metadata";
 import { isMosaicRendererRequest } from "@/lib/request";
 import { takeScreenshot } from "@/lib/screenshot";
 import {
@@ -140,11 +136,9 @@ async function handleDemoRequest(
 
   // One fetch validates the redirect chain for the screenshot and supplies
   // the HTML for the metadata. The screenshot starts once headers arrive.
-  const page = fetchPageHtml(target.url, target.requestHostname);
+  const page = fetchPublicPage(target.url, target.requestHostname);
   const [metadata, screenshot] = await Promise.allSettled([
-    page.then(async ({ html, finalUrl }) =>
-      extractMetadata(await html, finalUrl),
-    ),
+    page.then(({ response, finalUrl }) => extractMetadata(response, finalUrl)),
     page.then(({ finalUrl }) => takeScreenshot(finalUrl.toString())),
   ]);
   const meta =
@@ -250,10 +244,13 @@ async function handleProductionRequest(
 
     const startedAt = Date.now();
     try {
-      const finalUrl = await resolvePublicPageUrl(
+      // Resolve and validate every server redirect before Browser Run
+      // navigates; only the final URL is needed.
+      const { response, finalUrl } = await fetchPublicPage(
         target.url,
         target.requestHostname,
       );
+      await response.body?.cancel();
       const image = await takeScreenshot(finalUrl.toString());
       const imageKey = `global/${await sha256Hex(pageUrl)}.jpeg`;
       await env.OG_BUCKET.put(imageKey, image, {

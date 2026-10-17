@@ -5,11 +5,10 @@ import {
   website_subtitle,
 } from "@/lib/constants";
 import { publicEnv } from "@/lib/env";
-import { buildUseEndpointUrl } from "@/lib/url";
+import { getOgImageUrl } from "@/lib/url";
 
 type SeoConfig = {
   description?: string;
-  image?: string;
   path?: string;
   title?: string;
   type?: "article" | "website";
@@ -25,16 +24,15 @@ export function pageTitle(title?: string) {
     : `${website_name} - ${website_subtitle}`;
 }
 
+/** Page meta tags. The OG image is a Mosaic screenshot of the page itself. */
 export function buildSeoMeta({
   description = website_description,
-  image,
   path = "/",
   title,
   type = "website",
 }: SeoConfig) {
   const canonicalUrl = absoluteUrl(path);
-  const resolvedImage =
-    image ?? buildUseEndpointUrl(publicEnv.siteUrl, publicEnv.siteUrl);
+  const resolvedImage = getOgImageUrl(path);
   const resolvedTitle = pageTitle(title);
 
   return {
@@ -53,6 +51,38 @@ export function buildSeoMeta({
       { name: "twitter:image", content: resolvedImage },
     ],
     links: [{ rel: "canonical", href: canonicalUrl }],
+  };
+}
+
+/** Head for a content article: meta tags plus schema.org JSON-LD. */
+export function buildArticleHead({
+  path,
+  title,
+  description,
+  schemaType,
+  datePublished,
+}: {
+  path: string;
+  title?: string;
+  description?: string;
+  schemaType: "Article" | "TechArticle";
+  datePublished?: string;
+}) {
+  return {
+    ...buildSeoMeta({ title, description, path, type: "article" }),
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": schemaType,
+          headline: title,
+          description,
+          datePublished,
+          url: absoluteUrl(path),
+        }),
+      },
+    ],
   };
 }
 

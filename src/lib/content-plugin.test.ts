@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { existsSync } from "node:fs";
 import path from "node:path";
 import {
   loadContent,
@@ -41,6 +42,7 @@ describe("loadContent", () => {
   test("loads every content file with valid, unique slugs", async () => {
     const content = await loadContent(
       path.resolve(import.meta.dir, "../content"),
+      path.resolve(import.meta.dir, "../../public/llms.txt"),
     );
 
     for (const list of [
@@ -66,6 +68,33 @@ describe("loadContent", () => {
       expect(content.markdownPages[`/help/guides/${guide.slug}`]).toStartWith(
         `# ${guide.title}\n`,
       );
+    }
+  });
+
+  test("internal links point at content pages or public files", async () => {
+    const content = await loadContent(
+      path.resolve(import.meta.dir, "../content"),
+      path.resolve(import.meta.dir, "../../public/llms.txt"),
+    );
+    const publicDir = path.resolve(import.meta.dir, "../../public");
+    const html = [
+      ...content.helpArticles,
+      ...content.guides,
+      ...content.legalDocuments,
+    ]
+      .map((entry) => entry.contentHtml)
+      .join("\n");
+
+    const targets = [...html.matchAll(/(?:href|src)="(\/[^"#?]*)/g)].map(
+      (match) => match[1],
+    );
+    expect(targets.length).toBeGreaterThan(0);
+    for (const target of new Set(targets)) {
+      expect(
+        Object.hasOwn(content.markdownPages, target) ||
+          existsSync(path.join(publicDir, target)),
+        `broken internal link: ${target}`,
+      ).toBe(true);
     }
   });
 });

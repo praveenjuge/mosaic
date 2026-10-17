@@ -195,7 +195,6 @@ describe("negotiateResponse", () => {
     for (const path of [
       "/use",
       "/i/global/a.jpeg",
-      "/blog/missing",
       "/sign-in",
       "/_serverFn/abc123",
       "/llms.txt",

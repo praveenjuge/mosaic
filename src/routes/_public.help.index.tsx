@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/card";
 import { guideLinks, helpCategories, type HelpCategory } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
-import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Mail } from "lucide-react";
@@ -22,7 +21,6 @@ export const Route = createFileRoute("/_public/help/")({
     buildSeoMeta({
       title: "Help & Support",
       description: helpDescription,
-      image: getOgImageUrl("help"),
       path: "/help",
     }),
   component: HelpPage,

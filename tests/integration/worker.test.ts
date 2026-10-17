@@ -56,9 +56,44 @@ describe("public pages", () => {
     assert.match(await response.text(), /Sitemap:/);
   });
 
+  test("lists content pages in the sitemap", async () => {
+    const response = await server.fetch("/sitemap.xml");
+    assert.equal(response.status, 200);
+    assert.match(
+      response.headers.get("Content-Type") ?? "",
+      /^application\/xml/,
+    );
+    const xml = await response.text();
+    for (const path of ["/help", "/legal", "/help/guides/nextjs"]) {
+      assert.ok(xml.includes(`${path}</loc>`), path);
+    }
+    assert.doesNotMatch(xml, /\/blog|#/);
+  });
+
+  test("serves llms.txt as a static file", async () => {
+    const response = await server.fetch("/llms.txt");
+    assert.equal(response.status, 200);
+    assert.match(await response.text(), /^# Mosaic\n/);
+  });
+
+  test("redirects old blog URLs to the help center", async () => {
+    for (const [from, to] of [
+      ["/blog", "/help"],
+      ["/blog/hello-world", "/help/hello-world"],
+    ]) {
+      const response = await server.fetch(from, { redirect: "manual" });
+      assert.equal(response.status, 301, from);
+      assert.equal(
+        new URL(response.headers.get("Location") ?? "", "http://x").pathname,
+        to,
+        from,
+      );
+    }
+  });
+
   test("sets security headers on Worker responses", async () => {
     const response = await server.fetch("/robots.txt");
-    assert.equal(response.headers.get("X-Frame-Options"), "DENY");
+    assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
     assert.match(
       response.headers.get("Content-Security-Policy") ?? "",
       /frame-ancestors 'none'/,

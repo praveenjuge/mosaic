@@ -49,11 +49,7 @@ function SignedInNav() {
 }
 
 export default function HeaderAuth() {
-  const { isLoaded, userId } = useAuth();
-
-  if (!isLoaded) {
-    return <AuthLoadingSkeleton />;
-  }
+  const { userId } = useAuth();
 
   return (
     <>

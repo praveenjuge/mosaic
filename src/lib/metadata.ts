@@ -1,59 +1,57 @@
 /**
- * HTML metadata extraction utilities for OG image demo mode.
- *
- * Fetches a page's HTML and extracts Open Graph / Twitter Card
- * metadata (title, description, image) for display in the demo UI.
+ * Fetches public pages with validated redirects, and reads their Open Graph /
+ * Twitter Card metadata (title, description, image) for the demo UI.
  */
 
 import { publicEnv } from "./env";
 import { validateOutboundUrl } from "./url";
 
-// ── Helpers ─────────────────────────────────────────────────────────
+// ── Metadata ────────────────────────────────────────────────────────
 
 const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
 
-function extractMeta(
-  html: string,
-  attr: "property" | "name",
-  names: string[],
-): string | null {
-  for (const name of names) {
-    const regex = new RegExp(
-      `<meta[^>]*${attr}=["']${name}["'][^>]*content=["']([^"']+)["'][^>]*>`,
-      "i",
-    );
-    const match = html.match(regex);
-    if (match?.[1]) {
-      return normalizeText(match[1]);
-    }
-  }
-  return null;
-}
+/**
+ * Read Open Graph, Twitter Card, and fallback metadata from a page response.
+ * Meta tags are matched on either `property` or `name`, in any attribute
+ * order. Only the first `<title>` counts, so inline SVG titles are ignored.
+ */
+export async function extractMetadata(response: Response, baseUrl: URL) {
+  const meta = new Map<string, string>();
+  let titleCount = 0;
+  let titleTag = "";
 
-function extractTitleTag(html: string): string | null {
-  const match = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-  return match?.[1] ? normalizeText(match[1]) : null;
-}
+  await new HTMLRewriter()
+    .on("meta[content]", {
+      element(element) {
+        const key = (
+          element.getAttribute("property") ?? element.getAttribute("name")
+        )?.toLowerCase();
+        const content = normalizeText(element.getAttribute("content") ?? "");
+        if (key && content && !meta.has(key)) meta.set(key, content);
+      },
+    })
+    .on("title", {
+      element() {
+        titleCount++;
+      },
+      text({ text }) {
+        if (titleCount === 1) titleTag += text;
+      },
+    })
+    .transform(response)
+    .arrayBuffer();
 
-// ── Public API ──────────────────────────────────────────────────────
+  const first = (...keys: string[]) =>
+    keys.map((key) => meta.get(key)).find(Boolean) ?? "";
 
-export function extractMetadata(html: string, baseUrl: URL) {
   const title =
-    extractMeta(html, "property", ["og:title"]) ||
-    extractMeta(html, "name", ["twitter:title", "title"]) ||
-    extractTitleTag(html) ||
-    "";
-
-  const description =
-    extractMeta(html, "property", ["og:description"]) ||
-    extractMeta(html, "name", ["description", "twitter:description"]) ||
-    "";
-
-  let image =
-    extractMeta(html, "property", ["og:image"]) ||
-    extractMeta(html, "name", ["twitter:image", "twitter:image:src"]) ||
-    "";
-
+    first("og:title", "twitter:title", "title") || normalizeText(titleTag);
+  const description = first(
+    "og:description",
+    "description",
+    "twitter:description",
+  );
+  let image = first("og:image", "twitter:image", "twitter:image:src");
   if (image) {
     try {
       image = new URL(image, baseUrl).toString();
@@ -64,6 +62,8 @@ export function extractMetadata(html: string, baseUrl: URL) {
 
   return { title, description, image };
 }
+
+// ── Fetching ────────────────────────────────────────────────────────
 
 function getUserMessageForStatus(status: number): string {
   if (status === 403) {
@@ -80,7 +80,12 @@ function getUserMessageForStatus(status: number): string {
 
 const MAX_REDIRECT_HOPS = 5;
 
-async function fetchPublicPage(
+/**
+ * Fetch a public page, validating every redirect hop against
+ * `validateOutboundUrl`. Resolves once headers arrive, with the URL the
+ * redirects ended at. The caller reads or cancels the body.
+ */
+export async function fetchPublicPage(
   url: URL,
   requestHostname: string,
 ): Promise<{ response: Response; finalUrl: URL }> {
@@ -129,27 +134,4 @@ async function fetchPublicPage(
   }
 
   throw new Error("The website redirected too many times.");
-}
-
-/**
- * Fetch a page, resolving once its headers arrive with the URL its redirects
- * ended at. The body is read in the background, so a slow body delays only
- * the caller that awaits `html`.
- */
-export async function fetchPageHtml(
-  url: URL,
-  requestHostname: string,
-): Promise<{ html: Promise<string>; finalUrl: URL }> {
-  const { response, finalUrl } = await fetchPublicPage(url, requestHostname);
-  return { html: response.text(), finalUrl };
-}
-
-/** Resolve and validate every server redirect before Browser Run navigation. */
-export async function resolvePublicPageUrl(
-  url: URL,
-  requestHostname: string,
-): Promise<URL> {
-  const { response, finalUrl } = await fetchPublicPage(url, requestHostname);
-  await response.body?.cancel();
-  return finalUrl;
 }

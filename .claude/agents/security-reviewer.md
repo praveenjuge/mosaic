@@ -12,8 +12,9 @@ around each change.
 Check every changed path for:
 
 1. **SSRF** — every URL that is fetched or screenshotted passes
-   `validateOutboundUrl()` or `resolvePublicPageUrl()` in `src/lib/url.ts`
-   first, including redirects and URLs built from user input.
+   `validateOutboundUrl()` in `src/lib/url.ts` first, and pages are fetched
+   through `fetchPublicPage()` in `src/lib/metadata.ts` so every redirect is
+   validated, including URLs built from user input.
 2. **Auth** — server functions that read or change user data call Clerk
    `auth()` and scope every D1 query to `userId`.
 3. **D1** — queries use `.bind()`; no string interpolation of values.
