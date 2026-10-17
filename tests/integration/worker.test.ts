@@ -470,3 +470,136 @@ describe("/i/*", () => {
     assert.equal(response.status, 404);
   });
 });
+
+describe("/use answers and guards", () => {
+  const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
+  async function budgetCount(scope: string): Promise<number | null> {
+    const env = await worker.getEnv();
+    const row = await env.DB.prepare(
+      "SELECT count FROM generation_budgets WHERE scope = ?",
+    )
+      .bind(scope)
+      .first<{ count: number }>();
+    return row?.count ?? null;
+  }
+
+  async function setBudget(scope: string, key: string, count: number) {
+    const env = await worker.getEnv();
+    const now = new Date();
+    const dayStart = Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate(),
+    );
+    await env.DB.prepare(
+      "INSERT INTO generation_budgets (scope, budget_key, window_start, count) VALUES (?, ?, ?, ?)",
+    )
+      .bind(scope, key, dayStart, count)
+      .run();
+  }
+
+  test("answers repeat requests for a fresh image from the colo cache", async () => {
+    await registerSite("example.org");
+    const env = await worker.getEnv();
+    await env.DB.prepare(
+      "INSERT INTO global_images (page_url, hostname, key, size_in_bytes, generated_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)",
+    )
+      .bind(
+        "https://example.org",
+        "example.org",
+        "global/remembered.jpeg",
+        3,
+        Date.now(),
+        Date.now() + 60_000,
+      )
+      .run();
+
+    const first = await server.fetch("/use?url=https://example.org/", {
+      redirect: "manual",
+    });
+    assert.equal(first.status, 307);
+    await sleep(300);
+
+    // With the D1 row gone, only the cached answer can name the image.
+    await env.DB.prepare("DELETE FROM global_images").run();
+    const repeat = await server.fetch("/use?url=https://example.org/", {
+      redirect: "manual",
+    });
+    assert.equal(repeat.status, 307);
+    assert.equal(repeat.headers.get("Location"), first.headers.get("Location"));
+    // Browsers and crawlers still never cache the redirect itself.
+    assert.equal(repeat.headers.get("Cache-Control"), "private, no-store");
+  });
+
+  test("remembers unregistered hostnames briefly", async () => {
+    const first = await server.fetch("/use?url=https://example.net/");
+    assert.equal(first.status, 404);
+    await sleep(300);
+
+    await registerSite("example.net");
+    const repeat = await server.fetch("/use?url=https://example.net/a");
+    assert.equal(repeat.status, 404);
+  });
+
+  test("waits for a first image another request is generating", async () => {
+    await registerSite("example.com");
+    const env = await worker.getEnv();
+    await env.DB.prepare(
+      "INSERT INTO generation_locks (page_url, lease_token, expires_at) VALUES (?, ?, ?)",
+    )
+      .bind("https://example.com", "other-request", Date.now() + 60_000)
+      .run();
+
+    const response = server.fetch("/use?url=https://example.com/", {
+      redirect: "manual",
+    });
+    await sleep(1_500);
+    await insertGlobalImage("global/just-made.jpeg", Date.now() + 60_000);
+
+    const result = await response;
+    assert.equal(result.status, 307);
+    assert.match(
+      result.headers.get("Location") ?? "",
+      /\/i\/global\/just-made\.jpeg$/,
+    );
+  });
+
+  test("answers HEAD like GET and refuses other methods", async () => {
+    const head = await server.fetch("/use", { method: "HEAD" });
+    assert.equal(head.status, 400);
+    assert.equal(await head.text(), "");
+
+    const post = await server.fetch("/use?url=https://example.com/", {
+      method: "POST",
+    });
+    assert.equal(post.status, 405);
+    assert.equal(post.headers.get("Access-Control-Allow-Origin"), "*");
+    await post.arrayBuffer();
+  });
+
+  test("refunds the client's demo budget when the service's is spent", async () => {
+    await setBudget("demo-global", "service", 100);
+
+    const response = await server.fetch(
+      "/use?url=https://example.com/&mode=demo",
+    );
+    const body = (await response.json()) as { notice?: string };
+    assert.match(body.notice ?? "", /capacity is currently busy/);
+    assert.equal(await budgetCount("demo-client"), 0);
+    assert.equal(await budgetCount("demo-global"), 100);
+  });
+
+  test("refunds the service's demo budget when the client's is spent", async () => {
+    await setBudget("demo-client", "203.0.113.9", 10);
+
+    const response = await server.fetch(
+      "/use?url=https://example.com/&mode=demo",
+      { headers: { "CF-Connecting-IP": "203.0.113.9" } },
+    );
+    const body = (await response.json()) as { notice?: string };
+    assert.match(body.notice ?? "", /capacity is currently busy/);
+    assert.equal(await budgetCount("demo-client"), 10);
+    assert.equal(await budgetCount("demo-global"), 0);
+  });
+});

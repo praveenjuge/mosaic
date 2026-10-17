@@ -13,10 +13,8 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as PublicRouteImport } from './routes/_public'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
-import { Route as UseRouteImport } from './routes/use'
 import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as PublicLegalRouteImport } from './routes/_public.legal'
-import { Route as ISplatRouteImport } from './routes/i.$'
 import { Route as AuthSignInSplatRouteImport } from './routes/_auth.sign-in.$'
 import { Route as AuthSignUpSplatRouteImport } from './routes/_auth.sign-up.$'
 import { Route as PublicHelpIndexRouteImport } from './routes/_public.help.index'
@@ -41,11 +39,6 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
-const UseRoute = UseRouteImport.update({
-  id: '/use',
-  path: '/use',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PublicIndexRoute = PublicIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -55,11 +48,6 @@ const PublicLegalRoute = PublicLegalRouteImport.update({
   id: '/legal',
   path: '/legal',
   getParentRoute: () => PublicRoute,
-} as any)
-const ISplatRoute = ISplatRouteImport.update({
-  id: '/i/$',
-  path: '/i/$',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthSignInSplatRoute = AuthSignInSplatRouteImport.update({
   id: '/sign-in/$',
@@ -91,9 +79,7 @@ export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
-  '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -104,9 +90,7 @@ export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/use': typeof UseRoute
   '/legal': typeof PublicLegalRoute
-  '/i/$': typeof ISplatRoute
   '/sign-in/$': typeof AuthSignInSplatRoute
   '/sign-up/$': typeof AuthSignUpSplatRoute
   '/help/$slug': typeof PublicHelpSlugRoute
@@ -119,9 +103,7 @@ export interface FileRoutesById {
   '/_public': typeof PublicRouteWithChildren
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/use': typeof UseRoute
   '/_public/legal': typeof PublicLegalRoute
-  '/i/$': typeof ISplatRoute
   '/_public/': typeof PublicIndexRoute
   '/_auth/sign-in/$': typeof AuthSignInSplatRoute
   '/_auth/sign-up/$': typeof AuthSignUpSplatRoute
@@ -135,9 +117,7 @@ export interface FileRouteTypes {
     | '/'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/use'
     | '/legal'
-    | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -148,9 +128,7 @@ export interface FileRouteTypes {
     | '/'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/use'
     | '/legal'
-    | '/i/$'
     | '/sign-in/$'
     | '/sign-up/$'
     | '/help/$slug'
@@ -162,9 +140,7 @@ export interface FileRouteTypes {
     | '/_public'
     | '/robots.txt'
     | '/sitemap.xml'
-    | '/use'
     | '/_public/legal'
-    | '/i/$'
     | '/_public/'
     | '/_auth/sign-in/$'
     | '/_auth/sign-up/$'
@@ -178,8 +154,6 @@ export interface RootRouteChildren {
   PublicRoute: typeof PublicRouteWithChildren
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  UseRoute: typeof UseRoute
-  ISplatRoute: typeof ISplatRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -212,13 +186,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/use': {
-      id: '/use'
-      path: '/use'
-      fullPath: '/use'
-      preLoaderRoute: typeof UseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_public/': {
       id: '/_public/'
       path: '/'
@@ -232,13 +199,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/legal'
       preLoaderRoute: typeof PublicLegalRouteImport
       parentRoute: typeof PublicRoute
-    }
-    '/i/$': {
-      id: '/i/$'
-      path: '/i/$'
-      fullPath: '/i/$'
-      preLoaderRoute: typeof ISplatRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/_auth/sign-in/$': {
       id: '/_auth/sign-in/$'
@@ -314,8 +274,6 @@ const rootRouteChildren: RootRouteChildren = {
   PublicRoute: PublicRouteWithChildren,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  UseRoute: UseRoute,
-  ISplatRoute: ISplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

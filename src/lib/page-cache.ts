@@ -10,6 +10,21 @@
 /** `/`, `/legal`, `/help`, and help articles and guides. */
 const CACHEABLE_PATH = /^\/(?:legal|help(?:\/guides)?(?:\/[a-z0-9-]+)?)?$/;
 
+/**
+ * Query parameters that link trackers add and pages never read. Visitors
+ * arriving from social posts, ads, and newsletters usually carry one.
+ */
+const TRACKING_PARAM =
+  /^(?:utm_\w+|fbclid|gclid|gbraid|wbraid|msclkid|twclid|li_fat_id|igshid|mc_cid|mc_eid|ref|ref_src|_ga|_gl|si)$/;
+
+/** Whether every query parameter is a tracking one (or there are none). */
+function hasOnlyTrackingParams(url: URL): boolean {
+  for (const name of url.searchParams.keys()) {
+    if (!TRACKING_PARAM.test(name)) return false;
+  }
+  return true;
+}
+
 /** Clerk cookies that mean a session exists or may need a handshake. */
 function hasClerkSession(cookieHeader: string | null): boolean {
   for (const part of (cookieHeader ?? "").split(";")) {
@@ -27,9 +42,11 @@ function hasClerkSession(cookieHeader: string | null): boolean {
 }
 
 /**
- * Whether `request` may be answered from, and stored in, the page cache.
- * Only production Clerk instances: development instances redirect every
- * signed-out request through a handshake that must not be skipped.
+ * Whether `request` may be answered from the page cache. Tracking query
+ * parameters don't change the page, so they are ignored; only a request
+ * without a query stores a page (`isStorablePageRequest`). Only production
+ * Clerk instances: development instances redirect every signed-out request
+ * through a handshake that must not be skipped.
  */
 export function isCacheablePageRequest(
   request: Request,
@@ -38,9 +55,19 @@ export function isCacheablePageRequest(
   if (request.method !== "GET") return false;
   if (!clerkPublishableKey.startsWith("pk_live_")) return false;
   const url = new URL(request.url);
-  if (url.search || !CACHEABLE_PATH.test(url.pathname)) return false;
+  if (!hasOnlyTrackingParams(url) || !CACHEABLE_PATH.test(url.pathname)) {
+    return false;
+  }
   if (request.headers.has("Authorization")) return false;
   return !hasClerkSession(request.headers.get("Cookie"));
+}
+
+/**
+ * Whether a cacheable request's rendered page may be stored: only the plain
+ * URL's, so the shared copy never comes from a render that saw a query.
+ */
+export function isStorablePageRequest(request: Request): boolean {
+  return !new URL(request.url).search;
 }
 
 /** Whether a rendered page response is the same for everyone. */

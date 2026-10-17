@@ -10,9 +10,11 @@ type Image = { key: string; expiresAt: number };
 const state = {
   current: null as Image | null,
   lockFree: true,
+  reserved: true,
   screenshot: async (): Promise<ArrayBuffer> => new ArrayBuffer(3),
   calls: [] as string[],
   bucket: new Map<string, ArrayBuffer>(),
+  fetchSignal: null as AbortSignal | null,
 };
 
 mock.module("cloudflare:workers", () => ({
@@ -22,6 +24,7 @@ mock.module("cloudflare:workers", () => ({
       put: async (key: string, value: ArrayBuffer) => {
         state.calls.push(`put ${key}`);
         state.bucket.set(key, value);
+        return { httpEtag: '"etag"' };
       },
       delete: async (key: string) => {
         state.calls.push(`delete ${key}`);
@@ -32,6 +35,11 @@ mock.module("cloudflare:workers", () => ({
   waitUntil: () => {},
 }));
 mock.module("@/lib/analytics", () => ({ recordGenerationEvent: () => {} }));
+mock.module("@/lib/image-serving", () => ({
+  cacheGeneratedImage: (imageUrl: string) => {
+    state.calls.push(`cache ${imageUrl}`);
+  },
+}));
 mock.module("@/lib/screenshot", () => ({
   takeScreenshot: () => {
     state.calls.push("screenshot");
@@ -39,17 +47,26 @@ mock.module("@/lib/screenshot", () => ({
   },
 }));
 mock.module("@/server/generation-usage", () => ({
-  reserveGeneration: async () => true,
+  reserveGeneration: async () => {
+    state.calls.push("reserve");
+    return state.reserved;
+  },
 }));
 mock.module("@/server/og", () => ({
-  acquireGenerationLock: async () => (state.lockFree ? "lease" : null),
+  acquireGenerationLock: async () =>
+    state.lockFree ? { leaseToken: "lease", current: state.current } : null,
   releaseGenerationLock: async () => {
     state.calls.push("release");
   },
   findGlobalImage: async () => state.current,
+  findGlobalImageOrLock: async () => ({ image: state.current, locked: false }),
   isHostnameAssociated: async () => true,
-  recordGlobalImage: async (_db: unknown, _page: unknown, key: string) => {
-    state.calls.push(`record ${key}`);
+  recordGlobalImageAndRelease: async (
+    _db: unknown,
+    _page: unknown,
+    key: string,
+  ) => {
+    state.calls.push(`record and release ${key}`);
     state.current = { key, expiresAt: Date.now() + 1000 };
   },
 }));
@@ -61,13 +78,17 @@ const target = {
   pageUrl: "https://example.com",
   hostname: "example.com",
   requestHostname: "mosaic.example",
+  requestOrigin: "https://mosaic.example",
 };
 const db = {} as Parameters<typeof generateImage>[0];
 const oldKey = `global/${"a".repeat(64)}-1.jpeg`;
 
 const realFetch = globalThis.fetch;
-globalThis.fetch = (async () =>
-  new Response("<html></html>", { status: 200 })) as unknown as typeof fetch;
+globalThis.fetch = (async (_url: string, init?: RequestInit) => {
+  state.calls.push("fetch");
+  state.fetchSignal = init?.signal ?? null;
+  return new Response("<html></html>", { status: 200 });
+}) as unknown as typeof fetch;
 afterAll(() => {
   globalThis.fetch = realFetch;
 });
@@ -75,6 +96,8 @@ afterAll(() => {
 beforeEach(() => {
   state.current = { key: oldKey, expiresAt: Date.now() - 1 };
   state.lockFree = true;
+  state.reserved = true;
+  state.fetchSignal = null;
   state.screenshot = async () => new ArrayBuffer(3);
   state.calls = [];
   state.bucket = new Map([[oldKey, new ArrayBuffer(1)]]);
@@ -90,11 +113,13 @@ describe("generateImage", () => {
     const key = (result as { key: string }).key;
     expect(key).not.toBe(oldKey);
     expect(state.calls).toEqual([
+      "fetch",
+      "reserve",
       "screenshot",
       `put ${key}`,
-      `record ${key}`,
+      `record and release ${key}`,
+      `cache https://mosaic.example/i/${key}`,
       `delete ${oldKey}`,
-      "release",
     ]);
     expect([...state.bucket.keys()]).toEqual([key]);
   });
@@ -104,6 +129,17 @@ describe("generateImage", () => {
 
     expect(await generateImage(db, target, "client")).toEqual({ key: oldKey });
     expect(state.calls).toEqual(["release"]);
+  });
+
+  test("cancels the page fetch and releases the lock when the budget is spent", async () => {
+    state.reserved = false;
+
+    expect(await generateImage(db, target, "client")).toEqual({
+      skipped: "budget_exhausted",
+    });
+    expect(state.calls).toEqual(["fetch", "reserve", "release"]);
+    expect(state.fetchSignal?.aborted).toBe(true);
+    expect([...state.bucket.keys()]).toEqual([oldKey]);
   });
 
   test("skips while another request holds the lock", async () => {
@@ -123,7 +159,7 @@ describe("generateImage", () => {
     expect(await generateImage(db, target, "client")).toEqual({
       skipped: "failed",
     });
-    expect(state.calls).toEqual(["screenshot", "release"]);
+    expect(state.calls).toEqual(["fetch", "reserve", "screenshot", "release"]);
     expect([...state.bucket.keys()]).toEqual([oldKey]);
   });
 });

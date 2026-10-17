@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   isCacheablePageRequest,
   isCacheablePageResponse,
+  isStorablePageRequest,
   pageCacheKey,
 } from "./page-cache";
 
@@ -61,7 +62,8 @@ describe("isCacheablePageRequest", () => {
       "/help/guides/nextjs/extra",
       "/_serverFn/abc",
       "/?__clerk_handshake=abc",
-      "/help?utm_source=x",
+      "/help?utm_source=x&page=2",
+      "/?q=abc",
     ]) {
       expect(isCacheablePageRequest(request(path), liveKey)).toBe(false);
     }
@@ -69,6 +71,27 @@ describe("isCacheablePageRequest", () => {
       isCacheablePageRequest(request("/", { method: "HEAD" }), liveKey),
     ).toBe(false);
     expect(isCacheablePageRequest(request("/"), "pk_test_abc")).toBe(false);
+  });
+});
+
+describe("tracking parameters", () => {
+  test("are served from the cache but never stored", () => {
+    for (const path of [
+      "/?utm_source=x",
+      "/help?utm_source=x&utm_medium=social",
+      "/?fbclid=abc",
+      "/legal?ref=producthunt",
+    ]) {
+      expect(isCacheablePageRequest(request(path), liveKey)).toBe(true);
+      expect(isStorablePageRequest(request(path))).toBe(false);
+    }
+    expect(isStorablePageRequest(request("/help"))).toBe(true);
+  });
+
+  test("share the plain URL's cache key", () => {
+    expect(pageCacheKey(request("/?gclid=abc"), "b1").url).toBe(
+      pageCacheKey(request("/"), "b1").url,
+    );
   });
 });
 

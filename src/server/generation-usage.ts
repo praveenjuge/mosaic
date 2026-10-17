@@ -9,13 +9,13 @@ function utcDayStart(timestamp = Date.now()): number {
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }
 
-async function reserveWindowBudget(
+function reserveWindowBudget(
   db: D1Queryable,
   scope: BudgetScope,
   key: string,
   limit: number,
-): Promise<boolean> {
-  const result = await db
+) {
+  return db
     .prepare(
       `INSERT INTO generation_budgets
          (scope, budget_key, window_start, count)
@@ -31,10 +31,7 @@ async function reserveWindowBudget(
           OR generation_budgets.count < ?
        RETURNING count`,
     )
-    .bind(scope, key, utcDayStart(), limit)
-    .first<{ count: number }>();
-
-  return result !== null;
+    .bind(scope, key, utcDayStart(), limit);
 }
 
 async function refundWindowBudget(
@@ -54,7 +51,8 @@ async function refundWindowBudget(
 
 /**
  * Reserve one screenshot against the client's and the service's daily
- * budgets. A client reservation is refunded when the global budget is spent.
+ * budgets. Both reservations go in one round trip; when only one succeeds,
+ * it is refunded.
  */
 export async function reserveGeneration(
   db: D1Queryable,
@@ -63,15 +61,17 @@ export async function reserveGeneration(
 ): Promise<boolean> {
   const limits = DAILY_GENERATION_LIMITS[kind];
   const clientScope = `${kind}-client` as const;
+  const globalScope = `${kind}-global` as const;
 
-  if (!(await reserveWindowBudget(db, clientScope, clientKey, limits.client))) {
-    return false;
-  }
-  if (
-    await reserveWindowBudget(db, `${kind}-global`, "service", limits.global)
-  ) {
-    return true;
-  }
-  await refundWindowBudget(db, clientScope, clientKey);
+  const [client, global] = await db.batch([
+    reserveWindowBudget(db, clientScope, clientKey, limits.client),
+    reserveWindowBudget(db, globalScope, "service", limits.global),
+  ]);
+  const clientReserved = client.results.length > 0;
+  const globalReserved = global.results.length > 0;
+  if (clientReserved && globalReserved) return true;
+
+  if (clientReserved) await refundWindowBudget(db, clientScope, clientKey);
+  if (globalReserved) await refundWindowBudget(db, globalScope, "service");
   return false;
 }

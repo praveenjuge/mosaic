@@ -18,7 +18,10 @@ import { env } from "cloudflare:workers";
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling), and blocks known tracker
- * hosts so the network goes idle sooner.
+ * hosts and media so the network goes idle sooner. `bestAttempt` takes the
+ * screenshot anyway when a page never goes idle within the timeout, instead
+ * of failing after it. The timeout leaves room for the page fetch inside the
+ * ~30 s a background refresh gets after its response.
  *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
  * same options run through local Puppeteer instead.
@@ -29,10 +32,12 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
     userAgent: MOSAIC_RENDERER_USER_AGENT,
     viewport: { width: 1560, height: 819 },
-    gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 10_000 },
+    bestAttempt: true,
     rejectRequestPattern: blockedRequestPatterns(url),
+    rejectResourceTypes: ["media"],
     addStyleTag: [{ content: "* { overflow: hidden; }" }],
-    screenshotOptions: { type: "jpeg", quality: 85 },
+    screenshotOptions: { type: "jpeg", quality: 80 },
   };
 
   let response: Response;
