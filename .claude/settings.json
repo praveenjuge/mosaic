@@ -12,6 +12,18 @@
           }
         ]
       }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/claude-post-edit.sh",
+            "timeout": 120
+          }
+        ]
+      }
     ]
   },
   "permissions": {
@@ -31,7 +43,9 @@
       "Bash(bunx wrangler types:*)",
       "Bash(bunx wrangler d1 execute DB --local:*)",
       "Bash(bunx wrangler d1 migrations apply DB --local:*)",
-      "Bash(bunx wrangler d1 migrations list DB --local:*)"
+      "Bash(bunx wrangler d1 migrations list DB --local:*)",
+      "Bash(bunx wrangler d1 migrations create DB:*)",
+      "Bash(node scripts/screenshot-pages.mjs:*)"
     ],
     "deny": [
       "Bash(bun run deploy:*)",

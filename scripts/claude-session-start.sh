@@ -18,8 +18,18 @@ bash scripts/write-placeholder-env.sh
 bun run db:migrate:local
 bun run db:seed:local
 
-# Cloud containers run as root, and Miniflare only launches the local
-# Browser Run Chrome with --no-sandbox when CI is set.
 if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
+  # Cloud containers run as root, and Miniflare only launches the local
+  # Browser Run Chrome with --no-sandbox when CI is set.
   echo "export CI=1" >> "$CLAUDE_ENV_FILE"
+
+  # A CLOUDFLARE_API_TOKEN in the environment turns remote bindings on, but
+  # the remote proxy can't pass Cloudflare Access on the account's workers.dev
+  # subdomain without a service token, and then `bun run dev` fails to start.
+  # Keep dev on local Chrome unless the session can authenticate to Access or
+  # the environment sets MOSAIC_REMOTE_BINDINGS explicitly.
+  if [ -z "${MOSAIC_REMOTE_BINDINGS:-}" ] &&
+    [ -z "${CLOUDFLARE_ACCESS_CLIENT_ID:-}" ]; then
+    echo "export MOSAIC_REMOTE_BINDINGS=0" >> "$CLAUDE_ENV_FILE"
+  fi
 fi

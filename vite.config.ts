@@ -32,7 +32,9 @@ function resolveSiteHost(siteUrl: string | undefined) {
  * they need credentials. They are opt-in: on with `CLOUDFLARE_API_TOKEN` or
  * `MOSAIC_REMOTE_BINDINGS=1`, otherwise dev falls back to local Puppeteer.
  * `MOSAIC_REMOTE_BINDINGS=0` forces them off. Workers Builds' build token
- * can't reach them, so they always stay off there.
+ * can't reach them, so they always stay off there. The proxy also needs
+ * `CLOUDFLARE_ACCESS_CLIENT_ID`/`_SECRET` when the account's workers.dev
+ * subdomain is behind Cloudflare Access.
  */
 function shouldUseRemoteBindings() {
   if (process.env.WORKERS_CI === "1") return false;
@@ -93,9 +95,15 @@ export default defineConfig(({ command, mode }) => {
     plugins: [
       cloudflare({
         viteEnvironment: { name: "ssr" },
-        // Prerendered routes (/help, /legal) never touch Browser Run, and a
-        // remote proxy that can't authenticate fails the whole `vite build`.
-        remoteBindings: shouldUseRemoteBindings(),
+        // Builds never need remote bindings. Prerendered routes (/help,
+        // /legal) never touch Browser Run, and a remote proxy that can't
+        // authenticate (for example, a workers.dev subdomain behind Cloudflare
+        // Access) fails the whole `vite build`. Prerendering runs in a Vite
+        // preview server, so `command` alone doesn't identify it.
+        remoteBindings:
+          command === "serve" &&
+          process.env.TSS_PRERENDERING !== "true" &&
+          shouldUseRemoteBindings(),
       }),
       ...tanstackStart({
         pages: [{ path: "/help" }, { path: "/legal" }],

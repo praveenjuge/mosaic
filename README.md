@@ -29,7 +29,7 @@ bun run dev
 
 Fill in all three variables in `.env.local` (use `http://localhost:3000` for `VITE_SITE_URL`). D1 and R2 always use local state in `.wrangler/`.
 
-By default the dev server takes screenshots with a local Chrome driven by Puppeteer, so `/use` works without a Cloudflare account. To use the real Browser Run binding instead, set `CLOUDFLARE_API_TOKEN`, or run `wrangler login` and start dev with `MOSAIC_REMOTE_BINDINGS=1`.
+By default the dev server takes screenshots with a local Chrome driven by Puppeteer, so `/use` works without a Cloudflare account. To use the real Browser Run binding instead, set `CLOUDFLARE_API_TOKEN`, or run `wrangler login` and start dev with `MOSAIC_REMOTE_BINDINGS=1`. If your account's workers.dev subdomain is behind Cloudflare Access, the remote proxy also needs an Access service token in `CLOUDFLARE_ACCESS_CLIENT_ID` and `CLOUDFLARE_ACCESS_CLIENT_SECRET`. `bun run build` never uses remote bindings.
 
 `bun run db:seed:local` registers `example.com`, so `http://localhost:3000/use?url=https://example.com` generates an image right away.
 
@@ -49,7 +49,7 @@ CI runs lint, format, type, and binding-type checks plus all three suites on eve
 
 ## Claude Code
 
-The repository is set up for [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web): a SessionStart hook (`.claude/settings.json`) installs dependencies, writes placeholder keys, and prepares local D1, so cloud sessions can build, test, and generate screenshots without any credentials. Project instructions live in `AGENTS.md`, which `CLAUDE.md` imports.
+The repository is set up for [Claude Code on the web](https://code.claude.com/docs/en/claude-code-on-the-web): a SessionStart hook (`.claude/settings.json`) installs dependencies, writes placeholder keys, and prepares local D1, so cloud sessions can build, test, and generate screenshots without any credentials. A post-edit hook keeps files formatted and binding types current. Project skills (`run-mosaic`, `new-migration`, `add-binding`) and a `security-reviewer` subagent live in `.claude/`. Project instructions live in `AGENTS.md`, which `CLAUDE.md` imports.
 
 ## License
 
