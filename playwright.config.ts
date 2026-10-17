@@ -41,9 +41,9 @@ export default defineConfig({
           {
             name: "visual",
             testMatch: "visual.spec.ts",
-            // One page at a time keeps the dev server's first compiles from
-            // racing the screenshots.
-            fullyParallel: false,
+            // global-setup.ts opens every page first, so the screenshots
+            // don't race the dev server's first compiles.
+            fullyParallel: true,
             use: { ...devices["Desktop Chrome"] },
           },
         ]

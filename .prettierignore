@@ -1,5 +1,6 @@
 .agents/
 .claude/skills/
+.claude/worktrees/
 .wrangler/
 dist/
 playwright-report/
