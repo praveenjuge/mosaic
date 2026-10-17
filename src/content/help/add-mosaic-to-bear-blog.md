@@ -33,7 +33,7 @@ is nothing to build or deploy.
 No `link` yet? Publish once so Bear Blog creates one from the title. Then add
 that link to `meta_image` and publish again.
 
-![Bear Blog post editor with title, link, and meta_image attributes](/images/screenshot-202024-09-16-20at-209.05.07-e2-80-afpm-AzMT.png)
+![Bear Blog post editor with title, link, and meta_image attributes](/images/bear-blog-post-editor.png)
 
 ## Pre-fill new posts (optional)
 
@@ -48,7 +48,7 @@ ___
 In each new post, change the encoded URL to that post's address. If you leave
 the home page URL, every post shares the home page image.
 
-![Bear Blog post template with a meta_image attribute](/images/screenshot-202024-09-16-20at-209.05.17-e2-80-afpm-A5MT.png)
+![Bear Blog post template with a meta_image attribute](/images/bear-blog-post-template.png)
 
 ## After a theme change
 
