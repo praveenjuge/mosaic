@@ -418,6 +418,36 @@ describe("/i/*", () => {
     assert.equal(other.status, 404);
   });
 
+  test("redirects keys from old per-site prefixes once they are replaced", async () => {
+    const currentKey = `global/${pageHash}-def456.jpeg`;
+    await insertGlobalImage(currentKey, Date.now() + 60_000);
+    const { url } = await server.listen();
+
+    for (const oldKey of [
+      `msk7vkfb-u4ks6195/${pageHash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${pageHash}.png`,
+    ]) {
+      const response = await server.fetch(`/i/${oldKey}`, {
+        redirect: "manual",
+      });
+      assert.equal(response.status, 307, oldKey);
+      assert.equal(
+        response.headers.get("Location"),
+        new URL(`/i/${currentKey}`, url).toString(),
+      );
+      assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+    }
+
+    // Until a refresh deletes it, the old object is still served as is.
+    const env = await worker.getEnv();
+    const stored = `msk7vkfb-u4ks6195/${"b".repeat(64)}.jpeg`;
+    await env.OG_BUCKET.put(stored, new Uint8Array([7]));
+    const response = await server.fetch(`/i/${stored}`, { redirect: "manual" });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+    await response.arrayBuffer();
+  });
+
   test("never sets cookies, even for signed-in browsers", async () => {
     await registerSite("example.com");
     const env = await worker.getEnv();
