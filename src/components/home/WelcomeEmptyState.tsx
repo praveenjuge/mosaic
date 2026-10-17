@@ -28,10 +28,10 @@ export default function WelcomeEmptyState() {
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center text-center">
           <img
-            src="/illustrations/welcome.png"
+            src="/illustrations/welcome-600w-1b320790.webp"
             alt="Welcome to Mosaic"
             width={300}
-            height={300}
+            height={200}
             className="mb-3"
           />
           <CardTitle>Welcome to Mosaic</CardTitle>

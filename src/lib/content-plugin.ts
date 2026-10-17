@@ -27,6 +27,7 @@ import type {
   HelpCategory,
   LegalDocument,
 } from "./content-types";
+import { readImageSize } from "./image-size";
 import { toMarkdownDocument } from "./markdown-negotiation";
 
 const VIRTUAL_PREFIX = "virtual:mosaic-content/";
@@ -66,12 +67,38 @@ function rehypeLinksAndImages() {
   };
 }
 
+/**
+ * Images from `public/` get their `width` and `height`, so the page doesn't
+ * shift when they load. Others are left as they are.
+ */
+function rehypeImageSizes() {
+  const publicDir = path.resolve("public");
+  return async (tree: Root) => {
+    const images: Element[] = [];
+    visit(tree, "element", (node) => {
+      const src = String(node.properties.src ?? "");
+      if (node.tagName === "img" && /^\/(?!\/)/.test(src)) images.push(node);
+    });
+    await Promise.all(
+      images.map(async (node) => {
+        const file = path.join(publicDir, String(node.properties.src));
+        if (!file.startsWith(publicDir + path.sep)) return;
+        const size = await readFile(file).then(readImageSize, () => null);
+        if (!size) return;
+        node.properties.width = size.width;
+        node.properties.height = size.height;
+      }),
+    );
+  };
+}
+
 const processor = unified()
   .use(remarkParse)
   .use(remarkRehype, { allowDangerousHtml: true })
   .use(rehypeRaw)
   .use(rehypeShiki, { theme: "github-dark", langs: [], lazy: true })
   .use(rehypeLinksAndImages)
+  .use(rehypeImageSizes)
   .use(rehypeStringify);
 
 export async function renderMarkdown(markdown: string): Promise<string> {

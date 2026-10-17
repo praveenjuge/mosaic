@@ -1,3 +1,7 @@
 # Old blog posts moved to the help center.
 /blog /help 301
 /blog/* /help/:splat 301
+
+# Help article screenshots moved to resized WebP files.
+/images/bear-blog-post-editor.png /images/bear-blog-post-editor-1720w-105549cd.webp 301
+/images/bear-blog-post-template.png /images/bear-blog-post-template-1720w-508288fb.webp 301
