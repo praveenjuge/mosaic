@@ -12,7 +12,7 @@ This Privacy Policy explains how we collect, use, and protect your personal info
 
 We collect:
 
-- Account information (name, email address, sign-in details)
+- Account information (email address and sign-in details)
 - The website hostnames you add to your account
 - Screenshots of requested public pages (Cloudflare R2) and metadata such as page URL and generation time (Cloudflare D1)
 - Billing information (payment method, billing address) for paid plans

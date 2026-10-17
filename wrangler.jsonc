@@ -15,6 +15,13 @@
       "head_sampling_rate": 1,
     },
   },
+  // Prerendered content pages would otherwise be served as static files
+  // before the Worker runs. Routing them through the Worker lets
+  // src/start.ts answer Markdown and JSON requests for them; browsers get the
+  // same page, rendered by the server.
+  "assets": {
+    "run_worker_first": ["/help", "/help/*", "/legal"],
+  },
   "upload_source_maps": true,
   "keep_vars": true,
   "workers_dev": true,

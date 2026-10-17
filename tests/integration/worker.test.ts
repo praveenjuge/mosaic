@@ -147,31 +147,65 @@ describe("/use", () => {
   });
 });
 
-// Prerendered pages (/help, /legal) are static assets served before the
-// Worker, so only Worker-rendered paths are negotiated here.
 describe("content negotiation", () => {
-  test("serves the llms.txt site map as the home page's Markdown", async () => {
-    const response = await server.fetch("/", {
-      headers: { Accept: "text/markdown" },
-    });
-    assert.equal(response.status, 200);
-    assert.match(response.headers.get("Content-Type") ?? "", /^text\/markdown/);
-    assert.match(await response.text(), /^# Mosaic\n[\s\S]*\/help\/guides\//);
+  test("serves Markdown mirrors of content pages", async () => {
+    const pages = {
+      "/": /^# Mosaic\n[\s\S]*\/help\/guides\//,
+      "/help": /^# Help\n[\s\S]*\]\(\/help\/guides\/nextjs\)/,
+      "/help/guides/nextjs": /^# Next\.js\n/,
+      "/help/use-the-mosaic-api": /^# Use the Mosaic API\n/,
+      "/legal": /^# Privacy Policy\n[\s\S]*\n---\n/,
+    };
+    for (const [path, body] of Object.entries(pages)) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "text/markdown" },
+      });
+      assert.equal(response.status, 200, path);
+      assert.match(
+        response.headers.get("Content-Type") ?? "",
+        /^text\/markdown/,
+        path,
+      );
+      assert.match(await response.text(), body, path);
+    }
+  });
+
+  test("still serves content pages as HTML to browsers", async (t) => {
+    for (const path of ["/help", "/help/guides/nextjs", "/legal"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "text/html,application/xhtml+xml,*/*;q=0.8" },
+        redirect: "manual",
+      });
+      // A build with real Clerk development keys (some cloud sessions) sends
+      // signed-out page requests to Clerk's handshake first. CI builds with
+      // placeholder keys, so it always checks the rendered page.
+      if (response.headers.get("Location")?.includes("/v1/client/handshake")) {
+        t.skip("Clerk development keys redirect to the handshake");
+        return;
+      }
+      assert.equal(response.status, 200, path);
+      assert.match(response.headers.get("Content-Type") ?? "", /^text\/html/);
+      assert.match(await response.text(), /<html/, path);
+    }
   });
 
   test("answers JSON requests for pages with problem documents", async () => {
-    const known = await server.fetch("/", {
-      headers: { Accept: "application/json" },
-    });
-    assert.equal(known.status, 406);
-    const unknown = await server.fetch("/nope", {
-      headers: { Accept: "application/json" },
-    });
-    assert.equal(unknown.status, 404);
-    assert.equal(
-      ((await unknown.json()) as { code: string }).code,
-      "not_found",
-    );
+    for (const path of ["/", "/legal", "/help/guides/nextjs"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "application/json" },
+      });
+      assert.equal(response.status, 406, path);
+    }
+    for (const path of ["/nope", "/help/missing"]) {
+      const response = await server.fetch(path, {
+        headers: { Accept: "application/json" },
+      });
+      assert.equal(response.status, 404, path);
+      assert.equal(
+        ((await response.json()) as { code: string }).code,
+        "not_found",
+      );
+    }
   });
 });
 
