@@ -29,7 +29,7 @@ Run these before pushing; CI (`.github/workflows/ci.yml`) runs all of them.
 
 ## Local, cloud, and CI environments
 
-- Remote bindings are opt-in (`shouldUseRemoteBindings()` in `vite.config.ts`). They turn on for a logged-in machine or when `CLOUDFLARE_API_TOKEN` is set, and stay off in CI, Workers Builds, and Claude Code cloud sessions. `MOSAIC_REMOTE_BINDINGS=1|0` overrides.
+- Remote bindings are opt-in (`shouldUseRemoteBindings()` in `vite.config.ts`). They turn on only when `CLOUDFLARE_API_TOKEN` is set or `MOSAIC_REMOTE_BINDINGS=1`, never in Workers Builds; `MOSAIC_REMOTE_BINDINGS=0` forces them off. A `wrangler login` alone is not detected.
 - Only `BROWSER` is remote; D1 and R2 always use local state in `.wrangler/`, so development never writes to production storage.
 - Without remote bindings, `takeScreenshot()` falls back in dev to local Puppeteer (`src/lib/local-screenshot.ts`) against a Chrome that Miniflare downloads. Local Chrome needs `CI=1` when running as root (Miniflare only passes `--no-sandbox` then).
 - Claude Code cloud sessions run `scripts/claude-session-start.sh` via the SessionStart hook in `.claude/settings.json`: it installs dependencies, writes placeholder Clerk keys to `.env.local`, migrates and seeds local D1, and exports `CI=1`. Placeholder keys use the `pk_live_` shape because Clerk development keys force a handshake redirect to the (fake) Frontend API.

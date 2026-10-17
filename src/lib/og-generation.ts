@@ -345,6 +345,10 @@ async function handleProductionRequest(
   }
 
   const requestHostname = new URL(request.url).hostname;
+  // Redirect to images on the origin that served this request, not the
+  // build-time site URL, so Worker Previews read from their own R2 bucket.
+  const imageBaseUrl = new URL("/i/", request.url).toString();
+  const imageUrl = (key: string) => buildPublicImageUrl(key, imageBaseUrl);
   if (isSelfReferentialUseUrl(validatedUrl, requestHostname)) {
     return createJsonResponse(
       { error: "URL may not target this service's /use endpoint." },
@@ -379,7 +383,7 @@ async function handleProductionRequest(
 
   if (cachedImage && cachedImage.expiresAt > Date.now()) {
     record("cache_hit");
-    return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
+    return createRedirectResponse(imageUrl(cachedImage.key));
   }
 
   const clientKey = request.headers.get("CF-Connecting-IP") ?? "unknown";
@@ -387,7 +391,7 @@ async function handleProductionRequest(
   if (!rateLimit.success) {
     record("rate_limited");
     return cachedImage
-      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      ? createRedirectResponse(imageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
   }
 
@@ -395,7 +399,7 @@ async function handleProductionRequest(
   if (!leaseToken) {
     record("locked");
     if (cachedImage) {
-      return createRedirectResponse(buildPublicImageUrl(cachedImage.key));
+      return createRedirectResponse(imageUrl(cachedImage.key));
     }
     return createJsonResponse(
       { error: "This image is already being generated. Please retry shortly." },
@@ -409,7 +413,7 @@ async function handleProductionRequest(
     await releaseGenerationLock(db, sanitizedUrl, leaseToken);
     record("budget_exhausted");
     return cachedImage
-      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      ? createRedirectResponse(imageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
   }
 
@@ -431,12 +435,12 @@ async function handleProductionRequest(
       bytes: imageBuffer.byteLength,
     });
 
-    return createRedirectResponse(buildPublicImageUrl(imageKey));
+    return createRedirectResponse(imageUrl(imageKey));
   } catch (err) {
     console.error("[USE] Failed to generate or persist image:", err);
     record("failed", { durationMs: Date.now() - startedAt });
     return cachedImage
-      ? createRedirectResponse(buildPublicImageUrl(cachedImage.key))
+      ? createRedirectResponse(imageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);
   } finally {
     await releaseGenerationLock(db, sanitizedUrl, leaseToken).catch((error) =>

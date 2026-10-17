@@ -116,9 +116,12 @@ describe("/use", () => {
       redirect: "manual",
     });
     assert.equal(response.status, 307);
-    assert.match(
-      response.headers.get("Location") ?? "",
-      /\/i\/global\/cached\.jpeg$/,
+    // Redirects stay on the serving origin (the harness, not VITE_SITE_URL)
+    // so previews read images from their own bucket.
+    const { url } = await server.listen();
+    assert.equal(
+      response.headers.get("Location"),
+      new URL("/i/global/cached.jpeg", url).toString(),
     );
   });
 });

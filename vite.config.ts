@@ -29,18 +29,17 @@ function resolveSiteHost(siteUrl: string | undefined) {
 
 /**
  * Remote bindings proxy Browser Run calls to the real Cloudflare account, so
- * they need Cloudflare credentials. Workers Builds' build token can't reach
- * them, and CI or Claude Code cloud containers have no `wrangler login`, so
- * those default to local emulation unless an API token is present.
- * `MOSAIC_REMOTE_BINDINGS=1|0` overrides the detection either way.
+ * they need credentials. They are opt-in: on with `CLOUDFLARE_API_TOKEN` or
+ * `MOSAIC_REMOTE_BINDINGS=1`, otherwise dev falls back to local Puppeteer.
+ * `MOSAIC_REMOTE_BINDINGS=0` forces them off. Workers Builds' build token
+ * can't reach them, so they always stay off there.
  */
 function shouldUseRemoteBindings() {
+  if (process.env.WORKERS_CI === "1") return false;
   const override = process.env.MOSAIC_REMOTE_BINDINGS;
   if (override) return override === "1" || override === "true";
-  if (process.env.WORKERS_CI === "1") return false;
-  if (process.env.CLOUDFLARE_API_TOKEN) return true;
 
-  return !process.env.CI && process.env.CLAUDE_CODE_REMOTE !== "true";
+  return Boolean(process.env.CLOUDFLARE_API_TOKEN);
 }
 
 const prerenderBlockedPaths = [

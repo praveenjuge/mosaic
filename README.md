@@ -29,7 +29,7 @@ bun run dev
 
 Fill in all three variables in `.env.local` (use `http://localhost:3000` for `VITE_SITE_URL`). D1 and R2 always use local state in `.wrangler/`.
 
-Screenshots use the remote Browser Run binding when you are logged in with `wrangler login` or have `CLOUDFLARE_API_TOKEN` set. Otherwise the dev server falls back to a local Chrome driven by Puppeteer, so `/use` still works without a Cloudflare account. `MOSAIC_REMOTE_BINDINGS=1` or `0` forces either mode.
+By default the dev server takes screenshots with a local Chrome driven by Puppeteer, so `/use` works without a Cloudflare account. To use the real Browser Run binding instead, set `CLOUDFLARE_API_TOKEN`, or run `wrangler login` and start dev with `MOSAIC_REMOTE_BINDINGS=1`.
 
 `bun run db:seed:local` registers `example.com`, so `http://localhost:3000/use?url=https://example.com` generates an image right away.
 

@@ -19,8 +19,7 @@ bun run db:migrate:local
 bun run db:seed:local
 
 # Cloud containers run as root, and Miniflare only launches the local
-# Browser Run Chrome with --no-sandbox when CI is set. CI also keeps the Vite
-# plugin on local bindings unless a Cloudflare API token is configured.
+# Browser Run Chrome with --no-sandbox when CI is set.
 if [ -n "${CLAUDE_ENV_FILE:-}" ]; then
   echo "export CI=1" >> "$CLAUDE_ENV_FILE"
 fi
