@@ -1,14 +1,17 @@
 ---
 title: "Hugo"
 slug: "hugo"
-description: "Get started with integrating Mosaic into your Hugo project."
+description: "Give every page an image from your Hugo template."
 order: 60
 ---
 
-## Add this to your layout template
+In the `<head>` of your base template or head partial:
 
 ```html
-{{ $baseURL := "https://mosaic.praveenjuge.com/use?url=" }} {{ $pageURL :=
-.Page.Permalink }} {{ $ogImageURL := printf "%s%s" $baseURL ($pageURL |
-urlquery) }} <meta property="og:image" content="{{ $ogImageURL }}" />
+<meta
+  property="og:image"
+  content="https://mosaic.praveenjuge.com/use?url={{ .Permalink | urlquery }}"
+/>
 ```
+
+`.Permalink` uses `baseURL`, so set that to your production URL.

@@ -1,36 +1,19 @@
 ---
 title: "Nuxt"
 slug: "nuxt"
-description: "Get started with integrating Mosaic into your Nuxt project."
+description: "Set og:image with Nuxt's useSeoMeta."
 order: 50
 ---
 
-## Use `useSeoMeta`
+In `app.vue` or a layout, to cover every page:
 
 ```vue
-<script setup>
-useSeoMeta({
-  title: "My Page Title",
-  ogTitle: "My Page Title",
-  ogImage:
-    "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
-  ogType: "website",
-});
-</script>
-```
-
-## For dynamic pages
-
-```vue
-<script setup>
+<script setup lang="ts">
 const route = useRoute();
-const slug = route.params.slug;
 
 useSeoMeta({
-  title: `Post: ${slug}`,
-  ogTitle: `Post: ${slug}`,
-  ogImage: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${slug}`)}`,
-  ogType: "article",
+  ogImage: () =>
+    `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com${route.path}`)}`,
 });
 </script>
 ```

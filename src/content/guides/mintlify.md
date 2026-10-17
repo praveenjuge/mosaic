@@ -1,11 +1,9 @@
 ---
 title: "Mintlify"
 slug: "mintlify"
-description: "Get started with integrating Mosaic into your Mintlify docs."
+description: "Set og:image in Mintlify frontmatter."
 order: 130
 ---
-
-## Add this to your page frontmatter
 
 ```mdx
 ---

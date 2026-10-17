@@ -1,14 +1,13 @@
 ---
 title: "Create a New Account"
+description: "Sign up for Mosaic in a few steps."
 category: "Authentication"
 publishedAt: "2024-07-18T14:09:12.600Z"
 ---
 
-- **Go to [Mosaic](https://mosaic.praveenjuge.com)**
-- **Click on the "Sign Up" Button**
-- **Complete the Sign-Up Flow**\
-  A modal will open. Follow the instructions to enter your details.
-- **Access Your Dashboard**\
-  Once you've signed up, you'll be redirected to your dashboard.
+1. Go to [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com).
+2. Click **Sign Up**.
+3. Enter your details and follow the prompts.
 
-That's it! You're now ready to start using mosaic.
+When you finish, you land on your dashboard, ready to
+[add your first website](/help/add-your-website-to-mosaic).

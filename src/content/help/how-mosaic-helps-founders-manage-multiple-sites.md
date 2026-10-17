@@ -1,27 +1,21 @@
 ---
 title: "How Mosaic Helps Founders Manage Multiple Sites"
-description: "Running several websites can be exhausting. Learn how Mosaic streamlines your workflow so you can focus on building."
+description: "Running several websites? Mosaic gives every page an OG image without designing one per site."
 publishedAt: "2025-02-25T06:24:44.707Z"
 category: "Articles"
 ---
 
-Juggling a handful of websites is no easy task. Between keeping content fresh
-and ensuring everything looks sharp on social media, it can quickly feel
-overwhelming.
+Running several websites means a lot of small chores. Making a social preview
+image for every page is one you can skip.
 
-That's where Mosaic steps in. By automatically generating Open Graph images from
-real page screenshots, Mosaic saves time you would otherwise spend designing
-images for each individual page.
+Mosaic builds Open Graph images from real screenshots of your pages. Add a site,
+put one link in its `og:image` tag, and every page gets an image on its first
+share.
 
-You can integrate Mosaic into new projects in minutes, but the real magic
-happens once you have multiple sites under your belt. From a single dashboard,
-you can manage screenshots for all your domains, tweak settings, and automate
-updates whenever your pages change.
+This pays off most when you have many sites. Your dashboard lists all of them,
+with each site's OG image link, how many images it has, and when the last one
+was taken. Mosaic plans include unlimited websites, and images refresh on their
+own every 30 days.
 
-The result? Consistent, professional social previews across every project.
-Instead of manually capturing screenshots, you can get back to shipping features
-and growing your business.
-
-Mosaic was built with busy founders in mind. If you maintain lots of sites or
-spin up new landing pages frequently, give Mosaic a try and see how much time
-you can save.
+Your previews stay consistent across projects, and you get back to shipping. If
+you run lots of sites or launch landing pages often, give Mosaic a try.

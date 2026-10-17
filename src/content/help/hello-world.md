@@ -1,25 +1,19 @@
 ---
 title: "Hello World!"
-description: "In our inaugural post, we introduce the features and benefits of Mosaic, providing insights into how it can elevate your visual content. Join us on this exciting journey as we explore innovative techniques, share expert tips, and inspire your creative projects. Stay tuned for updates, tutorials, and much more!"
+description: "Meet Mosaic: OG images made from screenshots of the website you already have."
 publishedAt: "2024-07-24"
 category: "Articles"
 ---
 
-Welcome to our first blog post on Mosaic!
+Welcome to the first post on Mosaic!
 
-At Mosaic, we simplify the creation of Open Graph (OG) social images by
-automating the process with screenshots. We take the hassle out of creating an
-OG image for every page, allowing you to showcase the beautiful website you
-already have.
+Mosaic makes Open Graph (OG) images, the previews shown when someone shares your
+link, from screenshots of your pages. You don't have to design an image for
+every page. Your website already looks good, so Mosaic shows it off.
 
-With Mosaic, you can effortlessly generate these screenshots and integrate them
-into your website in under a minute, no coding skills required.
+Setup is short: add your website, then put one Mosaic link in your page's
+`og:image` meta tag. Mosaic takes the screenshot and keeps it fresh.
 
-We invite you to explore our [blog](https://mosaic.praveenjuge.com/blog) for the latest
-news and new features. For any assistance or support, visit our
-[help page](https://mosaic.praveenjuge.com/help).
-
-Feel free to reach out with any questions or feature requests. We're here to
-help!
-
-Stay tuned for more updates!
+Find news, guides, and answers in our [help center](https://mosaic.praveenjuge.com/help).
+Questions or feature requests? Email hello@praveenjuge.com. We'd love to hear
+from you.

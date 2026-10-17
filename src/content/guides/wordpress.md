@@ -1,27 +1,21 @@
 ---
 title: "WordPress"
 slug: "wordpress"
-description: "Get started with integrating Mosaic into your WordPress project."
+description: "Add og:image to WordPress posts and pages."
 order: 100
 ---
 
-## Add this to your theme's `functions.php`
+In your child theme's `functions.php`:
 
 ```php
-function add_dynamic_og_image() {
+add_action('wp_head', function () {
     if (!is_singular()) {
         return;
     }
 
-    $permalink = get_permalink();
-    if (!$permalink) {
-        return;
-    }
-
-    $page_url = rawurlencode($permalink);
-    $og_image_url = 'https://mosaic.praveenjuge.com/use?url=' . $page_url;
-
-    echo '<meta property="og:image" content="' . esc_url($og_image_url) . '" />';
-}
-add_action('wp_head', 'add_dynamic_og_image');
+    $og_image = 'https://mosaic.praveenjuge.com/use?url=' . rawurlencode(get_permalink());
+    echo '<meta property="og:image" content="' . esc_url($og_image) . '" />';
+});
 ```
+
+If an SEO plugin like Yoast already prints `og:image`, set it there instead.

@@ -1,44 +1,41 @@
 ---
 title: "Designing Hero Sections That Pop in OG Thumbnails"
-description: "Actionable tips for creating hero sections that translate beautifully into OG images, from smart composition to strong text contrast and layout."
+description: "Design tips for hero sections that still look sharp when Mosaic turns them into small social previews."
 publishedAt: "2025-04-02T05:40:00.916Z"
 category: "Articles"
 ---
 
-First impressions count, especially when your content gets shared on social
-media. The hero section at the top of your page is the part most likely to
-appear in an Open Graph (OG) image, so it needs to shine. Here are a few design
-tips to ensure your hero translates perfectly into an eye‑catching thumbnail.
+Mosaic's OG image is a screenshot of the top of your page, so your hero section
+is your social preview. Here's how to make it work at thumbnail size.
 
-## Compose with the thumbnail in mind
+## Know what gets captured
 
-Keep the essential visuals—like your product or main graphic—centered and clear.
-OG images often crop the outer edges, so avoid placing vital elements near the
-borders. If you’re using a background image, pick one that leaves room for text
-or a call to action without looking cluttered when scaled down.
+Mosaic opens your page in a 1560 × 819 pixel desktop window, the same shape as
+a standard 1200 × 630 OG image. Only that first screen ends up in the
+image. To preview it, resize your browser to that size and look at the top of
+the page.
 
-## Contrast is key for readable text
+## Keep the important parts in the middle
 
-OG thumbnails are small, so any text you include needs to pop. Choose font
-colors that stand out against the background. A subtle shadow or translucent
-backdrop can make sure your tagline or title stays readable, even in a busy
-feed. Test your hero at different sizes to confirm the text remains legible.
+Some platforms crop the edges of previews. Keep your product, headline, and
+main graphic centered, away from the borders.
 
-## Keep your layout simple
+## Make text readable when small
 
-Complex layouts with multiple columns or dense graphics can turn messy at
-thumbnail size. Stick to a single focal point, supported by a short line of text
-or button. This minimal approach ensures your design stays crisp, whether it’s
-seen full‑width on your site or squeezed into the OG dimensions.
+Previews are often shown a few hundred pixels wide. Use large type and strong
+contrast. If text sits on a photo, add a solid or translucent backdrop behind
+it.
 
-## Test across devices
+## Use one focal point
 
-Take a screenshot of your hero section and preview it at 1200x630 pixels—the
-standard OG size. Check it on both light and dark backgrounds since different
-social platforms may apply their own overlays. Seeing how your hero looks in
-various contexts lets you tweak the design for maximum impact.
+Multiple columns and dense graphics turn to noise when shrunk. One clear visual
+and one short line of text read best.
 
-With these principles—thoughtful composition, strong text contrast, and a
-simplified layout—your hero section will look great on your site and in every OG
-thumbnail. A polished hero makes people more likely to click, bringing more eyes
-to your content.
+## Avoid things the screenshot can't show
+
+- WebGL scenes and videos don't render, so give them a static fallback image.
+- Mosaic waits briefly for the page to settle, so slow animations may be caught
+  halfway. Make the first frame look good on its own.
+- Cookie banners and pop-ups that cover the hero will show up in the image too.
+
+A hero that reads well small also tends to read well on your site.

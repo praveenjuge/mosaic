@@ -1,14 +1,13 @@
 ---
 title: "Log In to Your Account"
+description: "Sign in to Mosaic to reach your dashboard."
 category: "Authentication"
 publishedAt: "2024-07-18T14:14:32.336Z"
 ---
 
-- **Go to [Mosaic](https://mosaic.praveenjuge.com)**
-- **Click on the "Log In" Button**
-- **Enter Your Credentials**\
-  In the modal that appears, enter your email and password.
-- **Access Your Dashboard**\
-  Once logged in, you'll be redirected to your dashboard.
+1. Go to [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com).
+2. Click **Log In**.
+3. Enter your email and follow the prompts.
 
-That's it! You're now logged in and ready to use mosaic.
+Once you're in, you land on your dashboard. Forgot your password? See
+[Change Your Account Password](/help/change-your-account-password).

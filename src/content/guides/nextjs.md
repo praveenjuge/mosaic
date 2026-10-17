@@ -1,53 +1,44 @@
 ---
 title: "Next.js"
 slug: "nextjs"
-description: "Get started with integrating Mosaic into your Next.js project."
+description: "Set og:image with the App Router Metadata API."
 order: 10
 svgLight: "nextjs_icon_dark"
 svgDark: "nextjs_icon_dark"
 ---
 
-## Use the metadata export in your layout or page files
+In a `layout.tsx` or `page.tsx`:
 
 ```typescript
-import { Metadata } from "next";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   openGraph: {
-    images: [
-      {
-        url: "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
-        width: 1200,
-        height: 630,
-        alt: "Open Graph Image",
-      },
-    ],
+    images:
+      "https://mosaic.praveenjuge.com/use?url=https%3A%2F%2Fyourwebsite.com%2Fyour_slug",
   },
 };
 ```
 
-## For dynamic routes, use `generateMetadata`
+For dynamic routes, use `generateMetadata`:
 
 ```typescript
+import type { Metadata } from "next";
+
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const slug = params.slug;
+  const { slug } = await params;
+  const pageUrl = `https://yourwebsite.com/blog/${slug}`;
 
   return {
-    title: `Post: ${slug}`,
     openGraph: {
-      images: [
-        {
-          url: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(`https://yourwebsite.com/${slug}`)}`,
-          width: 1200,
-          height: 630,
-          alt: `Open Graph Image for ${slug}`,
-        },
-      ],
+      images: `https://mosaic.praveenjuge.com/use?url=${encodeURIComponent(pageUrl)}`,
     },
   };
 }
 ```
+
+A page's `openGraph` replaces its layout's rather than merging with it.

@@ -1,48 +1,38 @@
 ---
-title: "Why do you need personalized OG images? Why skip boring or no OG images?"
-description: "Ever clicked on a link and been greeted by a bland, generic image? Or worse, no image at all? "
+title: "Why Personalized OG Images Beat Boring or Missing Ones"
+description: "Why a page-specific OG image beats a bland image or no image at all."
 publishedAt: "2024-12-15T08:37:21.750Z"
 category: "Articles"
 ---
 
-Ever clicked on a link and been greeted by a bland, generic image? Or worse, no
-image at all? Yeah, me too. It's like walking into a party where everyone's
-wearing the same beige outfit. Snooze fest, right?
+Ever clicked a link with a bland stock image, or no image at all? It's easy to
+scroll right past. Open Graph (OG) images, the previews shown when you share a
+link, fix that. Here's why they matter.
 
-So let's chat about Open Graph (OG) images – you know, those preview images you
-see when sharing links on social media. They're kinda a big deal, and here's why
-you should care:
+## First impressions
 
-## First impressions matter
+A missing or generic image says "meh" before anyone reads your title. Your
+content deserves better.
 
-Think about it – how do you feel when you see a link with no image or some
-random stock photo? Be honest! For me, it's often a quick "meh" before scrolling
-on. Your content deserves better than that!
+## Standing out in the feed
 
-## Stand out in the feed
-
-Social media moves fast. An eye-catching, personalized OG image can stop thumbs
-mid-scroll. It's your chance to say "Hey, this is worth your time!" without
-saying a word.
+Feeds move fast. A clear, page-specific image gives people a reason to stop
+scrolling.
 
 ## Brand recognition
 
-Consistent, on-brand OG images help people recognize your content instantly.
-It's like your digital signature.
+When every preview looks like your site, people learn to spot your content.
 
-## Show what's inside
+## A preview of what's inside
 
-A good OG image gives a sneak peek of your content. It's the movie trailer of
-your blog post or product page. Now, I'm curious – how do you feel when you see
-an OG image that doesn't relate to you or the content at all? Does it make you
-less likely to click?
+A good OG image is a trailer for the page. An image that has nothing to do with
+the content makes people less likely to click.
 
-Some cool where Mosaic could help you out
+## Where Mosaic helps
 
-- There is no chance that you will have no OG image at any cost because Mosaic
-  takes care
-- Helps you to bring a screenshot to an OG image format thereby consistently
-  maintaining the brand signature.
+- Each page you point at Mosaic gets an image made from its own screenshot,
+  so previews look like your site.
+- If a screenshot can't be taken, Mosaic serves the last image it has, or a
+  fallback image. The link still has a preview.
 
-Remember, in the world of content, standing out is half the battle. Make those
-OG images work for you!
+Standing out is half the battle. Make your OG images do the work.
