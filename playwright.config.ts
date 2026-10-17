@@ -15,7 +15,10 @@ export default defineConfig({
   testDir: "./e2e",
   timeout: 90_000,
   forbidOnly: !!process.env.CI,
-  workers: 1,
+  // Specs don't share state (signed-in ones add and delete their own sites),
+  // so they run side by side against the one dev server.
+  fullyParallel: true,
+  workers: process.env.CI ? 2 : undefined,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "list",
   globalSetup: "./e2e/global-setup.ts",
   use: {
@@ -38,6 +41,9 @@ export default defineConfig({
           {
             name: "visual",
             testMatch: "visual.spec.ts",
+            // One page at a time keeps the dev server's first compiles from
+            // racing the screenshots.
+            fullyParallel: false,
             use: { ...devices["Desktop Chrome"] },
           },
         ]

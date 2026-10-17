@@ -52,6 +52,8 @@ export default defineConfig(({ command, mode }) => {
       sourcemap: true,
     },
     define: {
+      // Keys the signed-out page cache (src/start.ts) to this build.
+      __MOSAIC_BUILD_ID__: JSON.stringify(Date.now().toString(36)),
       // Miniflare launches the local dev Chrome with an empty environment, so
       // it can't see HTTPS_PROXY. Sandboxes that require an egress proxy, like
       // Claude Code cloud sessions, need it passed to Puppeteer explicitly.

@@ -8,6 +8,7 @@
  * in the production Worker.
  */
 
+import { isBlockedRequest } from "@/lib/blocked-requests";
 import puppeteer, { type BrowserWorker } from "@cloudflare/puppeteer";
 
 /** Egress proxy for local Chrome, injected by `vite.config.ts` in dev. */
@@ -29,6 +30,19 @@ export async function takeLocalScreenshot(
     const page = await context.newPage();
     if (options.userAgent) await page.setUserAgent(options.userAgent);
     if (options.viewport) await page.setViewport(options.viewport);
+    // Mirror `rejectRequestPattern` (built by `blockedRequestPatterns`) with
+    // the same hostname rule.
+    if (options.rejectRequestPattern?.length) {
+      const pageUrl = options.url;
+      await page.setRequestInterception(true);
+      page.on("request", (request) => {
+        if (isBlockedRequest(pageUrl, request.url())) {
+          void request.abort();
+        } else {
+          void request.continue();
+        }
+      });
+    }
     await page.goto(options.url, {
       waitUntil: options.gotoOptions?.waitUntil,
       timeout: options.gotoOptions?.timeout,

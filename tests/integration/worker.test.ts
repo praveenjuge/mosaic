@@ -42,6 +42,17 @@ after(async () => {
   await server.close();
 });
 
+async function insertGlobalImage(key: string, expiresAt: number) {
+  const env = await worker.getEnv();
+  await env.DB.prepare(
+    "INSERT INTO global_images (page_url, hostname, key, size_in_bytes, generated_at, expires_at) VALUES (?, ?, ?, ?, ?, ?)",
+  )
+    .bind("https://example.com", "example.com", key, 3, Date.now(), expiresAt)
+    .run();
+}
+
+const pageHash = "a".repeat(64);
+
 async function registerSite(urlBase: string) {
   const env = await worker.getEnv();
   await env.DB.prepare("INSERT INTO sites (user_id, url_base) VALUES (?, ?)")
@@ -98,6 +109,57 @@ describe("public pages", () => {
       response.headers.get("Content-Security-Policy") ?? "",
       /frame-ancestors 'none'/,
     );
+  });
+});
+
+describe("signed-out page cache", () => {
+  async function fetchPage(path: string, headers?: Record<string, string>) {
+    return server.fetch(path, {
+      headers: { Accept: "text/html", ...headers },
+      redirect: "manual",
+    });
+  }
+
+  test("serves repeat signed-out visits from the cache", async (t) => {
+    const first = await fetchPage("/help");
+    // Development Clerk keys (some cloud sessions) handshake every signed-out
+    // request, so they never use the page cache. CI's placeholders do.
+    if (first.headers.get("Location")?.includes("/v1/client/handshake")) {
+      t.skip("Clerk development keys redirect to the handshake");
+      return;
+    }
+    assert.equal(first.headers.get("X-Mosaic-Cache"), "MISS");
+    const html = await first.text();
+
+    let second = await fetchPage("/help");
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (second.headers.get("X-Mosaic-Cache") === "HIT") break;
+      await second.arrayBuffer();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      second = await fetchPage("/help");
+    }
+    assert.equal(second.headers.get("X-Mosaic-Cache"), "HIT");
+    assert.equal(second.headers.get("Cache-Control"), null);
+    assert.match(
+      second.headers.get("Content-Security-Policy") ?? "",
+      /frame-ancestors 'none'/,
+    );
+    assert.equal(await second.text(), html);
+  });
+
+  test("renders fresh for requests that may be signed in", async () => {
+    for (const cookie of ["__session=abc", "__client_uat=1760000000"]) {
+      const response = await fetchPage("/help", { Cookie: cookie });
+      assert.equal(response.headers.get("X-Mosaic-Cache"), null, cookie);
+      await response.arrayBuffer();
+    }
+  });
+
+  test("leaves Markdown requests to content negotiation", async () => {
+    const response = await fetchPage("/help", { Accept: "text/markdown" });
+    assert.match(response.headers.get("Content-Type") ?? "", /^text\/markdown/);
+    assert.equal(response.headers.get("X-Mosaic-Cache"), null);
+    await response.arrayBuffer();
   });
 });
 
@@ -165,6 +227,21 @@ describe("/use", () => {
       bare.headers.get("Location"),
       response.headers.get("Location"),
     );
+  });
+
+  test("serves an expired image at once and refreshes it afterwards", async () => {
+    await registerSite("example.com");
+    await insertGlobalImage("global/stale.jpeg", Date.now() - 1);
+
+    const response = await server.fetch("/use?url=https://example.com/", {
+      redirect: "manual",
+    });
+    assert.equal(response.status, 307);
+    assert.match(
+      response.headers.get("Location") ?? "",
+      /\/i\/global\/stale\.jpeg$/,
+    );
+    assert.equal(response.headers.get("Cache-Control"), "private, no-store");
   });
 
   test("refuses private and self-referential targets", async () => {
@@ -272,6 +349,90 @@ describe("/i/*", () => {
     assert.equal(response.headers.get("Content-Type"), "image/jpeg");
     assert.ok(response.headers.get("ETag"));
     assert.equal((await response.arrayBuffer()).byteLength, 0);
+  });
+
+  test("caches versioned images as immutable", async () => {
+    const key = `global/${pageHash}-abc123.jpeg`;
+    const env = await worker.getEnv();
+    await env.OG_BUCKET.put(key, new Uint8Array([4, 5, 6]), {
+      httpMetadata: { contentType: "image/jpeg" },
+    });
+
+    const response = await server.fetch(`/i/${key}`);
+    assert.equal(response.status, 200);
+    assert.equal(
+      response.headers.get("Cache-Control"),
+      "public, max-age=31536000, immutable",
+    );
+    assert.equal(response.headers.get("Access-Control-Allow-Origin"), "*");
+    await response.arrayBuffer();
+
+    // Once cached, the image is served without reading R2.
+    await env.OG_BUCKET.delete(key);
+    const fetchCached = async () => {
+      for (let attempt = 0; ; attempt++) {
+        const cached = await server.fetch(`/i/${key}`, { redirect: "manual" });
+        if (cached.status === 200 || attempt === 20) return cached;
+        await cached.arrayBuffer();
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      }
+    };
+    const cached = await fetchCached();
+    assert.equal(cached.status, 200);
+    assert.deepEqual(
+      new Uint8Array(await cached.arrayBuffer()),
+      new Uint8Array([4, 5, 6]),
+    );
+
+    // HEAD describes the same cached image instead of redirecting.
+    const head = await server.fetch(`/i/${key}`, {
+      method: "HEAD",
+      redirect: "manual",
+    });
+    assert.equal(head.status, 200);
+    assert.equal((await head.arrayBuffer()).byteLength, 0);
+  });
+
+  test("redirects a replaced image to the page's current one", async () => {
+    const currentKey = `global/${pageHash}-def456.jpeg`;
+    await insertGlobalImage(currentKey, Date.now() + 60_000);
+    const { url } = await server.listen();
+
+    for (const oldKey of [
+      `global/${pageHash}-abc123.jpeg`,
+      `global/${pageHash}.jpeg`,
+    ]) {
+      const response = await server.fetch(`/i/${oldKey}`, {
+        redirect: "manual",
+      });
+      assert.equal(response.status, 307, oldKey);
+      assert.equal(
+        response.headers.get("Location"),
+        new URL(`/i/${currentKey}`, url).toString(),
+      );
+      assert.equal(response.headers.get("Cache-Control"), "private, no-store");
+    }
+
+    // Another page's key doesn't resolve to this one.
+    const other = await server.fetch(`/i/global/${"b".repeat(64)}-1.jpeg`);
+    assert.equal(other.status, 404);
+  });
+
+  test("never sets cookies, even for signed-in browsers", async () => {
+    await registerSite("example.com");
+    const env = await worker.getEnv();
+    const key = `global/${pageHash}-abc123.jpeg`;
+    await env.OG_BUCKET.put(key, new Uint8Array([1]));
+    const cookie = "__session=expired; __client_uat=1760000000; __refresh_x=y";
+
+    for (const path of [`/i/${key}`, "/use?url=https://example.com/"]) {
+      const response = await server.fetch(path, {
+        headers: { Cookie: cookie },
+        redirect: "manual",
+      });
+      assert.equal(response.headers.get("Set-Cookie"), null, path);
+      await response.arrayBuffer();
+    }
   });
 
   test("returns 404 for missing images", async () => {

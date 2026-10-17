@@ -3,7 +3,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import {
   authenticatedHomePath,
-  fetchRouteAuth,
+  getRouteAuth,
   signInPath,
   signUpPath,
 } from "@/lib/clerk-auth";
@@ -16,16 +16,18 @@ import { publicEnv } from "@/lib/env";
 import { buildOrganizationJsonLd } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import { ClerkProvider } from "@clerk/tanstack-react-start";
+import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
+import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
   HeadContent,
   Outlet,
   Scripts,
   createRootRouteWithContext,
+  useRouter,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { ThemeProvider } from "next-themes";
-import { Suspense, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
@@ -76,6 +78,15 @@ export const Route = createRootRouteWithContext<{}>()({
       },
     ],
     links: [
+      // The stylesheet names this font, so without a preload the browser
+      // only requests it after downloading and parsing the CSS.
+      {
+        rel: "preload",
+        href: geistLatin,
+        as: "font",
+        type: "font/woff2",
+        crossOrigin: "anonymous",
+      },
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico" },
       { rel: "icon", type: "image/svg+xml", href: "/icon.svg" },
@@ -84,7 +95,7 @@ export const Route = createRootRouteWithContext<{}>()({
   }),
   // Server-handler routes (/use, /i/*, robots.txt) answer before
   // the router runs, so this never runs for them.
-  beforeLoad: async () => ({ auth: await fetchRouteAuth() }),
+  beforeLoad: async () => ({ auth: await getRouteAuth() }),
   errorComponent: (props) => (
     <RootDocument>
       <DefaultCatchBoundary {...props} />
@@ -109,6 +120,7 @@ function RootComponent() {
         defaultTheme="light"
         disableTransitionOnChange
       >
+        <InvalidateOnAuthChange />
         <RootDocument>
           <Suspense>
             <Outlet />
@@ -117,6 +129,30 @@ function RootComponent() {
       </ThemeProvider>
     </ClerkProvider>
   );
+}
+
+/**
+ * Route auth and cached loader data depend on who is signed in, so reload
+ * them when Clerk signs a user in or out without a full page load.
+ */
+function InvalidateOnAuthChange() {
+  const { isLoaded, userId } = useAuth();
+  const router = useRouter();
+  const previousUserId = useRef<string | null | undefined>(undefined);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+    const current = userId ?? null;
+    if (
+      previousUserId.current !== undefined &&
+      previousUserId.current !== current
+    ) {
+      void router.invalidate();
+    }
+    previousUserId.current = current;
+  }, [isLoaded, userId, router]);
+
+  return null;
 }
 
 function RootDocument({ children }: { children: ReactNode }) {

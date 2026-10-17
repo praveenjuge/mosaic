@@ -14,13 +14,15 @@ const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
  * Read Open Graph, Twitter Card, and fallback metadata from a page response.
  * Meta tags are matched on either `property` or `name`, in any attribute
  * order. Only the first `<title>` counts, so inline SVG titles are ignored.
+ * Reading stops at `<body>`, so large pages don't download past their head.
  */
 export async function extractMetadata(response: Response, baseUrl: URL) {
   const meta = new Map<string, string>();
   let titleCount = 0;
   let titleTag = "";
+  let reachedBody = false;
 
-  await new HTMLRewriter()
+  const transformed = new HTMLRewriter()
     .on("meta[content]", {
       element(element) {
         const key = (
@@ -38,8 +40,20 @@ export async function extractMetadata(response: Response, baseUrl: URL) {
         if (titleCount === 1) titleTag += text;
       },
     })
-    .transform(response)
-    .arrayBuffer();
+    .on("body", {
+      element() {
+        reachedBody = true;
+      },
+    })
+    .transform(response);
+
+  const reader = transformed.body?.getReader();
+  if (reader) {
+    while (!reachedBody && !(await reader.read()).done) {
+      // The rewriter's handlers collect metadata as chunks stream through.
+    }
+    await reader.cancel();
+  }
 
   const first = (...keys: string[]) =>
     keys.map((key) => meta.get(key)).find(Boolean) ?? "";
@@ -83,11 +97,13 @@ const MAX_REDIRECT_HOPS = 5;
 /**
  * Fetch a public page, validating every redirect hop against
  * `validateOutboundUrl`. Resolves once headers arrive, with the URL the
- * redirects ended at. The caller reads or cancels the body.
+ * redirects ended at. The caller reads or cancels the body. Each hop times
+ * out after 5 s; `deadline` can also bound all hops together.
  */
 export async function fetchPublicPage(
   url: URL,
   requestHostname: string,
+  deadline?: AbortSignal,
 ): Promise<{ response: Response; finalUrl: URL }> {
   let currentUrl = url;
 
@@ -99,7 +115,9 @@ export async function fetchPublicPage(
     try {
       response = await fetch(currentUrl.toString(), {
         redirect: "manual",
-        signal: AbortSignal.timeout(5_000),
+        signal: deadline
+          ? AbortSignal.any([AbortSignal.timeout(5_000), deadline])
+          : AbortSignal.timeout(5_000),
         headers: {
           "User-Agent": `Mozilla/5.0 (compatible; MosaicBot/1.0; +${publicEnv.siteUrl})`,
           Accept: "text/html,application/xhtml+xml",

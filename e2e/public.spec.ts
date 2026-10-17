@@ -12,15 +12,19 @@ test("home page renders the hero", async ({ page }) => {
 test("live demo generates a screenshot", async ({ page }) => {
   await page.goto("/");
   // Submitting before hydration would fall through to a native form GET.
+  // A cold dev server compiles the page on first load, which can take a
+  // while when other specs load pages at the same time.
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const form = document.querySelector("form");
-        return (
-          !!form &&
-          Object.keys(form).some((key) => key.startsWith("__reactProps"))
-        );
-      }),
+    .poll(
+      () =>
+        page.evaluate(() => {
+          const form = document.querySelector("form");
+          return (
+            !!form &&
+            Object.keys(form).some((key) => key.startsWith("__reactProps"))
+          );
+        }),
+      { timeout: 30_000 },
     )
     .toBe(true);
   await page.getByLabel("Enter URL for OG image preview").fill("example.com");

@@ -12,7 +12,8 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": false,
+    "incremental": true,
+    "tsBuildInfoFile": "node_modules/.cache/tsc/tsconfig.tsbuildinfo",
     "types": ["vite/client", "bun"],
     "paths": {
       "@/*": ["./src/*", "./*"]

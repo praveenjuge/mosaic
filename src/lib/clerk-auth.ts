@@ -1,3 +1,8 @@
+import {
+  routeAuthFromBrowserClerk,
+  type BrowserClerk,
+  type RouteAuth,
+} from "@/lib/browser-route-auth";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 
@@ -5,10 +10,7 @@ export const authenticatedHomePath = "/";
 export const signInPath = "/sign-in";
 export const signUpPath = "/sign-up";
 
-export type RouteAuth = {
-  userId: string | null;
-  isAuthenticated: boolean;
-};
+export type { RouteAuth };
 
 export const fetchRouteAuth = createServerFn().handler(
   async (): Promise<RouteAuth> => {
@@ -20,6 +22,16 @@ export const fetchRouteAuth = createServerFn().handler(
     };
   },
 );
+
+export async function getRouteAuth(): Promise<RouteAuth> {
+  if (typeof window !== "undefined") {
+    const browserAuth = routeAuthFromBrowserClerk(
+      (window as { Clerk?: BrowserClerk }).Clerk,
+    );
+    if (browserAuth) return browserAuth;
+  }
+  return fetchRouteAuth();
+}
 
 export function sanitizeRedirectPath(redirectUrl?: string) {
   if (

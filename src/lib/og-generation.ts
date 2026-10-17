@@ -2,16 +2,18 @@
  * The public `GET /use?url=<page>` endpoint.
  *
  * - Default: production generation. Only hostnames saved by a user are
- *   served. A fresh shared image redirects (307) straight to `/i/<key>`; an
- *   expired or missing one is regenerated behind the rate limit, generation
- *   lock and daily budget, falling back to the stale or example image.
+ *   served. A shared image redirects (307) straight to `/i/<key>`; an expired
+ *   one is regenerated after the response. A missing one is generated behind
+ *   the rate limit, generation lock and daily budget, falling back to the
+ *   example image.
  * - `mode=demo`: the home page demo. Returns page metadata and an inline
  *   screenshot as JSON, without D1 image records or R2.
  */
 
 import { recordGenerationEvent, type GenerationOutcome } from "@/lib/analytics";
 import { publicCorsHeaders } from "@/lib/cors";
-import { getDb } from "@/lib/db";
+import { getDb, type D1Queryable } from "@/lib/db";
+import { buildImageKey } from "@/lib/image-key";
 import { extractMetadata, fetchPublicPage } from "@/lib/metadata";
 import { isMosaicRendererRequest } from "@/lib/request";
 import { takeScreenshot } from "@/lib/screenshot";
@@ -29,7 +31,7 @@ import {
   recordGlobalImage,
   releaseGenerationLock,
 } from "@/server/og";
-import { env } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 
 const FALLBACK_IMAGE_PATH = "/images/mosaic-example-og-f9e253a9.png";
 
@@ -170,6 +172,123 @@ async function handleDemoRequest(
 
 // ── Production mode ─────────────────────────────────────────────────
 
+/** Overall limit for resolving a page's redirects before a screenshot. */
+const PAGE_FETCH_DEADLINE_MS = 8_000;
+
+type GenerationResult =
+  | { key: string }
+  | { skipped: "rate_limited" | "locked" | "budget_exhausted" | "failed" };
+
+/**
+ * Take and store a fresh screenshot of `target`, behind the rate limit,
+ * generation lock and daily budget, in that order. Records the outcome. If
+ * the image is already fresh once the lock is held, returns it instead.
+ * The lock's 60 s lease is the backstop if the Worker is stopped mid-run.
+ *
+ * Every screenshot gets a new R2 key (`global/<page hash>-<version>.jpeg`),
+ * so an `/i/<key>` URL never changes content and can be cached for good. The
+ * image it replaces is deleted; `/i/*` redirects its old URL to the new key.
+ */
+export async function generateImage(
+  db: D1Queryable,
+  target: Target,
+  client: string,
+): Promise<GenerationResult> {
+  const { pageUrl, hostname } = target;
+  const record = (
+    outcome: GenerationOutcome,
+    metrics?: { durationMs: number; bytes?: number },
+  ) => recordGenerationEvent({ outcome, hostname, ...metrics });
+
+  const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: client });
+  if (!rateLimit.success) {
+    record("rate_limited");
+    return { skipped: "rate_limited" };
+  }
+
+  const leaseToken = await acquireGenerationLock(db, pageUrl);
+  if (!leaseToken) {
+    record("locked");
+    return { skipped: "locked" };
+  }
+
+  try {
+    // Re-read under the lock: another request may have just refreshed the
+    // image (or a replica served an older row before the lock's write).
+    const current = await findGlobalImage(db, pageUrl);
+    if (current && current.expiresAt > Date.now()) return { key: current.key };
+    const previousKey = current?.key ?? null;
+
+    if (!(await reserveGeneration(db, "production", client))) {
+      record("budget_exhausted");
+      return { skipped: "budget_exhausted" };
+    }
+
+    const startedAt = Date.now();
+    try {
+      // Resolve and validate every server redirect before Browser Run
+      // navigates; only the final URL is needed.
+      // Background runs get about 30 s after the response, so the page
+      // fetch, redirects included, must leave room for the screenshot.
+      const { response, finalUrl } = await fetchPublicPage(
+        target.url,
+        target.requestHostname,
+        AbortSignal.timeout(PAGE_FETCH_DEADLINE_MS),
+      );
+      await response.body?.cancel();
+      const image = await takeScreenshot(finalUrl.toString());
+      const key = buildImageKey(await sha256Hex(pageUrl), Date.now());
+      await env.OG_BUCKET.put(key, image, {
+        httpMetadata: { contentType: "image/jpeg" },
+      });
+      await recordGlobalImage(db, target, key, image.byteLength);
+      if (previousKey && previousKey !== key) {
+        await env.OG_BUCKET.delete(previousKey).catch((error) =>
+          console.error("[USE] Failed to delete replaced image:", error),
+        );
+      }
+
+      record("generated", {
+        durationMs: Date.now() - startedAt,
+        bytes: image.byteLength,
+      });
+      return { key };
+    } catch (error) {
+      console.error("[USE] Failed to generate or persist image:", error);
+      record("failed", { durationMs: Date.now() - startedAt });
+      return { skipped: "failed" };
+    }
+  } finally {
+    await releaseGenerationLock(db, pageUrl, leaseToken).catch((error) =>
+      console.error("[USE] Failed to release generation lock:", error),
+    );
+  }
+}
+
+/**
+ * Generate the image for a website's home page unless a fresh one exists, so
+ * the first social crawler after a site is added gets a cached image.
+ */
+export async function warmSiteImage(
+  hostname: string,
+  requestHostname: string,
+  client: string,
+): Promise<void> {
+  try {
+    const url = parseWebsiteUrl(hostname);
+    if (validateOutboundUrl(url, requestHostname)) return;
+    const page = canonicalPage(url);
+    const target = { ...page, url: new URL(page.pageUrl), requestHostname };
+
+    const db = getDb();
+    const cachedImage = await findGlobalImage(db, target.pageUrl);
+    if (cachedImage && cachedImage.expiresAt > Date.now()) return;
+    await generateImage(db, target, client);
+  } catch (error) {
+    console.error("[USE] Failed to warm site image:", error);
+  }
+}
+
 async function handleProductionRequest(
   request: Request,
   target: Target,
@@ -188,91 +307,38 @@ async function handleProductionRequest(
     isHostnameAssociated(db, hostname),
     findGlobalImage(db, pageUrl),
   ]);
-  const record = (
-    outcome: GenerationOutcome,
-    metrics?: { durationMs: number; bytes?: number },
-  ) => recordGenerationEvent({ outcome, hostname, ...metrics });
-
-  /** Serve the stale image, or the example image when there is none. */
-  const fallback = () =>
-    redirect(
-      cachedImage
-        ? imageUrl(cachedImage.key)
-        : new URL(FALLBACK_IMAGE_PATH, request.url).toString(),
-    );
 
   if (!isAssociated) {
-    record("unregistered");
+    recordGenerationEvent({ outcome: "unregistered", hostname });
     return json(
       { error: "Website must be added to Mosaic before generating OG images" },
       404,
     );
   }
 
-  if (cachedImage && cachedImage.expiresAt > Date.now()) {
-    record("cache_hit");
+  if (cachedImage) {
+    if (cachedImage.expiresAt > Date.now()) {
+      recordGenerationEvent({ outcome: "cache_hit", hostname });
+    } else {
+      // Serve the stale image now and refresh it after the response, so
+      // social crawlers never wait for a screenshot they would time out on.
+      recordGenerationEvent({ outcome: "stale_hit", hostname });
+      waitUntil(generateImage(db, target, clientKey(request)));
+    }
     return redirect(imageUrl(cachedImage.key));
   }
 
-  const client = clientKey(request);
-  const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: client });
-  if (!rateLimit.success) {
-    record("rate_limited");
-    return fallback();
-  }
-
-  const leaseToken = await acquireGenerationLock(db, pageUrl);
-  if (!leaseToken) {
-    record("locked");
-    return cachedImage
-      ? fallback()
-      : json(
-          {
-            error:
-              "This image is already being generated. Please retry shortly.",
-          },
-          503,
-          { "Retry-After": "2", "Cache-Control": "no-store" },
-        );
-  }
-
-  try {
-    if (!(await reserveGeneration(db, "production", client))) {
-      record("budget_exhausted");
-      return fallback();
-    }
-
-    const startedAt = Date.now();
-    try {
-      // Resolve and validate every server redirect before Browser Run
-      // navigates; only the final URL is needed.
-      const { response, finalUrl } = await fetchPublicPage(
-        target.url,
-        target.requestHostname,
-      );
-      await response.body?.cancel();
-      const image = await takeScreenshot(finalUrl.toString());
-      const imageKey = `global/${await sha256Hex(pageUrl)}.jpeg`;
-      await env.OG_BUCKET.put(imageKey, image, {
-        httpMetadata: { contentType: "image/jpeg" },
-      });
-      await recordGlobalImage(db, target, imageKey, image.byteLength);
-
-      record("generated", {
-        durationMs: Date.now() - startedAt,
-        bytes: image.byteLength,
-      });
-      return redirect(imageUrl(imageKey));
-    } catch (error) {
-      console.error("[USE] Failed to generate or persist image:", error);
-      record("failed", { durationMs: Date.now() - startedAt });
-      return fallback();
-    }
-  } finally {
-    await releaseGenerationLock(db, pageUrl, leaseToken).catch((error) =>
-      console.error("[USE] Failed to release generation lock:", error),
+  // No image yet: this request waits for the first one.
+  const result = await generateImage(db, target, clientKey(request));
+  if ("key" in result) return redirect(imageUrl(result.key));
+  if (result.skipped === "locked") {
+    return json(
+      { error: "This image is already being generated. Please retry shortly." },
+      503,
+      { "Retry-After": "2", "Cache-Control": "no-store" },
     );
   }
+  return redirect(new URL(FALLBACK_IMAGE_PATH, request.url).toString());
 }
 
 // ── Entry point ─────────────────────────────────────────────────────
