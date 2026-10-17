@@ -3,7 +3,6 @@ import { Link, useHydrated } from "@tanstack/react-router";
 import { Computer, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import Logo from "./logo";
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 
 const footerSections = [
   {
@@ -23,10 +22,44 @@ const footerSections = [
   },
 ];
 
-export default function Footer() {
+const themes = [
+  { value: "light", label: "Light theme", Icon: Sun },
+  { value: "dark", label: "Dark theme", Icon: Moon },
+  { value: "system", label: "System theme", Icon: Computer },
+];
+
+/** Plain buttons styled like the `Tabs` list, without Radix's Tabs code. */
+function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const hydrated = useHydrated();
+  // The server can't know the stored theme, so it renders "system".
+  const current = hydrated ? (theme ?? "system") : "system";
 
+  return (
+    <div className="flex">
+      <div
+        role="group"
+        aria-label="Theme"
+        className="bg-muted text-muted-foreground inline-flex h-8 w-fit items-center justify-center rounded-lg p-[3px]"
+      >
+        {themes.map(({ value, label, Icon }) => (
+          <button
+            key={value}
+            type="button"
+            aria-label={label}
+            aria-pressed={current === value}
+            onClick={() => setTheme(value)}
+            className="text-foreground/60 hover:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:text-muted-foreground dark:hover:text-foreground aria-pressed:bg-background aria-pressed:text-foreground dark:aria-pressed:border-input dark:aria-pressed:bg-input/30 dark:aria-pressed:text-foreground relative inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-1.5 py-0.5 text-sm font-medium whitespace-nowrap transition-all focus-visible:ring-[3px] focus-visible:outline-1 aria-pressed:shadow-sm [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0"
+          >
+            <Icon aria-hidden="true" />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function Footer() {
   return (
     <footer className="bg-background mt-auto border-t">
       <div className="mx-auto max-w-6xl px-4 pt-14 pb-8">
@@ -37,22 +70,7 @@ export default function Footer() {
               Transform your website&apos;s Open Graph social images by
               automatically using your hero section as an OG Image.
             </p>
-            <Tabs
-              value={hydrated ? (theme ?? "system") : "system"}
-              onValueChange={setTheme}
-            >
-              <TabsList>
-                <TabsTrigger value="light">
-                  <Sun />
-                </TabsTrigger>
-                <TabsTrigger value="dark">
-                  <Moon />
-                </TabsTrigger>
-                <TabsTrigger value="system">
-                  <Computer />
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <ThemeToggle />
             <p className="text-muted-foreground">
               &copy; {new Date().getFullYear()} {website_name}. All rights
               reserved.
