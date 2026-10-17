@@ -46,7 +46,7 @@ export const getDashboardStats = createServerFn().handler(
       await session.batch([
         session
           .prepare(
-            "SELECT id, url_base, created_at FROM sites WHERE user_id = ? ORDER BY created_at DESC",
+            "SELECT id, url_base, screenshot_engine, created_at FROM sites WHERE user_id = ? ORDER BY created_at DESC",
           )
           .bind(userId),
         session

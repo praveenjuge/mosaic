@@ -9,8 +9,8 @@ test.skip(!emailAddress, "Set E2E_CLERK_USER_EMAIL to run signed-in tests.");
 
 // Local D1 may or may not already hold sites for the test user, so the test
 // starts from either the empty state or the dashboard, adds a unique site,
-// and deletes it again.
-test("signed-in users can add and delete a website", async ({ page }) => {
+// switches it to Kitesurf, and deletes it again.
+test("signed-in users can manage a website", async ({ page }) => {
   const hostname = `e2e-${Date.now()}.example.com`;
 
   await page.goto("/help");
@@ -51,6 +51,11 @@ test("signed-in users can add and delete a website", async ({ page }) => {
 
   const row = page.getByRole("row").filter({ hasText: hostname });
   await expect(row).toBeVisible();
+
+  await row.getByRole("button", { name: "Actions" }).click();
+  await page.getByRole("menuitem", { name: "Screenshot engine" }).hover();
+  await page.getByRole("menuitemradio", { name: /Kitesurf/ }).click();
+  await expect(row.getByText("Kitesurf", { exact: true })).toBeVisible();
 
   await row.getByRole("button", { name: "Actions" }).click();
   await page.getByRole("menuitem", { name: "Delete" }).click();

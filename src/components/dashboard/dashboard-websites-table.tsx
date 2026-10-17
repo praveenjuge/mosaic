@@ -1,4 +1,5 @@
 import { CopyButton } from "@/components/copy-button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -74,6 +75,9 @@ function WebsiteRow({
           >
             {website.url_base}
           </a>
+          {website.screenshot_engine === "kitesurf" && (
+            <Badge variant="secondary">Kitesurf</Badge>
+          )}
         </div>
       </TableCell>
       <TableCell>
@@ -99,7 +103,11 @@ function WebsiteRow({
         )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
-        <WebsiteActions websiteId={website.id} currentUrl={website.url_base} />
+        <WebsiteActions
+          websiteId={website.id}
+          currentUrl={website.url_base}
+          screenshotEngine={website.screenshot_engine}
+        />
       </TableCell>
     </TableRow>
   );

@@ -1,8 +1,13 @@
-import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
+import type {
+  DashboardImageSummary,
+  DashboardStats,
+  ScreenshotEngine,
+} from "@/lib/types";
 
 export type DashboardSiteRow = {
   id: number;
   url_base: string;
+  screenshot_engine: ScreenshotEngine;
   created_at: string;
 };
 

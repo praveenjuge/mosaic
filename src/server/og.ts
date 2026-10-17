@@ -1,5 +1,6 @@
 import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
 import type { D1Queryable } from "@/lib/db";
+import type { ScreenshotEngine } from "@/lib/types";
 import { extractHostname, extractUrlParts } from "@/lib/url";
 
 export type GlobalImage = {
@@ -7,17 +8,28 @@ export type GlobalImage = {
   expiresAt: number;
 };
 
-/** Production generation is available only for a hostname saved by a user. */
-export async function isHostnameAssociated(
+/**
+ * The Browser Run engine for a hostname, or `null` when no user has saved it
+ * (production generation is only available for saved hostnames). Images are
+ * shared by everyone who saved the hostname, so Kitesurf is used only when
+ * every one of them chose it.
+ */
+export async function getHostnameScreenshotEngine(
   db: D1Queryable,
   hostname: string,
-): Promise<boolean> {
+): Promise<ScreenshotEngine | null> {
   const normalized = extractHostname(hostname);
   const row = await db
-    .prepare("SELECT 1 AS found FROM sites WHERE url_base = ? LIMIT 1")
+    .prepare(
+      `SELECT COUNT(*) AS registrations,
+              COALESCE(SUM(screenshot_engine = 'kitesurf'), 0) AS kitesurf
+       FROM sites
+       WHERE url_base = ?`,
+    )
     .bind(normalized)
-    .first<{ found: number }>();
-  return row !== null;
+    .first<{ registrations: number; kitesurf: number }>();
+  if (!row?.registrations) return null;
+  return row.kitesurf === row.registrations ? "kitesurf" : "chromium";
 }
 
 export async function findGlobalImage(
