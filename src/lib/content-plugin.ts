@@ -19,6 +19,7 @@ import { unified } from "unified";
 import { SKIP, visit } from "unist-util-visit";
 import type { Plugin } from "vite";
 import { parse as parseYaml } from "yaml";
+import { z } from "zod";
 import type {
   Guide,
   GuideLink,
@@ -79,71 +80,76 @@ export async function renderMarkdown(markdown: string): Promise<string> {
 
 // ── Loading ─────────────────────────────────────────────────────────
 
-type Frontmatter = Record<string, unknown>;
-
 export function parseFrontmatter(raw: string): {
-  data: Frontmatter;
+  data: Record<string, unknown>;
   body: string;
 } {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/);
   if (!match) return { data: {}, body: raw };
-  return { data: (parseYaml(match[1]) as Frontmatter) ?? {}, body: match[2] };
+  return { data: parseYaml(match[1]) ?? {}, body: match[2] };
 }
 
-function requireString(data: Frontmatter, key: string, file: string): string {
-  const value = data[key];
-  if (typeof value !== "string" || !value.trim()) {
-    throw new Error(`${file}: frontmatter "${key}" must be a non-empty string`);
-  }
-  return value;
-}
+const isoDate = z.coerce.date().transform((date) => date.toISOString());
 
-function optionalString(data: Frontmatter, key: string): string | undefined {
-  const value = data[key];
-  return typeof value === "string" && value.trim() ? value : undefined;
-}
+const helpSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().default(""),
+  category: z.string().default("General"),
+  publishedAt: isoDate,
+});
 
-function requireNumber(data: Frontmatter, key: string, file: string): number {
-  const value = data[key];
-  if (typeof value !== "number") {
-    throw new Error(`${file}: frontmatter "${key}" must be a number`);
-  }
-  return value;
-}
+const guideSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  order: z.number(),
+  svgLight: z.string().optional(),
+  svgDark: z.string().optional(),
+});
 
-function requireDate(data: Frontmatter, key: string, file: string): string {
-  const date = new Date(requireString(data, key, file));
-  if (Number.isNaN(date.getTime())) {
-    throw new Error(`${file}: frontmatter "${key}" is not a valid date`);
-  }
-  return date.toISOString();
-}
+const legalSchema = z.object({
+  title: z.string().min(1),
+  description: z.string().min(1),
+  updatedAt: isoDate,
+  order: z.number(),
+});
 
-type Entry = {
-  file: string;
-  slug: string;
-  data: Frontmatter;
-  body: string;
-  contentHtml: string;
-};
+/** Parse every Markdown file in a directory, sorted by file name. */
+async function loadCollection<T extends { title: string }>(
+  directory: string,
+  schema: z.ZodType<T>,
+) {
+  const names = (await readdir(directory))
+    .filter((name) => name.endsWith(".md"))
+    .sort();
 
-async function loadDirectory(directory: string): Promise<Entry[]> {
-  const names = (await readdir(directory)).filter((name) =>
-    name.endsWith(".md"),
-  );
   return Promise.all(
-    names.sort().map(async (name) => {
+    names.map(async (name) => {
       const file = path.join(directory, name);
       const { data, body } = parseFrontmatter(await readFile(file, "utf8"));
+      const result = schema.safeParse(data);
+      if (!result.success) {
+        throw new Error(
+          `${file}: invalid frontmatter: ${result.error.message}`,
+        );
+      }
+
+      const slug =
+        typeof data.slug === "string" ? data.slug : name.slice(0, -3);
       return {
-        file,
-        slug: optionalString(data, "slug") ?? name.replace(/\.md$/, ""),
-        data,
-        body,
-        contentHtml: await renderMarkdown(body),
+        entry: {
+          slug,
+          ...result.data,
+          contentHtml: await renderMarkdown(body),
+        },
+        markdown: toMarkdownDocument(result.data.title, body),
       };
     }),
   );
+}
+
+function linkList(heading: string, links: Array<[string, string]>): string {
+  const items = links.map(([title, href]) => `- [${title}](${href})`);
+  return `## ${heading}\n\n${items.join("\n")}\n`;
 }
 
 export type Content = {
@@ -157,46 +163,18 @@ export type Content = {
 };
 
 export async function loadContent(contentDir: string): Promise<Content> {
-  const [helpEntries, guideEntries, legalEntries, llmsTxt] = await Promise.all([
-    loadDirectory(path.join(contentDir, "help")),
-    loadDirectory(path.join(contentDir, "guides")),
-    loadDirectory(path.join(contentDir, "legal")),
+  const [help, guideFiles, legal, llmsTxt] = await Promise.all([
+    loadCollection(path.join(contentDir, "help"), helpSchema),
+    loadCollection(path.join(contentDir, "guides"), guideSchema),
+    loadCollection(path.join(contentDir, "legal"), legalSchema),
     readFile(path.join(contentDir, "llms.txt"), "utf8"),
   ]);
+  help.sort((a, b) => b.entry.publishedAt.localeCompare(a.entry.publishedAt));
+  guideFiles.sort((a, b) => a.entry.order - b.entry.order);
+  legal.sort((a, b) => a.entry.order - b.entry.order);
 
-  const helpArticles = helpEntries
-    .map(({ file, slug, data, contentHtml }) => ({
-      slug,
-      title: requireString(data, "title", file),
-      description: optionalString(data, "description") ?? "",
-      category: optionalString(data, "category") ?? "General",
-      publishedAt: requireDate(data, "publishedAt", file),
-      contentHtml,
-    }))
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt));
-
-  const guides = guideEntries
-    .map(({ file, slug, data, contentHtml }) => ({
-      slug,
-      title: requireString(data, "title", file),
-      description: requireString(data, "description", file),
-      order: requireNumber(data, "order", file),
-      svgLight: optionalString(data, "svgLight"),
-      svgDark: optionalString(data, "svgDark"),
-      contentHtml,
-    }))
-    .sort((a, b) => a.order - b.order);
-
-  const legalDocuments = legalEntries
-    .map(({ file, slug, data, contentHtml }) => ({
-      slug,
-      title: requireString(data, "title", file),
-      description: requireString(data, "description", file),
-      updatedAt: requireDate(data, "updatedAt", file),
-      order: requireNumber(data, "order", file),
-      contentHtml,
-    }))
-    .sort((a, b) => a.order - b.order);
+  const helpArticles = help.map(({ entry }) => entry);
+  const guides = guideFiles.map(({ entry }) => entry);
 
   const helpCategories: HelpCategory[] = [];
   for (const { category, slug, title } of helpArticles) {
@@ -208,34 +186,29 @@ export async function loadContent(contentDir: string): Promise<Content> {
     group.entries.push({ slug, title });
   }
 
-  const byOrder = (entry: Entry) =>
-    requireNumber(entry.data, "order", entry.file);
-  const toMarkdown = (entry: Entry) =>
-    toMarkdownDocument(
-      requireString(entry.data, "title", entry.file),
-      entry.body,
-    );
   const markdownPages: Record<string, string> = {
     // The homepage has no Markdown body, so agents get the llms.txt site map.
     "/": `${llmsTxt.trim()}\n`,
-    "/legal": [...legalEntries]
-      .sort((a, b) => byOrder(a) - byOrder(b))
-      .map(toMarkdown)
-      .join("\n---\n\n"),
+    "/help": [
+      "# Help\n",
+      ...helpCategories.map(({ category, entries }) =>
+        linkList(
+          category,
+          entries.map(({ slug, title }) => [title, `/help/${slug}`]),
+        ),
+      ),
+      linkList(
+        "Guides",
+        guides.map(({ slug, title }) => [title, `/help/guides/${slug}`]),
+      ),
+    ].join("\n"),
+    "/legal": legal.map(({ markdown }) => markdown).join("\n---\n\n"),
   };
-  markdownPages["/help"] = [
-    "# Help\n",
-    ...helpCategories.map(
-      ({ category, entries }) =>
-        `## ${category}\n\n${entries.map(({ slug, title }) => `- [${title}](/help/${slug})`).join("\n")}\n`,
-    ),
-    `## Guides\n\n${guides.map(({ slug, title }) => `- [${title}](/help/guides/${slug})`).join("\n")}\n`,
-  ].join("\n");
-  for (const entry of helpEntries) {
-    markdownPages[`/help/${entry.slug}`] = toMarkdown(entry);
+  for (const { entry, markdown } of help) {
+    markdownPages[`/help/${entry.slug}`] = markdown;
   }
-  for (const entry of guideEntries) {
-    markdownPages[`/help/guides/${entry.slug}`] = toMarkdown(entry);
+  for (const { entry, markdown } of guideFiles) {
+    markdownPages[`/help/guides/${entry.slug}`] = markdown;
   }
 
   return {
@@ -251,7 +224,7 @@ export async function loadContent(contentDir: string): Promise<Content> {
         svgDark,
       }),
     ),
-    legalDocuments,
+    legalDocuments: legal.map(({ entry }) => entry),
     markdownPages,
   };
 }

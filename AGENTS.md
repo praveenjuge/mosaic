@@ -64,11 +64,10 @@ Project skills and agents in `.claude/`:
 
 ```
 src/
-├── routes/          # TanStack Start file-based routes and lazy route modules
+├── routes/          # TanStack Start file-based routes
 ├── components/      # Reusable UI and route-specific presentation
 ├── server/          # Server functions (sites CRUD, stats, OG helpers)
-├── content/         # Markdown content sources
-├── generated/       # Build-time generated typed content manifests
+├── content/         # Markdown content, rendered at build time by src/lib/content-plugin.ts
 ├── lib/             # Shared utilities, SEO, env, constants, db accessor
 └── styles/          # Global app styles
 migrations/          # Ordered Wrangler D1 migrations
@@ -89,8 +88,8 @@ e2e/                 # Playwright end-to-end tests
 - Implement proper loading states with `<Skeleton>` components
 - Follow the pattern: SignedIn/SignedOut components for authentication states
 - TanStack Start route files should stay focused on `validateSearch`, `beforeLoad`, `loader`, and `head`
-- Prefer lazy route companions for heavy route components
-- Keep build-time content processing out of the route runtime path
+- Keep route components in the route file; TanStack Start code-splits them automatically
+- Markdown is rendered at build time by `src/lib/content-plugin.ts` into `virtual:mosaic-content/<collection>` modules. Import collections through `src/lib/content.ts` or `src/server/content.ts`, never the Markdown pipeline at runtime
 - Handle errors gracefully with try/catch blocks
 - Use Clerk `auth()` in server functions to enforce data access
 - For DB schema changes, add a Wrangler D1 migration and apply it locally
