@@ -18,7 +18,7 @@ const addSiteSchema = z.object({
 
 export const addSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(addSiteSchema)
+  .validator(addSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
     // The unique (user_id, url_base) index turns a duplicate into no row.
     const site = await getDb()
@@ -40,7 +40,7 @@ const editSiteSchema = z.object({
 
 export const editSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(editSiteSchema)
+  .validator(editSiteSchema)
   .handler(async ({ context, data }): Promise<Site> => {
     const db = getDb();
     const site = await db
@@ -70,7 +70,7 @@ const deleteSiteSchema = z.object({ siteId: z.number().int().positive() });
 
 export const deleteSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .inputValidator(deleteSiteSchema)
+  .validator(deleteSiteSchema)
   .handler(async ({ context, data }): Promise<void> => {
     const result = await getDb()
       .prepare("DELETE FROM sites WHERE id = ? AND user_id = ?")

@@ -9,11 +9,11 @@ import { z } from "zod";
 const slugSchema = z.string().max(200);
 
 export const getHelpArticle = createServerFn({ method: "GET" })
-  .inputValidator(slugSchema)
+  .validator(slugSchema)
   .handler(
     ({ data }) => helpArticles.find((entry) => entry.slug === data) ?? null,
   );
 
 export const getGuide = createServerFn({ method: "GET" })
-  .inputValidator(slugSchema)
+  .validator(slugSchema)
   .handler(({ data }) => guides.find((entry) => entry.slug === data) ?? null);
