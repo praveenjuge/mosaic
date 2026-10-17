@@ -86,8 +86,8 @@ export const Route = createRootRouteWithContext<{}>()({
       { rel: "apple-touch-icon", href: "/apple-icon.png" },
     ],
   }),
-  // Server-handler routes (/use, /i/*, robots.txt) answer before
-  // the router runs, so this never runs for them.
+  // `/use` and `/i/*` answer in src/server.ts, and server-handler routes
+  // (robots.txt) before the router runs, so this never runs for them.
   beforeLoad: async ({ location }) => {
     const auth = await getRouteAuth();
     await preloadClerkChunks(auth, location.pathname);
