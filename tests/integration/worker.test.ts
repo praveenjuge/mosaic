@@ -121,6 +121,57 @@ describe("/use", () => {
       response.headers.get("Location"),
       new URL("/i/global/cached.jpeg", url).toString(),
     );
+
+    // A bare hostname resolves to the same canonical page.
+    const bare = await server.fetch("/use?url=example.com", {
+      redirect: "manual",
+    });
+    assert.equal(
+      bare.headers.get("Location"),
+      response.headers.get("Location"),
+    );
+  });
+
+  test("refuses private and self-referential targets", async () => {
+    for (const target of [
+      "localhost:3000",
+      "http://127.0.0.1/",
+      "https://user:pass@example.com/",
+      "https://mosaic.account.workers.dev/use",
+    ]) {
+      const response = await server.fetch(
+        `/use?url=${encodeURIComponent(target)}`,
+      );
+      assert.equal(response.status, 400, target);
+    }
+  });
+});
+
+// Prerendered pages (/help, /legal) are static assets served before the
+// Worker, so only Worker-rendered paths are negotiated here.
+describe("content negotiation", () => {
+  test("serves the llms.txt site map as the home page's Markdown", async () => {
+    const response = await server.fetch("/", {
+      headers: { Accept: "text/markdown" },
+    });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("Content-Type") ?? "", /^text\/markdown/);
+    assert.match(await response.text(), /^# Mosaic\n[\s\S]*\/help\/guides\//);
+  });
+
+  test("answers JSON requests for pages with problem documents", async () => {
+    const known = await server.fetch("/", {
+      headers: { Accept: "application/json" },
+    });
+    assert.equal(known.status, 406);
+    const unknown = await server.fetch("/nope", {
+      headers: { Accept: "application/json" },
+    });
+    assert.equal(unknown.status, 404);
+    assert.equal(
+      ((await unknown.json()) as { code: string }).code,
+      "not_found",
+    );
   });
 });
 
@@ -139,6 +190,19 @@ describe("/i/*", () => {
       new Uint8Array(await response.arrayBuffer()),
       new Uint8Array([1, 2, 3]),
     );
+  });
+
+  test("answers HEAD with headers only", async () => {
+    const env = await worker.getEnv();
+    await env.OG_BUCKET.put("global/head.jpeg", new Uint8Array([1, 2, 3]));
+
+    const response = await server.fetch("/i/global/head.jpeg", {
+      method: "HEAD",
+    });
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get("Content-Type"), "image/jpeg");
+    assert.ok(response.headers.get("ETag"));
+    assert.equal((await response.arrayBuffer()).byteLength, 0);
   });
 
   test("returns 404 for missing images", async () => {
