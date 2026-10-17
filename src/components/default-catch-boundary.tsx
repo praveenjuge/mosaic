@@ -3,10 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ErrorComponentProps } from "@tanstack/react-router";
 import { useRouter } from "@tanstack/react-router";
 
-export function DefaultCatchBoundary({
-  error,
-  reset,
-}: ErrorComponentProps) {
+export function DefaultCatchBoundary({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
 
   return (

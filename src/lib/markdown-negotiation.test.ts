@@ -44,9 +44,9 @@ describe("prefersMarkdown", () => {
   });
 
   test("prefers the most specific range over a wildcard", () => {
-    expect(
-      prefersMarkdown("text/markdown;q=0.8, text/html;q=0, */*;q=1"),
-    ).toBe(true);
+    expect(prefersMarkdown("text/markdown;q=0.8, text/html;q=0, */*;q=1")).toBe(
+      true,
+    );
   });
 
   test("lets a wildcard HTML range beat weaker Markdown", () => {
@@ -108,7 +108,9 @@ describe("matchMarkdownPath", () => {
     expect(matchMarkdownPath("/unknown/nested")).toEqual({ kind: "not-found" });
     expect(matchMarkdownPath("/help")).toBeNull();
     expect(matchMarkdownPath("/help/guides")).toEqual({ kind: "not-found" });
-    expect(matchMarkdownPath("/legal/privacy-policy")).toEqual({ kind: "not-found" });
+    expect(matchMarkdownPath("/legal/privacy-policy")).toEqual({
+      kind: "not-found",
+    });
     expect(matchMarkdownPath("/sign-in")).toBeNull();
   });
 });
@@ -235,8 +237,11 @@ describe("toMarkdownDocument", () => {
   });
 
   test("keeps a source heading that differs from the title", () => {
-    expect(toMarkdownDocument("Managing Your Subscription", "# Subscription\n\nBody.")).toBe(
-      "# Managing Your Subscription\n\n# Subscription\n\nBody.\n",
-    );
+    expect(
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Subscription\n\nBody.",
+      ),
+    ).toBe("# Managing Your Subscription\n\n# Subscription\n\nBody.\n");
   });
 });

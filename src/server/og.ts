@@ -1,7 +1,6 @@
 import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
+import type { D1Queryable } from "@/lib/db";
 import { extractHostname, extractUrlParts } from "@/lib/url";
-
-type D1Queryable = Pick<D1Database, "prepare">;
 
 export type GlobalImage = {
   key: string;
@@ -39,7 +38,7 @@ export async function findGlobalImage(
 }
 
 export async function acquireGenerationLock(
-  db: D1Database,
+  db: D1Queryable,
   pageUrl: string,
 ): Promise<string | null> {
   const { sanitizedUrl } = extractUrlParts(pageUrl);
@@ -61,7 +60,7 @@ export async function acquireGenerationLock(
 }
 
 export async function releaseGenerationLock(
-  db: D1Database,
+  db: D1Queryable,
   pageUrl: string,
   leaseToken: string,
 ): Promise<void> {
@@ -76,7 +75,7 @@ export async function releaseGenerationLock(
 }
 
 export async function recordGlobalImage(
-  db: D1Database,
+  db: D1Queryable,
   imageKey: string,
   pageUrl: string,
   imageSize: number,

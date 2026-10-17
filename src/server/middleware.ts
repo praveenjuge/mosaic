@@ -1,5 +1,5 @@
-import { createMiddleware } from "@tanstack/react-start";
 import { auth } from "@clerk/tanstack-react-start/server";
+import { createMiddleware } from "@tanstack/react-start";
 
 /**
  * Server function middleware that enforces Clerk authentication.

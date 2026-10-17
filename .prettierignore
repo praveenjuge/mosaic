@@ -1,0 +1,10 @@
+.agents/
+.claude/skills/
+.wrangler/
+dist/
+playwright-report/
+test-results/
+bun.lock
+worker-configuration.d.ts
+src/routeTree.gen.ts
+src/generated/

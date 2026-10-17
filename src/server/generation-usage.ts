@@ -4,12 +4,10 @@ import {
   PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT,
   PRODUCTION_DAILY_GENERATION_LIMIT,
 } from "@/lib/constants";
+import type { D1Queryable } from "@/lib/db";
 
 type BudgetScope =
-  | "demo-client"
-  | "demo-global"
-  | "production-client"
-  | "production-global";
+  "demo-client" | "demo-global" | "production-client" | "production-global";
 
 function utcDayStart(timestamp = Date.now()): number {
   const date = new Date(timestamp);
@@ -17,7 +15,7 @@ function utcDayStart(timestamp = Date.now()): number {
 }
 
 async function reserveWindowBudget(
-  db: D1Database,
+  db: D1Queryable,
   scope: BudgetScope,
   key: string,
   limit: number,
@@ -45,7 +43,7 @@ async function reserveWindowBudget(
 }
 
 async function refundWindowBudget(
-  db: D1Database,
+  db: D1Queryable,
   scope: BudgetScope,
   key: string,
 ): Promise<void> {
@@ -60,7 +58,7 @@ async function refundWindowBudget(
 }
 
 async function reserveClientAndGlobalBudget(
-  db: D1Database,
+  db: D1Queryable,
   clientScope: "demo-client" | "production-client",
   globalScope: "demo-global" | "production-global",
   clientKey: string,
@@ -87,7 +85,7 @@ async function reserveClientAndGlobalBudget(
   return globalReserved;
 }
 
-export function reserveDemoGeneration(db: D1Database, clientKey: string) {
+export function reserveDemoGeneration(db: D1Queryable, clientKey: string) {
   return reserveClientAndGlobalBudget(
     db,
     "demo-client",
@@ -98,7 +96,10 @@ export function reserveDemoGeneration(db: D1Database, clientKey: string) {
   );
 }
 
-export function reserveProductionGeneration(db: D1Database, clientKey: string) {
+export function reserveProductionGeneration(
+  db: D1Queryable,
+  clientKey: string,
+) {
   return reserveClientAndGlobalBudget(
     db,
     "production-client",

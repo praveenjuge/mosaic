@@ -31,13 +31,18 @@
     {
       "binding": "OG_BUCKET",
       "bucket_name": "mosaic-og-prod",
-      "remote": true,
     },
   ],
   "browser": {
     "binding": "BROWSER",
     "remote": true,
   },
+  "analytics_engine_datasets": [
+    {
+      "binding": "OG_ANALYTICS",
+      "dataset": "mosaic_og_generations",
+    },
+  ],
   "ratelimits": [
     {
       "name": "DEMO_RATE_LIMITER",
@@ -52,5 +57,47 @@
   ],
   "secrets": {
     "required": ["CLERK_SECRET_KEY"],
+  },
+  // `wrangler preview` deploys each branch to its own URL. Storage bindings
+  // point at preview-only resources so previews never touch production data.
+  // Apply migrations with `bun run db:migrate:preview`, which uses
+  // `wrangler.preview-db.jsonc` because `wrangler d1` only reads top-level
+  // `d1_databases`.
+  "previews": {
+    "d1_databases": [
+      {
+        "binding": "DB",
+        "database_name": "mosaic-preview",
+        "database_id": "ab6df3e5-d807-4b9f-8d35-1b1374423f8a",
+        "migrations_dir": "migrations",
+      },
+    ],
+    "r2_buckets": [
+      {
+        "binding": "OG_BUCKET",
+        "bucket_name": "mosaic-og-preview",
+      },
+    ],
+    "browser": {
+      "binding": "BROWSER",
+    },
+    "analytics_engine_datasets": [
+      {
+        "binding": "OG_ANALYTICS",
+        "dataset": "mosaic_og_generations_preview",
+      },
+    ],
+    "ratelimits": [
+      {
+        "name": "DEMO_RATE_LIMITER",
+        "namespace_id": "2001",
+        "simple": { "limit": 5, "period": 60 },
+      },
+      {
+        "name": "SITE_RATE_LIMITER",
+        "namespace_id": "2002",
+        "simple": { "limit": 30, "period": 60 },
+      },
+    ],
   },
 }

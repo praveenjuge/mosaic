@@ -1,6 +1,6 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
 import unusedImports from "eslint-plugin-unused-imports";
+import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
@@ -8,6 +8,11 @@ export default tseslint.config(
       "node_modules/",
       ".content-collections/",
       "dist/",
+      ".wrangler/",
+      ".agents/",
+      "playwright-report/",
+      "test-results/",
+      "worker-configuration.d.ts",
     ],
   },
   js.configs.recommended,
@@ -16,7 +21,10 @@ export default tseslint.config(
     plugins: { "unused-imports": unusedImports },
     rules: {
       "unused-imports/no-unused-imports": "error",
-      "unused-imports/no-unused-vars": ["warn", { varsIgnorePattern: "^_", argsIgnorePattern: "^_" }],
+      "unused-imports/no-unused-vars": [
+        "warn",
+        { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
+      ],
     },
-  }
+  },
 );
