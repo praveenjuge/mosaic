@@ -9,6 +9,7 @@ export default tseslint.config(
       "dist/",
       ".wrangler/",
       ".agents/",
+      ".claude/worktrees/",
       "playwright-report/",
       "test-results/",
       "worker-configuration.d.ts",

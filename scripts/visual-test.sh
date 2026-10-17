@@ -10,7 +10,8 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Keep in step with @playwright/test in package.json.
+# Keep in step with @playwright/test in package.json. CI's visual job reads
+# this line to start pulling the image early.
 image="mcr.microsoft.com/playwright:v1.64.1-noble"
 
 # The container reuses the host's bun binary and node_modules (workerd,

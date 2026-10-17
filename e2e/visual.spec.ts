@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { visualPages } from "./visual-pages";
 
 // Pixel baselines for signed-out pages. Rendering differs between Chromium
 // builds and font stacks, so these only run inside the pinned Playwright
@@ -43,15 +44,7 @@ function screenshotOptions(page: Page) {
   };
 }
 
-const pages = [
-  { name: "home", path: "/" },
-  { name: "help", path: "/help" },
-  { name: "guide-nextjs", path: "/help/guides/nextjs" },
-  { name: "legal", path: "/legal" },
-  { name: "not-found", path: "/this-page-does-not-exist" },
-];
-
-for (const { name, path } of pages) {
+for (const { name, path } of visualPages) {
   test(`${name} (desktop)`, async ({ page }) => {
     await open(page, path, "light");
     await expect(page).toHaveScreenshot(
