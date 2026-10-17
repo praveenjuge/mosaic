@@ -1,23 +1,7 @@
-import {
-  DEMO_CLIENT_DAILY_GENERATION_LIMIT,
-  DEMO_DAILY_GENERATION_LIMIT,
-  PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT,
-  PRODUCTION_DAILY_GENERATION_LIMIT,
-} from "@/lib/constants";
+import { DAILY_GENERATION_LIMITS } from "@/lib/constants";
 import type { D1Queryable } from "@/lib/db";
 
-const DAILY_LIMITS = {
-  demo: {
-    client: DEMO_CLIENT_DAILY_GENERATION_LIMIT,
-    global: DEMO_DAILY_GENERATION_LIMIT,
-  },
-  production: {
-    client: PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT,
-    global: PRODUCTION_DAILY_GENERATION_LIMIT,
-  },
-} as const;
-
-type GenerationKind = keyof typeof DAILY_LIMITS;
+type GenerationKind = keyof typeof DAILY_GENERATION_LIMITS;
 type BudgetScope = `${GenerationKind}-${"client" | "global"}`;
 
 function utcDayStart(timestamp = Date.now()): number {
@@ -77,7 +61,7 @@ export async function reserveGeneration(
   kind: GenerationKind,
   clientKey: string,
 ): Promise<boolean> {
-  const limits = DAILY_LIMITS[kind];
+  const limits = DAILY_GENERATION_LIMITS[kind];
   const clientScope = `${kind}-client` as const;
 
   if (!(await reserveWindowBudget(db, clientScope, clientKey, limits.client))) {

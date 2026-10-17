@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Ellipsis, Pencil, Trash } from "lucide-react";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
 
@@ -35,36 +35,20 @@ interface WebsiteActionsProps {
 export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, startSaving] = useTransition();
+  const [isDeleting, startDeleting] = useTransition();
   const { removeWebsite, saveWebsite } = useWebsiteActions();
 
-  const handleEditSubmit = async (url: string) => {
-    setIsSaving(true);
-
-    try {
-      const didSave = await saveWebsite({ siteId: websiteId, url });
-
-      if (didSave) {
-        setEditOpen(false);
-      }
-    } finally {
-      setIsSaving(false);
-    }
+  const handleEditSubmit = (url: string) => {
+    startSaving(async () => {
+      if (await saveWebsite({ siteId: websiteId, url })) setEditOpen(false);
+    });
   };
 
-  const handleDeleteAction = async () => {
-    setIsDeleting(true);
-
-    try {
-      const didDelete = await removeWebsite(websiteId);
-
-      if (didDelete) {
-        setDeleteOpen(false);
-      }
-    } finally {
-      setIsDeleting(false);
-    }
+  const handleDeleteAction = () => {
+    startDeleting(async () => {
+      if (await removeWebsite(websiteId)) setDeleteOpen(false);
+    });
   };
 
   return (

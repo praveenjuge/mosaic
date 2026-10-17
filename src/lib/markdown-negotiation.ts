@@ -9,6 +9,8 @@
  * through the normal pipeline.
  */
 
+import { APP_ROUTE_PREFIXES, matchesPathPrefix } from "./app-routes";
+
 /** Composes a Markdown document headed by the page title. */
 export function toMarkdownDocument(title: string, content: string): string {
   const trimmed = content.trim();
@@ -82,11 +84,7 @@ export function acceptsHtml(acceptHeader: string | null): boolean {
 // ── Paths ───────────────────────────────────────────────────────────
 
 const appRoutePrefixes = [
-  "/dashboard",
-  "/sign-in",
-  "/sign-up",
-  "/i",
-  "/use",
+  ...APP_ROUTE_PREFIXES,
   "/blog",
   "/_serverFn",
   "/.well-known",
@@ -105,9 +103,7 @@ function normalizePathname(pathname: string): string {
 /** App routes, redirects and static files keep their own handlers. */
 function isAppRoute(path: string): boolean {
   return (
-    appRoutePrefixes.some(
-      (prefix) => path === prefix || path.startsWith(`${prefix}/`),
-    ) || /\.[a-z0-9]+$/i.test(path)
+    matchesPathPrefix(path, appRoutePrefixes) || /\.[a-z0-9]+$/i.test(path)
   );
 }
 

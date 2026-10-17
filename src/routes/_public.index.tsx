@@ -3,39 +3,33 @@ import HomeSignedOut from "@/components/home/homesignedout";
 import { buildSeoMeta } from "@/lib/seo";
 import { getOgImageUrl } from "@/lib/url";
 import { getDashboardStats } from "@/server/stats";
-import { useAuth } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
 
 const homeDescription =
   "Instantly turn your website's hero sections into stunning OG images-no design skills needed. Boost brand visibility and drive clicks with automated, high-converting social previews.";
 
 export const Route = createFileRoute("/_public/")({
-  beforeLoad: async () => {
-    const dashboardStats = await getDashboardStats();
-    return { dashboardStats };
-  },
+  beforeLoad: async ({ context }) => ({
+    dashboardStats: context.auth.isAuthenticated
+      ? await getDashboardStats()
+      : null,
+  }),
   component: HomePage,
-  head: () => {
-    const seo = buildSeoMeta({
+  head: () =>
+    buildSeoMeta({
       title: "Simplify Your Open Graph Image Creation.",
       description: homeDescription,
       image: getOgImageUrl(""),
       path: "/",
-    });
-
-    return {
-      ...seo,
-    };
-  },
+    }),
 });
 
 function HomePage() {
-  const { auth, dashboardStats } = Route.useRouteContext();
-  const { isSignedIn } = useAuth();
+  const { dashboardStats } = Route.useRouteContext();
 
-  if (auth.isAuthenticated || isSignedIn) {
-    return <DashboardPage dashboardStats={dashboardStats} />;
-  }
-
-  return <HomeSignedOut />;
+  return dashboardStats ? (
+    <DashboardPage dashboardStats={dashboardStats} />
+  ) : (
+    <HomeSignedOut />
+  );
 }

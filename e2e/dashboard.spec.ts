@@ -81,4 +81,12 @@ test("signed-in users can add, edit, and delete a website", async ({
     .getByRole("button", { name: "Yes, Delete" })
     .click();
   await expect(row).toHaveCount(0);
+
+  // Signing out reloads the route context, so the signed-out home replaces
+  // the dashboard.
+  await clerk.signOut({ page });
+  await expect(
+    page.getByRole("heading", { name: /Instant beautiful OG images/ }),
+  ).toBeVisible();
+  await expect(addWebsite).toHaveCount(0);
 });

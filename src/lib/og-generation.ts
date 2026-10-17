@@ -102,7 +102,7 @@ function clientKey(request: Request): string {
 // ── Demo mode ───────────────────────────────────────────────────────
 
 /**
- * Fetch page metadata and take a screenshot in parallel. A per-client
+ * Fetch the page once, then read its metadata and screenshot it. A per-client
  * limiter and a global daily budget protect the shared Browser Run
  * allowance before paid work begins.
  */
@@ -138,13 +138,14 @@ async function handleDemoRequest(
     );
   }
 
+  // One fetch validates the redirect chain for the screenshot and supplies
+  // the HTML for the metadata. The screenshot starts once headers arrive.
+  const page = fetchPageHtml(target.url, target.requestHostname);
   const [metadata, screenshot] = await Promise.allSettled([
-    fetchPageHtml(target.url, target.requestHostname).then((html) =>
-      extractMetadata(html, target.url),
+    page.then(async ({ html, finalUrl }) =>
+      extractMetadata(await html, finalUrl),
     ),
-    resolvePublicPageUrl(target.url, target.requestHostname).then((finalUrl) =>
-      takeScreenshot(finalUrl.toString()),
-    ),
+    page.then(({ finalUrl }) => takeScreenshot(finalUrl.toString())),
   ]);
   const meta =
     metadata.status === "fulfilled"

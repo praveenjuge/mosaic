@@ -44,13 +44,3 @@ export function validateRedirectSearch(search: Record<string, unknown>) {
       typeof search.redirect_url === "string" ? search.redirect_url : undefined,
   };
 }
-
-export function buildSignInHref(redirectUrl?: string) {
-  const safeRedirect = sanitizeRedirectPath(redirectUrl);
-  return `${signInPath}?redirect_url=${encodeURIComponent(safeRedirect)}`;
-}
-
-export function buildSignUpHref(redirectUrl?: string) {
-  const safeRedirect = sanitizeRedirectPath(redirectUrl);
-  return `${signUpPath}?redirect_url=${encodeURIComponent(safeRedirect)}`;
-}

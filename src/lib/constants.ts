@@ -1,5 +1,4 @@
 export const author_name = "Praveen Juge";
-export const author_email = "hello@praveenjuge.com";
 export const website_name = "Mosaic";
 export const website_subtitle = "Simplify Your Open Graph Image Creation.";
 
@@ -9,17 +8,14 @@ export const website_description =
 /** Shared images are regenerated after 30 days. */
 export const GLOBAL_IMAGE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** Maximum fresh production screenshots generated across the service per day. */
-export const PRODUCTION_DAILY_GENERATION_LIMIT = 500;
-
-/** Maximum fresh production screenshots generated for one client per day. */
-export const PRODUCTION_CLIENT_DAILY_GENERATION_LIMIT = 50;
-
-/** Maximum anonymous demo screenshots generated across the service per UTC day. */
-export const DEMO_DAILY_GENERATION_LIMIT = 100;
-
-/** Maximum demo screenshots generated for one client per UTC day. */
-export const DEMO_CLIENT_DAILY_GENERATION_LIMIT = 10;
+/**
+ * Maximum fresh screenshots per UTC day, across the service (`global`) and
+ * for one client IP (`client`). Demo covers the anonymous home page demo.
+ */
+export const DAILY_GENERATION_LIMITS = {
+  production: { global: 500, client: 50 },
+  demo: { global: 100, client: 10 },
+} as const;
 
 /**
  * Browser Run engine for every OG screenshot (production and demo). Kitesurf

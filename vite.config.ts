@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
+import { APP_ROUTE_PREFIXES, matchesPathPrefix } from "./src/lib/app-routes";
 import { mosaicContent } from "./src/lib/content-plugin";
 
 function resolveSiteHost(siteUrl: string | undefined) {
@@ -45,14 +46,8 @@ function shouldUseRemoteBindings() {
   return Boolean(process.env.CLOUDFLARE_API_TOKEN);
 }
 
-const prerenderBlockedPaths = [
-  "/",
-  "/dashboard",
-  "/sign-in",
-  "/sign-up",
-  "/use",
-  "/i",
-];
+// The home page renders the signed-in dashboard, so it is never prerendered.
+const prerenderBlockedPaths = ["/", ...APP_ROUTE_PREFIXES];
 
 const staticAssetPattern =
   /\.(avif|css|gif|ico|jpe?g|js|json|map|png|svg|webp|woff2?)$/i;
@@ -118,9 +113,7 @@ export default defineConfig(({ command, mode }) => {
           filter: (page) => {
             if (staticAssetPattern.test(page.path)) return false;
 
-            return !prerenderBlockedPaths.some(
-              (path) => page.path === path || page.path.startsWith(`${path}/`),
-            );
+            return !matchesPathPrefix(page.path, prerenderBlockedPaths);
           },
         },
         router: {
