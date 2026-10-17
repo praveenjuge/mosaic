@@ -1,7 +1,7 @@
 import { clerkSetup } from "@clerk/testing/playwright";
 import { chromium, type FullConfig } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { visualPages } from "./visual-pages";
+import { stubOutsideRequests, visualPages } from "./visual-pages";
 
 export default async function globalSetup(config: FullConfig) {
   const wrangler = (...args: string[]) =>
@@ -32,6 +32,7 @@ export default async function globalSetup(config: FullConfig) {
     // don't race the first compiles.
     const browser = await chromium.launch();
     const page = await browser.newPage();
+    await stubOutsideRequests(page);
     for (const { path } of visualPages) {
       await page.goto(new URL(path, config.webServer?.url).toString(), {
         waitUntil: "networkidle",
