@@ -1,0 +1,14 @@
+// Only used by `bun run db:migrate:preview` to migrate the D1 database bound
+// in the `previews` block of `wrangler.jsonc`. Keep the id in sync with it.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mosaic",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "mosaic-preview",
+      "database_id": "ab6df3e5-d807-4b9f-8d35-1b1374423f8a",
+      "migrations_dir": "migrations",
+    },
+  ],
+}

@@ -19,7 +19,7 @@
     "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "db:seed:local": "wrangler d1 execute DB --local --file scripts/seed-local.sql",
     "db:migrate:remote": "wrangler d1 migrations apply DB --remote",
-    "db:migrate:preview": "wrangler d1 migrations apply DB --remote --preview",
+    "db:migrate:preview": "wrangler d1 migrations apply DB --remote --config wrangler.preview-db.jsonc",
     "deploy": "bun run db:migrate:remote && wrangler deploy",
     "deploy:preview": "bun run db:migrate:preview && wrangler preview",
     "dev": "NODE_OPTIONS='--max-http-header-size=32768' vite dev",

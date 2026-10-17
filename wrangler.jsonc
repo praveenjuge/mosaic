@@ -60,12 +60,15 @@
   },
   // `wrangler preview` deploys each branch to its own URL. Storage bindings
   // point at preview-only resources so previews never touch production data.
-  // Apply migrations with `bun run db:migrate:preview`.
+  // Apply migrations with `bun run db:migrate:preview`, which uses
+  // `wrangler.preview-db.jsonc` because `wrangler d1` only reads top-level
+  // `d1_databases`.
   "previews": {
     "d1_databases": [
       {
         "binding": "DB",
         "database_name": "mosaic-preview",
+        "database_id": "ab6df3e5-d807-4b9f-8d35-1b1374423f8a",
         "migrations_dir": "migrations",
       },
     ],
