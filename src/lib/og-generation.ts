@@ -11,6 +11,7 @@
  */
 
 import { recordGenerationEvent, type GenerationOutcome } from "@/lib/analytics";
+import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { getDb } from "@/lib/db";
 import {
   extractMetadata,
@@ -21,7 +22,6 @@ import {
   isMosaicRendererRequest,
   MOSAIC_RENDERER_USER_AGENT,
 } from "@/lib/request";
-import type { ScreenshotEngine } from "@/lib/types";
 import {
   buildPublicImageUrl,
   ensureWebsiteProtocol,
@@ -36,7 +36,7 @@ import {
 import {
   acquireGenerationLock,
   findGlobalImage,
-  getHostnameScreenshotEngine,
+  isHostnameAssociated,
   recordGlobalImage,
   releaseGenerationLock,
 } from "@/server/og";
@@ -170,9 +170,8 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * `screenshot` Quick Action, called directly through the `BROWSER` Workers
  * binding (`env.BROWSER.quickAction`).
  *
- * `engine` is Chromium by default, or Kitesurf via the binding's
- * `browser: "kitesurf"` option when every user who saved the site picked it
- * (see `getHostnameScreenshotEngine`).
+ * The engine comes from `SCREENSHOT_ENGINE`: Kitesurf (the binding's
+ * `browser: "kitesurf"` option), or Chromium when that is set to "chromium".
  *
  * Using the binding talks to Browser Run directly over Cloudflare's network —
  * no account ID or API token required. Requires a compatibility date of
@@ -183,15 +182,12 @@ function arrayBufferToDataUrl(buffer: ArrayBuffer): string {
  * (analytics beacons, websockets, long-polling).
  *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
- * same options run through local Puppeteer (always Chromium) instead.
+ * same options run through local Puppeteer instead.
  */
-export async function takeScreenshot(
-  url: string,
-  engine: ScreenshotEngine = "chromium",
-): Promise<ArrayBuffer> {
+export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const options: BrowserRunScreenshotOptions = {
     url,
-    ...(engine === "kitesurf" ? { browser: "kitesurf" } : {}),
+    ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
     userAgent: MOSAIC_RENDERER_USER_AGENT,
     viewport: { width: 1560, height: 819 },
     gotoOptions: { waitUntil: "networkidle2", timeout: 15_000 },
@@ -365,21 +361,17 @@ async function handleProductionRequest(
   // replication is enabled. Later writes (locks, budgets, image records) go
   // to the primary, and the session keeps them sequentially consistent.
   const db = getDb().withSession("first-unconstrained");
-  const [cacheKey, engine, cachedImage] = await Promise.all([
+  const [cacheKey, isAssociated, cachedImage] = await Promise.all([
     generateCacheKey(sanitizedUrl),
-    getHostnameScreenshotEngine(db, urlBase),
+    isHostnameAssociated(db, urlBase),
     findGlobalImage(db, sanitizedUrl),
   ]);
   const record = (
     outcome: GenerationOutcome,
-    metrics?: {
-      durationMs: number;
-      bytes?: number;
-      engine?: ScreenshotEngine;
-    },
+    metrics?: { durationMs: number; bytes?: number },
   ) => recordGenerationEvent({ outcome, hostname: urlBase, ...metrics });
 
-  if (!engine) {
+  if (!isAssociated) {
     record("unregistered");
     return createJsonResponse(
       {
@@ -432,7 +424,7 @@ async function handleProductionRequest(
       new URL(sanitizedUrl),
       requestHostname,
     );
-    const imageBuffer = await takeScreenshot(finalUrl.toString(), engine);
+    const imageBuffer = await takeScreenshot(finalUrl.toString());
     await env.OG_BUCKET.put(imageKey, imageBuffer, {
       httpMetadata: { contentType: "image/jpeg" },
     });
@@ -441,13 +433,12 @@ async function handleProductionRequest(
     record("generated", {
       durationMs: Date.now() - startedAt,
       bytes: imageBuffer.byteLength,
-      engine,
     });
 
     return createRedirectResponse(imageUrl(imageKey));
   } catch (err) {
     console.error("[USE] Failed to generate or persist image:", err);
-    record("failed", { durationMs: Date.now() - startedAt, engine });
+    record("failed", { durationMs: Date.now() - startedAt });
     return cachedImage
       ? createRedirectResponse(imageUrl(cachedImage.key))
       : createFallbackRedirectResponse(request);

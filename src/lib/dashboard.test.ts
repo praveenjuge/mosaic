@@ -8,13 +8,11 @@ describe("dashboard image stats", () => {
         {
           id: 1,
           url_base: "example.com",
-          screenshot_engine: "chromium",
           created_at: "2026-08-29 10:00:00",
         },
         {
           id: 2,
           url_base: "empty.example",
-          screenshot_engine: "kitesurf",
           created_at: "2026-08-29 09:00:00",
         },
       ],

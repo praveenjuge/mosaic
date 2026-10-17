@@ -1,10 +1,4 @@
-import type { ScreenshotEngine } from "@/lib/types";
-import {
-  addSite,
-  deleteSite,
-  editSite,
-  setSiteScreenshotEngine,
-} from "@/server/sites";
+import { addSite, deleteSite, editSite } from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -56,27 +50,7 @@ export function useWebsiteActions() {
     }
   }
 
-  async function changeScreenshotEngine(
-    siteId: number,
-    engine: ScreenshotEngine,
-  ) {
-    try {
-      await setSiteScreenshotEngine({ data: { siteId, engine } });
-      toast.success(
-        engine === "kitesurf"
-          ? "New images use Kitesurf once everyone who added this website picks it."
-          : "New images use Chromium.",
-      );
-      router.invalidate();
-      return true;
-    } catch (error) {
-      toast.error(getErrorMessage(error));
-      return false;
-    }
-  }
-
   return {
-    changeScreenshotEngine,
     removeWebsite,
     saveWebsite,
   };

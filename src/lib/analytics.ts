@@ -1,4 +1,3 @@
-import type { ScreenshotEngine } from "@/lib/types";
 import { env } from "cloudflare:workers";
 
 export type GenerationOutcome =
@@ -17,15 +16,12 @@ interface GenerationEvent {
   durationMs?: number;
   /** Stored image size, for `generated`. */
   bytes?: number;
-  /** Browser Run engine used, for `generated` and `failed`. */
-  engine?: ScreenshotEngine;
 }
 
 /**
  * Records one production `/use` outcome in Workers Analytics Engine
  * (dataset `mosaic_og_generations`). Columns: index1 = hostname,
- * blob1 = outcome, blob2 = hostname, blob3 = engine (empty when no screenshot
- * ran), double1 = durationMs, double2 = bytes.
+ * blob1 = outcome, blob2 = hostname, double1 = durationMs, double2 = bytes.
  *
  * `writeDataPoint` is non-blocking; failures are logged and never affect
  * the response.
@@ -37,13 +33,12 @@ export function recordGenerationEvent({
   hostname,
   durationMs = 0,
   bytes = 0,
-  engine,
 }: GenerationEvent) {
   try {
     env.OG_ANALYTICS.writeDataPoint({
       // Index values are limited to 96 bytes.
       indexes: [hostname.slice(0, 96)],
-      blobs: [outcome, hostname, engine ?? ""],
+      blobs: [outcome, hostname],
       doubles: [durationMs, bytes],
     });
   } catch (error) {

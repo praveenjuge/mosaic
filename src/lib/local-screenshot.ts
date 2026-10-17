@@ -20,11 +20,6 @@ export async function takeLocalScreenshot(
   if (!("url" in options)) {
     throw new Error("Local screenshots only support the `url` option.");
   }
-  if (options.browser === "kitesurf") {
-    console.warn(
-      "[DEV] Kitesurf needs remote Browser Run; using local Chrome instead.",
-    );
-  }
 
   const browser = await puppeteer.launch(binding as unknown as BrowserWorker);
   try {

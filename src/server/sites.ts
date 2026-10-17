@@ -1,4 +1,3 @@
-import { SCREENSHOT_ENGINES } from "@/lib/constants";
 import { getDb } from "@/lib/db";
 import type { Site } from "@/lib/types";
 import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
@@ -80,24 +79,6 @@ export const editSite = createServerFn({ method: "POST" })
       .bind(hostname, data.siteId, context.userId)
       .run();
     return { ...existing, url_base: hostname };
-  });
-
-const setSiteScreenshotEngineSchema = z.object({
-  siteId: z.number().int().positive(),
-  engine: z.enum(SCREENSHOT_ENGINES),
-});
-
-export const setSiteScreenshotEngine = createServerFn({ method: "POST" })
-  .middleware([authMiddleware])
-  .inputValidator(setSiteScreenshotEngineSchema)
-  .handler(async ({ context, data }): Promise<void> => {
-    const result = await getDb()
-      .prepare(
-        "UPDATE sites SET screenshot_engine = ? WHERE id = ? AND user_id = ?",
-      )
-      .bind(data.engine, data.siteId, context.userId)
-      .run();
-    if (result.meta.changes === 0) throw new Error("Website not found.");
   });
 
 const deleteSiteSchema = z.object({ siteId: z.number().int().positive() });

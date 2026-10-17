@@ -1,8 +1,4 @@
-import type { SCREENSHOT_ENGINES } from "@/lib/constants";
-
 // ── Site Types ──────────────────────────────────────────────────────
-
-export type ScreenshotEngine = (typeof SCREENSHOT_ENGINES)[number];
 
 export interface Site {
   id: number;
@@ -10,7 +6,6 @@ export interface Site {
   url_base: string;
   image_count: number;
   r2_prefix: string;
-  screenshot_engine: ScreenshotEngine;
   created_at: string;
   refreshed_at: string | null;
 }
@@ -34,7 +29,6 @@ export type DashboardStats = {
     id: number;
     url_base: string;
     image_count: number;
-    screenshot_engine: ScreenshotEngine;
     created_at: string;
     last_generated_at: number | null;
   }>;

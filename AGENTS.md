@@ -7,7 +7,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Database**: Cloudflare D1 (SQLite), accessed via `env.DB` binding
 - **Storage**: Cloudflare R2 for OG images, accessed via `env.OG_BUCKET` binding
-- **Screenshots**: Cloudflare Browser Run via the `env.BROWSER` binding (`quickAction`), Chromium default
+- **Screenshots**: Cloudflare Browser Run via the `env.BROWSER` binding (`quickAction`), Kitesurf engine
 - **Authentication**: Clerk (server-side JWT verification via `@clerk/tanstack-react-start/server`)
 - **Analytics**: Workers Analytics Engine via `env.OG_ANALYTICS` (`src/lib/analytics.ts`)
 - **Deployment Runtime**: Cloudflare Workers via Wrangler
@@ -23,7 +23,7 @@ Mosaic is a SaaS platform that automatically generates Open Graph (OG) images fo
 Run `bun run check` before pushing. It runs everything CI (`.github/workflows/ci.yml`) runs, in order, and takes about three minutes. `bun run check:fast` runs only the lint, format, type, and unit steps. Stop any dev server on port 3000 first: with `CI=1`, Playwright won't reuse it.
 
 - `bun run lint:check`, `bun run format:check`, `bun run typecheck`, `bun run cf-typegen:check`
-- `bun run test` — Bun unit tests, colocated in `src/` as `*.test.ts(x)`. To test SQL, run the real `migrations/` in `bun:sqlite` behind a small D1 stand-in, as `src/server/og.test.ts` does.
+- `bun run test` — Bun unit tests, colocated in `src/` as `*.test.ts(x)`.
 - `bun run build && bun run test:integration` — the built Worker in workerd with local D1/R2, via wrangler's test harness under `node --test` (`tests/integration/`). Bun's fetch shim is incompatible with the harness, so these don't run under `bun test`. Browser Run is stripped there, so every screenshot fails like an outage; the harness can't override the `BROWSER` binding.
 - `bun run test:e2e` — Playwright against `bun run dev` (`e2e/`). Signed-in specs (`e2e/dashboard.spec.ts`) skip unless a Clerk development instance and `E2E_CLERK_USER_EMAIL` are configured. They add and delete their own sites, so they work against any local D1 state.
 - `bun run test:visual` — pixel baselines for signed-out pages (`e2e/visual.spec.ts`, images in `e2e/__screenshots__/`). `scripts/visual-test.sh` runs them in the pinned `mcr.microsoft.com/playwright` image (keep its tag in step with `@playwright/test`), with placeholder Clerk keys and strict comparison. It needs Docker on a Linux host; in cloud sessions it starts `dockerd` itself, and the first run pulls the image (about a minute). After an intended UI change run `bun run test:visual:update`, look at the changed PNGs, and commit them with the change. On failure, the diffs are in `test-results/`.
@@ -109,7 +109,7 @@ e2e/                 # Playwright end-to-end tests
 - Uses Bun as the runtime and package manager
 - All database operations go through D1 via `createServerFn` or direct queries in route handlers
 - Authentication is handled entirely by Clerk
-- OG image generation is handled internally via the Cloudflare Browser Run `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", ...)` — no account ID or API token required. Each site picks an engine (`sites.screenshot_engine`, one of `SCREENSHOT_ENGINES` in `src/lib/constants.ts`): Chromium by default, or Kitesurf (`browser: "kitesurf"`), which is cheaper but not pixel-perfect. Images are shared per page URL, so `getHostnameScreenshotEngine()` uses Kitesurf only when every user who saved the hostname chose it. Kitesurf needs remote Browser Run: the local Puppeteer fallback always uses Chrome.
+- OG image generation is handled internally via the Cloudflare Browser Run `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", ...)` — no account ID or API token required. Every screenshot uses the engine in `SCREENSHOT_ENGINE` (`src/lib/constants.ts`): Kitesurf (`browser: "kitesurf"`), which is cheaper and free during its beta but not pixel-perfect and has no WebGL or video. Set it to `"chromium"` to go back to full Chrome. Kitesurf needs remote Browser Run: the local Puppeteer fallback always renders with Chrome, so check Kitesurf output on a Worker Preview.
 - Public client environment variables must use the `VITE_` prefix
 - Website URL format: always clean and normalize URLs before storage
 - Suggest new instructions or improvements to this file as the project evolves.

@@ -20,46 +20,24 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SCREENSHOT_ENGINES } from "@/lib/constants";
-import type { ScreenshotEngine } from "@/lib/types";
-import { Camera, Ellipsis, Pencil, Trash } from "lucide-react";
+import { Ellipsis, Pencil, Trash } from "lucide-react";
 import { useState } from "react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
 
-const engineLabels: Record<ScreenshotEngine, string> = {
-  chromium: "Chromium",
-  kitesurf: "Kitesurf (beta, cheaper)",
-};
-
-function isScreenshotEngine(value: string): value is ScreenshotEngine {
-  return (SCREENSHOT_ENGINES as readonly string[]).includes(value);
-}
-
 interface WebsiteActionsProps {
   websiteId: number;
   currentUrl: string;
-  screenshotEngine: ScreenshotEngine;
 }
 
-export function WebsiteActions({
-  websiteId,
-  currentUrl,
-  screenshotEngine,
-}: WebsiteActionsProps) {
+export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { changeScreenshotEngine, removeWebsite, saveWebsite } =
-    useWebsiteActions();
+  const { removeWebsite, saveWebsite } = useWebsiteActions();
 
   const handleEditSubmit = async (url: string) => {
     setIsSaving(true);
@@ -98,33 +76,11 @@ export function WebsiteActions({
             <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-48">
+        <DropdownMenuContent className="min-w-40">
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             <Pencil className="stroke-2" />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Camera className="stroke-2" />
-              Screenshot engine
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent>
-              <DropdownMenuRadioGroup
-                value={screenshotEngine}
-                onValueChange={(value) => {
-                  if (isScreenshotEngine(value) && value !== screenshotEngine) {
-                    void changeScreenshotEngine(websiteId, value);
-                  }
-                }}
-              >
-                {SCREENSHOT_ENGINES.map((engine) => (
-                  <DropdownMenuRadioItem key={engine} value={engine}>
-                    {engineLabels[engine]}
-                  </DropdownMenuRadioItem>
-                ))}
-              </DropdownMenuRadioGroup>
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
           <DropdownMenuItem
             variant="destructive"
             onClick={() => setDeleteOpen(true)}
