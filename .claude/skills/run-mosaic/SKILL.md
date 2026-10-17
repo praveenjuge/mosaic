@@ -11,12 +11,21 @@ screenshots to the user (SendUserFile) instead of describing them.
 
 ## 1. Start the dev server
 
+Run this as one command. It stops waiting after about three minutes, or as soon as the dev
+process exits, and then prints the end of the log:
+
 ```sh
-bun run dev > "${TMPDIR:-/tmp}/mosaic-dev.log" 2>&1 &   # run in the background
-until curl -s -o /dev/null http://localhost:3000/; do sleep 2; done
+log="${TMPDIR:-/tmp}/mosaic-dev.log"
+bun run dev > "$log" 2>&1 &
+dev_pid=$!
+for _ in $(seq 1 90); do
+  curl -s -o /dev/null http://localhost:3000/ && echo ready && break
+  if ! kill -0 "$dev_pid" 2>/dev/null; then echo "dev exited"; tail -40 "$log"; break; fi
+  sleep 2
+done
 ```
 
-- Port 3000. `predev` type-checks first, so a type error stops startup; read the log.
+- Port 3000. `predev` type-checks first, so a type error stops startup.
 - `Failed to start the remote proxy session ... behind Cloudflare Access` means
   remote bindings are on without Access credentials. Restart with
   `MOSAIC_REMOTE_BINDINGS=0` to use local Chrome (cloud sessions set this by
@@ -45,10 +54,12 @@ node scripts/screenshot-pages.mjs --mobile --out <dir> / /help /legal
 node scripts/screenshot-pages.mjs --dark --out <dir> /
 ```
 
-Prints one `status url -> file` line per page and exits 1 if any page fails.
-Read the PNGs, then send the relevant ones to the user. `/dashboard` needs a
-signed-in Clerk user, which placeholder keys can't provide; use the Playwright
-specs in `e2e/` with a Clerk development instance for that.
+Prints one `status url -> file` line per page and exits 1 if any page fails to
+load or answers 400 or above (the screenshot is still saved). `--dark` selects
+the app's dark theme. Read the PNGs, then send the relevant ones to the user.
+The dashboard is the signed-in view of `/`, which needs a real Clerk user that
+placeholder keys can't provide; use `e2e/dashboard.spec.ts` with a Clerk
+development instance for that.
 
 ## 4. Inspect local state
 

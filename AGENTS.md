@@ -36,6 +36,7 @@ Run these before pushing; CI (`.github/workflows/ci.yml`) runs all of them.
 - Claude Code cloud sessions run `scripts/claude-session-start.sh` via the SessionStart hook in `.claude/settings.json`: it installs dependencies, writes placeholder Clerk keys to `.env.local`, migrates and seeds local D1, exports `CI=1`, and exports `MOSAIC_REMOTE_BINDINGS=0` unless the environment sets it or provides Access credentials. Sessions with more than one repository skip repository hooks, so run the script from the environment's setup script there. Placeholder keys use the `pk_live_` shape because Clerk development keys force a handshake redirect to the (fake) Frontend API.
 - A PostToolUse hook (`scripts/claude-post-edit.sh`) runs Prettier on each file Claude edits and `bun run cf-typegen` after `wrangler.jsonc` changes.
 - Deploys, remote migrations, and secret changes are denied to agents in `.claude/settings.json`; a human runs them.
+- Worker Previews (`bun run deploy:preview`) use the `previews` block in `wrangler.jsonc`, bound to preview-only D1 (`mosaic-preview`), R2 (`mosaic-og-preview`), rate limiter namespaces, and Analytics Engine dataset.
 - In cloud sessions the Cloudflare account is reachable through the claude.ai Cloudflare connector (D1, R2, Workers, docs). The `cloudflare-observability` server in `.mcp.json` needs an OAuth sign-in, so it only works in local sessions.
 
 ## Seeing changes
@@ -48,7 +49,6 @@ Project skills and agents in `.claude/`:
 - `new-migration` — add a D1 migration the safe way
 - `add-binding` — add a Cloudflare binding everywhere it must appear (production, previews, types, docs)
 - `security-reviewer` subagent — checks a diff against `REVIEW.md` before a PR
-- Worker Previews (`bun run deploy:preview`) use the `previews` block in `wrangler.jsonc`, bound to preview-only D1 (`mosaic-preview`), R2 (`mosaic-og-preview`), rate limiter namespaces, and Analytics Engine dataset.
 
 ## Project Structure
 

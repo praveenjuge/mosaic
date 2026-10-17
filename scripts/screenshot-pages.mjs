@@ -3,7 +3,9 @@
 // changes. Usage:
 //   node scripts/screenshot-pages.mjs / /help /use?url=https://example.com
 //   node scripts/screenshot-pages.mjs --mobile --dark --out /tmp/shots /help
-// Writes full-page PNGs (default: test-results/screenshots/) and prints paths.
+// Writes full-page PNGs (default: test-results/screenshots/), prints one
+// "status url -> file" line per page, and exits 1 if any page errors or
+// answers with an HTTP status of 400 or above.
 import { chromium } from "@playwright/test";
 import console from "node:console";
 import { existsSync } from "node:fs";
@@ -42,6 +44,12 @@ try {
       viewport: { width: viewport.width, height: viewport.height },
       colorScheme: values.dark ? "dark" : "light",
     });
+    // The app defaults to the light theme whatever the browser prefers, so
+    // pick the theme the way the theme toggle does (next-themes' storage key).
+    const theme = values.dark ? "dark" : "light";
+    await page.addInitScript((value) => {
+      localStorage.setItem("theme", value);
+    }, theme);
 
     for (const path of paths) {
       const url = new URL(path, values.base).toString();
@@ -55,7 +63,10 @@ try {
       try {
         const response = await page.goto(url, { waitUntil: "networkidle" });
         await page.screenshot({ path: file, fullPage: true });
-        console.log(`${response?.status() ?? "?"} ${url} -> ${file}`);
+        const status = response?.status();
+        // Keep the screenshot of an error page, but fail the run.
+        if (status === undefined || status >= 400) failed = true;
+        console.log(`${status ?? "?"} ${url} -> ${file}`);
       } catch (error) {
         failed = true;
         console.error(`FAILED ${url}: ${error.message}`);
