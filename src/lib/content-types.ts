@@ -30,5 +30,5 @@ export interface LegalDocument {
 
 export type HelpCategory = {
   category: string;
-  entries: Array<Pick<HelpArticle, "slug" | "title">>;
+  entries: Array<Pick<HelpArticle, "slug" | "title" | "description">>;
 };

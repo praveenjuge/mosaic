@@ -53,6 +53,12 @@
       "OG_ANALYTICS": {
         "description": "Workers Analytics Engine dataset recording /use generation outcomes."
       },
+      "ANALYTICS_SQL": {
+        "description": "Analytics SQL binding the dashboard reads OG_ANALYTICS back with."
+      },
+      "OG_ANALYTICS_DATASET": {
+        "description": "Name of the OG_ANALYTICS dataset, for ANALYTICS_SQL queries."
+      },
       "VITE_SITE_URL": {
         "description": "Required build-time public HTTPS origin for this Mosaic deployment."
       },

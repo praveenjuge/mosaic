@@ -13,10 +13,13 @@ import { createTestHarness } from "wrangler";
 
 // Browser Run is remote-only in the built config. Strip the flag so the
 // harness runs fully offline; screenshots then fail like a Browser Run outage.
+// The Analytics SQL binding only exists remotely, and only the signed-in
+// dashboard reads it, so the harness goes without it.
 const builtConfig = JSON.parse(
   readFileSync("./dist/server/wrangler.json", "utf8"),
 );
 delete builtConfig.browser?.remote;
+delete builtConfig.analytics;
 writeFileSync("./dist/server/wrangler.test.json", JSON.stringify(builtConfig));
 
 const server = createTestHarness({

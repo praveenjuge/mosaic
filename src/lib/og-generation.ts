@@ -233,7 +233,7 @@ export async function generateImage(
   const record = (
     outcome: GenerationOutcome,
     metrics?: { durationMs: number; bytes?: number },
-  ) => recordGenerationEvent({ outcome, hostname, ...metrics });
+  ) => recordGenerationEvent({ outcome, hostname, pageUrl, ...metrics });
 
   const rateLimit = await env.SITE_RATE_LIMITER.limit({ key: client });
   if (!rateLimit.success) {
@@ -321,6 +321,30 @@ export async function generateImage(
 }
 
 /**
+ * The generation target for a website or page the dashboard names, or `null`
+ * when it isn't a public URL this deployment may screenshot.
+ */
+function dashboardTarget(value: string, requestUrl: string): Target | null {
+  const { hostname: requestHostname, origin: requestOrigin } = new URL(
+    requestUrl,
+  );
+  let url: URL;
+  try {
+    url = parseWebsiteUrl(value);
+  } catch {
+    return null;
+  }
+  if (validateOutboundUrl(url, requestHostname)) return null;
+  const page = canonicalPage(url);
+  return {
+    ...page,
+    url: new URL(page.pageUrl),
+    requestHostname,
+    requestOrigin,
+  };
+}
+
+/**
  * Generate the image for a website's home page unless a fresh one exists, so
  * the first social crawler after a site is added gets a cached image.
  */
@@ -330,18 +354,8 @@ export async function warmSiteImage(
   client: string,
 ): Promise<void> {
   try {
-    const { hostname: requestHostname, origin: requestOrigin } = new URL(
-      requestUrl,
-    );
-    const url = parseWebsiteUrl(hostname);
-    if (validateOutboundUrl(url, requestHostname)) return;
-    const page = canonicalPage(url);
-    const target = {
-      ...page,
-      url: new URL(page.pageUrl),
-      requestHostname,
-      requestOrigin,
-    };
+    const target = dashboardTarget(hostname, requestUrl);
+    if (!target) return;
 
     const db = getDb();
     const cachedImage = await findGlobalImage(db, target.pageUrl);
@@ -350,6 +364,35 @@ export async function warmSiteImage(
   } catch (error) {
     console.error("[USE] Failed to warm site image:", error);
   }
+}
+
+export type PageRegeneration =
+  | { status: "regenerated"; key: string }
+  | {
+      status: "rate_limited" | "locked" | "budget_exhausted" | "failed";
+    };
+
+/**
+ * Take a new screenshot of a page now, for the dashboard's per-page
+ * "Regenerate". The caller has already marked the page's image expired (see
+ * `expirePageImage`), so `generateImage()` replaces it, behind the usual
+ * rate limit, lock, and budget counted against `client`. If it is skipped,
+ * the old image keeps serving and the next `/use` request refreshes it.
+ */
+export async function regeneratePageImage(
+  pageUrl: string,
+  requestUrl: string,
+  client: string,
+): Promise<PageRegeneration> {
+  const target = dashboardTarget(pageUrl, requestUrl);
+  if (!target) return { status: "failed" };
+  await forgetPageAnswers(requestUrl, [target.pageUrl]).catch((error) => {
+    console.error("[USE] Failed to clear cached /use answer:", error);
+  });
+  const result = await generateImage(getDb(), target, client);
+  return "key" in result
+    ? { status: "regenerated", key: result.key }
+    : { status: result.skipped };
 }
 
 /** How long a colo answers `/use` for a fresh image without reading D1. */
@@ -481,11 +524,11 @@ async function handleProductionRequest(
     cache.match(hostnameCacheKey),
   ]);
   if (cachedUnregistered) {
-    recordGenerationEvent({ outcome: "unregistered", hostname });
+    recordGenerationEvent({ outcome: "unregistered", hostname, pageUrl });
     return unregistered();
   }
   if (cachedKey) {
-    recordGenerationEvent({ outcome: "cache_hit", hostname });
+    recordGenerationEvent({ outcome: "cache_hit", hostname, pageUrl });
     return redirect(imageUrl(target, await cachedKey.text()));
   }
 
@@ -499,7 +542,7 @@ async function handleProductionRequest(
   ]);
 
   if (!isAssociated) {
-    recordGenerationEvent({ outcome: "unregistered", hostname });
+    recordGenerationEvent({ outcome: "unregistered", hostname, pageUrl });
     rememberUseAnswer(hostnameCacheKey, "", UNREGISTERED_CACHE_MAX_AGE_S);
     return unregistered();
   }
@@ -516,12 +559,12 @@ async function handleProductionRequest(
 
   if (cachedImage) {
     if (cachedImage.expiresAt > Date.now()) {
-      recordGenerationEvent({ outcome: "cache_hit", hostname });
+      recordGenerationEvent({ outcome: "cache_hit", hostname, pageUrl });
       rememberFresh(cachedImage.key, cachedImage.expiresAt);
     } else {
       // Serve the stale image now and refresh it after the response, so
       // social crawlers never wait for a screenshot they would time out on.
-      recordGenerationEvent({ outcome: "stale_hit", hostname });
+      recordGenerationEvent({ outcome: "stale_hit", hostname, pageUrl });
       const startedAt = refreshing.get(pageUrl);
       if (!startedAt || Date.now() - startedAt > REFRESH_LEASE_MS) {
         refreshing.set(pageUrl, Date.now());

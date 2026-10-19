@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { buildDashboardStats } from "./dashboard";
+import { buildDashboardBudget, buildDashboardStats } from "./dashboard";
 
 describe("dashboard image stats", () => {
   test("totals per-site image counts and trims latest page URLs", () => {
@@ -29,6 +29,7 @@ describe("dashboard image stats", () => {
           url_base: "example.com",
         },
       ],
+      buildDashboardBudget([], 0),
     );
 
     expect(stats.total_websites).toBe(2);
@@ -42,5 +43,30 @@ describe("dashboard image stats", () => {
         url_base: "example.com",
       },
     ]);
+  });
+});
+
+describe("dashboard budget", () => {
+  test("reads today's service and user counts against their limits", () => {
+    const dayStart = Date.UTC(2026, 9, 19);
+    expect(
+      buildDashboardBudget(
+        [
+          { scope: "production-global", count: 120 },
+          { scope: "production-client", count: 3 },
+        ],
+        dayStart,
+      ),
+    ).toEqual({
+      service: { used: 120, limit: 500 },
+      user: { used: 3, limit: 50 },
+      resets_at: Date.UTC(2026, 9, 20),
+    });
+  });
+
+  test("counts a missing window as unused", () => {
+    const budget = buildDashboardBudget([], 0);
+    expect(budget.service.used).toBe(0);
+    expect(budget.user.used).toBe(0);
   });
 });

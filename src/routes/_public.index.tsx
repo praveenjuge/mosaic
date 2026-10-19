@@ -1,7 +1,8 @@
 import HomeSignedOut from "@/components/home/homesignedout";
 import { preloadableLazy } from "@/lib/preloadable-lazy";
 import { buildSeoMeta } from "@/lib/seo";
-import { getDashboardStats } from "@/server/stats";
+import type { DashboardAnalytics } from "@/lib/site-analytics";
+import { getDashboardAnalytics, getDashboardStats } from "@/server/stats";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
@@ -21,13 +22,18 @@ export const Route = createFileRoute("/_public/")({
   loader: async ({ context }) => {
     const { userId } = context.auth;
     if (!userId) {
-      return { userId, dashboardStats: null };
+      return { userId, dashboardStats: null, dashboardAnalytics: null };
     }
+    // Not awaited: traffic streams in after the page, so a slow Analytics
+    // Engine query never holds up the dashboard.
+    const dashboardAnalytics = getDashboardAnalytics().catch(
+      (): DashboardAnalytics => ({ available: false }),
+    );
     const [dashboardStats] = await Promise.all([
       getDashboardStats(),
       dashboardPage.preload(),
     ]);
-    return { userId, dashboardStats };
+    return { userId, dashboardStats, dashboardAnalytics };
   },
   component: HomePage,
   head: () =>
@@ -39,7 +45,7 @@ export const Route = createFileRoute("/_public/")({
 });
 
 function HomePage() {
-  const { userId, dashboardStats } = Route.useLoaderData();
+  const { userId, dashboardStats, dashboardAnalytics } = Route.useLoaderData();
   const { auth } = Route.useRouteContext();
   // Never show cached stats to someone else after a sign-out or switch.
   const stats = userId === auth.userId ? dashboardStats : null;
@@ -47,8 +53,11 @@ function HomePage() {
   // Its own boundary, so hydrating the header doesn't wait for this chunk.
   return (
     <Suspense>
-      {stats ? (
-        <dashboardPage.Component dashboardStats={stats} />
+      {stats && dashboardAnalytics ? (
+        <dashboardPage.Component
+          dashboardStats={stats}
+          dashboardAnalytics={dashboardAnalytics}
+        />
       ) : (
         <HomeSignedOut />
       )}

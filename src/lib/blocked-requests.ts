@@ -1,8 +1,8 @@
 /**
- * Analytics, ad, session-replay, and chat-widget hosts that screenshots don't
- * load. They never change how a page looks in an OG image (chat bubbles only
- * add clutter), but their beacons and long polls keep the network busy,
- * which delays `networkidle2`.
+ * Analytics, ad, session-replay, chat-widget, and cookie-consent hosts that
+ * screenshots don't load. They never change how a page looks in an OG image
+ * (chat bubbles and consent banners only cover it), and their beacons and
+ * long polls keep the network busy, which delays `networkidle2`.
  */
 const BLOCKED_HOSTS = [
   "google-analytics.com",
@@ -33,6 +33,29 @@ const BLOCKED_HOSTS = [
   "client.crisp.chat",
   "embed.tawk.to",
   "static.zdassets.com",
+  // Consent management platforms. Their banners cover the hero, so a page
+  // whose consent script never loads is screenshotted without one.
+  // `consent-banners.ts` hides the ones a site serves from its own host.
+  "cookielaw.org",
+  "onetrust.com",
+  "cookiepro.com",
+  "cookiebot.com",
+  "iubenda.com",
+  "osano.com",
+  "termly.io",
+  "usercentrics.eu",
+  "privacy-center.org",
+  "privacy-mgmt.com",
+  "quantcast.com",
+  "trustarc.com",
+  "cookie-script.com",
+  "cookiehub.eu",
+  "consentmanager.net",
+  "axept.io",
+  "ketchcdn.com",
+  "cookieyes.com",
+  "cookieinformation.com",
+  "civiccomputing.com",
 ];
 
 const escapeRegExp = (value: string) =>

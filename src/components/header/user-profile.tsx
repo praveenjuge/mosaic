@@ -1,23 +1,18 @@
+import { useClerkAppearance } from "@/components/auth/use-clerk-appearance";
 import { UserButton } from "@clerk/tanstack-react-start";
-import { dark } from "@clerk/ui/themes";
-import { useTheme } from "next-themes";
 
 export default function UserProfile() {
-  const { resolvedTheme } = useTheme();
+  const appearance = useClerkAppearance();
 
   return (
     <UserButton
       appearance={{
-        theme: resolvedTheme === "dark" ? dark : undefined,
+        ...appearance,
         elements: {
           userButtonPopoverFooter: "!hidden",
         },
       }}
-      userProfileProps={{
-        appearance: {
-          theme: resolvedTheme === "dark" ? dark : undefined,
-        },
-      }}
+      userProfileProps={{ appearance }}
     />
   );
 }

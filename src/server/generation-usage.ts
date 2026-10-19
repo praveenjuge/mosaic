@@ -4,7 +4,8 @@ import type { D1Queryable } from "@/lib/db";
 type GenerationKind = "production" | "demo";
 type BudgetScope = `${GenerationKind}-${"client" | "global"}`;
 
-function utcDayStart(timestamp = Date.now()): number {
+/** Start of the UTC day budgets count in, in milliseconds. */
+export function utcDayStart(timestamp = Date.now()): number {
   const date = new Date(timestamp);
   return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
 }

@@ -1,4 +1,5 @@
 import { AuthPageShell } from "@/components/auth/auth-page-shell";
+import { useClerkAppearance } from "@/components/auth/use-clerk-appearance";
 import {
   sanitizeRedirectPath,
   signInPath,
@@ -23,10 +24,12 @@ export const Route = createFileRoute("/_auth/sign-up/$")({
 function SignUpPage() {
   const { redirect_url } = Route.useSearch();
   const redirectUrl = sanitizeRedirectPath(redirect_url);
+  const appearance = useClerkAppearance();
 
   return (
     <AuthPageShell>
       <SignUp
+        appearance={appearance}
         path={signUpPath}
         routing="path"
         signInUrl={signInPath}

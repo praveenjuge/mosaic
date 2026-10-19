@@ -68,7 +68,7 @@ export function WebsiteActions({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="size-8">
+          <Button variant="ghost" size="icon-sm">
             <Ellipsis className="stroke-2" />
             <span className="sr-only">Actions</span>
           </Button>
@@ -126,7 +126,8 @@ export function WebsiteActions({
               This deletes all {imageCount}{" "}
               {imageCount === 1 ? "image" : "images"} for this website now. Each
               page gets a new screenshot the next time it is requested, so that
-              first request is slower. Images are shared, so this also resets
+              first request is slower. To refresh a single page instead, use
+              Regenerate on its image. Images are shared, so this also resets
               them for any other Mosaic user who saved this hostname.
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -153,13 +154,6 @@ export function WebsiteActions({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <img
-              src="/illustrations/delete-website-720w-cb3544ac.webp"
-              alt="Delete Website"
-              width={300}
-              height={200}
-              className="w-full"
-            />
             <AlertDialogTitle>Delete Website {currentUrl}?</AlertDialogTitle>
             <AlertDialogDescription>
               This removes the website from your account. Shared cached images

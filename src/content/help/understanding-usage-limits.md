@@ -16,7 +16,12 @@ screenshots count toward limits, not cached images.
   service.
 
 Days reset at midnight UTC. The client is whoever requests the image, usually a
-social platform's crawler. Limits are the same on every plan.
+social platform's crawler. Screenshots you start from the dashboard (adding a
+website, regenerating a page) count against your account instead, also 50 per
+day. Limits are the same on every plan.
+
+The dashboard's **Today's usage** panel shows how many of your screenshots and
+of the service's daily screenshots are used so far.
 
 ## When a limit is reached
 

@@ -6,7 +6,7 @@ publishedAt: "2025-06-20T12:00:00.000Z"
 ---
 
 1. Sign in and find the site in the **Websites** table on your dashboard.
-2. Click the **⋯** button in the **Actions** column, then **Delete**.
+2. Click the **⋯** button at the end of its row, then **Delete**.
 3. Click **Yes, Delete** to confirm.
 
 This removes the site from your account only. Cached images aren't deleted.

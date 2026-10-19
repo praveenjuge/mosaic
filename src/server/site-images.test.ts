@@ -2,7 +2,11 @@ import type { D1Queryable } from "@/lib/db";
 import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { beforeEach, describe, expect, test } from "bun:test";
 import { join } from "node:path";
-import { deleteSiteImages, deleteStoredImages } from "./site-images";
+import {
+  deleteSiteImages,
+  deleteStoredImages,
+  expirePageImage,
+} from "./site-images";
 
 /** Just enough of D1 over bun:sqlite to run these helpers' SQL. */
 function createD1(sqlite: Database): D1Queryable {
@@ -101,6 +105,74 @@ describe("deleteSiteImages", () => {
   test("returns no images for a website without any", async () => {
     const siteId = addSite("user_a", "example.com");
     expect(await deleteSiteImages(db, siteId, "user_a")).toEqual([]);
+  });
+});
+
+function expiresAt(pageUrl: string): number | undefined {
+  return sqlite
+    .query<{ expires_at: number }, [string]>(
+      "SELECT expires_at FROM global_images WHERE page_url = ?",
+    )
+    .get(pageUrl)?.expires_at;
+}
+
+describe("expirePageImage", () => {
+  function addFreshImage(hostname: string, path: string) {
+    sqlite.run(
+      `INSERT INTO global_images
+         (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
+       VALUES (?, ?, ?, 3, 0, 9999999999999)`,
+      [`https://${hostname}${path}`, hostname, `global/${hostname}${path}`],
+    );
+  }
+
+  test("expires one page on the user's website and nothing else", async () => {
+    addSite("user_a", "example.com");
+    addFreshImage("example.com", "/");
+    addFreshImage("example.com", "/pricing");
+
+    expect(
+      await expirePageImage(
+        db,
+        "https://example.com/pricing",
+        "example.com",
+        "user_a",
+      ),
+    ).toBe(true);
+    expect(expiresAt("https://example.com/pricing")).toBe(0);
+    expect(expiresAt("https://example.com/")).toBe(9999999999999);
+  });
+
+  test("refuses a page on a website the user hasn't saved", async () => {
+    addSite("user_a", "example.com");
+    addFreshImage("other.com", "/");
+
+    expect(
+      await expirePageImage(db, "https://other.com/", "other.com", "user_a"),
+    ).toBe(false);
+    expect(expiresAt("https://other.com/")).toBe(9999999999999);
+  });
+
+  test("refuses a page whose hostname doesn't match", async () => {
+    addSite("user_a", "example.com");
+    addFreshImage("other.com", "/");
+
+    expect(
+      await expirePageImage(db, "https://other.com/", "example.com", "user_a"),
+    ).toBe(false);
+    expect(expiresAt("https://other.com/")).toBe(9999999999999);
+  });
+
+  test("reports a page without an image", async () => {
+    addSite("user_a", "example.com");
+    expect(
+      await expirePageImage(
+        db,
+        "https://example.com/",
+        "example.com",
+        "user_a",
+      ),
+    ).toBe(false);
   });
 });
 

@@ -6,16 +6,14 @@ interface LogoProps {
 
 function Logo({ colorMode = "default" }: LogoProps) {
   return (
-    <Link to="/" aria-label="Mosaic Logo">
+    <Link to="/" aria-label="Mosaic Logo" className="inline-flex shrink-0">
       <svg
         width="100"
         height="18"
         viewBox="0 0 110 20"
         fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
-        className={
-          colorMode === "default" ? "text-emerald-900 dark:text-emerald-50" : ""
-        }
+        className={colorMode === "default" ? "text-foreground" : ""}
       >
         <path
           d="M0.198975 2C0.198975 0.895431 1.09441 0 2.19897 0L6.19897 0V20H2.19897C1.09441 20 0.198975 19.1046 0.198975 18L0.198975 2Z"

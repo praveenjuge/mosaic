@@ -1,4 +1,5 @@
 import { blockedRequestPatterns } from "@/lib/blocked-requests";
+import { CONSENT_BANNER_CSS } from "@/lib/consent-banners";
 import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
 import { env } from "cloudflare:workers";
@@ -18,9 +19,10 @@ import { env } from "cloudflare:workers";
  * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
  * `networkidle0` to avoid stalling on sites with persistent connections
  * (analytics beacons, websockets, long-polling), and blocks known tracker
- * hosts and media so the network goes idle sooner. `bestAttempt` takes the
- * screenshot anyway when a page never goes idle within the timeout, instead
- * of failing after it. The timeout leaves room for the page fetch inside the
+ * hosts and media so the network goes idle sooner. Consent platforms are
+ * blocked too, and `CONSENT_BANNER_CSS` hides self-hosted banners.
+ * `bestAttempt` takes the screenshot anyway when a page never goes idle
+ * within the timeout, instead of failing after it. The timeout leaves room for the page fetch inside the
  * ~30 s a background refresh gets after its response.
  *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
@@ -36,7 +38,10 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     bestAttempt: true,
     rejectRequestPattern: blockedRequestPatterns(url),
     rejectResourceTypes: ["media"],
-    addStyleTag: [{ content: "* { overflow: hidden; }" }],
+    addStyleTag: [
+      { content: "* { overflow: hidden; }" },
+      { content: CONSENT_BANNER_CSS },
+    ],
     screenshotOptions: { type: "jpeg", quality: 80 },
   };
 

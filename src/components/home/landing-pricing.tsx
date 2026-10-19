@@ -1,17 +1,15 @@
 import PricingTable from "@/components/pricing-table";
+import { SectionHeading } from "./section-heading";
 
 export default function LandingPricing() {
   return (
-    <section className="mx-auto max-w-6xl py-10">
-      <div className="mb-8 md:text-center">
-        <h2 className="mb-4 text-4xl font-semibold tracking-tighter">
-          Simple, Transparent Pricing
-        </h2>
-        <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-          Start for free and upgrade when you need more. No hidden fees, cancel
-          anytime.
-        </p>
-      </div>
+    <section id="pricing" className="flex flex-col gap-12">
+      <SectionHeading
+        align="center"
+        eyebrow="Pricing"
+        title="Simple, transparent pricing"
+        description="Start for free and upgrade when you need more. No hidden fees, cancel anytime."
+      />
       <PricingTable />
     </section>
   );

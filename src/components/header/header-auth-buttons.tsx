@@ -2,21 +2,14 @@ import { SignInLink, SignUpLink } from "@/components/auth/auth-links";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function AuthLoadingSkeleton() {
-  return (
-    <div className="flex items-center gap-2">
-      <Skeleton className="h-8 w-16" />
-      <Skeleton className="size-8 rounded-full" />
-    </div>
-  );
+  return <Skeleton className="size-8 rounded-full" />;
 }
 
 export function SignedOutButtons() {
   return (
-    <div className="flex items-center gap-2">
-      <SignInLink variant="outline" size="sm">
-        Log In
-      </SignInLink>
-      <SignUpLink size="sm">Sign Up</SignUpLink>
+    <div className="flex items-center gap-1.5">
+      <SignInLink variant="ghost">Log In</SignInLink>
+      <SignUpLink>Get started</SignUpLink>
     </div>
   );
 }

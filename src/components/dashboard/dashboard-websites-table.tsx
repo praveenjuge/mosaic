@@ -1,5 +1,6 @@
-import { CopyButton } from "@/components/copy-button";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { RelativeTime } from "@/components/relative-time";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -10,99 +11,97 @@ import {
 } from "@/components/ui/table";
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
-import { WebsiteInfoModal } from "@/components/websites/WebsiteInfoModal";
-import { publicEnv } from "@/lib/env";
+import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-dialog";
+import type { DashboardAnalytics } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
-import { buildUseEndpointUrl } from "@/lib/url";
+import { formatNumber } from "@/lib/utils";
+import { Code } from "lucide-react";
+import { useState } from "react";
+import { totalRequests } from "./dashboard-overview";
+import { DashboardPanel } from "./dashboard-panel";
 
-function formatRelativeTime(timestamp: number): string {
-  const diffMs = Math.max(0, Date.now() - timestamp);
-  const diffMinutes = Math.floor(diffMs / 60_000);
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
-
-  if (diffMinutes < 1) return "just now";
-  if (diffMinutes < 60) return `${diffMinutes}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return new Date(timestamp).toLocaleDateString("en-US", {
-    timeZone: "Asia/Kolkata",
-  });
-}
-
-function UsageUrl({ targetUrl }: { targetUrl: string }) {
-  const usageUrl = buildUseEndpointUrl(publicEnv.siteUrl, targetUrl);
-  return (
-    <div className="flex items-center gap-1">
-      <a
-        href={usageUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="max-w-lg truncate font-medium"
-      >
-        {decodeURIComponent(usageUrl)}
-      </a>
-      <CopyButton text={usageUrl} />
-    </div>
-  );
+function Requests({
+  analytics,
+  hostname,
+}: {
+  analytics: DashboardAnalytics | null;
+  hostname: string;
+}) {
+  if (!analytics) return <Skeleton className="h-4 w-10" />;
+  if (!analytics.available)
+    return <span className="text-muted-foreground">—</span>;
+  const counts = analytics.sites[hostname];
+  return <>{formatNumber(counts ? totalRequests(counts) : 0)}</>;
 }
 
 function WebsiteRow({
   website,
+  analytics,
 }: {
   website: DashboardStats["websites"][number];
+  analytics: DashboardAnalytics | null;
 }) {
+  const [codeOpen, setCodeOpen] = useState(false);
   const fullUrl = `https://${website.url_base}`;
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
 
   return (
-    <TableRow className="items-center">
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <img
-            src={faviconUrl}
-            alt="Favicon"
-            className="size-3.5"
-            width={14}
-            height={14}
-          />
+    <TableRow>
+      <TableCell className="pl-5">
+        <div className="flex items-center gap-3">
+          <span className="bg-muted grid size-7 shrink-0 place-items-center rounded-md border">
+            <img
+              src={faviconUrl}
+              alt=""
+              className="size-3.5"
+              width={14}
+              height={14}
+            />
+          </span>
           <a
             href={fullUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary max-w-xs truncate font-medium"
+            className="max-w-40 truncate font-medium hover:underline sm:max-w-xs"
           >
             {website.url_base}
           </a>
         </div>
       </TableCell>
-      <TableCell>
-        <UsageUrl targetUrl={fullUrl} />
+      <TableCell className="hidden tabular-nums sm:table-cell">
+        {formatNumber(website.image_count)}
       </TableCell>
-      <TableCell className="py-0">
-        {website.image_count === 0 ? (
-          <WebsiteInfoModal websiteUrl={website.url_base} />
-        ) : (
-          website.image_count
-        )}
+      <TableCell className="hidden tabular-nums md:table-cell">
+        <Requests analytics={analytics} hostname={website.url_base} />
       </TableCell>
-      <TableCell className="py-0">
+      <TableCell className="text-muted-foreground hidden lg:table-cell">
         {website.last_generated_at ? (
-          <span
-            className="text-muted-foreground text-sm"
-            title={new Date(website.last_generated_at).toLocaleString()}
-          >
-            {formatRelativeTime(website.last_generated_at)}
-          </span>
+          <RelativeTime timestamp={website.last_generated_at} />
         ) : (
-          <span className="text-muted-foreground text-sm">Never</span>
+          "Never"
         )}
       </TableCell>
-      <TableCell className="flex items-center p-0.5">
-        <WebsiteActions
-          websiteId={website.id}
-          currentUrl={website.url_base}
-          imageCount={website.image_count}
+      <TableCell className="pr-3">
+        <div className="flex items-center justify-end gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCodeOpen(true)}
+            aria-label="Get code"
+          >
+            <Code />
+            <span className="hidden sm:inline">Get code</span>
+          </Button>
+          <WebsiteActions
+            websiteId={website.id}
+            currentUrl={website.url_base}
+            imageCount={website.image_count}
+          />
+        </div>
+        <LazyWebsiteCodeDialog
+          hostname={website.url_base}
+          open={codeOpen}
+          onOpenChange={setCodeOpen}
         />
       </TableCell>
     </TableRow>
@@ -111,33 +110,43 @@ function WebsiteRow({
 
 export function DashboardWebsitesTable({
   dashboardStats,
+  analytics,
 }: {
   dashboardStats: DashboardStats;
+  analytics: DashboardAnalytics | null;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <CardHeader className="flex items-center justify-between p-0">
-        <CardTitle>Websites</CardTitle>
-        <AddWebsite />
-      </CardHeader>
-      <Card className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Website</TableHead>
-              <TableHead>URL</TableHead>
-              <TableHead>OG Images</TableHead>
-              <TableHead>Last Generated</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dashboardStats.websites.map((website) => (
-              <WebsiteRow key={website.id} website={website} />
-            ))}
-          </TableBody>
-        </Table>
-      </Card>
-    </div>
+    <DashboardPanel
+      title="Websites"
+      description="Pages on these hostnames get OG images from Mosaic."
+      action={<AddWebsite />}
+    >
+      <Table>
+        <TableHeader>
+          <TableRow className="hover:bg-transparent">
+            <TableHead className="pl-5">Website</TableHead>
+            <TableHead className="hidden sm:table-cell">OG images</TableHead>
+            <TableHead className="hidden md:table-cell">
+              Requests (7d)
+            </TableHead>
+            <TableHead className="hidden lg:table-cell">
+              Last generated
+            </TableHead>
+            <TableHead className="pr-5 text-right">
+              <span className="sr-only">Actions</span>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {dashboardStats.websites.map((website) => (
+            <WebsiteRow
+              key={website.id}
+              website={website}
+              analytics={analytics}
+            />
+          ))}
+        </TableBody>
+      </Table>
+    </DashboardPanel>
   );
 }

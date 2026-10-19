@@ -11,7 +11,7 @@ publishedAt: "2024-09-16T17:21:41.891Z"
    `yourblog.bearblog.dev`.
 2. Sign in to Mosaic and add that hostname as a website. If your blog uses a
    custom domain, add the custom domain instead.
-3. Copy the OG image link from the **URL** column of the Websites table.
+3. Click **Get code** on the website's row and choose **Copy image link**.
 
 ## Add an OG image to a post
 

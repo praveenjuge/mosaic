@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowDown, ArrowRight, CornerDownRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Globe, LoaderCircle } from "lucide-react";
 import { useState, type FormEvent } from "react";
 
 interface DemoData {
@@ -21,64 +22,85 @@ type Preview = { title: string; description: string; url: string };
 type PreviewImage = { src: string; srcSet?: string };
 
 interface PreviewCardProps {
+  label: string;
   isLoading: boolean;
   image: PreviewImage;
   alt: string;
   preview: Preview;
   /** The first card's image is the largest paint on phones. */
   priority?: boolean;
+  highlight?: boolean;
 }
 
+/** A link preview as a social feed shows it: image, title, and domain. */
 function PreviewCard({
+  label,
   isLoading,
   image,
   alt,
   preview,
   priority = false,
+  highlight = false,
 }: PreviewCardProps) {
   return (
-    <div className="flex w-full flex-col overflow-hidden rounded-lg">
-      <div className="relative h-52 w-full">
-        {isLoading ? (
-          <Skeleton className="bg-primary size-full rounded-none" />
-        ) : (
-          <>
-            <Skeleton className="absolute inset-0 size-full rounded-none" />
-            <img
-              src={image.src}
-              srcSet={image.srcSet}
-              // Cards sit side by side from `md` up, in a `max-w-4xl` row.
-              sizes={
-                image.srcSet
-                  ? "(min-width: 768px) 420px, calc(100vw - 32px)"
-                  : undefined
-              }
-              fetchPriority={priority ? "high" : undefined}
-              decoding="async"
-              alt={alt}
-              width={600}
-              height={250}
-              className="relative size-full object-cover"
-            />
-          </>
-        )}
+    <figure className="flex w-full min-w-0 flex-col gap-2.5">
+      <figcaption className="text-muted-foreground flex items-center gap-2 px-1 text-xs font-medium">
+        <span
+          aria-hidden="true"
+          className={cn(
+            "size-1.5 rounded-full",
+            highlight ? "bg-brand" : "bg-muted-foreground/40",
+          )}
+        />
+        {label}
+      </figcaption>
+      <div className="bg-card overflow-hidden rounded-xl border shadow-xs">
+        <div className="relative aspect-[1.91/1] w-full border-b">
+          {isLoading ? (
+            <Skeleton className="size-full rounded-none" />
+          ) : (
+            <>
+              <Skeleton className="absolute inset-0 size-full rounded-none" />
+              <img
+                src={image.src}
+                srcSet={image.srcSet}
+                // Cards sit side by side from `md` up, in a `max-w-5xl` row.
+                sizes={
+                  image.srcSet
+                    ? "(min-width: 768px) 480px, calc(100vw - 32px)"
+                    : undefined
+                }
+                fetchPriority={priority ? "high" : undefined}
+                decoding="async"
+                alt={alt}
+                width={600}
+                height={314}
+                className="relative size-full object-cover object-top"
+              />
+            </>
+          )}
+        </div>
+        <div className="flex flex-col gap-1 p-4 text-xs">
+          {isLoading ? (
+            <>
+              <Skeleton className="h-3 w-1/3" />
+              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-8 w-full" />
+            </>
+          ) : (
+            <>
+              <p className="text-muted-foreground truncate">{preview.url}</p>
+              <p className="line-clamp-1 text-sm font-medium">
+                {preview.title}
+              </p>
+              <p className="text-muted-foreground line-clamp-2">
+                {preview.description}
+              </p>
+            </>
+          )}
+        </div>
       </div>
-      <div className="bg-muted flex flex-col gap-0.5 p-3.5">
-        {isLoading ? (
-          <>
-            <Skeleton className="h-4 w-3/4" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-4 w-1/2" />
-          </>
-        ) : (
-          <>
-            <p className="line-clamp-1 font-semibold">{preview.title}</p>
-            <p className="line-clamp-2">{preview.description}</p>
-            <p className="text-muted-foreground">{preview.url}</p>
-          </>
-        )}
-      </div>
-    </div>
+    </figure>
   );
 }
 
@@ -150,57 +172,59 @@ export default function OGImageDemo() {
   const mosaicImage = mosaicUrl ? { src: mosaicUrl } : fallbackMosaicImage;
 
   return (
-    <div className="relative mx-auto max-w-4xl pb-16">
+    <div className="bg-surface mx-auto w-full max-w-5xl rounded-3xl border p-3 shadow-sm md:p-5">
       <form
         onSubmit={handleSubmit}
-        className="mb-6 flex flex-col gap-4 md:flex-row"
+        className="bg-background flex flex-col gap-2 rounded-2xl border p-2 shadow-xs sm:flex-row"
       >
-        <Input
-          value={inputUrl}
-          onChange={(e) => setInputUrl(e.target.value)}
-          placeholder="Enter your website URL"
-          aria-label="Enter URL for OG image preview"
-          className="bg-background dark:bg-background"
-        />
-        <Button
-          type="submit"
-          variant="outline"
-          disabled={isLoading}
-          className="bg-background dark:bg-background"
-        >
-          Get a Live Demo of your new OG Image
-          <CornerDownRight className="size-4" />
+        <div className="flex flex-1 items-center gap-2 pl-2">
+          <Globe
+            className="text-muted-foreground size-4 shrink-0"
+            aria-hidden="true"
+          />
+          <Input
+            value={inputUrl}
+            onChange={(e) => setInputUrl(e.target.value)}
+            placeholder="yourwebsite.com"
+            aria-label="Enter URL for OG image preview"
+            className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+          />
+        </div>
+        <Button type="submit" disabled={isLoading} size="lg" className="h-9">
+          {isLoading ? (
+            <LoaderCircle className="animate-spin" aria-hidden="true" />
+          ) : null}
+          Generate preview
         </Button>
       </form>
       {error ? (
-        <p className="text-destructive mb-6 text-center" role="alert">
+        <p className="text-destructive mt-4 text-center text-sm" role="alert">
           {error}
         </p>
       ) : demoData?.notice ? (
-        <p className="text-muted-foreground mb-6 text-center" role="status">
+        <p
+          className="text-muted-foreground mt-4 text-center text-sm"
+          role="status"
+        >
           {demoData.notice}
         </p>
       ) : null}
-      <div className="flex flex-col items-center gap-4 text-xs md:flex-row">
+      <div className="mt-5 grid gap-5 md:grid-cols-2 md:gap-6">
         <PreviewCard
+          label="Your current og:image"
           isLoading={isLoading}
           image={originalImage}
           alt="Original Open Graph Image"
           preview={preview}
           priority
         />
-        <span
-          className="text-muted-foreground pointer-events-none grid size-7 shrink-0 place-items-center select-none"
-          aria-hidden="true"
-        >
-          <ArrowRight className="hidden size-7 md:block" />
-          <ArrowDown className="size-7 md:hidden" />
-        </span>
         <PreviewCard
+          label="With Mosaic"
           isLoading={isLoading}
           image={mosaicImage}
           alt="Mosaic Open Graph Image"
           preview={preview}
+          highlight
         />
       </div>
     </div>

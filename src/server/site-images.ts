@@ -44,3 +44,28 @@ export function deleteStoredImages(
     () => undefined,
   );
 }
+
+/**
+ * Mark one page's image expired, so the next screenshot replaces it while
+ * the old one keeps serving. Only touches pages on one of the user's
+ * websites. Returns whether the page had an image to expire.
+ */
+export async function expirePageImage(
+  db: D1Queryable,
+  pageUrl: string,
+  hostname: string,
+  userId: string,
+): Promise<boolean> {
+  const expired = await db
+    .prepare(
+      `UPDATE global_images SET expires_at = 0
+       WHERE page_url = ? AND hostname = ?
+         AND EXISTS (
+           SELECT 1 FROM sites WHERE user_id = ? AND url_base = ?
+         )
+       RETURNING page_url`,
+    )
+    .bind(pageUrl, hostname, userId, hostname)
+    .first();
+  return Boolean(expired);
+}

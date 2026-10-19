@@ -8,14 +8,14 @@ publishedAt: "2024-07-18T14:25:38.421Z"
 1. Sign in at [mosaic.praveenjuge.com](https://mosaic.praveenjuge.com).
 2. Click **Add Website** (or use the welcome form on your first visit).
 3. Enter your site, like `example.com`, and submit.
-4. Copy the link in the **URL** column. Until the site has an image, **Add to
-   Your Website** also shows ready-made meta tags.
+4. Click **Get code** on the website's row, type a page's path, and copy the
+   ready-made meta tags.
 
 Mosaic saves only the hostname, with no verification step. `example.com`,
 `www.example.com`, and `blog.example.com` are separate, so add each one you use.
 
-Put the link in your `og:image` tag. For other pages, change the encoded page
-URL:
+The tags point `og:image` (and `twitter:image`) at the page's Mosaic link. For
+other pages, change the encoded page URL:
 
 ```html
 <meta
@@ -25,4 +25,5 @@ URL:
 ```
 
 The first request takes the screenshot. It refreshes automatically after 30
-days.
+days. To check that a preview works, see
+[Test Your Social Previews](/help/test-your-social-previews).

@@ -24,4 +24,17 @@ export type DashboardStats = {
     last_generated_at: number | null;
   }>;
   latest_screenshots: DashboardImageSummary[];
+  budget: DashboardBudget;
+};
+
+/** New screenshots used today against a daily limit. */
+export type BudgetUsage = { used: number; limit: number };
+
+export type DashboardBudget = {
+  /** Every `/use` screenshot across the service. */
+  service: BudgetUsage;
+  /** Screenshots the user started: adding sites and regenerating pages. */
+  user: BudgetUsage;
+  /** When both reset (the next UTC midnight), in milliseconds. */
+  resets_at: number;
 };
