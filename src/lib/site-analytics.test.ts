@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   analyticsQueries,
   analyticsWindowStart,
+  pageUrlWithoutQuery,
   summarizeAnalytics,
 } from "./site-analytics";
 
@@ -83,6 +84,23 @@ describe("analyticsWindowStart", () => {
   });
 });
 
+describe("pageUrlWithoutQuery", () => {
+  test("matches the canonical page once the query is gone", () => {
+    expect(pageUrlWithoutQuery("https://example.com/?utm_source=x")).toBe(
+      "https://example.com",
+    );
+    expect(pageUrlWithoutQuery("https://example.com/a/?token=secret")).toBe(
+      "https://example.com/a",
+    );
+    expect(pageUrlWithoutQuery("https://example.com/a#top")).toBe(
+      "https://example.com/a",
+    );
+    expect(pageUrlWithoutQuery("https://example.com/p%3Fq?x=1")).toBe(
+      "https://example.com/p%3Fq",
+    );
+  });
+});
+
 describe("summarizeAnalytics", () => {
   const now = Date.UTC(2026, 9, 19, 12);
 
@@ -160,6 +178,26 @@ describe("summarizeAnalytics", () => {
       page_url: "https://example.com/11",
       requests: 11,
     });
+  });
+
+  test("drops query strings and fragments from top pages", () => {
+    const summary = summarizeAnalytics(
+      [],
+      [
+        { page_url: "https://example.com/reset?token=secret", requests: 3 },
+        { page_url: "https://example.com/reset", requests: 2 },
+        { page_url: "https://example.com/docs#intro", requests: 4 },
+        { page_url: "https://example.com/?utm_source=x", requests: 1 },
+        { page_url: "https://example.com", requests: 1 },
+      ],
+      now,
+    );
+    if (!summary.available) throw new Error("expected analytics");
+    expect(summary.top_pages).toEqual([
+      { page_url: "https://example.com/reset", requests: 5 },
+      { page_url: "https://example.com/docs", requests: 4 },
+      { page_url: "https://example.com", requests: 2 },
+    ]);
   });
 
   test("answers zeros without traffic", () => {

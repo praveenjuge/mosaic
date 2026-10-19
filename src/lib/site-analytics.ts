@@ -10,6 +10,7 @@
  */
 
 import type { GenerationOutcome } from "@/lib/analytics";
+import { stripTrailingSlashes } from "@/lib/url";
 
 export const ANALYTICS_DAYS = 7;
 export const TOP_PAGES_LIMIT = 8;
@@ -40,6 +41,17 @@ export type AnalyticsRow = {
 };
 
 export type TopPageRow = { page_url: string; requests: number };
+
+/**
+ * A page URL without its query string or fragment. Anyone can save any
+ * hostname and see its top pages, so tokens or personal data in a query
+ * string must never reach the dashboard. Trailing slashes go too, so the
+ * result matches `canonicalPage()` (`https://example.com/?a=1` becomes
+ * `https://example.com`).
+ */
+export function pageUrlWithoutQuery(pageUrl: string): string {
+  return stripTrailingSlashes(pageUrl.split(/[?#]/, 1)[0]);
+}
 
 export type TrafficCounts = {
   /** Served an existing image, fresh or stale. */
@@ -182,13 +194,28 @@ export function summarizeAnalytics(
     days: [...days].map(([day, counts]) => ({ day, ...counts })),
     totals,
     sites: Object.fromEntries(sites),
-    // Each batch of hostnames answers its own top pages.
-    top_pages: topPages
-      .map((page) => ({
-        page_url: page.page_url,
-        requests: Number(page.requests) || 0,
-      }))
-      .sort((a, b) => b.requests - a.requests)
-      .slice(0, TOP_PAGES_LIMIT),
+    top_pages: mergeTopPages(topPages),
   };
+}
+
+/**
+ * Each batch of hostnames answers its own top pages, and events recorded
+ * before `recordGenerationEvent` dropped query strings still carry them, so
+ * rows that share a page once the query is gone are added together. Those
+ * older rows were ranked per query before the SQL `LIMIT`, so until they
+ * leave the window a page split across many queries can count low.
+ */
+function mergeTopPages(topPages: TopPageRow[]): TopPageRow[] {
+  const pages = new Map<string, number>();
+  for (const page of topPages) {
+    const pageUrl = pageUrlWithoutQuery(page.page_url);
+    pages.set(
+      pageUrl,
+      (pages.get(pageUrl) ?? 0) + (Number(page.requests) || 0),
+    );
+  }
+  return [...pages]
+    .map(([page_url, requests]) => ({ page_url, requests }))
+    .sort((a, b) => b.requests - a.requests)
+    .slice(0, TOP_PAGES_LIMIT);
 }
