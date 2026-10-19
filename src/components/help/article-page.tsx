@@ -38,6 +38,7 @@ export function ArticlePage({
           </p>
         ) : null}
       </header>
+      {/* Build-time HTML from the repo's own Markdown (content-plugin.ts), never request input. nosemgrep */}
       <div
         className="prose prose-neutral dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight prose-h2:mt-10 prose-h2:text-xl prose-a:underline-offset-4 prose-code:before:content-none prose-code:after:content-none prose-pre:rounded-xl prose-pre:border mt-8 max-w-none [&_pre]:overflow-x-auto"
         dangerouslySetInnerHTML={{ __html: html }}

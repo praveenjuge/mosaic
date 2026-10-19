@@ -11,10 +11,26 @@ const SERIES: Array<{
   key: keyof TrafficCounts;
   label: string;
   color: string;
+  count: (counts: TrafficCounts) => number;
 }> = [
-  { key: "cached", label: "From cache", color: "bg-chart-1" },
-  { key: "generated", label: "New screenshots", color: "bg-chart-2" },
-  { key: "fallback", label: "Fallbacks", color: "bg-chart-3" },
+  {
+    key: "cached",
+    label: "From cache",
+    color: "bg-chart-1",
+    count: (counts) => counts.cached,
+  },
+  {
+    key: "generated",
+    label: "New screenshots",
+    color: "bg-chart-2",
+    count: (counts) => counts.generated,
+  },
+  {
+    key: "fallback",
+    label: "Fallbacks",
+    color: "bg-chart-3",
+    count: (counts) => counts.fallback,
+  },
 ];
 
 function dayLabel(day: string, style: "short" | "long") {
@@ -29,7 +45,7 @@ function dayLabel(day: string, style: "short" | "long") {
 function Legend({ totals }: { totals: TrafficCounts }) {
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-1.5 px-5 text-xs">
-      {SERIES.map(({ key, label, color }) => (
+      {SERIES.map(({ key, label, color, count }) => (
         <li key={key} className="flex items-center gap-1.5">
           <span
             className={cn("size-2 rounded-[2px]", color)}
@@ -37,7 +53,7 @@ function Legend({ totals }: { totals: TrafficCounts }) {
           />
           <span className="text-muted-foreground">{label}</span>
           <span className="font-medium tabular-nums">
-            {formatNumber(totals[key])}
+            {formatNumber(count(totals))}
           </span>
         </li>
       ))}
@@ -49,7 +65,7 @@ type Day = Extract<DashboardAnalytics, { available: true }>["days"][number];
 
 function Bar({ day, max }: { day: Day; max: number }) {
   const total = totalRequests(day);
-  const segments = SERIES.filter(({ key }) => day[key] > 0);
+  const segments = SERIES.filter(({ count }) => count(day) > 0);
 
   return (
     <li className="group relative flex h-full flex-1 flex-col items-center justify-end">
@@ -66,7 +82,7 @@ function Bar({ day, max }: { day: Day; max: number }) {
             className="flex w-full max-w-10 flex-col-reverse gap-0.5"
             style={{ height: `${Math.max((total / max) * 100, 2)}%` }}
           >
-            {segments.map(({ key, color }, index) => (
+            {segments.map(({ key, color, count }, index) => (
               <span
                 key={key}
                 className={cn(
@@ -74,7 +90,7 @@ function Bar({ day, max }: { day: Day; max: number }) {
                   color,
                   index === segments.length - 1 && "rounded-t-[4px]",
                 )}
-                style={{ flexGrow: day[key] }}
+                style={{ flexGrow: count(day) }}
               />
             ))}
           </span>
@@ -85,14 +101,14 @@ function Bar({ day, max }: { day: Day; max: number }) {
         className="bg-popover text-popover-foreground pointer-events-none absolute bottom-full z-10 mb-2 hidden w-44 rounded-lg border p-2.5 text-xs shadow-md group-focus-within:block group-hover:block"
       >
         <p className="mb-1.5 font-medium">{dayLabel(day.day, "long")}</p>
-        {SERIES.map(({ key, label, color }) => (
+        {SERIES.map(({ key, label, color, count }) => (
           <p key={key} className="flex items-center gap-1.5 py-0.5">
             <span
               className={cn("size-2 rounded-[2px]", color)}
               aria-hidden="true"
             />
             <span className="text-muted-foreground flex-1">{label}</span>
-            <span className="tabular-nums">{formatNumber(day[key])}</span>
+            <span className="tabular-nums">{formatNumber(count(day))}</span>
           </p>
         ))}
       </div>
@@ -157,8 +173,8 @@ function TrafficChart({
             {analytics.days.map((day) => (
               <tr key={day.day}>
                 <th scope="row">{dayLabel(day.day, "long")}</th>
-                {SERIES.map(({ key }) => (
-                  <td key={key}>{day[key]}</td>
+                {SERIES.map(({ key, count }) => (
+                  <td key={key}>{count(day)}</td>
                 ))}
               </tr>
             ))}

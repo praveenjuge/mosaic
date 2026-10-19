@@ -184,7 +184,9 @@ export default function OGImageDemo() {
           />
           <Input
             value={inputUrl}
-            onChange={(e) => setInputUrl(e.target.value)}
+            onChange={(e) => {
+              setInputUrl(e.target.value);
+            }}
             placeholder="yourwebsite.com"
             aria-label="Enter URL for OG image preview"
             className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"

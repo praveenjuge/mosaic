@@ -74,7 +74,11 @@ export function WebsiteActions({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="min-w-48">
-          <DropdownMenuItem onClick={() => setEditOpen(true)}>
+          <DropdownMenuItem
+            onClick={() => {
+              setEditOpen(true);
+            }}
+          >
             <Pencil className="stroke-2" />
             Edit
           </DropdownMenuItem>
@@ -89,7 +93,9 @@ export function WebsiteActions({
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
-            onClick={() => setDeleteOpen(true)}
+            onClick={() => {
+              setDeleteOpen(true);
+            }}
           >
             <Trash className="stroke-2" />
             Delete

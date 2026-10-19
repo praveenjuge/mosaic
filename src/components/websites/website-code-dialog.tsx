@@ -24,14 +24,23 @@ function CopyTextButton({ text, label }: { text: string; label: string }) {
 
   const show = (next: CopyState) => {
     setState(next);
-    setTimeout(() => setState("idle"), next === "failed" ? 4000 : 2000);
+    setTimeout(
+      () => {
+        setState("idle");
+      },
+      next === "failed" ? 4000 : 2000,
+    );
   };
 
   const copy = () => {
     // The browser can refuse clipboard access; the text stays selectable.
     navigator.clipboard.writeText(text).then(
-      () => show("copied"),
-      () => show("failed"),
+      () => {
+        show("copied");
+      },
+      () => {
+        show("failed");
+      },
     );
   };
 
@@ -102,7 +111,9 @@ export function WebsiteCodeDialog({
               <Input
                 id={pathId}
                 value={path.replace(/^\/+/, "")}
-                onChange={(event) => setPath(event.target.value)}
+                onChange={(event) => {
+                  setPath(event.target.value);
+                }}
                 placeholder="blog/my-post"
                 className="h-full rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
               />
