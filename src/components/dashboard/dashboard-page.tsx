@@ -69,10 +69,9 @@ function ReportAnalytics({
   websites: string;
   onResolve: (retained: RetainedAnalytics) => void;
 }) {
-  useEffect(
-    () => onResolve({ key: websites, analytics }),
-    [analytics, websites, onResolve],
-  );
+  useEffect(() => {
+    onResolve({ key: websites, analytics });
+  }, [analytics, websites, onResolve]);
   return null;
 }
 

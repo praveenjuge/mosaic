@@ -5,7 +5,7 @@ import { useState } from "react";
 const steps = [
   "Add your website's hostname below.",
   "Mosaic screenshots your home page right away.",
-  "Copy the meta tags into your pages' <head>.",
+  "Paste the meta tags it gives you into your pages.",
 ];
 
 export default function WelcomeEmptyState() {

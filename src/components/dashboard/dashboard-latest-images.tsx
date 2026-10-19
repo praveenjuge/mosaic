@@ -57,7 +57,9 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            onClick={() => setCodeOpen(true)}
+            onClick={() => {
+              setCodeOpen(true);
+            }}
             aria-label={`Get code for ${cleanDisplayUrl(item.page_url)}`}
             title="Get code"
           >
@@ -67,11 +69,11 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
             variant="ghost"
             size="icon-sm"
             disabled={isRegenerating}
-            onClick={() =>
+            onClick={() => {
               startRegenerating(async () => {
                 await regeneratePage(item.page_url);
-              })
-            }
+              });
+            }}
             aria-label={`Regenerate ${cleanDisplayUrl(item.page_url)}`}
             title="Regenerate"
           >

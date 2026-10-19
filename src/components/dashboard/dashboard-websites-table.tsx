@@ -12,7 +12,7 @@ import {
 import AddWebsite from "@/components/websites/AddWebsite";
 import { WebsiteActions } from "@/components/websites/WebsiteActions";
 import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-dialog";
-import type { DashboardAnalytics } from "@/lib/site-analytics";
+import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import { Code } from "lucide-react";
@@ -20,26 +20,35 @@ import { useState } from "react";
 import { totalRequests } from "./dashboard-overview";
 import { DashboardPanel } from "./dashboard-panel";
 
+/** Each website's counts by hostname, once the analytics have loaded. */
+type SiteCounts = Map<string, TrafficCounts> | "loading" | "unavailable";
+
+function siteCounts(analytics: DashboardAnalytics | null): SiteCounts {
+  if (!analytics) return "loading";
+  if (!analytics.available) return "unavailable";
+  return new Map(Object.entries(analytics.sites));
+}
+
 function Requests({
-  analytics,
+  sites,
   hostname,
 }: {
-  analytics: DashboardAnalytics | null;
+  sites: SiteCounts;
   hostname: string;
 }) {
-  if (!analytics) return <Skeleton className="h-4 w-10" />;
-  if (!analytics.available)
+  if (sites === "loading") return <Skeleton className="h-4 w-10" />;
+  if (sites === "unavailable")
     return <span className="text-muted-foreground">—</span>;
-  const counts = analytics.sites[hostname];
+  const counts = sites.get(hostname);
   return <>{formatNumber(counts ? totalRequests(counts) : 0)}</>;
 }
 
 function WebsiteRow({
   website,
-  analytics,
+  sites,
 }: {
   website: DashboardStats["websites"][number];
-  analytics: DashboardAnalytics | null;
+  sites: SiteCounts;
 }) {
   const [codeOpen, setCodeOpen] = useState(false);
   const fullUrl = `https://${website.url_base}`;
@@ -72,7 +81,7 @@ function WebsiteRow({
         {formatNumber(website.image_count)}
       </TableCell>
       <TableCell className="hidden tabular-nums md:table-cell">
-        <Requests analytics={analytics} hostname={website.url_base} />
+        <Requests sites={sites} hostname={website.url_base} />
       </TableCell>
       <TableCell className="text-muted-foreground hidden lg:table-cell">
         {website.last_generated_at ? (
@@ -86,7 +95,9 @@ function WebsiteRow({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setCodeOpen(true)}
+            onClick={() => {
+              setCodeOpen(true);
+            }}
             aria-label="Get code"
           >
             <Code />
@@ -115,6 +126,7 @@ export function DashboardWebsitesTable({
   dashboardStats: DashboardStats;
   analytics: DashboardAnalytics | null;
 }) {
+  const sites = siteCounts(analytics);
   return (
     <DashboardPanel
       title="Websites"
@@ -139,11 +151,7 @@ export function DashboardWebsitesTable({
         </TableHeader>
         <TableBody>
           {dashboardStats.websites.map((website) => (
-            <WebsiteRow
-              key={website.id}
-              website={website}
-              analytics={analytics}
-            />
+            <WebsiteRow key={website.id} website={website} sites={sites} />
           ))}
         </TableBody>
       </Table>

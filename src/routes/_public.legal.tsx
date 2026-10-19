@@ -57,6 +57,7 @@ function LegalPage() {
               Last updated {formatUpdated(document.updatedAt)}
             </p>
           </div>
+          {/* Build-time HTML from the repo's own Markdown (content-plugin.ts), never request input. nosemgrep */}
           <div
             className="prose prose-sm prose-neutral dark:prose-invert prose-headings:font-semibold prose-headings:tracking-tight max-w-none [&_pre]:overflow-x-auto"
             dangerouslySetInnerHTML={{ __html: document.contentHtml }}

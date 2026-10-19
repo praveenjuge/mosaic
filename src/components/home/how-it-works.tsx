@@ -33,9 +33,9 @@ function MetaTagSnippet() {
       </figcaption>
       <pre className="p-5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap">
         <code>
-          <span className="text-white/50">{"<head>"}</span>
+          <span className="text-white/50">&lt;head&gt;</span>
           {"\n  "}
-          <span className="text-white/50">{"<"}</span>
+          <span className="text-white/50">&lt;</span>
           <span className="text-emerald-300">meta</span>
           {"\n    "}
           <span className="text-sky-300">property</span>
@@ -46,9 +46,9 @@ function MetaTagSnippet() {
           <span className="text-white/50">=</span>
           <span className="break-all text-amber-200">&quot;{useUrl}&quot;</span>
           {"\n  "}
-          <span className="text-white/50">{"/>"}</span>
+          <span className="text-white/50">/&gt;</span>
           {"\n"}
-          <span className="text-white/50">{"</head>"}</span>
+          <span className="text-white/50">&lt;/head&gt;</span>
         </code>
       </pre>
     </figure>
