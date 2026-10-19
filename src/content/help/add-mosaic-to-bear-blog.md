@@ -52,6 +52,7 @@ the home page URL, every post shares the home page image.
 
 ## After a theme change
 
-There is no refresh button. Mosaic takes a new screenshot on the first request
-after an image is 30 days old. Social platforms also cache previews, so use
+Mosaic takes a new screenshot on the first request after an image is 30 days
+old. To update them sooner, choose **Regenerate images** from the website's
+**…** menu on the dashboard. Social platforms also cache previews, so use
 their card debugger or re-scrape tool to make them fetch the image again.

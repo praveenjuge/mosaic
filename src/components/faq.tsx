@@ -46,7 +46,7 @@ const FAQS: FAQ[] = [
   {
     question: "How often are OG images refreshed?",
     answer:
-      "Images are cached by canonical page URL and refresh automatically after 30 days. No manual refresh is required.",
+      "Images are cached by canonical page URL and refresh automatically after 30 days. To update them sooner, choose Regenerate images from a website's menu on the dashboard: every page gets a new screenshot on its next visit.",
   },
   {
     question: "What image format is used?",

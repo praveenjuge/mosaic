@@ -78,6 +78,13 @@ test("signed-in users can add, edit, and delete a website", async ({
   row = page.getByRole("row").filter({ hasText: renamed });
   await expect(row).toBeVisible();
 
+  // The made-up hostname has no images, so there is nothing to regenerate.
+  await row.getByRole("button", { name: "Actions" }).click();
+  await expect(
+    page.getByRole("menuitem", { name: "Regenerate images" }),
+  ).toBeDisabled();
+  await page.keyboard.press("Escape");
+
   await row.getByRole("button", { name: "Actions" }).click();
   await page.getByRole("menuitem", { name: "Delete" }).click();
   await page

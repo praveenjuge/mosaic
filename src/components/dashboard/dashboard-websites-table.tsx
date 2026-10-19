@@ -99,7 +99,11 @@ function WebsiteRow({
         )}
       </TableCell>
       <TableCell className="flex items-center p-0.5">
-        <WebsiteActions websiteId={website.id} currentUrl={website.url_base} />
+        <WebsiteActions
+          websiteId={website.id}
+          currentUrl={website.url_base}
+          imageCount={website.image_count}
+        />
       </TableCell>
     </TableRow>
   );

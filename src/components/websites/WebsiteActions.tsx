@@ -22,7 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis, Pencil, Trash } from "lucide-react";
+import { Ellipsis, Pencil, RefreshCcw, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
@@ -30,18 +30,31 @@ import { WebsiteUrlForm } from "./website-url-form";
 interface WebsiteActionsProps {
   websiteId: number;
   currentUrl: string;
+  imageCount: number;
 }
 
-export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
+export function WebsiteActions({
+  websiteId,
+  currentUrl,
+  imageCount,
+}: WebsiteActionsProps) {
   const [editOpen, setEditOpen] = useState(false);
+  const [regenerateOpen, setRegenerateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [isSaving, startSaving] = useTransition();
+  const [isRegenerating, startRegenerating] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
-  const { removeWebsite, saveWebsite } = useWebsiteActions();
+  const { regenerateWebsite, removeWebsite, saveWebsite } = useWebsiteActions();
 
   const handleEditSubmit = (url: string) => {
     startSaving(async () => {
       if (await saveWebsite({ siteId: websiteId, url })) setEditOpen(false);
+    });
+  };
+
+  const handleRegenerateAction = () => {
+    startRegenerating(async () => {
+      if (await regenerateWebsite(websiteId)) setRegenerateOpen(false);
     });
   };
 
@@ -60,10 +73,19 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
             <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-40">
+        <DropdownMenuContent className="min-w-48">
           <DropdownMenuItem onClick={() => setEditOpen(true)}>
             <Pencil className="stroke-2" />
             Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={imageCount === 0}
+            onClick={() => {
+              setRegenerateOpen(true);
+            }}
+          >
+            <RefreshCcw className="stroke-2" />
+            Regenerate images
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
@@ -92,6 +114,40 @@ export function WebsiteActions({ websiteId, currentUrl }: WebsiteActionsProps) {
           />
         </DialogContent>
       </Dialog>
+
+      {/* Regenerate Alert Dialog */}
+      <AlertDialog open={regenerateOpen} onOpenChange={setRegenerateOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Regenerate images for {currentUrl}?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This deletes all {imageCount}{" "}
+              {imageCount === 1 ? "image" : "images"} for this website now. Each
+              page gets a new screenshot the next time it is requested, so that
+              first request is slower. Images are shared, so this also resets
+              them for any other Mosaic user who saved this hostname.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isRegenerating}>
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={handleRegenerateAction}
+              disabled={isRegenerating}
+            >
+              {isRegenerating ? (
+                <LoadingSpinner size={18} />
+              ) : (
+                "Yes, Regenerate"
+              )}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Alert Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
