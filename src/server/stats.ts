@@ -20,6 +20,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { env } from "cloudflare:workers";
 import { utcDayStart } from "./generation-usage";
 import { authMiddleware } from "./middleware";
+import { latestSiteImages } from "./site-images";
 
 /** Fetch dashboard stats for the signed-in user. */
 export const getDashboardStats = createServerFn()
@@ -33,7 +34,8 @@ export const getDashboardStats = createServerFn()
     // stale fallback until a regeneration replaces the same page record.
     // Both queries read images through the (hostname, generated_at) index.
     // Counting `g.hostname` (never NULL for a joined row) lets the first use
-    // it as a covering index; the second still sorts the user's images.
+    // it as a covering index; `latestSiteImages` still sorts the user's
+    // images.
     const dayStart = utcDayStart();
     const [websitesResult, latestImagesResult, budgetResult] =
       await session.batch([
@@ -51,20 +53,7 @@ export const getDashboardStats = createServerFn()
            ORDER BY s.created_at DESC`,
           )
           .bind(context.userId),
-        session
-          .prepare(
-            `SELECT g.key,
-                  g.page_url,
-                  g.size_in_bytes,
-                  g.generated_at,
-                  g.hostname AS url_base
-           FROM global_images g
-           JOIN sites s ON s.url_base = g.hostname
-           WHERE s.user_id = ?
-           ORDER BY g.generated_at DESC
-           LIMIT 12`,
-          )
-          .bind(context.userId),
+        latestSiteImages(session, context.userId),
         // Today's screenshots across the service and those the user started
         // (adding sites, regenerating pages). Older windows count as zero.
         session
