@@ -68,6 +68,18 @@ test("signed-in users can add, edit, and delete a website", async ({
   ).toBeVisible();
   await page.keyboard.press("Escape");
 
+  // Get code builds meta tags for any page of the website.
+  await row.getByRole("button", { name: "Get code" }).click();
+  const codeDialog = page.getByRole("dialog");
+  await codeDialog.getByLabel("Page").fill("blog/post");
+  await expect(
+    codeDialog
+      .getByText(`use?url=https%3A%2F%2F${hostname}%2Fblog%2Fpost`)
+      .first(),
+  ).toBeVisible();
+  await expect(codeDialog.getByText("twitter:image")).toBeVisible();
+  await page.keyboard.press("Escape");
+
   // Editing renames the row.
   const renamed = `renamed-${hostname}`;
   await row.getByRole("button", { name: "Actions" }).click();

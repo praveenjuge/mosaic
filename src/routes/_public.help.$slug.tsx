@@ -29,11 +29,8 @@ function HelpArticlePage() {
   return (
     <ArticlePage
       title={help.title}
-      subtitle={
-        <span className="bg-muted text-muted-foreground inline-block rounded px-2 py-1 text-xs font-medium">
-          {help.category}
-        </span>
-      }
+      eyebrow={help.category}
+      description={help.description}
       html={help.contentHtml}
     />
   );

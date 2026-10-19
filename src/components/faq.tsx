@@ -4,13 +4,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 interface FAQ {
   question: string;
@@ -46,7 +39,7 @@ const FAQS: FAQ[] = [
   {
     question: "How often are OG images refreshed?",
     answer:
-      "Images are cached by canonical page URL and refresh automatically after 30 days. To update them sooner, choose Regenerate images from a website's menu on the dashboard: every page gets a new screenshot on its next visit.",
+      "Images are cached by canonical page URL and refresh automatically after 30 days. To update one sooner, choose Regenerate next to its image on the dashboard, or Regenerate images in a website's menu to reset every page.",
   },
   {
     question: "What image format is used?",
@@ -55,36 +48,19 @@ const FAQS: FAQ[] = [
   },
 ];
 
-interface FAQProps {
-  showCard?: boolean;
-  className?: string;
-}
-
-export default function FAQ({ showCard = true, className = "" }: FAQProps) {
-  const content = (
-    <Accordion type="single" collapsible className={className}>
+export default function FAQ() {
+  return (
+    <Accordion type="single" collapsible className="border-t">
       {FAQS.map((faq, index) => (
         <AccordionItem key={index} value={`item-${index}`}>
-          <AccordionTrigger>{faq.question}</AccordionTrigger>
-          <AccordionContent>{faq.answer}</AccordionContent>
+          <AccordionTrigger className="py-4 text-base">
+            {faq.question}
+          </AccordionTrigger>
+          <AccordionContent className="text-muted-foreground leading-relaxed">
+            {faq.answer}
+          </AccordionContent>
         </AccordionItem>
       ))}
     </Accordion>
-  );
-
-  if (!showCard) {
-    return content;
-  }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Frequently Asked Questions</CardTitle>
-        <CardDescription>
-          Common questions about OG Images and our service.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>{content}</CardContent>
-    </Card>
   );
 }

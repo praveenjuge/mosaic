@@ -31,3 +31,27 @@ export function formatDate(timestamp: number): string {
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-US");
 }
+
+/** "just now", "5m ago", "3h ago", "12d ago", then a date. */
+export function formatRelativeTime(
+  timestamp: number,
+  now = Date.now(),
+): string {
+  const diffMinutes = Math.floor(Math.max(0, now - timestamp) / 60_000);
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMinutes < 1) return "just now";
+  if (diffMinutes < 60) return `${diffMinutes}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 30) return `${diffDays}d ago`;
+  return new Date(timestamp).toLocaleDateString("en-US", {
+    timeZone: "Asia/Kolkata",
+  });
+}
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}

@@ -4,7 +4,7 @@
 
 How it works:
 
-- The first request for a page screenshots it, stores the image, and returns a 307 redirect to it. Later requests redirect to the cached image, and images regenerate automatically after 30 days. Signed-in users can also regenerate all of a website's images from the dashboard; each page is screenshotted again on its next request.
+- The first request for a page screenshots it, stores the image, and returns a 307 redirect to it. Later requests redirect to the cached image, and images regenerate automatically after 30 days. Signed-in users can also regenerate one page's image right away, or reset all of a website's images so each page is screenshotted again on its next request.
 - Only hostnames added in the dashboard work, matched exactly (`www.example.com` and `example.com` are different). Other hostnames get a 404 error.
 - If a screenshot fails or a limit is reached, Mosaic redirects to the previous image or a placeholder.
 - Mosaic is not an image editor or a general-purpose screenshot API.
@@ -14,8 +14,9 @@ How it works:
 - [Add Your Website to Mosaic](https://mosaic.praveenjuge.com/help/add-your-website-to-mosaic): Add your site in the dashboard and copy its OG image link.
 - [Use the Mosaic API](https://mosaic.praveenjuge.com/help/use-the-mosaic-api): The `/use` endpoint and its responses.
 - [Understanding Usage Limits](https://mosaic.praveenjuge.com/help/understanding-usage-limits): Daily screenshot limits and what happens when one is reached.
-- [How Mosaic Refreshes OG Images](https://mosaic.praveenjuge.com/help/refresh-og-images-for-a-website): Automatic 30-day refresh.
+- [How Mosaic Refreshes OG Images](https://mosaic.praveenjuge.com/help/refresh-og-images-for-a-website): Automatic 30-day refresh, and regenerating a page or website now.
 - [Delete a Website from Mosaic](https://mosaic.praveenjuge.com/help/delete-a-website-from-mosaic): Remove a website and what happens to its images.
+- [Test Your Social Previews](https://mosaic.praveenjuge.com/help/test-your-social-previews): The meta tags to add, image size and format, and how to check a preview on each platform.
 - [Help center](https://mosaic.praveenjuge.com/help): All help articles and guides.
 
 ## Framework guides

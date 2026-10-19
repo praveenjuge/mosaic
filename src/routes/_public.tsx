@@ -9,12 +9,8 @@ export const Route = createFileRoute("/_public")({
 function PublicLayout() {
   return (
     <>
-      <div
-        className="bg-primary pointer-events-none fixed -top-48 -right-48 size-96 opacity-15 blur-3xl select-none"
-        aria-hidden="true"
-      />
       <Header />
-      <main className="mx-auto min-h-screen w-full max-w-6xl flex-1 space-y-10 px-4 pt-10 pb-6 md:px-10">
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 pt-12 pb-20 md:px-6 md:pt-16">
         <Outlet />
       </main>
       <Footer />

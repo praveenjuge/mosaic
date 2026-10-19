@@ -207,13 +207,13 @@ export async function loadContent(
   const guides = guideFiles.map(({ entry }) => entry);
 
   const helpCategories: HelpCategory[] = [];
-  for (const { category, slug, title } of helpArticles) {
+  for (const { category, slug, title, description } of helpArticles) {
     let group = helpCategories.find((entry) => entry.category === category);
     if (!group) {
       group = { category, entries: [] };
       helpCategories.push(group);
     }
-    group.entries.push({ slug, title });
+    group.entries.push({ slug, title, description });
   }
 
   const markdownPages: Record<string, string> = {

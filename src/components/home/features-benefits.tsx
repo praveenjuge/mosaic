@@ -1,14 +1,13 @@
 import {
   type LucideIcon,
-  ChartBarIncreasing,
+  ChartNoAxesColumn,
+  Code,
   Globe,
-  Heart,
-  Image,
-  ImagePlus,
-  LayoutDashboard,
-  Puzzle,
   RefreshCcw,
+  ScanEye,
+  ShieldCheck,
 } from "lucide-react";
+import { SectionHeading } from "./section-heading";
 
 interface Feature {
   icon: LucideIcon;
@@ -18,61 +17,61 @@ interface Feature {
 
 const FEATURES: Feature[] = [
   {
-    icon: ImagePlus,
-    title: "Automated OG Images",
-    description: "Create Images automatically as soon as you publish.",
+    icon: ScanEye,
+    title: "Automatic screenshots",
+    description:
+      "The first request for a page captures it at 1560×819. No templates to design or keep in sync.",
   },
   {
-    icon: Puzzle,
-    title: "Seamless Integrations",
-    description: "Add a single script tag to get started in minutes.",
-  },
-  {
-    icon: Heart,
-    title: "Beautiful Social Previews",
-    description: "Engage your audience with eye-catching OG images.",
-  },
-  {
-    icon: Image,
-    title: "Retina-Ready Quality",
-    description: "Crisp images delivered in high resolution.",
-  },
-  {
-    icon: Globe,
-    title: "Global CDN",
-    description: "Fast delivery from edge locations worldwide.",
-  },
-  {
-    icon: LayoutDashboard,
-    title: "Simple Dashboard",
-    description: "Manage multiple websites in one place.",
+    icon: Code,
+    title: "One meta tag",
+    description:
+      "Point og:image at your Mosaic link. It works with any framework, CMS, or static site.",
   },
   {
     icon: RefreshCcw,
-    title: "Refresh OG Images",
-    description: "Update previews whenever your design changes.",
+    title: "Always current",
+    description:
+      "Images refresh every 30 days on their own, or regenerate any page from the dashboard.",
   },
   {
-    icon: ChartBarIncreasing,
-    title: "Advanced Analytics",
-    description: "Track impressions and usage on every image.",
+    icon: ShieldCheck,
+    title: "Clean captures",
+    description:
+      "Cookie banners, chat widgets, and trackers are left out, so the shot shows your page.",
+  },
+  {
+    icon: Globe,
+    title: "Served from the edge",
+    description:
+      "Images are cached on Cloudflare's network, close to every crawler that asks for them.",
+  },
+  {
+    icon: ChartNoAxesColumn,
+    title: "Usage at a glance",
+    description:
+      "See image requests, cache hits, and your most-shared pages for every website.",
   },
 ];
 
 export default function FeaturesBenefits() {
   return (
-    <section className="mx-auto max-w-4xl py-8 md:text-center">
-      <h2 className="mb-10 text-4xl font-semibold tracking-tight">
-        Features & Benefits
-      </h2>
-      <ul className="grid gap-8 md:grid-cols-4 md:gap-12">
+    <section id="features" className="flex flex-col gap-12">
+      <SectionHeading
+        eyebrow="Features"
+        title="Everything a link preview needs"
+        description="Your website already looks great. Mosaic turns it into the image people see when your links are shared."
+      />
+      <ul className="bg-border grid gap-px overflow-hidden rounded-2xl border sm:grid-cols-2 lg:grid-cols-3">
         {FEATURES.map(({ icon: Icon, title, description }) => (
-          <li key={title} className="flex gap-2 md:flex-col md:items-center">
-            <Icon className="text-primary size-6 shrink-0" />
-            <div className="space-y-1">
-              <h3 className="font-medium">{title}</h3>
-              <p className="text-muted-foreground text-sm">{description}</p>
-            </div>
+          <li key={title} className="bg-background flex flex-col gap-3 p-6">
+            <span className="bg-muted text-foreground grid size-9 place-items-center rounded-lg border">
+              <Icon className="size-4" aria-hidden="true" />
+            </span>
+            <h3 className="font-medium">{title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {description}
+            </p>
           </li>
         ))}
       </ul>

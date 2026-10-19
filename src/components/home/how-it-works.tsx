@@ -1,47 +1,89 @@
-import { cn } from "@/lib/utils";
+import { publicEnv } from "@/lib/env";
+import { buildUseEndpointUrl } from "@/lib/url";
+import { SectionHeading } from "./section-heading";
 
 const steps = [
   {
-    title: "Add your Website",
-    description: "Connect your site to Mosaic with just a few clicks",
+    title: "Add your website",
+    description:
+      "Sign up and enter your domain. Mosaic captures your home page right away.",
   },
   {
-    title: "We Generate an OG Image",
+    title: "Add one meta tag",
     description:
-      "Mosaic automatically grabs a beautiful OG Image of your website's hero section",
+      "Point og:image at your Mosaic link. Each page's address goes in the url parameter.",
   },
   {
-    title: "Add the OG Image to Your Site",
+    title: "Share your links",
     description:
-      "Insert the generated link in your meta tags for instant previews",
+      "When a link is shared, its crawler gets a screenshot of that page, cached and refreshed for you.",
   },
 ];
 
+const useUrl = buildUseEndpointUrl(publicEnv.siteUrl, "https://example.com");
+
+function MetaTagSnippet() {
+  return (
+    <figure className="bg-primary text-primary-foreground overflow-hidden rounded-2xl border shadow-sm dark:bg-black/40 dark:text-white">
+      <figcaption className="flex items-center gap-1.5 border-b border-white/10 px-4 py-3">
+        <span className="size-2.5 rounded-full bg-white/20" />
+        <span className="size-2.5 rounded-full bg-white/20" />
+        <span className="size-2.5 rounded-full bg-white/20" />
+        <span className="ml-2 font-mono text-xs text-white/50">index.html</span>
+      </figcaption>
+      <pre className="p-5 font-mono text-[13px] leading-relaxed whitespace-pre-wrap">
+        <code>
+          <span className="text-white/50">{"<head>"}</span>
+          {"\n  "}
+          <span className="text-white/50">{"<"}</span>
+          <span className="text-emerald-300">meta</span>
+          {"\n    "}
+          <span className="text-sky-300">property</span>
+          <span className="text-white/50">=</span>
+          <span className="text-amber-200">&quot;og:image&quot;</span>
+          {"\n    "}
+          <span className="text-sky-300">content</span>
+          <span className="text-white/50">=</span>
+          <span className="break-all text-amber-200">&quot;{useUrl}&quot;</span>
+          {"\n  "}
+          <span className="text-white/50">{"/>"}</span>
+          {"\n"}
+          <span className="text-white/50">{"</head>"}</span>
+        </code>
+      </pre>
+    </figure>
+  );
+}
+
 export default function HowItWorks() {
   return (
-    <section className="mx-auto my-26 max-w-4xl md:text-center">
-      <h2 className="mb-10 text-4xl font-semibold tracking-tight">
-        How it Works
-      </h2>
-      <div className="grid gap-8 md:grid-cols-3">
-        {steps.map((step, index) => (
-          <div key={step.title} className="flex flex-col gap-3 md:items-center">
-            <span
-              className={cn(
-                "bg-primary text-background grid size-10 place-items-center rounded-full font-medium",
-              )}
-            >
-              {index + 1}
-            </span>
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold">{step.title}</h3>
-              <p className="text-muted-foreground text-sm">
-                {step.description}
-              </p>
-            </div>
-          </div>
-        ))}
+    <section
+      id="how-it-works"
+      className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16"
+    >
+      <div className="flex flex-col gap-10">
+        <SectionHeading
+          eyebrow="How it works"
+          title="Live in about a minute"
+          description="No build step, no image templates, no API keys."
+        />
+        <ol className="flex flex-col gap-6">
+          {steps.map((step, index) => (
+            <li key={step.title} className="flex gap-4">
+              <span className="text-muted-foreground grid size-7 shrink-0 place-items-center rounded-full border font-mono text-xs">
+                {index + 1}
+              </span>
+              <div className="space-y-1">
+                <h3 className="font-medium">{step.title}</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
+      <MetaTagSnippet />
     </section>
   );
 }

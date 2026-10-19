@@ -2,16 +2,22 @@ import { getDb } from "@/lib/db";
 import {
   forgetPageAnswers,
   forgetUnregisteredHostname,
+  regeneratePageImage as takePageImage,
   warmSiteImage,
+  type PageRegeneration,
 } from "@/lib/og-generation";
 import type { Site } from "@/lib/types";
-import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
+import { canonicalPage, parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
-import { deleteSiteImages, deleteStoredImages } from "./site-images";
+import {
+  deleteSiteImages,
+  deleteStoredImages,
+  expirePageImage,
+} from "./site-images";
 
 function normalizePublicHostname(value: string): string {
   const websiteUrl = parseWebsiteUrl(value);
@@ -141,4 +147,33 @@ export const regenerateSiteImages = createServerFn({ method: "POST" })
       }),
     );
     return { deleted: images.length };
+  });
+
+const regeneratePageImageSchema = z.object({
+  pageUrl: z.string().trim().min(1).max(2048),
+});
+
+/**
+ * Take a new screenshot of one page of the user's websites now. The old
+ * image keeps serving until the new one is stored, and stays if the
+ * screenshot is skipped (the next `/use` request then refreshes it). Counts
+ * against the user's daily budget, like warming a new site.
+ */
+export const regeneratePageImage = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(regeneratePageImageSchema)
+  .handler(async ({ context, data }): Promise<PageRegeneration> => {
+    const url = parseWebsiteUrl(data.pageUrl);
+    const error = validateOutboundUrl(url);
+    if (error) throw new Error(error);
+    const { pageUrl, hostname } = canonicalPage(url);
+
+    const expired = await expirePageImage(
+      getDb(),
+      pageUrl,
+      hostname,
+      context.userId,
+    );
+    if (!expired) throw new Error("Image not found.");
+    return takePageImage(pageUrl, getRequest().url, `user:${context.userId}`);
   });

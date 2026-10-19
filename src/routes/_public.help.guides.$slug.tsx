@@ -28,7 +28,8 @@ function GuidePage() {
   return (
     <ArticlePage
       title={guide.title}
-      subtitle={guide.description}
+      eyebrow="Framework guides"
+      description={guide.description}
       html={guide.contentHtml}
       footer="Add your hostname in the dashboard first, then test the page with a card validator like metatags.io."
     />

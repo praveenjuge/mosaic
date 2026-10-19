@@ -13,6 +13,15 @@ Mosaic refreshes images on its own.
 4. If a daily limit is reached or the capture fails, it keeps serving the
    previous image.
 
+## Regenerate one page now
+
+Changed a single page? On the dashboard, find its image under **Latest OG
+images** and click **Regenerate** (the circular arrow). Mosaic takes a new
+screenshot right away. The old image keeps serving until the new one is saved,
+and stays if the capture fails or a daily limit is reached; the page then
+refreshes on its next request. Each regeneration counts toward your daily
+screenshots.
+
 ## Regenerate a website's images now
 
 After a redesign you don't have to wait 30 days. On the dashboard, open the

@@ -52,9 +52,7 @@ test("live demo generates a screenshot", async ({ page }) => {
     )
     .toBe(true);
   await page.getByLabel("Enter URL for OG image preview").fill("example.com");
-  await page
-    .getByRole("button", { name: /Get a Live Demo of your new OG Image/ })
-    .click();
+  await page.getByRole("button", { name: "Generate preview" }).click();
 
   const image = page.getByAltText("Mosaic Open Graph Image");
   await expect(image).toHaveAttribute("src", /^data:image\/jpeg;base64,/, {

@@ -43,6 +43,16 @@
       "dataset": "mosaic_og_generations",
     },
   ],
+  // Reads OG_ANALYTICS back for the dashboard (src/server/stats.ts). The
+  // binding is scoped to this Worker's account, so it needs no API token. It
+  // only exists remotely; dev reads its own events instead (local-analytics).
+  "analytics": {
+    "binding": "ANALYTICS_SQL",
+    "remote": true,
+  },
+  "vars": {
+    "OG_ANALYTICS_DATASET": "mosaic_og_generations",
+  },
   "ratelimits": [
     {
       "name": "DEMO_RATE_LIMITER",
@@ -87,6 +97,12 @@
         "dataset": "mosaic_og_generations_preview",
       },
     ],
+    "analytics": {
+      "binding": "ANALYTICS_SQL",
+    },
+    "vars": {
+      "OG_ANALYTICS_DATASET": "mosaic_og_generations_preview",
+    },
     "ratelimits": [
       {
         "name": "DEMO_RATE_LIMITER",

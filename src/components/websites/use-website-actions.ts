@@ -2,6 +2,7 @@ import {
   addSite,
   deleteSite,
   editSite,
+  regeneratePageImage,
   regenerateSiteImages,
 } from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
@@ -68,7 +69,39 @@ export function useWebsiteActions() {
     }
   }
 
+  async function regeneratePage(pageUrl: string) {
+    try {
+      const result = await regeneratePageImage({ data: { pageUrl } });
+      router.invalidate();
+      switch (result.status) {
+        case "regenerated":
+          toast.success("New screenshot saved.");
+          return true;
+        case "budget_exhausted":
+          toast.error(
+            "Daily screenshot limit reached. The old image keeps serving until the page's next visit refreshes it.",
+          );
+          return false;
+        case "rate_limited":
+          toast.error("Too many screenshots in a minute. Try again shortly.");
+          return false;
+        case "locked":
+          toast.info("This page is already being captured. Check back soon.");
+          return false;
+        default:
+          toast.error(
+            "The screenshot failed. The old image stays until the page's next visit.",
+          );
+          return false;
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      return false;
+    }
+  }
+
   return {
+    regeneratePage,
     regenerateWebsite,
     removeWebsite,
     saveWebsite,
