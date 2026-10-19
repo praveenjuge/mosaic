@@ -17,6 +17,20 @@ export const TOP_PAGES_LIMIT = 8;
 const MAX_HOSTNAMES = 100;
 export const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * Midnight UTC on the chart's first day. The queries read from here, so the
+ * totals cover exactly the days the chart shows, not a rolling 7 × 24 hours.
+ */
+export function analyticsWindowStart(now = Date.now()): number {
+  const date = new Date(now);
+  const today = Date.UTC(
+    date.getUTCFullYear(),
+    date.getUTCMonth(),
+    date.getUTCDate(),
+  );
+  return today - (ANALYTICS_DAYS - 1) * DAY_MS;
+}
+
 /** One `(day, outcome, hostname)` group from the dataset. */
 export type AnalyticsRow = {
   day: string;
@@ -88,6 +102,7 @@ export type AnalyticsQueries = {
 export function analyticsQueries(
   dataset: string,
   hostnames: string[],
+  since: number,
 ): AnalyticsQueries[] | null {
   const table = datasetIdentifier(dataset);
   const unique = [...new Set(hostnames.filter(Boolean))];
@@ -96,12 +111,14 @@ export function analyticsQueries(
   const batches: AnalyticsQueries[] = [];
   for (let start = 0; start < unique.length; start += MAX_HOSTNAMES) {
     const batch = unique.slice(start, start + MAX_HOSTNAMES);
+    // `$1` is the window start; hostnames follow.
     const placeholders = (offset: number) =>
-      batch.map((_, index) => `$${offset + index + 1}`).join(", ");
-    const where = `timestamp >= NOW() - INTERVAL '${ANALYTICS_DAYS}' DAY
+      batch.map((_, index) => `$${offset + index + 2}`).join(", ");
+    const where = `timestamp >= $1
       AND index1 IN (${placeholders(0)})
       AND blob2 IN (${placeholders(batch.length)})`;
     const params = [
+      new Date(since).toISOString(),
       ...batch.map((hostname) => hostname.slice(0, INDEX_LENGTH)),
       ...batch,
     ];

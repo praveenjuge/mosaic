@@ -11,26 +11,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { guideLinks } from "@/lib/content";
 import { publicEnv } from "@/lib/env";
-import { buildMetaTags, pageUrlFor } from "@/lib/meta-tags";
+import { buildMetaTags, pageUrlFor, type PageProtocol } from "@/lib/meta-tags";
 import { buildUseEndpointUrl } from "@/lib/url";
 import { Link } from "@tanstack/react-router";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
 
+type CopyState = "idle" | "copied" | "failed";
+
 function CopyTextButton({ text, label }: { text: string; label: string }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<CopyState>("idle");
+
+  const show = (next: CopyState) => {
+    setState(next);
+    setTimeout(() => setState("idle"), next === "failed" ? 4000 : 2000);
+  };
 
   const copy = () => {
-    void navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
+    // The browser can refuse clipboard access; the text stays selectable.
+    navigator.clipboard.writeText(text).then(
+      () => show("copied"),
+      () => show("failed"),
+    );
   };
 
   return (
     <Button variant="outline" size="sm" onClick={copy}>
-      {copied ? <Check className="text-brand" /> : <Copy />}
-      {copied ? "Copied" : label}
+      {state === "copied" ? (
+        <Check className="text-brand" />
+      ) : state === "failed" ? (
+        <TriangleAlert className="text-destructive" />
+      ) : (
+        <Copy />
+      )}
+      <span aria-live="polite">
+        {state === "copied"
+          ? "Copied"
+          : state === "failed"
+            ? "Couldn't copy. Select the text instead."
+            : label}
+      </span>
     </Button>
   );
 }
@@ -43,23 +63,27 @@ function CopyTextButton({ text, label }: { text: string; label: string }) {
 export function WebsiteCodeDialog({
   hostname,
   initialPath = "",
+  protocol = "https:",
   open,
   onOpenChange,
 }: {
   hostname: string;
   initialPath?: string;
+  /** An image card's page can be `http:`, which has its own image. */
+  protocol?: PageProtocol;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const pathId = useId();
   const [path, setPath] = useState(initialPath);
-  const pageUrl = pageUrlFor(hostname, path);
+  const pageUrl = pageUrlFor(hostname, path, protocol);
   const tags = buildMetaTags(pageUrl);
   const imageUrl = buildUseEndpointUrl(publicEnv.siteUrl, pageUrl);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      {/* Short phone screens lock page scrolling, so the dialog scrolls. */}
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
         <DialogHeader>
           <DialogTitle>Add Mosaic to {hostname}</DialogTitle>
           <DialogDescription>
@@ -72,6 +96,7 @@ export function WebsiteCodeDialog({
             <Label htmlFor={pathId}>Page</Label>
             <div className="border-input focus-within:border-ring focus-within:ring-ring/50 dark:bg-input/30 flex h-8 items-center rounded-lg border text-sm focus-within:ring-3">
               <span className="text-muted-foreground border-r px-2.5 select-none">
+                {protocol === "http:" ? "http://" : ""}
                 {hostname}/
               </span>
               <Input

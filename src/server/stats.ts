@@ -7,9 +7,8 @@ import {
 import { getDb } from "@/lib/db";
 import { queryLocalEvents } from "@/lib/local-analytics";
 import {
-  ANALYTICS_DAYS,
   analyticsQueries,
-  DAY_MS,
+  analyticsWindowStart,
   summarizeAnalytics,
   TOP_PAGES_LIMIT,
   type AnalyticsRow,
@@ -88,7 +87,7 @@ export const getDashboardStats = createServerFn()
     );
   });
 
-/** Traffic for the given hostnames over the last `ANALYTICS_DAYS` days. */
+/** Traffic for the given hostnames over the chart's days. */
 /** Hostname batches (two queries each) queried at once. */
 const BATCH_CONCURRENCY = 5;
 
@@ -99,13 +98,17 @@ async function querySiteAnalytics(
     // Local writes never reach the deployed dataset, so dev reads its own.
     const { rows, topPages } = queryLocalEvents(
       hostnames,
-      Date.now() - ANALYTICS_DAYS * DAY_MS,
+      analyticsWindowStart(),
       TOP_PAGES_LIMIT,
     );
     return summarizeAnalytics(rows, topPages);
   }
 
-  const batches = analyticsQueries(env.OG_ANALYTICS_DATASET, hostnames);
+  const batches = analyticsQueries(
+    env.OG_ANALYTICS_DATASET,
+    hostnames,
+    analyticsWindowStart(),
+  );
   if (!batches) return summarizeAnalytics([], []);
   try {
     // A few batches at a time stays inside the SQL API's concurrency limit.

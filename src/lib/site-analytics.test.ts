@@ -1,23 +1,33 @@
 import { describe, expect, test } from "bun:test";
-import { analyticsQueries, summarizeAnalytics } from "./site-analytics";
+import {
+  analyticsQueries,
+  analyticsWindowStart,
+  summarizeAnalytics,
+} from "./site-analytics";
+
+const since = Date.UTC(2026, 9, 13);
+const sinceIso = "2026-10-13T00:00:00.000Z";
 
 describe("analyticsQueries", () => {
   test("passes hostnames as parameters, never in the SQL text", () => {
     const [queries] =
-      analyticsQueries("mosaic_og_generations", [
-        "example.com",
-        "www.example.org",
-      ]) ?? [];
+      analyticsQueries(
+        "mosaic_og_generations",
+        ["example.com", "www.example.org"],
+        since,
+      ) ?? [];
     expect(queries.breakdown.params).toEqual([
+      sinceIso,
       "example.com",
       "www.example.org",
       "example.com",
       "www.example.org",
     ]);
-    expect(queries.breakdown.query).toContain("index1 IN ($1, $2)");
+    expect(queries.breakdown.query).toContain("timestamp >= $1");
+    expect(queries.breakdown.query).toContain("index1 IN ($2, $3)");
     // A look-alike hostname sharing the 96-byte index must not match.
-    expect(queries.breakdown.query).toContain("blob2 IN ($3, $4)");
-    expect(queries.topPages.query).toContain("blob2 IN ($3, $4)");
+    expect(queries.breakdown.query).toContain("blob2 IN ($4, $5)");
+    expect(queries.topPages.query).toContain("blob2 IN ($4, $5)");
     expect(queries.breakdown.query).toContain(
       'FROM events.analyticsEngine."mosaic_og_generations"',
     );
@@ -28,8 +38,13 @@ describe("analyticsQueries", () => {
   test("matches long hostnames by their 96-byte index and full name", () => {
     const long = `${"a".repeat(90)}.example.com`;
     const [queries] =
-      analyticsQueries("mosaic_og_generations", [long, "[2001:db8::1]"]) ?? [];
+      analyticsQueries(
+        "mosaic_og_generations",
+        [long, "[2001:db8::1]"],
+        since,
+      ) ?? [];
     expect(queries.breakdown.params).toEqual([
+      sinceIso,
       long.slice(0, 96),
       "[2001:db8::1]",
       long,
@@ -42,17 +57,29 @@ describe("analyticsQueries", () => {
       { length: 250 },
       (_, index) => `site-${index}.example.com`,
     );
-    const batches = analyticsQueries("mosaic_og_generations", hostnames) ?? [];
+    const batches =
+      analyticsQueries("mosaic_og_generations", hostnames, since) ?? [];
     expect(batches.map(({ breakdown }) => breakdown.params?.length)).toEqual([
-      200, 200, 100,
+      201, 201, 101,
     ]);
     const lastParams = batches[2].breakdown.params as string[];
     expect(lastParams.at(-1)).toBe("site-249.example.com");
   });
 
   test("refuses a dataset name that isn't a plain identifier", () => {
-    expect(analyticsQueries('x" UNION', ["example.com"])).toBeNull();
-    expect(analyticsQueries("mosaic_og_generations", [])).toBeNull();
+    expect(analyticsQueries('x" UNION', ["example.com"], since)).toBeNull();
+    expect(analyticsQueries("mosaic_og_generations", [], since)).toBeNull();
+  });
+});
+
+describe("analyticsWindowStart", () => {
+  test("starts at midnight UTC on the chart's first day", () => {
+    const now = Date.UTC(2026, 9, 19, 12);
+    expect(analyticsWindowStart(now)).toBe(since);
+    // The chart's first bar is the same day.
+    const summary = summarizeAnalytics([], [], now);
+    if (!summary.available) throw new Error("expected analytics");
+    expect(summary.days[0].day).toBe("2026-10-13");
   });
 });
 

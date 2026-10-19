@@ -82,6 +82,9 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
       <LazyWebsiteCodeDialog
         hostname={item.url_base}
         initialPath={pagePath(item.page_url)}
+        protocol={
+          new URL(item.page_url).protocol === "http:" ? "http:" : "https:"
+        }
         open={codeOpen}
         onOpenChange={setCodeOpen}
       />

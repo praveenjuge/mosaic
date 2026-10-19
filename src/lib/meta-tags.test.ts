@@ -13,6 +13,15 @@ describe("pageUrlFor", () => {
     );
   });
 
+  test("keeps an http: page's protocol, which has its own image", () => {
+    expect(pageUrlFor("example.com", "blog", "http:")).toBe(
+      "http://example.com/blog",
+    );
+    expect(pageUrlFor("example.com", "http://example.com/a")).toBe(
+      "http://example.com/a",
+    );
+  });
+
   test("accepts a full URL on the same hostname", () => {
     expect(pageUrlFor("example.com", "https://example.com/docs/")).toBe(
       "https://example.com/docs/",

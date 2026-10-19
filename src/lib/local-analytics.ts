@@ -44,7 +44,7 @@ export function queryLocalEvents(
 ): { rows: AnalyticsRow[]; topPages: TopPageRow[] } {
   const wanted = new Set(hostnames);
   const matching = events.filter(
-    (event) => event.timestamp > since && wanted.has(event.hostname),
+    (event) => event.timestamp >= since && wanted.has(event.hostname),
   );
   const rows = sumBy(
     matching.map((event) =>
