@@ -49,15 +49,30 @@ function Dashboard({
   );
 }
 
-/** Hands each resolved analytics result to the dashboard. */
+/** The saved hostnames, which decide what the analytics cover. */
+function websitesKey(stats: DashboardStats): string {
+  return stats.websites
+    .map(({ url_base }) => url_base)
+    .sort()
+    .join(" ");
+}
+
+type RetainedAnalytics = { key: string; analytics: DashboardAnalytics };
+
+/** Hands each resolved analytics result, with the websites it covers, up. */
 function ReportAnalytics({
   analytics,
+  websites,
   onResolve,
 }: {
   analytics: DashboardAnalytics;
-  onResolve: (analytics: DashboardAnalytics) => void;
+  websites: string;
+  onResolve: (retained: RetainedAnalytics) => void;
 }) {
-  useEffect(() => onResolve(analytics), [analytics, onResolve]);
+  useEffect(
+    () => onResolve({ key: websites, analytics }),
+    [analytics, websites, onResolve],
+  );
   return null;
 }
 
@@ -71,8 +86,11 @@ export default function DashboardPage({
   // The dashboard renders once, outside the analytics' Suspense boundary:
   // an action reloads the route and its analytics, and rendering it as the
   // boundary's fallback and content would remount it, closing open dialogs.
-  // Until new numbers arrive, it keeps showing the last ones.
-  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
+  // Until new numbers arrive, it keeps showing the last ones, but only while
+  // they cover the same websites.
+  const [retained, setRetained] = useState<RetainedAnalytics | null>(null);
+  const websites = websitesKey(dashboardStats);
+  const analytics = retained?.key === websites ? retained.analytics : null;
 
   // Only the dashboard shows toasts, so other pages don't download sonner.
   // The Toaster stays mounted when the first website replaces the welcome.
@@ -84,7 +102,11 @@ export default function DashboardPage({
           <Dashboard dashboardStats={dashboardStats} analytics={analytics} />
           <Await promise={dashboardAnalytics} fallback={null}>
             {(resolved) => (
-              <ReportAnalytics analytics={resolved} onResolve={setAnalytics} />
+              <ReportAnalytics
+                analytics={resolved}
+                websites={websites}
+                onResolve={setRetained}
+              />
             )}
           </Await>
         </>
