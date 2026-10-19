@@ -89,6 +89,9 @@ export const getDashboardStats = createServerFn()
   });
 
 /** Traffic for the given hostnames over the last `ANALYTICS_DAYS` days. */
+/** Hostname batches (two queries each) queried at once. */
+const BATCH_CONCURRENCY = 5;
+
 async function querySiteAnalytics(
   hostnames: string[],
 ): Promise<DashboardAnalytics> {
@@ -102,14 +105,29 @@ async function querySiteAnalytics(
     return summarizeAnalytics(rows, topPages);
   }
 
-  const queries = analyticsQueries(env.OG_ANALYTICS_DATASET, hostnames);
-  if (!queries) return summarizeAnalytics([], []);
+  const batches = analyticsQueries(env.OG_ANALYTICS_DATASET, hostnames);
+  if (!batches) return summarizeAnalytics([], []);
   try {
-    const [breakdown, topPages] = await Promise.all([
-      env.ANALYTICS_SQL.query<AnalyticsRow>(queries.breakdown),
-      env.ANALYTICS_SQL.query<TopPageRow>(queries.topPages),
-    ]);
-    return summarizeAnalytics(breakdown.data, topPages.data);
+    // A few batches at a time stays inside the SQL API's concurrency limit.
+    const results = [];
+    for (let start = 0; start < batches.length; start += BATCH_CONCURRENCY) {
+      results.push(
+        ...(await Promise.all(
+          batches
+            .slice(start, start + BATCH_CONCURRENCY)
+            .map(({ breakdown, topPages }) =>
+              Promise.all([
+                env.ANALYTICS_SQL.query<AnalyticsRow>(breakdown),
+                env.ANALYTICS_SQL.query<TopPageRow>(topPages),
+              ]),
+            ),
+        )),
+      );
+    }
+    return summarizeAnalytics(
+      results.flatMap(([breakdown]) => breakdown.data),
+      results.flatMap(([, topPages]) => topPages.data),
+    );
   } catch (error) {
     console.error("[ANALYTICS] Failed to query site analytics:", error);
     return { available: false };

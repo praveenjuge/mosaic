@@ -3,33 +3,51 @@ import { analyticsQueries, summarizeAnalytics } from "./site-analytics";
 
 describe("analyticsQueries", () => {
   test("passes hostnames as parameters, never in the SQL text", () => {
-    const queries = analyticsQueries("mosaic_og_generations", [
+    const [queries] =
+      analyticsQueries("mosaic_og_generations", [
+        "example.com",
+        "www.example.org",
+      ]) ?? [];
+    expect(queries.breakdown.params).toEqual([
+      "example.com",
+      "www.example.org",
       "example.com",
       "www.example.org",
     ]);
-    expect(queries?.breakdown.params).toEqual([
-      "example.com",
-      "www.example.org",
-      "example.com",
-      "www.example.org",
-    ]);
-    expect(queries?.breakdown.query).toContain("index1 IN ($1, $2)");
+    expect(queries.breakdown.query).toContain("index1 IN ($1, $2)");
     // A look-alike hostname sharing the 96-byte index must not match.
-    expect(queries?.breakdown.query).toContain("blob2 IN ($3, $4)");
-    expect(queries?.topPages.query).toContain("blob2 IN ($3, $4)");
-    expect(queries?.breakdown.query).toContain(
+    expect(queries.breakdown.query).toContain("blob2 IN ($3, $4)");
+    expect(queries.topPages.query).toContain("blob2 IN ($3, $4)");
+    expect(queries.breakdown.query).toContain(
       'FROM events.analyticsEngine."mosaic_og_generations"',
     );
-    expect(queries?.breakdown.query).not.toContain("example.com");
-    expect(queries?.topPages.query).toContain("LIMIT 8");
+    expect(queries.breakdown.query).not.toContain("example.com");
+    expect(queries.topPages.query).toContain("LIMIT 8");
   });
 
-  test("skips hostnames that aren't stored hostnames", () => {
-    const queries = analyticsQueries("mosaic_og_generations", [
-      "example.com",
-      "x') OR 1=1 --",
+  test("matches long hostnames by their 96-byte index and full name", () => {
+    const long = `${"a".repeat(90)}.example.com`;
+    const [queries] =
+      analyticsQueries("mosaic_og_generations", [long, "[2001:db8::1]"]) ?? [];
+    expect(queries.breakdown.params).toEqual([
+      long.slice(0, 96),
+      "[2001:db8::1]",
+      long,
+      "[2001:db8::1]",
     ]);
-    expect(queries?.breakdown.params).toEqual(["example.com", "example.com"]);
+  });
+
+  test("queries every hostname, 100 per batch", () => {
+    const hostnames = Array.from(
+      { length: 250 },
+      (_, index) => `site-${index}.example.com`,
+    );
+    const batches = analyticsQueries("mosaic_og_generations", hostnames) ?? [];
+    expect(batches.map(({ breakdown }) => breakdown.params?.length)).toEqual([
+      200, 200, 100,
+    ]);
+    const lastParams = batches[2].breakdown.params as string[];
+    expect(lastParams.at(-1)).toBe("site-249.example.com");
   });
 
   test("refuses a dataset name that isn't a plain identifier", () => {
@@ -98,6 +116,23 @@ describe("summarizeAnalytics", () => {
     expect(summary.top_pages).toEqual([
       { page_url: "https://example.com", requests: 42 },
     ]);
+  });
+
+  test("merges each batch's top pages into one list", () => {
+    const summary = summarizeAnalytics(
+      [],
+      Array.from({ length: 12 }, (_, index) => ({
+        page_url: `https://example.com/${index}`,
+        requests: index,
+      })),
+      now,
+    );
+    if (!summary.available) throw new Error("expected analytics");
+    expect(summary.top_pages).toHaveLength(8);
+    expect(summary.top_pages[0]).toEqual({
+      page_url: "https://example.com/11",
+      requests: 11,
+    });
   });
 
   test("answers zeros without traffic", () => {
