@@ -11,7 +11,7 @@ import { getRequest } from "@tanstack/react-start/server";
 import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
-import { deleteSiteImages, deleteStoredImages } from "./og";
+import { deleteSiteImages, deleteStoredImages } from "./site-images";
 
 function normalizePublicHostname(value: string): string {
   const websiteUrl = parseWebsiteUrl(value);

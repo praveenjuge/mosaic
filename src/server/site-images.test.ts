@@ -3,7 +3,7 @@ import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { beforeEach, describe, expect, test } from "bun:test";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { deleteSiteImages, deleteStoredImages } from "./og";
+import { deleteSiteImages, deleteStoredImages } from "./site-images";
 
 /** Just enough of D1 over bun:sqlite to run these helpers' SQL. */
 function createD1(sqlite: Database): D1Queryable {
