@@ -4,7 +4,7 @@
 
 How it works:
 
-- The first request for a page screenshots it, stores the image, and returns a 307 redirect to it. Later requests redirect to the cached image, and images regenerate automatically after 30 days.
+- The first request for a page screenshots it, stores the image, and returns a 307 redirect to it. Later requests redirect to the cached image, and images regenerate automatically after 30 days. Signed-in users can also regenerate all of a website's images from the dashboard; each page is screenshotted again on its next request.
 - Only hostnames added in the dashboard work, matched exactly (`www.example.com` and `example.com` are different). Other hostnames get a 404 error.
 - If a screenshot fails or a limit is reached, Mosaic redirects to the previous image or a placeholder.
 - Mosaic is not an image editor or a general-purpose screenshot API.

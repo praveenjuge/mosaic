@@ -405,6 +405,27 @@ export async function forgetUnregisteredHostname(
   await cache.delete(useCacheKey(origin, "hostname", hostname));
 }
 
+/** Most page answers one reset forgets, to bound its Cache API calls. */
+const FORGET_PAGES_LIMIT = 500;
+
+/**
+ * Forget this colo's remembered `/use` answers for pages whose images were
+ * deleted, so their next request here generates a new one. Other colos
+ * forget within `USE_CACHE_MAX_AGE_S`.
+ */
+export async function forgetPageAnswers(
+  requestUrl: string,
+  pageUrls: string[],
+): Promise<void> {
+  const { origin } = new URL(requestUrl);
+  const cache = await caches.open(USE_CACHE_NAME);
+  await Promise.all(
+    pageUrls
+      .slice(0, FORGET_PAGES_LIMIT)
+      .map((pageUrl) => cache.delete(useCacheKey(origin, "page", pageUrl))),
+  );
+}
+
 /**
  * The `/i/<key>` URL for an image, on the origin that served this request
  * rather than the build-time site URL, so Worker Previews read from their own

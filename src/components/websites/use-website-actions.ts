@@ -1,4 +1,9 @@
-import { addSite, deleteSite, editSite } from "@/server/sites";
+import {
+  addSite,
+  deleteSite,
+  editSite,
+  regenerateSiteImages,
+} from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
 
@@ -49,7 +54,22 @@ export function useWebsiteActions() {
     }
   }
 
+  async function regenerateWebsite(siteId: number) {
+    try {
+      const { deleted } = await regenerateSiteImages({ data: { siteId } });
+      toast.success(
+        `Deleted ${deleted} ${deleted === 1 ? "image" : "images"}. Each page gets a new screenshot on its next visit.`,
+      );
+      router.invalidate();
+      return true;
+    } catch (error) {
+      toast.error(getErrorMessage(error));
+      return false;
+    }
+  }
+
   return {
+    regenerateWebsite,
     removeWebsite,
     saveWebsite,
   };

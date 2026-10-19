@@ -1,12 +1,17 @@
 import { getDb } from "@/lib/db";
-import { forgetUnregisteredHostname, warmSiteImage } from "@/lib/og-generation";
+import {
+  forgetPageAnswers,
+  forgetUnregisteredHostname,
+  warmSiteImage,
+} from "@/lib/og-generation";
 import type { Site } from "@/lib/types";
 import { parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { waitUntil } from "cloudflare:workers";
+import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
 import { authMiddleware } from "./middleware";
+import { deleteSiteImages, deleteStoredImages } from "./og";
 
 function normalizePublicHostname(value: string): string {
   const websiteUrl = parseWebsiteUrl(value);
@@ -100,4 +105,40 @@ export const deleteSite = createServerFn({ method: "POST" })
       .bind(data.siteId, context.userId)
       .run();
     if (result.meta.changes === 0) throw new Error("Website not found.");
+  });
+
+const regenerateSiteImagesSchema = z.object({
+  siteId: z.number().int().positive(),
+});
+
+/**
+ * Delete every image of the website, so each page is screenshotted again on
+ * its next `/use` request, through the usual rate limit, lock, and budget.
+ */
+export const regenerateSiteImages = createServerFn({ method: "POST" })
+  .middleware([authMiddleware])
+  .validator(regenerateSiteImagesSchema)
+  .handler(async ({ context, data }): Promise<{ deleted: number }> => {
+    const images = await deleteSiteImages(getDb(), data.siteId, context.userId);
+    if (!images) throw new Error("Website not found.");
+    if (images.length === 0) return { deleted: 0 };
+
+    // The rows are gone, so `/i/*` answers 404 for these keys until a `/use`
+    // request for the page stores a new screenshot, which the old key then
+    // redirects to. A failed delete only leaves orphaned objects.
+    await deleteStoredImages(
+      env.OG_BUCKET,
+      images.map(({ key }) => key),
+    ).catch((error) => {
+      console.error("[SITES] Failed to delete regenerated images:", error);
+    });
+    waitUntil(
+      forgetPageAnswers(
+        getRequest().url,
+        images.map(({ page_url }) => page_url),
+      ).catch((error) => {
+        console.error("[SITES] Failed to clear cached /use answers:", error);
+      }),
+    );
+    return { deleted: images.length };
   });
