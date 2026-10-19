@@ -35,10 +35,12 @@ const R2_DELETE_BATCH = 1000;
 export function deleteStoredImages(
   bucket: R2Bucket,
   keys: string[],
-): Promise<void[]> {
+): Promise<void> {
   const batches: string[][] = [];
   for (let start = 0; start < keys.length; start += R2_DELETE_BATCH) {
     batches.push(keys.slice(start, start + R2_DELETE_BATCH));
   }
-  return Promise.all(batches.map((batch) => bucket.delete(batch)));
+  return Promise.all(batches.map((batch) => bucket.delete(batch))).then(
+    () => undefined,
+  );
 }
