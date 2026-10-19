@@ -1,7 +1,6 @@
 import type { D1Queryable } from "@/lib/db";
 import { Database, type SQLQueryBindings } from "bun:sqlite";
 import { beforeEach, describe, expect, test } from "bun:test";
-import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { deleteSiteImages, deleteStoredImages } from "./site-images";
 
@@ -29,21 +28,27 @@ function createD1(sqlite: Database): D1Queryable {
 let sqlite: Database;
 let db: D1Queryable;
 
-beforeEach(() => {
+const migrationsDir = join(import.meta.dir, "../../migrations");
+const migrationFiles = [
+  ...new Bun.Glob("*.sql").scanSync({ cwd: migrationsDir }),
+].sort();
+
+beforeEach(async () => {
   sqlite = new Database(":memory:");
-  const dir = join(import.meta.dir, "../../migrations");
-  for (const file of readdirSync(dir).sort()) {
-    sqlite.exec(readFileSync(join(dir, file), "utf8"));
+  for (const file of migrationFiles) {
+    sqlite.exec(await Bun.file(join(migrationsDir, file)).text());
   }
   db = createD1(sqlite);
 });
 
 function addSite(userId: string, hostname: string): number {
-  return sqlite
+  const site = sqlite
     .query<{ id: number }, [string, string]>(
       "INSERT INTO sites (user_id, url_base) VALUES (?, ?) RETURNING id",
     )
-    .get(userId, hostname)!.id;
+    .get(userId, hostname);
+  if (!site) throw new Error(`Failed to add ${hostname}`);
+  return site.id;
 }
 
 function addImage(hostname: string, path: string) {

@@ -32,11 +32,13 @@ export async function deleteSiteImages(
 /** R2 deletes at most 1000 keys per call. */
 const R2_DELETE_BATCH = 1000;
 
-export async function deleteStoredImages(
+export function deleteStoredImages(
   bucket: R2Bucket,
   keys: string[],
-): Promise<void> {
+): Promise<void[]> {
+  const batches: string[][] = [];
   for (let start = 0; start < keys.length; start += R2_DELETE_BATCH) {
-    await bucket.delete(keys.slice(start, start + R2_DELETE_BATCH));
+    batches.push(keys.slice(start, start + R2_DELETE_BATCH));
   }
+  return Promise.all(batches.map((batch) => bucket.delete(batch)));
 }

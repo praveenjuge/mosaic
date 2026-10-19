@@ -80,7 +80,9 @@ export function WebsiteActions({
           </DropdownMenuItem>
           <DropdownMenuItem
             disabled={imageCount === 0}
-            onClick={() => setRegenerateOpen(true)}
+            onClick={() => {
+              setRegenerateOpen(true);
+            }}
           >
             <RefreshCcw className="stroke-2" />
             Regenerate images
