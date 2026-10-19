@@ -29,6 +29,30 @@ export async function deleteSiteImages(
   return (deleted as D1Result<{ key: string; page_url: string }>).results;
 }
 
+/**
+ * The newest images across the user's websites, for the dashboard. Anyone
+ * can save any hostname, so pages with a query string are left out: their
+ * URL and screenshot can hold tokens or personal data. A canonical page URL
+ * only has a `?` in its query, since one in the path is percent-encoded.
+ * Reads images through the (hostname, generated_at) index.
+ */
+export function latestSiteImages(db: D1Queryable, userId: string) {
+  return db
+    .prepare(
+      `SELECT g.key,
+              g.page_url,
+              g.size_in_bytes,
+              g.generated_at,
+              g.hostname AS url_base
+       FROM global_images g
+       JOIN sites s ON s.url_base = g.hostname
+       WHERE s.user_id = ? AND instr(g.page_url, '?') = 0
+       ORDER BY g.generated_at DESC
+       LIMIT 12`,
+    )
+    .bind(userId);
+}
+
 /** R2 deletes at most 1000 keys per call. */
 const R2_DELETE_BATCH = 1000;
 

@@ -6,6 +6,7 @@ import {
   deleteSiteImages,
   deleteStoredImages,
   expirePageImage,
+  latestSiteImages,
 } from "./site-images";
 
 /** Just enough of D1 over bun:sqlite to run these helpers' SQL. */
@@ -203,5 +204,38 @@ describe("deleteStoredImages", () => {
     await deleteStoredImages(bucket, []);
 
     expect(called).toBe(false);
+  });
+});
+
+describe("latestSiteImages", () => {
+  test("lists the user's newest images without query-string pages", async () => {
+    addSite("user_a", "example.com");
+    addSite("user_b", "other.com");
+    addImage("example.com", "/");
+    addImage("example.com", "/docs");
+    addImage("example.com", "/reset?token=secret");
+    addImage("example.com", "/p%3Fq");
+    addImage("other.com", "/");
+    // Newest last: the reset page is the newest image overall.
+    sqlite.run(
+      `UPDATE global_images SET generated_at = CASE page_url
+         WHEN 'https://example.com/docs' THEN 1
+         WHEN 'https://example.com/p%3Fq' THEN 2
+         WHEN 'https://example.com/' THEN 3
+         ELSE 4 END`,
+    );
+
+    const { results } = await latestSiteImages(db, "user_a").all<{
+      page_url: string;
+      url_base: string;
+    }>();
+    expect(results).toEqual([
+      expect.objectContaining({
+        page_url: "https://example.com/",
+        url_base: "example.com",
+      }),
+      expect.objectContaining({ page_url: "https://example.com/p%3Fq" }),
+      expect.objectContaining({ page_url: "https://example.com/docs" }),
+    ]);
   });
 });
