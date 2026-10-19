@@ -55,6 +55,9 @@ function HomePage() {
     <Suspense>
       {stats && dashboardAnalytics ? (
         <dashboardPage.Component
+          // A new account gets a fresh dashboard, never the last one's
+          // analytics while its own load.
+          key={userId}
           dashboardStats={stats}
           dashboardAnalytics={dashboardAnalytics}
         />
