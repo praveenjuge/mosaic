@@ -2,6 +2,7 @@ import { blockedRequestPatterns } from "@/lib/blocked-requests";
 import { CONSENT_BANNER_CSS } from "@/lib/consent-banners";
 import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
+import { screenshotWithRetry } from "@/lib/screenshot-retry";
 import { env } from "cloudflare:workers";
 
 /**
@@ -45,9 +46,11 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     screenshotOptions: { type: "jpeg", quality: 80 },
   };
 
-  let response: Response;
   try {
-    response = await env.BROWSER.quickAction("screenshot", options);
+    return await screenshotWithRetry(
+      env.BROWSER.quickAction.bind(env.BROWSER),
+      options,
+    );
   } catch (error) {
     if (import.meta.env.DEV) {
       const { takeLocalScreenshot } = await import("@/lib/local-screenshot");
@@ -55,9 +58,4 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     }
     throw error;
   }
-  if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(`Browser Run returned ${response.status}: ${message}`);
-  }
-  return response.arrayBuffer();
 }
