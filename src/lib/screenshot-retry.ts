@@ -10,8 +10,7 @@
 const MAX_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 250;
 
-const sleep = (ms: number) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 type QuickAction = (
   action: "screenshot",
