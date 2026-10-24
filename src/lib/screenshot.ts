@@ -2,6 +2,10 @@ import { blockedRequestPatterns } from "@/lib/blocked-requests";
 import { CONSENT_BANNER_CSS } from "@/lib/consent-banners";
 import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
+import {
+  BrowserRunHttpError,
+  screenshotWithRetry,
+} from "@/lib/screenshot-retry";
 import { env } from "cloudflare:workers";
 
 /**
@@ -26,7 +30,9 @@ import { env } from "cloudflare:workers";
  * ~30 s a background refresh gets after its response.
  *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
- * same options run through local Puppeteer instead.
+ * same options run through local Puppeteer instead. A real HTTP answer from
+ * the remote binding (a `BrowserRunHttpError`) still propagates so it is not
+ * masked by a different local result.
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const options: BrowserRunScreenshotOptions = {
@@ -45,19 +51,19 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     screenshotOptions: { type: "jpeg", quality: 80 },
   };
 
-  let response: Response;
   try {
-    response = await env.BROWSER.quickAction("screenshot", options);
+    return await screenshotWithRetry(
+      env.BROWSER.quickAction.bind(env.BROWSER),
+      options,
+    );
   } catch (error) {
-    if (import.meta.env.DEV) {
+    // In dev, fall back to local Puppeteer only when the binding itself is
+    // unavailable; a real HTTP answer from Browser Run must not be masked by
+    // a different local result.
+    if (import.meta.env.DEV && !(error instanceof BrowserRunHttpError)) {
       const { takeLocalScreenshot } = await import("@/lib/local-screenshot");
       return takeLocalScreenshot(env.BROWSER, options);
     }
     throw error;
   }
-  if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(`Browser Run returned ${response.status}: ${message}`);
-  }
-  return response.arrayBuffer();
 }
