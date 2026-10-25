@@ -15,8 +15,8 @@ import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-d
 import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
-import { Code } from "lucide-react";
 import { useState } from "react";
+import { Code } from "vadivam-react";
 import { totalRequests } from "./dashboard-overview";
 import { DashboardPanel } from "./dashboard-panel";
 

@@ -22,8 +22,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Ellipsis, Pencil, RefreshCcw, Trash } from "lucide-react";
 import { useState, useTransition } from "react";
+import { Ellipsis, Pencil, RefreshCcw, Trash } from "vadivam-react";
 import { useWebsiteActions } from "./use-website-actions";
 import { WebsiteUrlForm } from "./website-url-form";
 

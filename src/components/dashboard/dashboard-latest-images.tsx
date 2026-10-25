@@ -5,8 +5,8 @@ import { useWebsiteActions } from "@/components/websites/use-website-actions";
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
 import { buildPublicImageUrl, cleanDisplayUrl } from "@/lib/url";
 import { formatBytes } from "@/lib/utils";
-import { Code, ImageOff, RefreshCcw } from "lucide-react";
 import { useState, useTransition } from "react";
+import { Code, ImageOff, RefreshCcw } from "vadivam-react";
 import { DashboardPanel } from "./dashboard-panel";
 
 /** The page's path and query, which the code dialog shows after the host. */

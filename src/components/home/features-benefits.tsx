@@ -1,16 +1,16 @@
 import {
-  type LucideIcon,
+  type VadivamIcon,
   ChartNoAxesColumn,
   Code,
   Globe,
   RefreshCcw,
   ScanEye,
   ShieldCheck,
-} from "lucide-react";
+} from "vadivam-react";
 import { SectionHeading } from "./section-heading";
 
 interface Feature {
-  icon: LucideIcon;
+  icon: VadivamIcon;
   title: string;
   description: string;
 }

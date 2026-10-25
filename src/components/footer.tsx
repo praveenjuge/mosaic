@@ -1,7 +1,7 @@
 import { website_name } from "@/lib/constants";
 import { Link, useHydrated } from "@tanstack/react-router";
-import { Computer, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
+import { Computer, Moon, Sun } from "vadivam-react";
 import Logo from "./logo";
 
 const footerSections = [

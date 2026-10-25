@@ -14,8 +14,8 @@ import { publicEnv } from "@/lib/env";
 import { buildMetaTags, pageUrlFor, type PageProtocol } from "@/lib/meta-tags";
 import { buildUseEndpointUrl } from "@/lib/url";
 import { Link } from "@tanstack/react-router";
-import { Check, Copy, TriangleAlert } from "lucide-react";
 import { useId, useState } from "react";
+import { Check, Copy, TriangleAlert } from "vadivam-react";
 
 type CopyState = "idle" | "copied" | "failed";
 

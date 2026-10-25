@@ -1,7 +1,7 @@
 import { SignUpLink } from "@/components/auth/auth-links";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { Check } from "lucide-react";
+import { Check } from "vadivam-react";
 
 // ── Pricing Data ────────────────────────────────────────────────────
 

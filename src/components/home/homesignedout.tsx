@@ -3,7 +3,7 @@ import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "vadivam-react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
 import LandingPricing from "./landing-pricing";

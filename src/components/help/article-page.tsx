@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { ChevronRight } from "vadivam-react";
 
 /** A help article or guide: breadcrumbs, a title, and prebuilt HTML. */
 export function ArticlePage({

@@ -2,7 +2,7 @@ import Footer from "@/components/footer";
 import Header from "@/components/header/header";
 import { Button } from "@/components/ui/button";
 import { Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "vadivam-react";
 
 const destinations = [
   { href: "/", label: "Home", description: "Generate Open Graph images" },
