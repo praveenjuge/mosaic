@@ -4,8 +4,8 @@ import { guideLinks, helpCategories, type HelpCategory } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { cn } from "@/lib/utils";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ChevronRight, Mail } from "lucide-react";
 import type { ReactNode } from "react";
+import { ChevronRight, Mail } from "vadivam-react";
 
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";

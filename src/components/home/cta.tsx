@@ -1,5 +1,5 @@
 import { SignUpLink } from "@/components/auth/auth-links";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight } from "vadivam-react";
 
 export default function CTA() {
   return (

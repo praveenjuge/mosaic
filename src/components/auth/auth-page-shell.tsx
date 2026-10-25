@@ -1,7 +1,7 @@
 import Logo from "@/components/logo";
 import { Link } from "@tanstack/react-router";
-import { ArrowLeft } from "lucide-react";
 import type { ReactNode } from "react";
+import { ArrowLeft } from "vadivam-react";
 
 export function AuthPageShell({ children }: { children: ReactNode }) {
   return (
