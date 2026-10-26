@@ -57,7 +57,12 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
 
   try {
     return await screenshotWithEngineFallback(
-      env.BROWSER.quickAction.bind(env.BROWSER),
+      // `env.BROWSER` is an RPC stub, so its methods cannot be detached with
+      // `.bind()`: on the stub that property access is itself an RPC call to
+      // a method named "bind", which the receiver does not implement. A plain
+      // local closure keeps the call on the stub.
+      (action: "screenshot", opts: BrowserRunScreenshotOptions) =>
+        env.BROWSER.quickAction(action, opts),
       options,
     );
   } catch (error) {

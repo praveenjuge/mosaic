@@ -1,10 +1,11 @@
 import { afterAll, beforeEach, describe, expect, mock, test } from "bun:test";
 
 // `generateImage` runs against Cloudflare bindings and D1 helpers; these
-// stand-ins record what it does. The integration harness can't screenshot,
-// so this is where the success path is covered. Bun's module mocks apply to
-// the whole test run, so only modules no other test imports are mocked; the
-// page fetch goes through a stubbed `fetch` instead.
+// stand-ins record what it does. The screenshot itself goes through the real
+// `takeScreenshot` against the BROWSER stub above, so the success path and
+// the production quickAction wiring are both covered here. Bun's module
+// mocks apply to the whole test run, so only modules no other test imports
+// are mocked; the page fetch goes through a stubbed `fetch` instead.
 type Image = { key: string; expiresAt: number };
 
 const state = {
@@ -20,6 +21,18 @@ const state = {
 mock.module("cloudflare:workers", () => ({
   env: {
     SITE_RATE_LIMITER: { limit: async () => ({ success: true }) },
+    // The real `takeScreenshot` runs against this stub, so these tests cover
+    // the production screenshot wiring too. Consecutive attempts collapse to
+    // one "screenshot" marker: retry and engine fallback can call quickAction
+    // up to four times per generation.
+    BROWSER: {
+      quickAction: async () => {
+        if (state.calls[state.calls.length - 1] !== "screenshot") {
+          state.calls.push("screenshot");
+        }
+        return new Response(await state.screenshot());
+      },
+    },
     OG_BUCKET: {
       put: async (key: string, value: ArrayBuffer) => {
         state.calls.push(`put ${key}`);
@@ -38,12 +51,6 @@ mock.module("@/lib/analytics", () => ({ recordGenerationEvent: () => {} }));
 mock.module("@/lib/image-serving", () => ({
   cacheGeneratedImage: (imageUrl: string) => {
     state.calls.push(`cache ${imageUrl}`);
-  },
-}));
-mock.module("@/lib/screenshot", () => ({
-  takeScreenshot: () => {
-    state.calls.push("screenshot");
-    return state.screenshot();
   },
 }));
 mock.module("@/server/generation-usage", () => ({
