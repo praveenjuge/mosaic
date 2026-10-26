@@ -2,6 +2,7 @@ import { cloudflare } from "@cloudflare/vite-plugin";
 import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+import { redact } from "@tanstack/redact/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
 import { mosaicContent } from "./src/lib/content-plugin";
@@ -85,6 +86,7 @@ export default defineConfig(({ command, mode }) => {
       babel({
         presets: [reactCompilerPreset()],
       }),
+      redact(),
       tailwindcss(),
     ],
     resolve: {
@@ -92,6 +94,9 @@ export default defineConfig(({ command, mode }) => {
     },
     server: {
       port: 3000,
+    },
+    ssr: {
+      noExternal: true,
     },
   };
 });
