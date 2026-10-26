@@ -4,7 +4,7 @@ import { SCREENSHOT_ENGINE } from "@/lib/constants";
 import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
 import {
   BrowserRunHttpError,
-  screenshotWithRetry,
+  screenshotWithEngineFallback,
 } from "@/lib/screenshot-retry";
 import { env } from "cloudflare:workers";
 
@@ -29,6 +29,10 @@ import { env } from "cloudflare:workers";
  * within the timeout, instead of failing after it. The timeout leaves room for the page fetch inside the
  * ~30 s a background refresh gets after its response.
  *
+ * When the Kitesurf engine fails (it is in beta and has broken upstream
+ * before), the same shot is retried with Browser Run's default Chromium
+ * engine via `screenshotWithEngineFallback`.
+ *
  * In dev without remote bindings, `quickAction()` is unavailable, so the
  * same options run through local Puppeteer instead. A real HTTP answer from
  * the remote binding (a `BrowserRunHttpError`) still propagates so it is not
@@ -52,7 +56,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   };
 
   try {
-    return await screenshotWithRetry(
+    return await screenshotWithEngineFallback(
       env.BROWSER.quickAction.bind(env.BROWSER),
       options,
     );

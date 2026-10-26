@@ -73,3 +73,33 @@ export const screenshotWithRetry = async (
   }
   throw lastError;
 };
+
+/**
+ * Kitesurf is a beta engine: when it breaks upstream, every render fails
+ * with an empty-message binding throw that a fast retry cannot ride out
+ * (production saw ~100% generation failure while `browser: "kitesurf"` was
+ * set, with chromium-era renders healthy days earlier). After the kitesurf
+ * attempts fail, drop the engine option and let Browser Run's default
+ * Chromium take the same shot, so one engine's outage cannot stop image
+ * generation. Options without a `browser` key already use the default
+ * engine, so there is nothing to fall back to and the error propagates.
+ */
+export const screenshotWithEngineFallback = async (
+  quickAction: QuickAction,
+  options: BrowserRunScreenshotOptions,
+): Promise<ArrayBuffer> => {
+  try {
+    return await screenshotWithRetry(quickAction, options);
+  } catch (error) {
+    if (!("browser" in options)) {
+      throw error;
+    }
+    const fallbackOptions = { ...options };
+    delete fallbackOptions.browser;
+    console.warn(
+      "[SCREENSHOT] Kitesurf render failed, retrying with the default engine:",
+      error,
+    );
+    return screenshotWithRetry(quickAction, fallbackOptions);
+  }
+};

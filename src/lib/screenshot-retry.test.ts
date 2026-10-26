@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, spyOn, test } from "bun:test";
 
-import { BrowserRunHttpError, screenshotWithRetry } from "./screenshot-retry";
+import {
+  BrowserRunHttpError,
+  screenshotWithEngineFallback,
+  screenshotWithRetry,
+} from "./screenshot-retry";
 
 const okImage = (byte: number) =>
   new Response(new Uint8Array([byte]).buffer, { status: 200 });
@@ -105,5 +109,81 @@ describe("recovered failure logging", () => {
     await expect(screenshotWithRetry(quickAction, options)).rejects.toThrow();
     expect(warn).not.toHaveBeenCalled();
     warn.mockRestore();
+  });
+});
+
+describe("screenshotWithEngineFallback", () => {
+  const kitesurfOptions = {
+    url: "https://example.com",
+    browser: "kitesurf",
+  } as BrowserRunScreenshotOptions;
+
+  const calls: BrowserRunScreenshotOptions[] = [];
+
+  const recordingQuickAction = async (
+    _action: "screenshot",
+    options: BrowserRunScreenshotOptions,
+  ) => {
+    calls.push({ ...options });
+    return quickAction();
+  };
+
+  beforeEach(() => {
+    calls.length = 0;
+  });
+
+  test("falls back to the default engine when Kitesurf keeps failing", async () => {
+    state.outcomes = [new Error(""), new Error(""), okImage(5)];
+    const image = await screenshotWithEngineFallback(
+      recordingQuickAction,
+      kitesurfOptions,
+    );
+    expect(image.byteLength).toBe(1);
+    expect(calls).toHaveLength(3);
+    expect(calls[0]).toHaveProperty("browser", "kitesurf");
+    expect(calls[2]).not.toHaveProperty("browser");
+  });
+
+  test("recovers within the Kitesurf attempts without touching the fallback", async () => {
+    state.outcomes = [new Error(""), okImage(5)];
+    const image = await screenshotWithEngineFallback(
+      recordingQuickAction,
+      kitesurfOptions,
+    );
+    expect(image.byteLength).toBe(1);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).toHaveProperty("browser", "kitesurf");
+  });
+
+  test("falls back when Kitesurf rejects the options with a 4xx", async () => {
+    state.outcomes = [new Response("bad engine", { status: 422 }), okImage(5)];
+    const image = await screenshotWithEngineFallback(
+      recordingQuickAction,
+      kitesurfOptions,
+    );
+    expect(image.byteLength).toBe(1);
+    expect(calls).toHaveLength(2);
+    expect(calls[1]).not.toHaveProperty("browser");
+  });
+
+  test("surfaces the default engine's error when both engines fail", async () => {
+    state.outcomes = [
+      new Error("kitesurf down"),
+      new Error("kitesurf down"),
+      new Response("chromium broken", { status: 500 }),
+      new Response("chromium still broken", { status: 500 }),
+    ];
+    await expect(
+      screenshotWithEngineFallback(recordingQuickAction, kitesurfOptions),
+    ).rejects.toMatchObject({ status: 500 });
+    expect(calls).toHaveLength(4);
+  });
+
+  test("does not fall back when the default engine is already in use", async () => {
+    state.outcomes = [new Error(""), new Error("")];
+    await expect(
+      screenshotWithEngineFallback(recordingQuickAction, options),
+    ).rejects.toThrow();
+    expect(calls).toHaveLength(2);
   });
 });
