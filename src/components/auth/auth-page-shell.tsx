@@ -1,9 +1,18 @@
 import Logo from "@/components/logo";
+import { loadClerkUI } from "@/lib/clerk-ui";
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { ArrowLeft } from "vadivam-react";
 
 export function AuthPageShell({ children }: { children: ReactNode }) {
+  // The page's Clerk form needs Clerk's UI bundle. Fetching it now, while
+  // clerk-js loads, saves waiting for one after the other.
+  useEffect(() => {
+    loadClerkUI().catch(() => {
+      // The form retries when it mounts.
+    });
+  }, []);
+
   return (
     <div className="bg-surface relative isolate flex min-h-screen flex-col">
       <div

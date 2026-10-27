@@ -1,10 +1,12 @@
 import { ArticlePage } from "@/components/help/article-page";
 import { buildArticleHead } from "@/lib/seo";
-import { getGuide } from "@/server/content";
 import { createFileRoute, notFound } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_public/help/guides/$slug")({
   loader: async ({ params }) => {
+    // Loaded with the first article, so other pages skip the server
+    // function runtime.
+    const { getGuide } = await import("@/server/content");
     const guide = await getGuide({ data: params.slug });
     if (!guide) {
       throw notFound();

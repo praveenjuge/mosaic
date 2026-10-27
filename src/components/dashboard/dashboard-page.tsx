@@ -1,9 +1,8 @@
 import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
-import { Toaster } from "@/components/ui/sonner";
 import type { DashboardAnalytics } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { Await } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { DashboardLatestImages } from "./dashboard-latest-images";
 import { DashboardOverview } from "./dashboard-overview";
 import { DashboardTopPages, DashboardTraffic } from "./dashboard-traffic";
@@ -46,6 +45,21 @@ function Dashboard({
         <DashboardTopPages analytics={analytics} />
       </div>
     </div>
+  );
+}
+
+// sonner is a third of the dashboard's JavaScript, and toasts only follow
+// actions, so it loads once the dashboard has hydrated (see `@/lib/toast`).
+const Toaster = lazy(() => import("@/components/ui/sonner"));
+
+function LazyToaster() {
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+  if (!hydrated) return null;
+  return (
+    <Suspense>
+      <Toaster richColors />
+    </Suspense>
   );
 }
 
@@ -95,7 +109,7 @@ export default function DashboardPage({
   // The Toaster stays mounted when the first website replaces the welcome.
   return (
     <>
-      <Toaster richColors />
+      <LazyToaster />
       {dashboardStats.total_websites ? (
         <>
           <Dashboard dashboardStats={dashboardStats} analytics={analytics} />

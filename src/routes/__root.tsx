@@ -8,6 +8,7 @@ import {
   website_subtitle,
 } from "@/lib/constants";
 import { buildOrganizationJsonLd } from "@/lib/seo";
+import { themeScript } from "@/lib/theme";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
 import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
@@ -19,7 +20,6 @@ import {
   useMatches,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import { ThemeProvider } from "next-themes";
 import { Suspense, useState, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
@@ -121,22 +121,15 @@ function RootComponent() {
   );
 
   return (
-    <ThemeProvider
-      enableSystem
-      attribute="class"
-      defaultTheme="light"
-      disableTransitionOnChange
-    >
-      <RootDocument>
-        {clerkNeeded || clerkStarted ? (
-          <Suspense>
-            <clerkShell.Component>{page}</clerkShell.Component>
-          </Suspense>
-        ) : (
-          page
-        )}
-      </RootDocument>
-    </ThemeProvider>
+    <RootDocument>
+      {clerkNeeded || clerkStarted ? (
+        <Suspense>
+          <clerkShell.Component>{page}</clerkShell.Component>
+        </Suspense>
+      ) : (
+        page
+      )}
+    </RootDocument>
   );
 }
 
@@ -155,6 +148,8 @@ function RootDocument({ children }: { children: ReactNode }) {
       )}
     >
       <head>
+        {/* Before the stylesheet, so the first paint has the right theme. */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
         {shouldRenderStructuredData ? (
           <script

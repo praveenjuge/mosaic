@@ -1,7 +1,7 @@
 import { website_name } from "@/lib/constants";
-import { Link, useHydrated } from "@tanstack/react-router";
-import { useTheme } from "next-themes";
-import { Computer, Moon, Sun } from "vadivam-react";
+import { useTheme, type Theme } from "@/lib/theme";
+import { Link } from "@tanstack/react-router";
+import { Computer, Moon, Sun, type VadivamIcon } from "vadivam-react";
 import Logo from "./logo";
 
 const footerSections = [
@@ -31,7 +31,7 @@ const footerSections = [
   },
 ];
 
-const themes = [
+const themes: { value: Theme; label: string; Icon: VadivamIcon }[] = [
   { value: "light", label: "Light theme", Icon: Sun },
   { value: "dark", label: "Dark theme", Icon: Moon },
   { value: "system", label: "System theme", Icon: Computer },
@@ -40,9 +40,8 @@ const themes = [
 /** Plain buttons styled like the `Tabs` list, without Radix's Tabs code. */
 function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const hydrated = useHydrated();
   // The server can't know the stored theme, so it renders "system".
-  const current = hydrated ? (theme ?? "system") : "system";
+  const current = theme ?? "system";
 
   return (
     <div className="flex">

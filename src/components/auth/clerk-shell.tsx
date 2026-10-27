@@ -4,6 +4,7 @@ import {
   signUpPath,
 } from "@/lib/clerk-auth";
 import { clerkFrontendApiOrigin } from "@/lib/clerk-frontend-api";
+import { LazyClerkUI } from "@/lib/clerk-ui";
 import { publicEnv } from "@/lib/env";
 import { ClerkProvider, useAuth } from "@clerk/tanstack-react-start";
 import { useRouter } from "@tanstack/react-router";
@@ -18,8 +19,11 @@ const clerkOrigin = clerkFrontendApiOrigin(publicEnv.clerkPublishableKey);
 /**
  * Clerk's provider, loaded only where Clerk is needed: for signed-in users
  * and on the sign-in and sign-up pages. Signed-out pages skip Clerk's
- * scripts, UI bundle, and API calls entirely.
+ * scripts, UI bundle, and API calls entirely, and signed-in pages skip the UI
+ * bundle until a Clerk component opens (see `LazyClerkUI`).
  */
+const clerkUI = { ClerkUI: LazyClerkUI };
+
 export default function ClerkShell({ children }: { children: ReactNode }) {
   if (clerkOrigin) {
     preconnect(clerkOrigin, { crossOrigin: "anonymous" });
@@ -33,6 +37,7 @@ export default function ClerkShell({ children }: { children: ReactNode }) {
       signUpUrl={signUpPath}
       signInFallbackRedirectUrl={authenticatedHomePath}
       signUpFallbackRedirectUrl={authenticatedHomePath}
+      ui={clerkUI}
     >
       <InvalidateOnAuthChange />
       {children}

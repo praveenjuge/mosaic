@@ -4,25 +4,12 @@ import {
   type BrowserClerk,
   type RouteAuth,
 } from "@/lib/browser-route-auth";
-import { auth } from "@clerk/tanstack-react-start/server";
-import { createServerFn } from "@tanstack/react-start";
 
 export const authenticatedHomePath = "/";
 export const signInPath = "/sign-in";
 export const signUpPath = "/sign-up";
 
 export type { RouteAuth };
-
-export const fetchRouteAuth = createServerFn().handler(
-  async (): Promise<RouteAuth> => {
-    const { userId } = await auth();
-
-    return {
-      userId,
-      isAuthenticated: userId !== null,
-    };
-  },
-);
 
 export async function getRouteAuth(): Promise<RouteAuth> {
   if (typeof window !== "undefined") {
@@ -33,6 +20,9 @@ export async function getRouteAuth(): Promise<RouteAuth> {
     const cookieAuth = routeAuthFromCookies(document.cookie);
     if (cookieAuth) return cookieAuth;
   }
+  // Imported only when needed, so the browser loads the server function
+  // runtime (about 12 KB) only when it calls one.
+  const { fetchRouteAuth } = await import("@/server/route-auth");
   return fetchRouteAuth();
 }
 

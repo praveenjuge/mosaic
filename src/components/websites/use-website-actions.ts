@@ -1,3 +1,4 @@
+import { toast } from "@/lib/toast";
 import {
   addSite,
   deleteSite,
@@ -6,7 +7,6 @@ import {
   regenerateSiteImages,
 } from "@/server/sites";
 import { useRouter } from "@tanstack/react-router";
-import { toast } from "sonner";
 
 type SaveWebsiteArgs = { siteId?: number; url: string };
 

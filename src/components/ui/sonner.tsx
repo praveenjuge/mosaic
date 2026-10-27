@@ -1,4 +1,6 @@
-import { useTheme } from "next-themes";
+import { useTheme } from "@/lib/theme";
+import { toasterMounted } from "@/lib/toast";
+import { useEffect } from "react";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
@@ -10,6 +12,7 @@ import {
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
+  useEffect(toasterMounted, []);
 
   return (
     <Sonner
@@ -40,4 +43,5 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
+export default Toaster;
 export { Toaster };
