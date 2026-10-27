@@ -1,7 +1,12 @@
 /// <reference types="vite/client" />
 
 import { getRouteAuth } from "@/lib/clerk-auth";
-import { clerkShell, needsClerk, preloadClerkChunks } from "@/lib/clerk-chunks";
+import {
+  clerkShell,
+  isAuthPage,
+  needsClerk,
+  preloadClerkChunks,
+} from "@/lib/clerk-chunks";
 import {
   website_description,
   website_name,
@@ -124,7 +129,9 @@ function RootComponent() {
     <RootDocument>
       {clerkNeeded || clerkStarted ? (
         <Suspense>
-          <clerkShell.Component>{page}</clerkShell.Component>
+          <clerkShell.Component authPage={isAuthPage(pathname)}>
+            {page}
+          </clerkShell.Component>
         </Suspense>
       ) : (
         page

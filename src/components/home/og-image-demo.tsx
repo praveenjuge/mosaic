@@ -71,6 +71,9 @@ function PreviewCard({
                     : undefined
                 }
                 fetchPriority={priority ? "high" : undefined}
+                // The second card sits below the fold on phones, where it
+                // would compete with the first for a slow connection.
+                loading={priority ? undefined : "lazy"}
                 decoding="async"
                 alt={alt}
                 width={600}

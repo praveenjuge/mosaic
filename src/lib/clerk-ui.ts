@@ -1,5 +1,9 @@
 import { publicEnv } from "@/lib/env";
-import { loadClerkUIScript } from "@clerk/shared/loadClerkJsScript";
+import {
+  clerkJSScriptUrl,
+  clerkUIScriptUrl,
+  loadClerkUIScript,
+} from "@clerk/shared/loadClerkJsScript";
 import type {
   ClerkUIConstructor,
   ClerkUIInstance,
@@ -9,7 +13,29 @@ import type {
 declare global {
   interface Window {
     __internal_ClerkUICtor?: ClerkUIConstructor;
+    /** Mosaic's React, registered by `@clerk/react` for Clerk's UI. */
+    __clerkSharedModules?: unknown;
   }
+}
+
+/**
+ * Clerk's `ui.shared.browser.js` renders with the page's React, which
+ * `@clerk/react` registers when it loads, instead of downloading its own copy
+ * (about 45 KB compressed). Clerk's loader always picks the standalone
+ * bundle, so this names the shared one when React is registered.
+ */
+export function clerkUIUrl(shared = Boolean(window.__clerkSharedModules)) {
+  const url = clerkUIScriptUrl(clerkScriptOptions);
+  return shared
+    ? url.replace(/\/ui\.browser\.js$/, "/ui.shared.browser.js")
+    : url;
+}
+
+const clerkScriptOptions = { publishableKey: publicEnv.clerkPublishableKey };
+
+/** The clerk-js script `ClerkProvider` loads. */
+export function clerkJSUrl() {
+  return clerkJSScriptUrl(clerkScriptOptions);
 }
 
 let ui: Promise<ClerkUIConstructor> | undefined;
@@ -21,7 +47,8 @@ let ui: Promise<ClerkUIConstructor> | undefined;
  */
 export function loadClerkUI(): Promise<ClerkUIConstructor> {
   ui ??= loadClerkUIScript({
-    publishableKey: publicEnv.clerkPublishableKey,
+    ...clerkScriptOptions,
+    __internal_clerkUIUrl: clerkUIUrl(),
   }).then(
     () => {
       const ctor = window.__internal_ClerkUICtor;

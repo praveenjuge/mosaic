@@ -12,14 +12,16 @@ export const headerSignedIn = preloadableLazy(
 
 const authPaths = ["/sign-in", "/sign-up"];
 
+/** The sign-in and sign-up pages, which are Clerk's forms. */
+export function isAuthPage(pathname: string) {
+  return authPaths.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
 /** Clerk runs for signed-in users and on the sign-in and sign-up pages. */
 export function needsClerk(auth: RouteAuth, pathname: string) {
-  return (
-    auth.userId !== null ||
-    authPaths.some(
-      (path) => pathname === path || pathname.startsWith(`${path}/`),
-    )
-  );
+  return auth.userId !== null || isAuthPage(pathname);
 }
 
 /** Loads the chunks a page needs, so it renders without suspending. */

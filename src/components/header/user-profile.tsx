@@ -7,11 +7,14 @@ import { LogOut, Settings } from "vadivam-react";
 const itemClass =
   "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground flex w-full cursor-default items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm outline-hidden select-none [&_svg]:size-4 [&_svg]:shrink-0";
 
-/** Clerk's avatar images take resize parameters; 2x for sharp screens. */
-function avatarUrl(imageUrl: string, size: number) {
+/**
+ * Clerk's avatar images take resize parameters. One 64px copy, sharp at 2x,
+ * serves both the button and the menu, so the browser fetches it once.
+ */
+function avatarUrl(imageUrl: string) {
   const url = new URL(imageUrl);
-  url.searchParams.set("width", String(size * 2));
-  url.searchParams.set("height", String(size * 2));
+  url.searchParams.set("width", "64");
+  url.searchParams.set("height", "64");
   url.searchParams.set("fit", "crop");
   return url.toString();
 }
@@ -68,7 +71,7 @@ export default function UserProfile() {
         className="focus-visible:ring-ring/50 block size-7 shrink-0 overflow-hidden rounded-full outline-none focus-visible:ring-3"
       >
         <img
-          src={avatarUrl(user.imageUrl, 28)}
+          src={avatarUrl(user.imageUrl)}
           alt=""
           width={28}
           height={28}
@@ -85,7 +88,7 @@ export default function UserProfile() {
       >
         <div className="flex items-center gap-2.5 px-2 py-2">
           <img
-            src={avatarUrl(user.imageUrl, 32)}
+            src={avatarUrl(user.imageUrl)}
             alt=""
             width={32}
             height={32}
