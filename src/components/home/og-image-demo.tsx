@@ -71,6 +71,9 @@ function PreviewCard({
                     : undefined
                 }
                 fetchPriority={priority ? "high" : undefined}
+                // The second card sits below the fold on phones, where it
+                // would compete with the first for a slow connection.
+                loading={priority ? undefined : "lazy"}
                 decoding="async"
                 alt={alt}
                 width={600}
@@ -189,10 +192,11 @@ export default function OGImageDemo() {
             }}
             placeholder="yourwebsite.com"
             aria-label="Enter URL for OG image preview"
-            className="h-9 border-0 bg-transparent px-1 shadow-none focus-visible:ring-0 dark:bg-transparent"
+            bare
+            className="h-9 rounded-lg px-1"
           />
         </div>
-        <Button type="submit" disabled={isLoading} size="lg" className="h-9">
+        <Button type="submit" disabled={isLoading} size="lg" className="h-9!">
           {isLoading ? (
             <LoaderCircle className="animate-spin" aria-hidden="true" />
           ) : null}

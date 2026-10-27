@@ -36,7 +36,7 @@ export function GuideLink({ guide }: { guide: GuideLinkItem }) {
       params={{ slug: guide.slug }}
       className={cn(
         buttonVariants({ variant: "outline", size: "sm" }),
-        "gap-2",
+        "gap-2!",
       )}
     >
       <GuideIcon guide={guide} />

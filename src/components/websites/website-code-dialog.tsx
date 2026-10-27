@@ -92,7 +92,7 @@ export function WebsiteCodeDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {/* Short phone screens lock page scrolling, so the dialog scrolls. */}
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl">
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl!">
         <DialogHeader>
           <DialogTitle>Add Mosaic to {hostname}</DialogTitle>
           <DialogDescription>
@@ -115,7 +115,8 @@ export function WebsiteCodeDialog({
                   setPath(event.target.value);
                 }}
                 placeholder="blog/my-post"
-                className="h-full rounded-none border-0 bg-transparent shadow-none focus-visible:ring-0 dark:bg-transparent"
+                bare
+                className="h-full px-2.5"
               />
             </div>
           </div>

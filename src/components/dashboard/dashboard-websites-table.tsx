@@ -135,7 +135,7 @@ export function DashboardWebsitesTable({
     >
       <Table>
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="hover:bg-transparent!">
             <TableHead className="pl-5">Website</TableHead>
             <TableHead className="hidden sm:table-cell">OG images</TableHead>
             <TableHead className="hidden md:table-cell">
@@ -144,7 +144,7 @@ export function DashboardWebsitesTable({
             <TableHead className="hidden lg:table-cell">
               Last generated
             </TableHead>
-            <TableHead className="pr-5 text-right">
+            <TableHead className="pr-5 text-right!">
               <span className="sr-only">Actions</span>
             </TableHead>
           </TableRow>

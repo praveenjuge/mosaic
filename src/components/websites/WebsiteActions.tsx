@@ -73,7 +73,7 @@ export function WebsiteActions({
             <span className="sr-only">Actions</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-48">
+        <DropdownMenuContent className="min-w-48!">
           <DropdownMenuItem
             onClick={() => {
               setEditOpen(true);

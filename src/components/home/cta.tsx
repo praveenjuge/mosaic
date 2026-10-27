@@ -17,7 +17,7 @@ export default function CTA() {
       <div className="mt-8 flex justify-center">
         <SignUpLink
           size="lg"
-          className="bg-primary-foreground text-primary hover:bg-primary-foreground/90"
+          className="bg-primary-foreground! text-primary! hover:bg-primary-foreground/90!"
         >
           Start for free
           <ArrowRight data-icon="inline-end" />

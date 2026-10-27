@@ -2,7 +2,6 @@ import HomeSignedOut from "@/components/home/homesignedout";
 import { preloadableLazy } from "@/lib/preloadable-lazy";
 import { buildSeoMeta } from "@/lib/seo";
 import type { DashboardAnalytics } from "@/lib/site-analytics";
-import { getDashboardAnalytics, getDashboardStats } from "@/server/stats";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
 
@@ -14,6 +13,7 @@ const homeDescription =
 // chunk, which the loader fetches alongside the data.
 const dashboardPage = preloadableLazy(
   () => import("@/components/dashboard/dashboard-page"),
+  "src/components/dashboard/dashboard-page.tsx",
 );
 
 export const Route = createFileRoute("/_public/")({
@@ -24,6 +24,10 @@ export const Route = createFileRoute("/_public/")({
     if (!userId) {
       return { userId, dashboardStats: null, dashboardAnalytics: null };
     }
+    // Signed-out visitors never call these, so their page doesn't download
+    // the server function runtime.
+    const { getDashboardAnalytics, getDashboardStats } =
+      await import("@/server/stats");
     // Not awaited: traffic streams in after the page, so a slow Analytics
     // Engine query never holds up the dashboard.
     const dashboardAnalytics = getDashboardAnalytics().catch(

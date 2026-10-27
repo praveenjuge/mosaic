@@ -9,8 +9,12 @@
 import { publicCorsHeaders } from "@/lib/cors";
 import { serveImage } from "@/lib/image-serving";
 import { handleUseRequest } from "@/lib/og-generation";
+import { registerLazyChunks } from "@/lib/preloadable-lazy";
 import { withSecurityHeaders } from "@/lib/security-headers";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
+import lazyChunks from "virtual:mosaic-lazy-chunks";
+
+registerLazyChunks(lazyChunks);
 
 const PUBLIC_ENDPOINT = /^\/(use$|i\/)/;
 

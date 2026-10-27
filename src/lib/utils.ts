@@ -1,8 +1,31 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+/**
+ * Joins class names. Unlike shadcn's default, it doesn't resolve conflicting
+ * Tailwind classes at runtime: tailwind-merge would add about 27 KB to every
+ * page. A `className` that overrides a component's own class must replace it
+ * instead of being appended. Development warns about any conflict it finds.
+ */
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
+  const classes = clsx(inputs);
+  if (import.meta.env.DEV) warnOnConflicts(classes);
+  return classes;
+}
+
+const warned = new Set<string>();
+
+function warnOnConflicts(classes: string) {
+  const merged = twMerge(classes);
+  if (merged === classes || warned.has(classes)) return;
+  warned.add(classes);
+  const kept = new Set(merged.split(" "));
+  const dropped = classes.split(" ").filter((name) => !kept.has(name));
+  // tailwind-merge also drops repeated classes, which are harmless.
+  if (dropped.length === 0) return;
+  console.warn(
+    `cn(): conflicting classes ${JSON.stringify(dropped)} in "${classes}"`,
+  );
 }
 
 /**

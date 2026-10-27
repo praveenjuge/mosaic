@@ -101,11 +101,14 @@ e2e/                 # Playwright end-to-end tests
 - Use `getDb()` from `src/lib/db.ts` for D1 access in server functions
 - Type D1 helper parameters as `D1Queryable` so they accept a Sessions API session. Use `withSession("first-unconstrained")` on read-heavy public paths so reads can hit read replicas
 - Use `import { env } from "cloudflare:workers"` for R2 and other bindings
-- Use shadcn/ui components consistently
+- Use shadcn/ui components consistently. Their overlays are native: `dialog.tsx` and `alert-dialog.tsx` wrap `<dialog>`, `dropdown-menu.tsx` the popover API, and `slot.tsx` replaces Radix's `Slot`. Don't add `radix-ui` back for a primitive the browser has
+- `cn()` (`src/lib/utils.ts`) only joins classes; tailwind-merge runs in development to warn about conflicts. To override a component's own class from outside, use Tailwind's `!` modifier (`className="h-9!"`) or a variant, not a second class of the same kind
 - Show loading states during async operations
 - Implement proper error boundaries and fallbacks
 - Implement proper SEO metadata for all pages
-- Use dynamic imports where appropriate
+- Use dynamic imports where appropriate. Keep the signed-out pages' JavaScript small: code only the dashboard needs (sonner, server functions, Clerk) loads lazily. A lazy component the server renders uses `preloadableLazy(load, "src/…file.tsx")`, so the HTML preloads its chunks (`src/lib/lazy-chunks-plugin.ts`); without them, hydration waits for a second round trip
+- Clerk's UI bundle loads only when a Clerk component mounts (`LazyClerkUI` in `src/lib/clerk-ui.ts`), in its shared-React variant. The header's account menu is Mosaic's own; rendering a Clerk component such as `<UserButton>` on every page would download about 300 KB of Clerk UI with it
+- Icons come from `vadivam-react`; a Vite plugin (`vadivamLite` in `vite.config.ts`) renders them with `src/lib/vadivam-icon.ts` instead of the package's runtime sanitizer
 - Show user-friendly error messages
 - Log errors appropriately without exposing sensitive data
 - Use ESLint with the Vite/TanStack Start setup

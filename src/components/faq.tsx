@@ -1,9 +1,4 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { ChevronDownIcon, ChevronUpIcon } from "vadivam-react";
 
 interface FAQ {
   question: string;
@@ -48,19 +43,36 @@ const FAQS: FAQ[] = [
   },
 ];
 
+/**
+ * Native `<details>` elements sharing a `name`, so opening one closes the
+ * others. They work before the page's JavaScript loads and ship none of
+ * their own.
+ */
 export default function FAQ() {
   return (
-    <Accordion type="single" collapsible className="border-t">
-      {FAQS.map((faq, index) => (
-        <AccordionItem key={index} value={`item-${index}`}>
-          <AccordionTrigger className="py-4 text-base">
+    <div className="flex w-full flex-col border-t">
+      {FAQS.map((faq) => (
+        <details
+          key={faq.question}
+          name="faq"
+          className="group/faq not-last:border-b"
+        >
+          <summary className="focus-visible:border-ring focus-visible:ring-ring/50 relative flex cursor-pointer list-none items-start justify-between rounded-lg border border-transparent py-4 text-left text-base font-medium transition-all outline-none hover:underline focus-visible:ring-3 [&::-webkit-details-marker]:hidden">
             {faq.question}
-          </AccordionTrigger>
-          <AccordionContent className="text-muted-foreground leading-relaxed">
+            <ChevronDownIcon
+              aria-hidden="true"
+              className="text-muted-foreground pointer-events-none ml-auto size-4 shrink-0 group-open/faq:hidden"
+            />
+            <ChevronUpIcon
+              aria-hidden="true"
+              className="text-muted-foreground pointer-events-none ml-auto hidden size-4 shrink-0 group-open/faq:inline"
+            />
+          </summary>
+          <p className="text-muted-foreground pb-2.5 text-sm leading-relaxed">
             {faq.answer}
-          </AccordionContent>
-        </AccordionItem>
+          </p>
+        </details>
       ))}
-    </Accordion>
+    </div>
   );
 }
