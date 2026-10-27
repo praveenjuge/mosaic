@@ -6,6 +6,7 @@ import react, { reactCompilerPreset } from "@vitejs/plugin-react";
 import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 import { mosaicContent } from "./src/lib/content-plugin";
+import { lazyChunks } from "./src/lib/lazy-chunks-plugin";
 
 function validateSiteUrl(siteUrl: string | undefined) {
   if (!siteUrl) {
@@ -88,6 +89,7 @@ export default defineConfig(({ command, mode }) => {
     envPrefix: ["VITE_"],
     plugins: [
       vadivamLite(),
+      lazyChunks(),
       mosaicContent(),
       cloudflare({
         viteEnvironment: { name: "ssr" },

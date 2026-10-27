@@ -5,9 +5,11 @@ import { preloadableLazy } from "@/lib/preloadable-lazy";
 // none of it. `ClerkShell` also loads Clerk's own scripts from its CDN.
 export const clerkShell = preloadableLazy(
   () => import("@/components/auth/clerk-shell"),
+  "src/components/auth/clerk-shell.tsx",
 );
 export const headerSignedIn = preloadableLazy(
   () => import("@/components/header/header-signed-in"),
+  "src/components/header/header-signed-in.tsx",
 );
 
 const authPaths = ["/sign-in", "/sign-up"];

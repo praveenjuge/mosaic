@@ -13,6 +13,7 @@ const homeDescription =
 // chunk, which the loader fetches alongside the data.
 const dashboardPage = preloadableLazy(
   () => import("@/components/dashboard/dashboard-page"),
+  "src/components/dashboard/dashboard-page.tsx",
 );
 
 export const Route = createFileRoute("/_public/")({

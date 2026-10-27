@@ -36,16 +36,13 @@ export default function ClerkShell({
     preconnect(clerkOrigin, { crossOrigin: "anonymous" });
     preconnect(clerkOrigin);
   }
-  // Rendered on the server, these start Clerk's scripts with the page's
-  // own, instead of after it hydrates. Elsewhere, Clerk mostly keeps the
-  // session fresh, so its script waits behind the page's.
-  preload(clerkJSUrl(), {
-    as: "script",
-    crossOrigin: "anonymous",
-    fetchPriority: authPage ? "high" : "low",
-  });
-  // `@clerk/react` registers React for the shared UI before it loads.
+  // The sign-in and sign-up pages are Clerk's form, so the server starts
+  // Clerk's scripts with the page's own instead of after it hydrates.
+  // Elsewhere Clerk mostly keeps the session fresh, and on a slow connection
+  // its script would delay the page becoming interactive.
   if (authPage) {
+    preload(clerkJSUrl(), { as: "script", crossOrigin: "anonymous" });
+    // `@clerk/react` registers React for the shared UI before it loads.
     preload(clerkUIUrl(true), { as: "script", crossOrigin: "anonymous" });
   }
 
