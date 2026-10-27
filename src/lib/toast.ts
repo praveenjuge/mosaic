@@ -15,14 +15,16 @@ export function toasterMounted() {
   markReady();
 }
 
-function show(kind: "success" | "error" | "info", message: string) {
+type Sonner = typeof import("sonner").toast;
+
+function show(display: (sonner: Sonner) => void) {
   void Promise.all([import("sonner"), toasterReady]).then(([{ toast }]) => {
-    toast[kind](message);
+    display(toast);
   });
 }
 
 export const toast = {
-  success: (message: string) => show("success", message),
-  error: (message: string) => show("error", message),
-  info: (message: string) => show("info", message),
+  success: (message: string) => show((sonner) => sonner.success(message)),
+  error: (message: string) => show((sonner) => sonner.error(message)),
+  info: (message: string) => show((sonner) => sonner.info(message)),
 };

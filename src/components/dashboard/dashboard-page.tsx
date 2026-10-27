@@ -54,7 +54,9 @@ const Toaster = lazy(() => import("@/components/ui/sonner"));
 
 function LazyToaster() {
   const [hydrated, setHydrated] = useState(false);
-  useEffect(() => setHydrated(true), []);
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
   if (!hydrated) return null;
   return (
     <Suspense>
