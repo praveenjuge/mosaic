@@ -16,7 +16,6 @@ import { buildOrganizationJsonLd } from "@/lib/seo";
 import { themeScript } from "@/lib/theme";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
-import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
   HeadContent,
   Outlet,
@@ -29,6 +28,7 @@ import { Suspense, useState, type ReactNode } from "react";
 import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
+import geistCore from "../styles/fonts/geist-core.woff2?url";
 
 // The root router context is intentionally empty; child routes augment it via
 // `beforeLoad` (see `auth`). `{}` is required here for that augmentation to work.
@@ -80,7 +80,7 @@ export const Route = createRootRouteWithContext<{}>()({
       // only requests it after downloading and parsing the CSS.
       {
         rel: "preload",
-        href: geistLatin,
+        href: geistCore,
         as: "font",
         type: "font/woff2",
         crossOrigin: "anonymous",

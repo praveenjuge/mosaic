@@ -9,7 +9,6 @@ import {
 } from "@/lib/page-cache";
 import { withSecurityHeaders } from "@/lib/security-headers";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
-import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
   createCsrfMiddleware,
   createMiddleware,
@@ -17,6 +16,7 @@ import {
 } from "@tanstack/react-start";
 import { waitUntil } from "cloudflare:workers";
 import appCss from "./styles/app.css?url";
+import geistCore from "./styles/fonts/geist-core.woff2?url";
 
 /** Set per build by `vite.config.ts`; keys the page cache to one deploy. */
 declare const __MOSAIC_BUILD_ID__: string;
@@ -34,7 +34,7 @@ const csrfMiddleware = createCsrfMiddleware({
  */
 const earlyHints = [
   `<${appCss}>; rel=preload; as=style`,
-  `<${geistLatin}>; rel=preload; as=font; type="font/woff2"; crossorigin`,
+  `<${geistCore}>; rel=preload; as=font; type="font/woff2"; crossorigin`,
 ].join(", ");
 
 // `/use` and `/i/*` answer in `src/server.ts` and never reach these.

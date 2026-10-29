@@ -1,0 +1,13 @@
+{
+  "source": "https://raw.githubusercontent.com/google/fonts/6157dfaa640ca5738b4d1a7070fe389c3036d7fc/ofl/geist/Geist%5Bwght%5D.ttf",
+  "axis": [400, 900],
+  "features": ["ccmp", "kern", "liga", "mark", "mkmk", "tnum"],
+  "scanned": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.md",
+    "src/**/*.css",
+    "node_modules/@clerk/localizations/dist/en-US.mjs"
+  ],
+  "systemFonts": "→≤⋯─"
+}

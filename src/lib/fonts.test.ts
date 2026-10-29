@@ -1,0 +1,70 @@
+import { describe, expect, test } from "bun:test";
+import { readFileSync } from "node:fs";
+import path from "node:path";
+
+// The Geist files in src/styles/fonts/ hold only the characters and weights
+// Mosaic draws. When these fail, rerun `uv run scripts/subset-fonts.py` and
+// commit what it writes.
+
+const root = path.resolve(import.meta.dir, "../..");
+const fontsDir = path.join(root, "src/styles/fonts");
+const manifest = JSON.parse(
+  readFileSync(path.join(fontsDir, "geist.json"), "utf8"),
+) as { axis: [number, number]; scanned: string[]; systemFonts: string };
+
+function unicodeRanges(css: string): Set<number> {
+  const chars = new Set<number>();
+  for (const [, ranges] of css.matchAll(/unicode-range:([^;]+);/g)) {
+    for (const range of ranges.split(",")) {
+      const [lo, hi = lo] = range.trim().replace("U+", "").split("-");
+      for (let c = parseInt(lo, 16); c <= parseInt(hi, 16); c++) chars.add(c);
+    }
+  }
+  return chars;
+}
+
+function scannedFiles(): string[] {
+  const files = new Set<string>();
+  for (const pattern of manifest.scanned) {
+    for (const file of new Bun.Glob(pattern).scanSync({ cwd: root })) {
+      if (!file.includes(".test.")) files.add(file);
+    }
+  }
+  return [...files].sort();
+}
+
+describe("Geist subset", () => {
+  test("has every character the pages and Clerk's strings use", () => {
+    const covered = unicodeRanges(
+      readFileSync(path.join(fontsDir, "geist.css"), "utf8"),
+    );
+    for (const c of manifest.systemFonts) covered.add(c.codePointAt(0)!);
+    const missing = new Map<string, string>();
+    for (const file of scannedFiles()) {
+      for (const c of readFileSync(path.join(root, file), "utf8")) {
+        const code = c.codePointAt(0)!;
+        if (code > 0x7e && !covered.has(code) && !missing.has(c)) {
+          missing.set(
+            c,
+            `U+${code.toString(16).toUpperCase().padStart(4, "0")} in ${file}`,
+          );
+        }
+      }
+    }
+    expect([...missing.values()]).toEqual([]);
+  });
+
+  test("covers every weight the styles ask for", () => {
+    const [min] = manifest.axis;
+    // Tailwind's weights below 400, and literal ones in CSS or inline styles.
+    const light =
+      /\bfont-(thin|extralight|light)\b|font-weight:\s*[1-3]00\b|fontWeight:\s*["']?[1-3]00\b/;
+    const offenders = scannedFiles().filter(
+      (file) =>
+        !file.startsWith("node_modules/") &&
+        light.test(readFileSync(path.join(root, file), "utf8")),
+    );
+    expect(min).toBe(400);
+    expect(offenders).toEqual([]);
+  });
+});
