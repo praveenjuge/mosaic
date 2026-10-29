@@ -54,17 +54,26 @@ describe("Geist subset", () => {
     expect([...missing.values()]).toEqual([]);
   });
 
+  // A weight below the axis fails until AXIS in the script is widened.
   test("covers every weight the styles ask for", () => {
     const [min] = manifest.axis;
-    // Tailwind's weights below 400, and literal ones in CSS or inline styles.
-    const light =
-      /\bfont-(thin|extralight|light)\b|font-weight:\s*[1-3]00\b|fontWeight:\s*["']?[1-3]00\b/;
-    const offenders = scannedFiles().filter(
-      (file) =>
-        !file.startsWith("node_modules/") &&
-        light.test(readFileSync(path.join(root, file), "utf8")),
-    );
-    expect(min).toBe(400);
+    const named: Record<string, number> = {
+      thin: 100,
+      extralight: 200,
+      light: 300,
+    };
+    // Tailwind's light weights, and literal ones in CSS or inline styles.
+    const weights =
+      /\bfont-(thin|extralight|light)\b|font-weight:\s*(\d00)\b|fontWeight:\s*["']?(\d00)\b/g;
+    const offenders: string[] = [];
+    for (const file of scannedFiles()) {
+      if (file.startsWith("node_modules/")) continue;
+      const text = readFileSync(path.join(root, file), "utf8");
+      for (const [match, name, css, inline] of text.matchAll(weights)) {
+        const weight = name ? named[name] : Number(css ?? inline);
+        if (weight < min) offenders.push(`${match} in ${file}`);
+      }
+    }
     expect(offenders).toEqual([]);
   });
 });

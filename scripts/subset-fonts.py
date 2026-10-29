@@ -18,10 +18,11 @@ The output is deterministic, so a rerun with nothing changed leaves git
 clean. Rerun it when:
 
 - `src/lib/fonts.test.ts` fails because src/ or Clerk's en-US strings use a
-  character the files don't have (the test names it), or a style asks for a
-  weight below 400;
-- a style turns on an OpenType feature that isn't in FEATURES;
-- you move to a newer Geist (update SOURCE_COMMIT and SOURCE_SHA256).
+  character the files don't have (the test names it);
+- the test fails because a style asks for a weight below AXIS[0]: first set
+  AXIS to (100, 900), the full range;
+- a style turns on an OpenType feature: first add its tag to FEATURES;
+- you move to a newer Geist: first update SOURCE_COMMIT and SOURCE_SHA256.
 
 Each choice keeps rendering identical to the fontsource files it replaced
 (Geist 1.800 from Google Fonts, the same build as the source here):
@@ -81,13 +82,14 @@ LICENSE_URL = f"{SOURCE_BASE}/OFL.txt"
 
 FAMILY = "Geist Variable"
 
-# The axis range the files keep. Geist's masters are 100, 400, and 900.
+# The axis range the files keep: (400, 900) or the full (100, 900). Geist's
+# masters are 100, 400, and 900, and any other cut would rescale deltas.
 AXIS = (400, 900)
 # The weights pages use, which the checks compare against the source:
 # Tailwind's font-normal, font-medium, and font-semibold; prose text, and
 # its headings and <strong> at 600 (prose-headings:font-semibold); Clerk's
 # normal, medium, semibold, and bold; sonner's 400 and 500.
-WEIGHTS = range(400, 701, 50)
+WEIGHTS = range(AXIS[0], 701, 50)
 
 # ccmp, kern, liga, mark, and mkmk are on by default; Geist's liga draws
 # "->" and "<-" as arrows. tnum is `tabular-nums` on the dashboard. The old
@@ -188,13 +190,16 @@ def build(source: bytes, chars: set[int]) -> bytes:
     # The instancer trims fvar and the HVAR, MVAR, and GDEF deltas, but it
     # also rewrites gvar with every point's delta rounded, where Geist leaves
     # some points to be interpolated (to fractional positions). So gvar keeps
-    # the subset's own deltas minus those for the 100 master, which is exact:
-    # above 400 the normalized axis doesn't change.
+    # the subset's own deltas, minus those for the 100 master when AXIS
+    # starts at 400. That is exact: above 400 the normalized axis doesn't
+    # change.
+    if AXIS not in ((400, 900), (100, 900)):
+        sys.exit("AXIS must be (400, 900) or (100, 900)")
     limited = instancer.instantiateVariableFont(
         font, {"wght": AXIS}, updateFontNames=False
     )
     limited["gvar"].variations = {
-        glyph: [v for v in variations if v.axes["wght"][1] > 0]
+        glyph: [v for v in variations if AXIS[0] < 400 or v.axes["wght"][1] > 0]
         for glyph, variations in font["gvar"].variations.items()
     }
     # Browsers don't use named instances, or the names only they refer to.
