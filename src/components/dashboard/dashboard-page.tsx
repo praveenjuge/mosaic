@@ -1,4 +1,4 @@
-import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
+import WelcomeEmptyState from "@/components/dashboard/welcome-empty-state";
 import type { DashboardAnalytics } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { Await } from "@tanstack/react-router";
@@ -107,7 +107,6 @@ export default function DashboardPage({
   const websites = websitesKey(dashboardStats);
   const analytics = retained?.key === websites ? retained.analytics : null;
 
-  // Only the dashboard shows toasts, so other pages don't download sonner.
   // The Toaster stays mounted when the first website replaces the welcome.
   return (
     <>

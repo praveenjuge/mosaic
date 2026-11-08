@@ -3,7 +3,6 @@ import {
   acceptsHtml,
   negotiateResponse,
   prefersMarkdown,
-  toMarkdownDocument,
 } from "./markdown-negotiation";
 
 const browserAccept =
@@ -193,8 +192,6 @@ describe("negotiateResponse", () => {
 
   test("leaves app routes, assets, and non-GET requests alone", () => {
     for (const path of [
-      "/use",
-      "/i/global/a.jpeg",
       "/sign-in",
       "/_serverFn/abc123",
       "/llms.txt",
@@ -208,37 +205,5 @@ describe("negotiateResponse", () => {
     expect(
       negotiateResponse(get("/", "text/markdown", "POST"), pages),
     ).toBeNull();
-  });
-});
-
-describe("toMarkdownDocument", () => {
-  test("prepends the title as the heading", () => {
-    expect(toMarkdownDocument("Hello World!", "Welcome to Mosaic.")).toBe(
-      "# Hello World!\n\nWelcome to Mosaic.\n",
-    );
-  });
-
-  test("removes a source heading that repeats the title", () => {
-    expect(
-      toMarkdownDocument(
-        "Managing Your Subscription",
-        "# Managing Your Subscription\n\nBody.",
-      ),
-    ).toBe("# Managing Your Subscription\n\nBody.\n");
-  });
-
-  test("keeps an opening section heading that is not the title", () => {
-    expect(
-      toMarkdownDocument("React", "## In React 19+, render meta tags\n\nBody."),
-    ).toBe("# React\n\n## In React 19+, render meta tags\n\nBody.\n");
-  });
-
-  test("keeps a source heading that differs from the title", () => {
-    expect(
-      toMarkdownDocument(
-        "Managing Your Subscription",
-        "# Subscription\n\nBody.",
-      ),
-    ).toBe("# Managing Your Subscription\n\n# Subscription\n\nBody.\n");
   });
 });

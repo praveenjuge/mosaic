@@ -1,35 +1,20 @@
-import { ensureTrailingSlash, publicEnv } from "./env";
-
-// OG images are served by the Worker itself at `/i/<r2key>` (no separate
-// R2 custom domain). R2 keys contain slashes, so this is a splat route.
-export const DEFAULT_PUBLIC_IMAGE_BASE_URL = new URL(
-  "i/",
-  publicEnv.siteUrl,
-).toString();
-
-// ── Parsing ─────────────────────────────────────────────────────────
+import { publicEnv } from "./env";
 
 export function stripTrailingSlashes(value: string) {
   return value.replace(/\/+$/, "");
 }
 
-/** Parse user input as an HTTP(S) URL, adding `https://` to bare hostnames. */
-export function parseWebsiteUrl(value: string): URL {
+/**
+ * Parse user input as an HTTP(S) URL, adding `https://` to bare hostnames.
+ * `null` when it isn't a URL.
+ */
+export function parseWebsiteUrl(value: string): URL | null {
   const trimmed = value.trim();
-  if (!trimmed) {
-    throw new Error("Please enter a valid website URL.");
-  }
-
-  const parsed = new URL(
+  if (!trimmed) return null;
+  return URL.parse(
     /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`,
   );
-  if (!["http:", "https:"].includes(parsed.protocol)) {
-    throw new Error("Only HTTP and HTTPS URLs are supported.");
-  }
-  return parsed;
 }
-
-// ── Outbound URL security ──────────────────────────────────────────
 
 const PRIVATE_IPV4_RANGES: Array<[number, number]> = [
   [0x00000000, 0x00ffffff],
@@ -146,8 +131,6 @@ export function validateOutboundUrl(
   return null;
 }
 
-// ── Canonical page identity ─────────────────────────────────────────
-
 /**
  * A page's identity in the shared cache: the URL without its fragment or
  * trailing slashes. `global_images` rows are keyed by `pageUrl`, so changing
@@ -166,23 +149,25 @@ export function cleanDisplayUrl(value: string) {
   return stripTrailingSlashes(value).replace(/^https?:\/\//, "");
 }
 
-// ── URL builders ────────────────────────────────────────────────────
-
-export function buildUseEndpointUrl(baseUrl: string, targetUrl: string) {
-  const endpoint = new URL("use", ensureTrailingSlash(baseUrl));
+/** The `/use` URL that gives a page its OG image. */
+export function imageEndpointUrl(targetUrl: string) {
+  const endpoint = new URL("use", publicEnv.siteUrl);
   endpoint.searchParams.set("url", targetUrl);
   return endpoint.toString();
 }
 
-export function buildPublicImageUrl(
-  key: string,
-  baseUrl = DEFAULT_PUBLIC_IMAGE_BASE_URL,
-) {
-  return new URL(key, ensureTrailingSlash(baseUrl)).toString();
+/**
+ * The `/i/<key>` URL of a stored image. The Worker serves images itself, and
+ * R2 keys contain slashes. Server code passes the origin that served the
+ * request, so Worker Previews read from their own R2 bucket.
+ */
+export function publicImageUrl(key: string, origin = publicEnv.siteUrl) {
+  return new URL(`/i/${key}`, origin).toString();
 }
 
 /** The `/use` URL that screenshots one of Mosaic's own pages. */
 export function getOgImageUrl(slug: string) {
-  const targetUrl = new URL(slug.replace(/^\//, ""), publicEnv.siteUrl);
-  return buildUseEndpointUrl(publicEnv.siteUrl, targetUrl.toString());
+  return imageEndpointUrl(
+    new URL(slug.replace(/^\//, ""), publicEnv.siteUrl).toString(),
+  );
 }

@@ -7,6 +7,8 @@
  * in renders fresh, so per-user HTML is never stored or shared.
  */
 
+import { hasClerkSession } from "@/lib/clerk-auth";
+
 /** `/`, `/legal`, `/help`, and help articles and guides. */
 const CACHEABLE_PATH = /^\/(?:legal|help(?:\/guides)?(?:\/[a-z0-9-]+)?)?$/;
 
@@ -17,28 +19,11 @@ const CACHEABLE_PATH = /^\/(?:legal|help(?:\/guides)?(?:\/[a-z0-9-]+)?)?$/;
 const TRACKING_PARAM =
   /^(?:utm_\w+|fbclid|gclid|gbraid|wbraid|msclkid|twclid|li_fat_id|igshid|mc_cid|mc_eid|ref|ref_src|_ga|_gl|si)$/;
 
-/** Whether every query parameter is a tracking one (or there are none). */
 function hasOnlyTrackingParams(url: URL): boolean {
   for (const name of url.searchParams.keys()) {
     if (!TRACKING_PARAM.test(name)) return false;
   }
   return true;
-}
-
-/** Clerk cookies that mean a session exists or may need a handshake. */
-export function hasClerkSession(cookieHeader: string | null): boolean {
-  for (const part of (cookieHeader ?? "").split(";")) {
-    const separator = part.indexOf("=");
-    const name = (separator === -1 ? part : part.slice(0, separator)).trim();
-    const value = separator === -1 ? "" : part.slice(separator + 1).trim();
-    if (name.startsWith("__session") || name.startsWith("__clerk")) {
-      return true;
-    }
-    // `__client_uat` is "0" once signed out; anything else means signed in
-    // on another tab or domain, which Clerk resolves with a handshake.
-    if (name.startsWith("__client_uat") && value !== "0") return true;
-  }
-  return false;
 }
 
 /**

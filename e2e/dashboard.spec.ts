@@ -1,5 +1,6 @@
 import { clerk } from "@clerk/testing/playwright";
 import { expect, test } from "@playwright/test";
+import { waitForHydration } from "./hydration";
 
 // Needs a Clerk development instance: real VITE_CLERK_PUBLISHABLE_KEY and
 // CLERK_SECRET_KEY, plus E2E_CLERK_USER_EMAIL for an existing test user.
@@ -26,22 +27,7 @@ test("signed-in users can add, edit, and delete a website", async ({
     exact: true,
   });
   await expect(welcome.or(addWebsite)).toBeVisible();
-  // Clicking before hydration would do nothing or fall through to a native
-  // form GET.
-  await expect
-    .poll(
-      () =>
-        page.evaluate(() => {
-          const button = document.querySelector("main button");
-          return (
-            !!button &&
-            Object.keys(button).some((key) => key.startsWith("__reactProps"))
-          );
-        }),
-      // A cold dev server can take a while to compile and hydrate the page.
-      { timeout: 30_000 },
-    )
-    .toBe(true);
+  await waitForHydration(page, "main button");
 
   if (await welcome.isVisible()) {
     await page.getByLabel("Website").fill(hostname);

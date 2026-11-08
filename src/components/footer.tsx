@@ -1,4 +1,5 @@
-import { website_name } from "@/lib/constants";
+import { landingSections } from "@/components/home/sections";
+import { support_email, website_name } from "@/lib/constants";
 import { useTheme, type Theme } from "@/lib/theme";
 import { Link } from "@tanstack/react-router";
 import { Computer, Moon, Sun, type VadivamIcon } from "vadivam-react";
@@ -8,8 +9,8 @@ const footerSections = [
   {
     title: "Product",
     links: [
-      { href: "/#features", label: "Features" },
-      { href: "/#pricing", label: "Pricing" },
+      { href: `/#${landingSections.features}`, label: "Features" },
+      { href: `/#${landingSections.pricing}`, label: "Pricing" },
       { href: "/help/use-the-mosaic-api", label: "API" },
     ],
   },
@@ -18,7 +19,7 @@ const footerSections = [
     links: [
       { href: "/help", label: "Help center" },
       { href: "/help/test-your-social-previews", label: "Test your previews" },
-      { href: "mailto:hello@praveenjuge.com", label: "Contact support" },
+      { href: `mailto:${support_email}`, label: "Contact support" },
     ],
   },
   {

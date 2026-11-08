@@ -1,3 +1,4 @@
+import { inlineLinkClass } from "@/components/inline-link";
 import type { BudgetUsage, DashboardBudget } from "@/lib/types";
 import { cn, formatNumber } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
@@ -52,18 +53,11 @@ function Meter({
   );
 }
 
-export function DashboardUsage({
-  budget,
-  className,
-}: {
-  budget: DashboardBudget;
-  className?: string;
-}) {
+export function DashboardUsage({ budget }: { budget: DashboardBudget }) {
   return (
     <DashboardPanel
       title="Today's usage"
       description="New screenshots since midnight UTC"
-      className={className}
     >
       <div className="flex flex-1 flex-col gap-6 px-5 pt-1 pb-5">
         <Meter
@@ -81,7 +75,7 @@ export function DashboardUsage({
           <Link
             to="/help/$slug"
             params={{ slug: "understanding-usage-limits" }}
-            className="text-foreground underline underline-offset-4"
+            className={inlineLinkClass}
           >
             How limits work
           </Link>

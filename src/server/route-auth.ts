@@ -1,4 +1,4 @@
-import type { RouteAuth } from "@/lib/browser-route-auth";
+import type { RouteAuth } from "@/lib/clerk-auth";
 import { auth } from "@clerk/tanstack-react-start/server";
 import { createServerFn } from "@tanstack/react-start";
 

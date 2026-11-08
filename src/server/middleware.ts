@@ -6,13 +6,6 @@ import { createMiddleware } from "@tanstack/react-start";
  *
  * Throws if the user is not signed in, making `context.userId`
  * available (as a non-null string) to every downstream handler.
- *
- * Usage:
- *   createServerFn()
- *     .middleware([authMiddleware])
- *     .handler(async ({ context }) => {
- *       context.userId; // string
- *     })
  */
 export const authMiddleware = createMiddleware({ type: "function" }).server(
   async ({ next }) => {

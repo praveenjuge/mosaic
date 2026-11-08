@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { afterEach, describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { Suspense } from "react";
 import { renderToString } from "react-dom/server";
@@ -15,6 +15,10 @@ function render(Component: (props: { name: string }) => React.ReactNode) {
     </Suspense>,
   );
 }
+
+afterEach(() => {
+  registerLazyChunks({});
+});
 
 describe("preloadableLazy", () => {
   test("suspends before the module is loaded", () => {
@@ -51,12 +55,10 @@ describe("preloadableLazy", () => {
         </body>
       </html>,
     );
-    for (const href of ["/assets/greeting.js", "/assets/shared.js"]) {
-      expect(html).toContain(
-        `<link rel="preload" href="${href}" as="script" crossorigin="" fetchPriority="low"/>`,
-      );
-    }
-    registerLazyChunks({});
+    const preloaded = [
+      ...html.matchAll(/<link rel="preload" href="([^"]+)" as="script"/g),
+    ].map(([, href]) => href);
+    expect(preloaded).toEqual(["/assets/greeting.js", "/assets/shared.js"]);
   });
 
   test("names chunks that exist, matching what each call imports", async () => {

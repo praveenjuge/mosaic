@@ -2,7 +2,6 @@ import { Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ChevronRight } from "vadivam-react";
 
-/** A help article or guide: breadcrumbs, a title, and prebuilt HTML. */
 export function ArticlePage({
   title,
   eyebrow,

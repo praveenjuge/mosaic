@@ -80,6 +80,37 @@ async function insertGlobalImage(
 
 const pageHash = "a".repeat(64);
 
+const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
+
+type HarnessResponse = Awaited<ReturnType<typeof server.fetch>>;
+
+/**
+ * Fetch until `done` accepts the response, for caches that are written
+ * after a response. Returns the last response.
+ */
+async function fetchUntil(
+  fetchOnce: () => Promise<HarnessResponse>,
+  done: (response: HarnessResponse) => boolean,
+): Promise<HarnessResponse> {
+  for (let attempt = 0; ; attempt++) {
+    const response = await fetchOnce();
+    if (done(response) || attempt === 20) return response;
+    await response.arrayBuffer();
+    await sleep(50);
+  }
+}
+
+/**
+ * A build with real Clerk development keys (some cloud sessions) sends
+ * signed-out page requests to Clerk's handshake first, so they never render
+ * or use the page cache. CI builds with placeholder keys.
+ */
+function isClerkHandshake(response: HarnessResponse): boolean {
+  return (
+    response.headers.get("Location")?.includes("/v1/client/handshake") ?? false
+  );
+}
+
 // A hostname no other test uses, for tests whose `/use` answers get cached.
 let testHosts = 0;
 function testHost() {
@@ -157,22 +188,17 @@ describe("signed-out page cache", () => {
     // No other test requests this page as HTML, so the first visit misses.
     const path = "/help/hello-world";
     const first = await fetchPage(path);
-    // Development Clerk keys (some cloud sessions) handshake every signed-out
-    // request, so they never use the page cache. CI's placeholders do.
-    if (first.headers.get("Location")?.includes("/v1/client/handshake")) {
+    if (isClerkHandshake(first)) {
       t.skip("Clerk development keys redirect to the handshake");
       return;
     }
     assert.equal(first.headers.get("X-Mosaic-Cache"), "MISS");
     const html = await first.text();
 
-    let second = await fetchPage(path);
-    for (let attempt = 0; attempt < 20; attempt++) {
-      if (second.headers.get("X-Mosaic-Cache") === "HIT") break;
-      await second.arrayBuffer();
-      await new Promise((resolve) => setTimeout(resolve, 50));
-      second = await fetchPage(path);
-    }
+    const second = await fetchUntil(
+      () => fetchPage(path),
+      (response) => response.headers.get("X-Mosaic-Cache") === "HIT",
+    );
     assert.equal(second.headers.get("X-Mosaic-Cache"), "HIT");
     assert.equal(second.headers.get("Cache-Control"), null);
     assert.match(
@@ -254,7 +280,7 @@ describe("/use", () => {
     );
   });
 
-  test("serves an expired image at once and refreshes it afterwards", async () => {
+  test("serves an expired image at once instead of waiting for a refresh", async () => {
     const host = testHost();
     await registerSite(host);
     await insertGlobalImage("global/stale.jpeg", Date.now() - 1, host);
@@ -314,10 +340,7 @@ describe("content negotiation", () => {
         headers: { Accept: "text/html,application/xhtml+xml,*/*;q=0.8" },
         redirect: "manual",
       });
-      // A build with real Clerk development keys (some cloud sessions) sends
-      // signed-out page requests to Clerk's handshake first. CI builds with
-      // placeholder keys, so it always checks the rendered page.
-      if (response.headers.get("Location")?.includes("/v1/client/handshake")) {
+      if (isClerkHandshake(response)) {
         t.skip("Clerk development keys redirect to the handshake");
         return;
       }
@@ -396,15 +419,10 @@ describe("/i/*", () => {
 
     // Once cached, the image is served without reading R2.
     await env.OG_BUCKET.delete(key);
-    const fetchCached = async () => {
-      for (let attempt = 0; ; attempt++) {
-        const cached = await server.fetch(`/i/${key}`, { redirect: "manual" });
-        if (cached.status === 200 || attempt === 20) return cached;
-        await cached.arrayBuffer();
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-    };
-    const cached = await fetchCached();
+    const cached = await fetchUntil(
+      () => server.fetch(`/i/${key}`, { redirect: "manual" }),
+      (response) => response.status === 200,
+    );
     assert.equal(cached.status, 200);
     assert.deepEqual(
       new Uint8Array(await cached.arrayBuffer()),
@@ -428,6 +446,8 @@ describe("/i/*", () => {
     for (const oldKey of [
       `global/${pageHash}-abc123.jpeg`,
       `global/${pageHash}.jpeg`,
+      `msk7vkfb-u4ks6195/${pageHash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${pageHash}.png`,
     ]) {
       const response = await server.fetch(`/i/${oldKey}`, {
         redirect: "manual",
@@ -445,27 +465,7 @@ describe("/i/*", () => {
     assert.equal(other.status, 404);
   });
 
-  test("redirects keys from old per-site prefixes once they are replaced", async () => {
-    const currentKey = `global/${pageHash}-def456.jpeg`;
-    await insertGlobalImage(currentKey, Date.now() + 60_000);
-    const { url } = await server.listen();
-
-    for (const oldKey of [
-      `msk7vkfb-u4ks6195/${pageHash}.jpeg`,
-      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${pageHash}.png`,
-    ]) {
-      const response = await server.fetch(`/i/${oldKey}`, {
-        redirect: "manual",
-      });
-      assert.equal(response.status, 307, oldKey);
-      assert.equal(
-        response.headers.get("Location"),
-        new URL(`/i/${currentKey}`, url).toString(),
-      );
-      assert.equal(response.headers.get("Cache-Control"), "private, no-store");
-    }
-
-    // Until a refresh deletes it, the old object is still served as is.
+  test("serves an object under an old per-site prefix as is until it is replaced", async () => {
     const env = await worker.getEnv();
     const stored = `msk7vkfb-u4ks6195/${"b".repeat(64)}.jpeg`;
     await env.OG_BUCKET.put(stored, new Uint8Array([7]));
@@ -500,8 +500,6 @@ describe("/i/*", () => {
 });
 
 describe("/use answers and guards", () => {
-  const sleep = (ms: number) => new Promise((done) => setTimeout(done, ms));
-
   async function budgetCount(scope: string): Promise<number | null> {
     const env = await worker.getEnv();
     const row = await env.DB.prepare(

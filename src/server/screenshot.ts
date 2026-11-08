@@ -1,0 +1,92 @@
+import { OG_IMAGE_SIZE } from "@/lib/constants";
+import { blockedRequestPatterns } from "@/server/blocked-requests";
+import { CONSENT_BANNER_CSS } from "@/server/consent-banners";
+import {
+  BrowserRunHttpError,
+  screenshotWithEngineFallback,
+} from "@/server/screenshot-retry";
+import { env } from "cloudflare:workers";
+
+/**
+ * Deny marker in the user agent of Mosaic's own Browser Run sessions. If a
+ * captured page redirects back to `/use`, Chromium keeps this user agent and
+ * the request is stopped before another screenshot can start. It only ever
+ * denies, so spoofing it cannot grant access.
+ */
+/**
+ * Browser Run engine for every OG screenshot (production and demo). Kitesurf
+ * is cheaper and free while in beta, but it is not pixel-perfect and has no
+ * WebGL or video; set this to "chromium" to go back to full Chrome rendering.
+ *
+ * @see https://developers.cloudflare.com/browser-run/kitesurf/
+ */
+const SCREENSHOT_ENGINE: "chromium" | "kitesurf" = "kitesurf";
+
+const MOSAIC_RENDERER_MARKER = "MosaicBrowserRun/1.0";
+export const MOSAIC_RENDERER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
+  "AppleWebKit/537.36 (KHTML, like Gecko) " +
+  `Chrome/152.0.0.0 Safari/537.36 ${MOSAIC_RENDERER_MARKER}`;
+
+export function isMosaicRendererRequest(request: Request): boolean {
+  return (
+    request.headers.get("User-Agent")?.includes(MOSAIC_RENDERER_MARKER) ?? false
+  );
+}
+
+/**
+ * Take a JPEG screenshot of the given URL via the Cloudflare Browser Run
+ * `screenshot` Quick Action, called directly through the `BROWSER` Workers
+ * binding (`env.BROWSER.quickAction`).
+ *
+ * The engine comes from `SCREENSHOT_ENGINE`: Kitesurf (the binding's
+ * `browser: "kitesurf"` option), or Chromium when that is set to "chromium".
+ *
+ * Using the binding talks to Browser Run directly over Cloudflare's network —
+ * no account ID or API token required. Requires a compatibility date of
+ * `2026-03-24` or later and a `browser` binding in `wrangler.jsonc`.
+ *
+ * Uses `networkidle2` (≤ 2 open connections for 500 ms) instead of
+ * `networkidle0` to avoid stalling on sites with persistent connections
+ * (analytics beacons, websockets, long-polling), and blocks known tracker
+ * hosts and media so the network goes idle sooner. Consent platforms are
+ * blocked too, and `CONSENT_BANNER_CSS` hides self-hosted banners.
+ * `bestAttempt` takes the screenshot anyway when a page never goes idle
+ * within the timeout, instead of failing after it. The timeout leaves room
+ * for the page fetch inside the ~30 s a background refresh gets after its
+ * response. Failures are retried as `screenshotWithEngineFallback`
+ * describes.
+ */
+export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
+  const options: BrowserRunScreenshotOptions = {
+    url,
+    ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
+    userAgent: MOSAIC_RENDERER_USER_AGENT,
+    viewport: { ...OG_IMAGE_SIZE },
+    gotoOptions: { waitUntil: "networkidle2", timeout: 10_000 },
+    bestAttempt: true,
+    rejectRequestPattern: blockedRequestPatterns(url),
+    rejectResourceTypes: ["media"],
+    addStyleTag: [
+      { content: "* { overflow: hidden; }" },
+      { content: CONSENT_BANNER_CSS },
+    ],
+    screenshotOptions: { type: "jpeg", quality: 80 },
+  };
+
+  try {
+    return await screenshotWithEngineFallback(
+      env.BROWSER.quickAction.bind(env.BROWSER),
+      options,
+    );
+  } catch (error) {
+    // In dev, fall back to local Puppeteer only when the binding itself is
+    // unavailable; a real HTTP answer from Browser Run must not be masked by
+    // a different local result.
+    if (import.meta.env.DEV && !(error instanceof BrowserRunHttpError)) {
+      const { takeLocalScreenshot } = await import("@/server/local-screenshot");
+      return takeLocalScreenshot(env.BROWSER, options);
+    }
+    throw error;
+  }
+}

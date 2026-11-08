@@ -51,6 +51,14 @@ export function formatDate(timestamp: number): string {
   return `${values.month} ${values.day}, ${values.year}, ${values.hour}:${values.minute}:${values.second} ${values.dayPeriod}`;
 }
 
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Midnight UTC of the day `timestamp` falls in, in milliseconds. */
+export function utcDayStart(timestamp = Date.now()): number {
+  const date = new Date(timestamp);
+  return Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+}
+
 export function formatNumber(num: number): string {
   return num.toLocaleString("en-US");
 }

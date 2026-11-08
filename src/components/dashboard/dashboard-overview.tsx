@@ -1,12 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
+import {
+  ANALYTICS_DAYS,
+  totalRequests,
+  type DashboardAnalytics,
+} from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import type { ReactNode } from "react";
-
-export function totalRequests(counts: TrafficCounts): number {
-  return counts.cached + counts.generated + counts.fallback;
-}
 
 function StatCard({
   label,
@@ -30,16 +30,19 @@ function StatCard({
   );
 }
 
+const REQUESTS_LABEL = "Image requests";
+const CACHE_LABEL = "Served from cache";
+
 function TrafficStats({ analytics }: { analytics: DashboardAnalytics | null }) {
   if (!analytics) {
     return (
       <>
-        {["Image requests", "Served from cache"].map((label) => (
+        {[REQUESTS_LABEL, CACHE_LABEL].map((label) => (
           <StatCard
             key={label}
             label={label}
             value={<Skeleton className="h-8 w-20" />}
-            detail="Last 7 days"
+            detail={`Last ${ANALYTICS_DAYS} days`}
           />
         ))}
       </>
@@ -48,8 +51,8 @@ function TrafficStats({ analytics }: { analytics: DashboardAnalytics | null }) {
   if (!analytics.available) {
     return (
       <>
-        <StatCard label="Image requests" value="—" detail="Unavailable" />
-        <StatCard label="Served from cache" value="—" detail="Unavailable" />
+        <StatCard label={REQUESTS_LABEL} value="—" detail="Unavailable" />
+        <StatCard label={CACHE_LABEL} value="—" detail="Unavailable" />
       </>
     );
   }
@@ -60,12 +63,12 @@ function TrafficStats({ analytics }: { analytics: DashboardAnalytics | null }) {
   return (
     <>
       <StatCard
-        label="Image requests"
+        label={REQUESTS_LABEL}
         value={formatNumber(requests)}
-        detail="Last 7 days"
+        detail={`Last ${ANALYTICS_DAYS} days`}
       />
       <StatCard
-        label="Served from cache"
+        label={CACHE_LABEL}
         value={cacheRate === null ? "—" : `${cacheRate}%`}
         detail={`${formatNumber(analytics.totals.generated)} new screenshots`}
       />

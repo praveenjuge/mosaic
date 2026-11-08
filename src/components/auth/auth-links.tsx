@@ -13,11 +13,15 @@ type AuthLinkProps = Pick<
  * signed-out pages don't load (see `ClerkShell`). Both pages send the user
  * home after signing in.
  */
-export function SignInLink({ children, ...props }: AuthLinkProps) {
+function AuthLink({
+  to,
+  children,
+  ...props
+}: AuthLinkProps & { to: "/sign-in/$" | "/sign-up/$" }) {
   return (
     <Button asChild {...props}>
       <Link
-        to="/sign-in/$"
+        to={to}
         params={{ _splat: "" }}
         search={{ redirect_url: undefined }}
       >
@@ -27,16 +31,10 @@ export function SignInLink({ children, ...props }: AuthLinkProps) {
   );
 }
 
-export function SignUpLink({ children, ...props }: AuthLinkProps) {
-  return (
-    <Button asChild {...props}>
-      <Link
-        to="/sign-up/$"
-        params={{ _splat: "" }}
-        search={{ redirect_url: undefined }}
-      >
-        {children}
-      </Link>
-    </Button>
-  );
+export function SignInLink(props: AuthLinkProps) {
+  return <AuthLink to="/sign-in/$" {...props} />;
+}
+
+export function SignUpLink(props: AuthLinkProps) {
+  return <AuthLink to="/sign-up/$" {...props} />;
 }

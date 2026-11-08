@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
-  buildUseEndpointUrl,
   canonicalPage,
+  imageEndpointUrl,
   isBlockedOutboundHostname,
   isSelfReferentialUseUrl,
   validateOutboundUrl,
@@ -77,18 +77,14 @@ describe("canonical OG page identity", () => {
     });
   });
 
-  test("builds a directly usable unsigned endpoint URL", () => {
+  test("builds a /use URL that carries the page URL intact", () => {
     const endpoint = new URL(
-      buildUseEndpointUrl(
-        "https://mosaic.example",
-        "https://example.com/page?view=full",
-      ),
+      imageEndpointUrl("https://example.com/page?view=full&a=b"),
     );
 
     expect(endpoint.pathname).toBe("/use");
-    expect(endpoint.searchParams.get("url")).toBe(
-      "https://example.com/page?view=full",
-    );
-    expect(endpoint.searchParams.has("sig")).toBe(false);
+    expect([...endpoint.searchParams]).toEqual([
+      ["url", "https://example.com/page?view=full&a=b"],
+    ]);
   });
 });

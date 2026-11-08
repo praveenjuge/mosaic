@@ -1,5 +1,7 @@
+import AddWebsite from "@/components/dashboard/add-website";
+import { GetCodeButton } from "@/components/dashboard/get-code-button";
+import { WebsiteActions } from "@/components/dashboard/website-actions";
 import { RelativeTime } from "@/components/relative-time";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -9,18 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AddWebsite from "@/components/websites/AddWebsite";
-import { WebsiteActions } from "@/components/websites/WebsiteActions";
-import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-dialog";
-import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
+import {
+  ANALYTICS_DAYS,
+  totalRequests,
+  type DashboardAnalytics,
+  type TrafficCounts,
+} from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
-import { useState } from "react";
 import { Code } from "vadivam-react";
-import { totalRequests } from "./dashboard-overview";
 import { DashboardPanel } from "./dashboard-panel";
 
-/** Each website's counts by hostname, once the analytics have loaded. */
 type SiteCounts = Map<string, TrafficCounts> | "loading" | "unavailable";
 
 function siteCounts(analytics: DashboardAnalytics | null): SiteCounts {
@@ -50,7 +51,6 @@ function WebsiteRow({
   website: DashboardStats["websites"][number];
   sites: SiteCounts;
 }) {
-  const [codeOpen, setCodeOpen] = useState(false);
   const fullUrl = `https://${website.url_base}`;
   const faviconUrl = `https://www.google.com/s2/favicons?domain=${fullUrl}&sz=64`;
 
@@ -92,28 +92,21 @@ function WebsiteRow({
       </TableCell>
       <TableCell className="pr-3">
         <div className="flex items-center justify-end gap-1">
-          <Button
+          <GetCodeButton
+            hostname={website.url_base}
             variant="outline"
             size="sm"
-            onClick={() => {
-              setCodeOpen(true);
-            }}
             aria-label="Get code"
           >
             <Code />
             <span className="hidden sm:inline">Get code</span>
-          </Button>
+          </GetCodeButton>
           <WebsiteActions
             websiteId={website.id}
             currentUrl={website.url_base}
             imageCount={website.image_count}
           />
         </div>
-        <LazyWebsiteCodeDialog
-          hostname={website.url_base}
-          open={codeOpen}
-          onOpenChange={setCodeOpen}
-        />
       </TableCell>
     </TableRow>
   );
@@ -139,7 +132,7 @@ export function DashboardWebsitesTable({
             <TableHead className="pl-5">Website</TableHead>
             <TableHead className="hidden sm:table-cell">OG images</TableHead>
             <TableHead className="hidden md:table-cell">
-              Requests (7d)
+              Requests ({ANALYTICS_DAYS}d)
             </TableHead>
             <TableHead className="hidden lg:table-cell">
               Last generated

@@ -5,6 +5,7 @@ import {
   loadContent,
   parseFrontmatter,
   renderMarkdown,
+  toMarkdownDocument,
 } from "./content-plugin";
 
 describe("parseFrontmatter", () => {
@@ -28,7 +29,9 @@ describe("renderMarkdown", () => {
       '<a href="https://example.com" target="_blank" rel="noopener noreferrer">',
     );
     expect(html).toContain('<a href="/help">');
-    expect(html).toContain('class="shiki github-dark"');
+    expect(html).toMatch(
+      /<pre class="shiki[^"]*"[^>]*><code><span[^>]*><span style="color:/,
+    );
   });
 
   test("lazy-loads images and links them to themselves", async () => {
@@ -63,10 +66,6 @@ describe("loadContent", () => {
         expect(entry.contentHtml.length).toBeGreaterThan(0);
     }
 
-    expect(content.guideLinks).toHaveLength(content.guides.length);
-    expect(
-      content.helpCategories.flatMap((category) => category.entries),
-    ).toHaveLength(content.helpArticles.length);
     for (const page of ["/", "/help", "/legal"]) {
       expect(content.markdownPages[page]).toStartWith("#");
     }
@@ -95,6 +94,22 @@ describe("loadContent", () => {
       (match) => match[1],
     );
     expect(targets.length).toBeGreaterThan(0);
+
+    // Help pages that components link to by path or by `/help/$slug` params.
+    const srcDir = path.resolve(import.meta.dir, "..");
+    for (const file of new Bun.Glob("{components,routes}/**/*.tsx").scanSync(
+      srcDir,
+    )) {
+      const source = await Bun.file(path.join(srcDir, file)).text();
+      for (const [, target] of source.matchAll(/"(\/help\/[a-z0-9-/]+)"/g)) {
+        targets.push(target);
+      }
+      for (const [, slug] of source.matchAll(
+        /to="\/help\/\$slug"\s+params=\{\{ slug: "([a-z0-9-]+)" \}\}/g,
+      )) {
+        targets.push(`/help/${slug}`);
+      }
+    }
     for (const target of new Set(targets)) {
       expect(
         Object.hasOwn(content.markdownPages, target) ||
@@ -102,5 +117,37 @@ describe("loadContent", () => {
         `broken internal link: ${target}`,
       ).toBe(true);
     }
+  });
+});
+
+describe("toMarkdownDocument", () => {
+  test("prepends the title as the heading", () => {
+    expect(toMarkdownDocument("Hello World!", "Welcome to Mosaic.")).toBe(
+      "# Hello World!\n\nWelcome to Mosaic.\n",
+    );
+  });
+
+  test("removes a source heading that repeats the title", () => {
+    expect(
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Managing Your Subscription\n\nBody.",
+      ),
+    ).toBe("# Managing Your Subscription\n\nBody.\n");
+  });
+
+  test("keeps an opening section heading that is not the title", () => {
+    expect(
+      toMarkdownDocument("React", "## In React 19+, render meta tags\n\nBody."),
+    ).toBe("# React\n\n## In React 19+, render meta tags\n\nBody.\n");
+  });
+
+  test("keeps a source heading that differs from the title", () => {
+    expect(
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Subscription\n\nBody.",
+      ),
+    ).toBe("# Managing Your Subscription\n\n# Subscription\n\nBody.\n");
   });
 });

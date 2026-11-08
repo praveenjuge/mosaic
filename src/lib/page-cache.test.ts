@@ -119,9 +119,11 @@ describe("isCacheablePageResponse", () => {
 });
 
 describe("pageCacheKey", () => {
-  test("keys on origin, path, and build", () => {
-    expect(pageCacheKey(request("/help"), "b1").url).toBe(
-      "https://mosaic.example/help?build=b1",
-    );
+  test("keys on path and build, not on tracking parameters", () => {
+    const key = (path: string, build: string) =>
+      pageCacheKey(request(path), build).url;
+    expect(key("/help?utm_source=x", "b1")).toBe(key("/help", "b1"));
+    expect(key("/help", "b2")).not.toBe(key("/help", "b1"));
+    expect(key("/legal", "b1")).not.toBe(key("/help", "b1"));
   });
 });
