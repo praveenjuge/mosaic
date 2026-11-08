@@ -46,6 +46,7 @@ export function useWebsiteActions() {
     try {
       const { kind, message } = await action();
       void router.invalidate();
+      // `kind` is one of three literals from this file. nosemgrep
       toast[kind](message);
       return kind === "success";
     } catch (error) {

@@ -66,6 +66,7 @@ describe("blockedRequestPatterns", () => {
 
   test("block exactly the requests isBlockedRequest blocks", () => {
     const patterns = blockedRequestPatterns(page).map(
+      // Mosaic's own tracker list, the strings sent to Browser Run. nosemgrep
       (pattern) => new RegExp(pattern),
     );
     for (const url of urls) {
@@ -78,6 +79,7 @@ describe("blockedRequestPatterns", () => {
 
   test("leave out the page's own host", () => {
     const patterns = blockedRequestPatterns("https://www.posthog.com/").map(
+      // Mosaic's own tracker list, the strings sent to Browser Run. nosemgrep
       (pattern) => new RegExp(pattern),
     );
     expect(patterns.length).toBeGreaterThan(0);
