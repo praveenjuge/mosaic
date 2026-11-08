@@ -1,5 +1,6 @@
-import { useEndpointUrl } from "@/lib/url";
+import { imageEndpointUrl } from "@/lib/url";
 import { SectionHeading } from "./section-heading";
+import { landingSections } from "./sections";
 
 const steps = [
   {
@@ -19,7 +20,7 @@ const steps = [
   },
 ];
 
-const useUrl = useEndpointUrl("https://example.com");
+const useUrl = imageEndpointUrl("https://example.com");
 
 function MetaTagSnippet() {
   return (
@@ -57,7 +58,7 @@ function MetaTagSnippet() {
 export default function HowItWorks() {
   return (
     <section
-      id="how-it-works"
+      id={landingSections.howItWorks}
       className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16"
     >
       <div className="flex flex-col gap-10">

@@ -1,7 +1,7 @@
 import { OG_IMAGE_SIZE } from "@/lib/constants";
-import { useEndpointUrl } from "@/lib/url";
+import { imageEndpointUrl } from "@/lib/url";
 
-export type PageProtocol = "http:" | "https:";
+type PageProtocol = "http:" | "https:";
 
 /**
  * The page URL for what a user typed after a website's hostname: a path, or
@@ -45,7 +45,7 @@ export function splitPageUrl(pageUrl: string): {
 
 /** The `<head>` tags that point a page's link previews at its Mosaic image. */
 export function buildMetaTags(pageUrl: string): string {
-  const imageUrl = useEndpointUrl(pageUrl);
+  const imageUrl = imageEndpointUrl(pageUrl);
   return [
     `<meta property="og:image" content="${imageUrl}" />`,
     `<meta property="og:image:width" content="${OG_IMAGE_SIZE.width}" />`,

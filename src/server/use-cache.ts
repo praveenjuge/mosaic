@@ -2,8 +2,9 @@
  * This colo's memory of `/use` answers, so repeat crawler hits skip D1: a
  * fresh image's key per page for up to `USE_CACHE_MAX_AGE_S` (never past its
  * `expires_at`), and an unregistered hostname for
- * `UNREGISTERED_CACHE_MAX_AGE_S`. Other colos forget within those times, so
- * a change that makes a remembered answer wrong forgets it here at once.
+ * `UNREGISTERED_CACHE_MAX_AGE_S`. Adding a site and resetting or
+ * regenerating images forget the answers they make wrong in this colo at
+ * once; other colos, and deleted sites, wait out those times.
  */
 
 import { cacheAfterResponse } from "@/server/cache";
@@ -35,7 +36,7 @@ function remember(key: Request, body: string, maxAgeSeconds: number): void {
   );
 }
 
-export type RememberedAnswer =
+type RememberedAnswer =
   { kind: "unregistered" } | { kind: "fresh"; key: string } | null;
 
 export async function recallUseAnswer(

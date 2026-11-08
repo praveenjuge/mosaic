@@ -1,3 +1,4 @@
+import { inlineLinkClass } from "@/components/inline-link";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   ANALYTICS_DAYS,
@@ -47,10 +48,7 @@ function Legend({ totals }: { totals: TrafficCounts }) {
     <ul className="flex flex-wrap gap-x-5 gap-y-1.5 px-5 text-xs">
       {SERIES.map(({ key, label, color }) => (
         <li key={key} className="flex items-center gap-1.5">
-          <span
-            className={cn("size-2 rounded-[2px]", color)}
-            aria-hidden="true"
-          />
+          <Swatch color={color} />
           <span className="text-muted-foreground">{label}</span>
           <span className="font-medium tabular-nums">
             {formatNumber(totals[key])}
@@ -103,10 +101,7 @@ function Bar({ day, max }: { day: Day; max: number }) {
         <p className="mb-1.5 font-medium">{dayLabel(day.day, "long")}</p>
         {SERIES.map(({ key, label, color }) => (
           <p key={key} className="flex items-center gap-1.5 py-0.5">
-            <span
-              className={cn("size-2 rounded-[2px]", color)}
-              aria-hidden="true"
-            />
+            <Swatch color={color} />
             <span className="text-muted-foreground flex-1">{label}</span>
             <span className="tabular-nums">{formatNumber(day[key])}</span>
           </p>
@@ -185,11 +180,17 @@ function TrafficChart({
   );
 }
 
-function Unavailable({ children }: { children: string }) {
+function Unavailable() {
   return (
     <p className="text-muted-foreground flex flex-1 items-center justify-center px-5 pb-6 text-center text-sm">
-      {children}
+      Traffic data is unavailable right now.
     </p>
+  );
+}
+
+function Swatch({ color }: { color: string }) {
+  return (
+    <span className={cn("size-2 rounded-[2px]", color)} aria-hidden="true" />
   );
 }
 
@@ -213,7 +214,7 @@ export function DashboardTraffic({
       ) : analytics.available ? (
         <TrafficChart analytics={analytics} />
       ) : (
-        <Unavailable>Traffic data is unavailable right now.</Unavailable>
+        <Unavailable />
       )}
     </DashboardPanel>
   );
@@ -239,7 +240,7 @@ export function DashboardTopPages({
           ))}
         </div>
       ) : !analytics.available ? (
-        <Unavailable>Traffic data is unavailable right now.</Unavailable>
+        <Unavailable />
       ) : pages.length === 0 ? (
         <div className="text-muted-foreground flex flex-1 flex-col items-center justify-center gap-1 px-5 pb-6 text-center text-sm">
           <p>No requests yet.</p>
@@ -248,7 +249,7 @@ export function DashboardTopPages({
             <Link
               to="/help/$slug"
               params={{ slug: "test-your-social-previews" }}
-              className="text-foreground underline underline-offset-4"
+              className={inlineLinkClass}
             >
               their tags
             </Link>{" "}

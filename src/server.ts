@@ -7,7 +7,7 @@
  */
 
 import { registerLazyChunks } from "@/lib/preloadable-lazy";
-import { setSecurityHeaders } from "@/lib/security-headers";
+import { withSecurityHeaders } from "@/lib/security-headers";
 import { serveImage } from "@/server/image-serving";
 import { handleUseRequest } from "@/server/use-endpoint";
 import handler, { createServerEntry } from "@tanstack/react-start/server-entry";
@@ -28,16 +28,11 @@ const publicCorsHeaders = {
 };
 
 function withPublicHeaders(response: Response): Response {
-  const headers = new Headers(response.headers);
+  const copy = withSecurityHeaders(response);
   for (const [name, value] of Object.entries(publicCorsHeaders)) {
-    headers.set(name, value);
+    copy.headers.set(name, value);
   }
-  setSecurityHeaders(headers);
-  return new Response(response.body, {
-    headers,
-    status: response.status,
-    statusText: response.statusText,
-  });
+  return copy;
 }
 
 async function handlePublicEndpoint(

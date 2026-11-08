@@ -45,7 +45,7 @@ export function imageKeyRange(pageHash: string): [string, string] {
   return [`global/${pageHash}-`, `global/${pageHash}.jpeg`];
 }
 
-export type GlobalImage = {
+type GlobalImage = {
   key: string;
   expiresAt: number;
 };

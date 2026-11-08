@@ -9,6 +9,7 @@ import {
   ShieldCheck,
 } from "vadivam-react";
 import { SectionHeading } from "./section-heading";
+import { landingSections } from "./sections";
 
 interface Feature {
   icon: VadivamIcon;
@@ -55,7 +56,7 @@ const FEATURES: Feature[] = [
 
 export default function FeaturesBenefits() {
   return (
-    <section id="features" className="flex flex-col gap-12">
+    <section id={landingSections.features} className="flex flex-col gap-12">
       <SectionHeading
         eyebrow="Features"
         title="Everything a link preview needs"

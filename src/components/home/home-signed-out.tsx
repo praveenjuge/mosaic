@@ -1,6 +1,7 @@
 import { SignUpLink } from "@/components/auth/auth-links";
 import CTA from "@/components/home/cta";
 import FAQ from "@/components/home/faq";
+import { inlineLinkClass } from "@/components/inline-link";
 import { Button } from "@/components/ui/button";
 import { support_email } from "@/lib/constants";
 import { Link } from "@tanstack/react-router";
@@ -10,6 +11,7 @@ import HowItWorks from "./how-it-works";
 import OGImageDemo from "./og-image-demo";
 import Pricing from "./pricing";
 import { SectionHeading } from "./section-heading";
+import { landingSections } from "./sections";
 
 function HeroSection() {
   return (
@@ -36,7 +38,7 @@ function HeroSection() {
           <ArrowRight data-icon="inline-end" />
         </SignUpLink>
         <Button asChild variant="outline" size="lg">
-          <Link to="/" hash="how-it-works">
+          <Link to="/" hash={landingSections.howItWorks}>
             See how it works
           </Link>
         </Button>
@@ -57,17 +59,11 @@ function FAQSection() {
         description={
           <>
             Can&apos;t find what you need? Browse the{" "}
-            <Link
-              to="/help"
-              className="text-foreground underline underline-offset-4"
-            >
+            <Link to="/help" className={inlineLinkClass}>
               help center
             </Link>{" "}
             or{" "}
-            <a
-              href={`mailto:${support_email}`}
-              className="text-foreground underline underline-offset-4"
-            >
+            <a href={`mailto:${support_email}`} className={inlineLinkClass}>
               email us
             </a>
             .

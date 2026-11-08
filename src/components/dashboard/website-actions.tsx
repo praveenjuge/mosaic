@@ -144,11 +144,7 @@ export function WebsiteActions({
               onClick={handleRegenerateAction}
               disabled={isRegenerating}
             >
-              {isRegenerating ? (
-                <LoadingSpinner size={18} />
-              ) : (
-                "Yes, Regenerate"
-              )}
+              {isRegenerating ? <LoadingSpinner /> : "Yes, Regenerate"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -171,7 +167,7 @@ export function WebsiteActions({
               onClick={handleDeleteAction}
               disabled={isDeleting}
             >
-              {isDeleting ? <LoadingSpinner size={18} /> : "Yes, Delete"}
+              {isDeleting ? <LoadingSpinner /> : "Yes, Delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

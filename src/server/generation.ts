@@ -50,12 +50,8 @@ export function resolveTarget(
   const { hostname: requestHostname, origin: requestOrigin } = new URL(
     requestUrl,
   );
-  let url: URL;
-  try {
-    url = parseWebsiteUrl(value);
-  } catch {
-    return { error: "Please enter a valid website URL." };
-  }
+  const url = parseWebsiteUrl(value);
+  if (!url) return { error: "Please enter a valid website URL." };
   const error = validateOutboundUrl(url, requestHostname);
   if (error) return { error };
   const page = canonicalPage(url);
@@ -77,18 +73,32 @@ export function targetImageUrl(target: Target, key: string): string {
 }
 
 /**
- * Start the page fetch that validates a target's redirects while slower
- * checks run. `cancel()` stops it, and its body, when they fail.
+ * Reserve one screenshot against the daily budgets while the page fetch that
+ * validates the target's redirects runs alongside. `null` when the budget
+ * is spent, after cancelling the fetch and its body.
  */
-export function startPageFetch(target: Target, deadline?: AbortSignal) {
+export async function fetchPageWithinBudget(
+  db: D1Queryable,
+  kind: "production" | "demo",
+  client: string,
+  target: Target,
+  deadline?: AbortSignal,
+): Promise<{ page: ReturnType<typeof fetchPublicPage> } | null> {
   const controller = new AbortController();
   const signal = deadline
     ? AbortSignal.any([controller.signal, deadline])
     : controller.signal;
   const page = fetchPublicPage(target.url, target.requestHostname, signal);
-  // Callers await this only once the checks pass.
+  // Awaited only once the budget is reserved.
   page.catch(() => {});
-  return { page, cancel: () => controller.abort() };
+
+  let reserved = false;
+  try {
+    reserved = await reserveGeneration(db, kind, client);
+  } finally {
+    if (!reserved) controller.abort();
+  }
+  return reserved ? { page } : null;
 }
 
 async function sha256Hex(value: string): Promise<string> {
@@ -152,24 +162,17 @@ export async function generateImage(
     const startedAt = Date.now();
     // Background runs get about 30 s after the response, so the page
     // fetch, redirects included, must leave room for the screenshot.
-    const { page, cancel } = startPageFetch(
+    const fetched = await fetchPageWithinBudget(
+      db,
+      "production",
+      client,
       target,
       AbortSignal.timeout(PAGE_FETCH_DEADLINE_MS),
     );
-    let reserved: boolean;
-    try {
-      reserved = await reserveGeneration(db, "production", client);
-    } catch (error) {
-      cancel();
-      throw error;
-    }
-    if (!reserved) {
-      cancel();
-      return skip("budget_exhausted");
-    }
+    if (!fetched) return skip("budget_exhausted");
 
     try {
-      const { response, finalUrl } = await page;
+      const { response, finalUrl } = await fetched.page;
       await response.body?.cancel();
       const image = await takeScreenshot(finalUrl.toString());
       const key = buildImageKey(await sha256Hex(pageUrl), Date.now());
@@ -185,7 +188,7 @@ export async function generateImage(
       );
       released = true;
 
-      cacheGeneratedImage(targetImageUrl(target, key), image, stored.httpEtag);
+      cacheGeneratedImage(target.requestOrigin, key, image, stored.httpEtag);
       if (current && current.key !== key) {
         waitUntil(
           env.OG_BUCKET.delete(current.key).catch((error) =>
@@ -252,9 +255,10 @@ export function siteSaved(
  * screenshotted again on its next `/use` request. Returns how many were
  * deleted, or `null` when the site isn't the user's.
  *
- * The rows go first, so `/i/*` answers 404 for these keys until a `/use`
- * request stores a new screenshot, which the old key then redirects to. A
- * failed R2 delete only leaves orphaned objects.
+ * The rows go first, so `/i/*` answers 404 for these keys (except in colos
+ * that cached the immutable image) until a `/use` request stores a new
+ * screenshot, which the old key then redirects to. A failed R2 delete only
+ * leaves orphaned objects.
  */
 export async function resetSiteImages(
   siteId: number,

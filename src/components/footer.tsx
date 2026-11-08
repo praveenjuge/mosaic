@@ -1,3 +1,4 @@
+import { landingSections } from "@/components/home/sections";
 import { support_email, website_name } from "@/lib/constants";
 import { useTheme, type Theme } from "@/lib/theme";
 import { Link } from "@tanstack/react-router";
@@ -8,8 +9,8 @@ const footerSections = [
   {
     title: "Product",
     links: [
-      { href: "/#features", label: "Features" },
-      { href: "/#pricing", label: "Pricing" },
+      { href: `/#${landingSections.features}`, label: "Features" },
+      { href: `/#${landingSections.pricing}`, label: "Pricing" },
       { href: "/help/use-the-mosaic-api", label: "API" },
     ],
   },

@@ -1,4 +1,4 @@
-import { OG_IMAGE_SIZE, SCREENSHOT_ENGINE } from "@/lib/constants";
+import { OG_IMAGE_SIZE } from "@/lib/constants";
 import { blockedRequestPatterns } from "@/server/blocked-requests";
 import { CONSENT_BANNER_CSS } from "@/server/consent-banners";
 import {
@@ -13,7 +13,16 @@ import { env } from "cloudflare:workers";
  * the request is stopped before another screenshot can start. It only ever
  * denies, so spoofing it cannot grant access.
  */
-export const MOSAIC_RENDERER_MARKER = "MosaicBrowserRun/1.0";
+/**
+ * Browser Run engine for every OG screenshot (production and demo). Kitesurf
+ * is cheaper and free while in beta, but it is not pixel-perfect and has no
+ * WebGL or video; set this to "chromium" to go back to full Chrome rendering.
+ *
+ * @see https://developers.cloudflare.com/browser-run/kitesurf/
+ */
+const SCREENSHOT_ENGINE: "chromium" | "kitesurf" = "kitesurf";
+
+const MOSAIC_RENDERER_MARKER = "MosaicBrowserRun/1.0";
 export const MOSAIC_RENDERER_USER_AGENT =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
   "AppleWebKit/537.36 (KHTML, like Gecko) " +
@@ -43,17 +52,10 @@ export function isMosaicRendererRequest(request: Request): boolean {
  * hosts and media so the network goes idle sooner. Consent platforms are
  * blocked too, and `CONSENT_BANNER_CSS` hides self-hosted banners.
  * `bestAttempt` takes the screenshot anyway when a page never goes idle
- * within the timeout, instead of failing after it. The timeout leaves room for the page fetch inside the
- * ~30 s a background refresh gets after its response.
- *
- * When the Kitesurf engine fails (it is in beta and has broken upstream
- * before), the same shot is retried with Browser Run's default Chromium
- * engine via `screenshotWithEngineFallback`.
- *
- * In dev without remote bindings, `quickAction()` is unavailable, so the
- * same options run through local Puppeteer instead. A real HTTP answer from
- * the remote binding (a `BrowserRunHttpError`) still propagates so it is not
- * masked by a different local result.
+ * within the timeout, instead of failing after it. The timeout leaves room
+ * for the page fetch inside the ~30 s a background refresh gets after its
+ * response. Failures are retried as `screenshotWithEngineFallback`
+ * describes.
  */
 export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
   const options: BrowserRunScreenshotOptions = {

@@ -34,8 +34,9 @@ export function GetCodeButton({
           <WebsiteCodeDialog
             hostname={hostname}
             pageUrl={pageUrl}
-            open
-            onOpenChange={setOpen}
+            onClose={() => {
+              setOpen(false);
+            }}
           />
         </Suspense>
       ) : null}

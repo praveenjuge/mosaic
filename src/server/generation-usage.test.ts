@@ -1,9 +1,9 @@
-import { DAILY_GENERATION_LIMITS } from "@/lib/constants";
 import { utcDayStart } from "@/lib/utils";
 import { createTestD1 } from "@/testing/d1";
 import type { Database } from "bun:sqlite";
 import { beforeEach, describe, expect, test } from "bun:test";
 import {
+  DAILY_GENERATION_LIMITS,
   dashboardBudget,
   dashboardBudgetStatement,
   reserveGeneration,

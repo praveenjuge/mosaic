@@ -1,5 +1,5 @@
-import { DAILY_GENERATION_LIMITS } from "@/lib/constants";
 import { utcDayStart } from "@/lib/utils";
+import { DAILY_GENERATION_LIMITS } from "@/server/generation-usage";
 import { createTestD1 } from "@/testing/d1";
 import {
   resetWorkerRuntime,

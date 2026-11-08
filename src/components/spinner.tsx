@@ -1,28 +1,17 @@
-import { cn } from "@/lib/utils";
-
-interface SpinnerProps extends React.SVGProps<SVGSVGElement> {
-  size?: number;
-}
-
-export const LoadingSpinner = ({
-  size = 24,
-  className,
-  ...props
-}: SpinnerProps) => {
+export const LoadingSpinner = () => {
   return (
     <div className="grid size-full place-items-center">
       <svg
-        {...props}
         fill="none"
-        width={size}
-        height={size}
+        width={18}
+        height={18}
         strokeWidth="2"
         viewBox="0 0 24 24"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
         xmlns="http://www.w3.org/2000/svg"
-        className={cn("animate-spin", className)}
+        className="animate-spin"
       >
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>

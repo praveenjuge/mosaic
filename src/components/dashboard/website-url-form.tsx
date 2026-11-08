@@ -38,7 +38,7 @@ export function WebsiteUrlForm({
         />
       </div>
       <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? <LoadingSpinner size={18} /> : submitLabel}
+        {isSubmitting ? <LoadingSpinner /> : submitLabel}
       </Button>
     </form>
   );

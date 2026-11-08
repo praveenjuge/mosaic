@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Check } from "vadivam-react";
 import { SectionHeading } from "./section-heading";
+import { landingSections } from "./sections";
 
 type Plan = {
   name: string;
   description: string;
-  price: string;
-  period: string;
+  /** In US dollars. */
+  price: number;
+  period: "" | "/month" | "/year";
   badge?: string;
   /** Outlined with the primary call to action. */
   featured?: boolean;
@@ -18,11 +20,14 @@ type Plan = {
 
 const SHARED_FEATURES = ["Automatic shared OG cache", "Unlimited websites"];
 
+const PRO_MONTHLY = 19;
+const PRO_YEARLY = 199;
+
 const PLANS: Plan[] = [
   {
     name: "Free",
     description: "For personal sites and side projects.",
-    price: "$0",
+    price: 0,
     period: "",
     cta: "Start for free",
     support: "Community support",
@@ -30,7 +35,7 @@ const PLANS: Plan[] = [
   {
     name: "Pro",
     description: "For growing teams and products.",
-    price: "$19",
+    price: PRO_MONTHLY,
     period: "/month",
     badge: "Popular",
     featured: true,
@@ -40,9 +45,9 @@ const PLANS: Plan[] = [
   {
     name: "Pro Yearly",
     description: "Everything in Pro, billed yearly.",
-    price: "$199",
+    price: PRO_YEARLY,
     period: "/year",
-    badge: "Save $29",
+    badge: `Save $${PRO_MONTHLY * 12 - PRO_YEARLY}`,
     cta: "Get started",
     support: "Priority email support",
   },
@@ -68,7 +73,7 @@ function PlanCard({ plan }: { plan: Plan }) {
       <p className="text-muted-foreground mt-1 text-sm">{plan.description}</p>
       <p className="mt-6 flex items-baseline gap-1">
         <span className="text-4xl font-semibold tracking-tight">
-          {plan.price}
+          ${plan.price}
         </span>
         <span className="text-muted-foreground text-sm">{plan.period}</span>
       </p>
@@ -92,7 +97,7 @@ function PlanCard({ plan }: { plan: Plan }) {
 
 export default function Pricing() {
   return (
-    <section id="pricing" className="flex flex-col gap-12">
+    <section id={landingSections.pricing} className="flex flex-col gap-12">
       <SectionHeading
         align="center"
         eyebrow="Pricing"

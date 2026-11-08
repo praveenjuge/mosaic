@@ -1,3 +1,4 @@
+import { landingSections } from "@/components/home/sections";
 import { cn } from "@/lib/utils";
 import { Link, useRouteContext } from "@tanstack/react-router";
 import Logo from "../logo";
@@ -25,14 +26,14 @@ function HeaderNav() {
         <>
           <Link
             to="/"
-            hash="features"
+            hash={landingSections.features}
             className={cn(navLinkClass, "hidden sm:inline-flex")}
           >
             Features
           </Link>
           <Link
             to="/"
-            hash="pricing"
+            hash={landingSections.pricing}
             className={cn(navLinkClass, "hidden sm:inline-flex")}
           >
             Pricing

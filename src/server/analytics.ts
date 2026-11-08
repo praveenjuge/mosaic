@@ -78,7 +78,7 @@ function datasetIdentifier(name: string): string | null {
   return /^[A-Za-z0-9_]+$/.test(name) ? `"${name}"` : null;
 }
 
-export type AnalyticsQueries = {
+type AnalyticsQueries = {
   breakdown: AnalyticsSQLQuery;
   topPages: AnalyticsSQLQuery;
 };
@@ -155,6 +155,10 @@ export async function querySiteAnalytics(
     return summarizeAnalytics(rows, topPages);
   }
 
+  if (!datasetIdentifier(env.OG_ANALYTICS_DATASET)) {
+    console.error("[ANALYTICS] OG_ANALYTICS_DATASET is not a dataset name");
+    return { available: false };
+  }
   const batches = analyticsQueries(env.OG_ANALYTICS_DATASET, hostnames, since);
   if (!batches) return summarizeAnalytics([], []);
   try {

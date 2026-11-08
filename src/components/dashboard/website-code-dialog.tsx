@@ -1,4 +1,5 @@
 import { GuideLink } from "@/components/help/guides";
+import { inlineLinkClass } from "@/components/inline-link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { guideLinks } from "@/lib/content";
 import { buildMetaTags, pageUrlFor, splitPageUrl } from "@/lib/meta-tags";
-import { useEndpointUrl } from "@/lib/url";
+import { imageEndpointUrl } from "@/lib/url";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useId, useRef, useState } from "react";
 import { Check, Copy, TriangleAlert } from "vadivam-react";
@@ -74,26 +75,30 @@ function CopyTextButton({ text, label }: { text: string; label: string }) {
 export function WebsiteCodeDialog({
   hostname,
   pageUrl: initialPageUrl,
-  open,
-  onOpenChange,
+  onClose,
 }: {
   hostname: string;
   pageUrl?: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
 }) {
   const pathId = useId();
   const initial = initialPageUrl
     ? splitPageUrl(initialPageUrl)
     : { path: "", protocol: "https:" as const };
-  const { protocol } = initial;
   const [path, setPath] = useState(initial.path);
-  const pageUrl = pageUrlFor(hostname, path, protocol);
+  const pageUrl = pageUrlFor(hostname, path, initial.protocol);
+  // A pasted full URL can switch the protocol.
+  const { protocol } = splitPageUrl(pageUrl);
   const tags = buildMetaTags(pageUrl);
-  const imageUrl = useEndpointUrl(pageUrl);
+  const imageUrl = imageEndpointUrl(pageUrl);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+    >
       {/* Short phone screens lock page scrolling, so the dialog scrolls. */}
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-xl!">
         <DialogHeader>
@@ -148,7 +153,7 @@ export function WebsiteCodeDialog({
               <Link
                 to="/help/$slug"
                 params={{ slug: "test-your-social-previews" }}
-                className="text-foreground underline underline-offset-4"
+                className={inlineLinkClass}
               >
                 test your previews
               </Link>

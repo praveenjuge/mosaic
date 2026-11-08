@@ -42,17 +42,18 @@ function imageHeaders(
 
 /**
  * Put a just-stored image in this colo's image cache, so the redirect that
- * follows a generation doesn't have to read it back from R2. `imageUrl` is
+ * follows a generation doesn't have to read it back from R2. `origin` serves
  * the `/i/<key>` URL the redirect points at.
  */
 export function cacheGeneratedImage(
-  imageUrl: string,
+  origin: string,
+  key: string,
   image: ArrayBuffer,
   etag: string,
 ): void {
   cacheAfterResponse(
     CACHE_NAME,
-    imageCacheKey(new URL(imageUrl)),
+    imageCacheKey(new URL(publicImageUrl(key, origin))),
     new Response(image, { headers: imageHeaders(etag, true) }),
   );
 }

@@ -16,13 +16,13 @@
 import { recordGenerationEvent } from "@/server/analytics";
 import { getDb, type D1Queryable } from "@/server/db";
 import {
+  fetchPageWithinBudget,
   generateImage,
   resolveTarget,
-  startPageFetch,
   targetImageUrl,
   type Target,
 } from "@/server/generation";
-import { requestClientKey, reserveGeneration } from "@/server/generation-usage";
+import { requestClientKey } from "@/server/generation-usage";
 import {
   findGlobalImage,
   findGlobalImageOrLock,
@@ -100,16 +100,8 @@ async function handleDemoRequest(
 
   // One fetch validates the redirect chain for the screenshot and supplies
   // the HTML for the metadata.
-  const { page, cancel } = startPageFetch(target);
-  let reserved: boolean;
-  try {
-    reserved = await reserveGeneration(getDb(), "demo", client);
-  } catch (error) {
-    cancel();
-    throw error;
-  }
-  if (!reserved) {
-    cancel();
+  const fetched = await fetchPageWithinBudget(getDb(), "demo", client, target);
+  if (!fetched) {
     return json(
       {
         normalizedUrl: target.pageUrl,
@@ -125,6 +117,7 @@ async function handleDemoRequest(
     );
   }
 
+  const { page } = fetched;
   const [metadata, screenshot] = await Promise.allSettled([
     page.then(({ response, finalUrl }) => extractMetadata(response, finalUrl)),
     page.then(({ finalUrl }) => takeScreenshot(finalUrl.toString())),

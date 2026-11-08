@@ -117,7 +117,7 @@ e2e/                 # Playwright end-to-end tests
 - Uses Bun as the runtime and package manager
 - All database operations go through D1 via `createServerFn` or direct queries in route handlers
 - Authentication is handled entirely by Clerk
-- OG image generation is handled internally via the Cloudflare Browser Run `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", ...)` — no account ID or API token required. Every screenshot uses the engine in `SCREENSHOT_ENGINE` (`src/lib/constants.ts`): Kitesurf (`browser: "kitesurf"`), which is cheaper and free during its beta but not pixel-perfect and has no WebGL or video. Set it to `"chromium"` to go back to full Chrome. Kitesurf needs remote Browser Run: the local Puppeteer fallback always renders with Chrome, so check Kitesurf output on a Worker Preview.
+- OG image generation is handled internally via the Cloudflare Browser Run `BROWSER` Workers binding using `env.BROWSER.quickAction("screenshot", ...)` — no account ID or API token required. Every screenshot uses the engine in `SCREENSHOT_ENGINE` (`src/server/screenshot.ts`): Kitesurf (`browser: "kitesurf"`), which is cheaper and free during its beta but not pixel-perfect and has no WebGL or video. Set it to `"chromium"` to go back to full Chrome. Kitesurf needs remote Browser Run: the local Puppeteer fallback always renders with Chrome, so check Kitesurf output on a Worker Preview.
 - Public client environment variables must use the `VITE_` prefix
 - Website URL format: always clean and normalize URLs before storage
 - Suggest new instructions or improvements to this file as the project evolves.

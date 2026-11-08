@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
   canonicalPage,
+  imageEndpointUrl,
   isBlockedOutboundHostname,
   isSelfReferentialUseUrl,
-  useEndpointUrl,
   validateOutboundUrl,
 } from "./url";
 
@@ -79,7 +79,7 @@ describe("canonical OG page identity", () => {
 
   test("builds a /use URL that carries the page URL intact", () => {
     const endpoint = new URL(
-      useEndpointUrl("https://example.com/page?view=full&a=b"),
+      imageEndpointUrl("https://example.com/page?view=full&a=b"),
     );
 
     expect(endpoint.pathname).toBe("/use");

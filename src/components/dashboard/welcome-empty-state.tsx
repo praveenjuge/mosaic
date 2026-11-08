@@ -1,6 +1,6 @@
 import { useWebsiteActions } from "@/components/dashboard/use-website-actions";
 import { WebsiteUrlForm } from "@/components/dashboard/website-url-form";
-import { useState } from "react";
+import { useTransition } from "react";
 
 const steps = [
   "Add your website's hostname below.",
@@ -9,17 +9,13 @@ const steps = [
 ];
 
 export default function WelcomeEmptyState() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, startSubmitting] = useTransition();
   const { saveWebsite } = useWebsiteActions();
 
-  const handleSubmit = async (url: string) => {
-    setIsSubmitting(true);
-
-    try {
+  const handleSubmit = (url: string) => {
+    startSubmitting(async () => {
       await saveWebsite({ url });
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
   };
 
   return (

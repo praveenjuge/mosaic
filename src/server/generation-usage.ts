@@ -4,12 +4,21 @@
  * screenshots and for the home page demo.
  */
 
-import { DAILY_GENERATION_LIMITS } from "@/lib/constants";
 import type { DashboardBudget } from "@/lib/types";
 import { DAY_MS, utcDayStart } from "@/lib/utils";
 import type { D1Queryable } from "@/server/db";
 
 type GenerationKind = "production" | "demo";
+
+/**
+ * Maximum fresh screenshots per UTC day, across the service (`global`) and
+ * for one client IP (`client`). Demo covers the anonymous home page demo.
+ */
+export const DAILY_GENERATION_LIMITS = {
+  production: { global: 500, client: 50 },
+  demo: { global: 100, client: 10 },
+} as const;
+
 type BudgetScope = `${GenerationKind}-${"client" | "global"}`;
 
 const SERVICE_KEY = "service";
@@ -24,6 +33,19 @@ export function userClientKey(userId: string): string {
   return `user:${userId}`;
 }
 
+/**
+ * Upsert tail that adds one to today's count, or starts a new day at one.
+ * The statement's last `WHERE` clause continues with the limit check.
+ */
+const COUNT_IN_TODAYS_WINDOW = `ON CONFLICT(scope, budget_key) DO UPDATE SET
+         window_start = excluded.window_start,
+         count = CASE
+           WHEN generation_budgets.window_start = excluded.window_start
+             THEN generation_budgets.count + 1
+           ELSE 1
+         END
+       WHERE generation_budgets.window_start != excluded.window_start`;
+
 function reserveWindowBudget(
   db: D1Queryable,
   scope: BudgetScope,
@@ -35,14 +57,7 @@ function reserveWindowBudget(
       `INSERT INTO generation_budgets
          (scope, budget_key, window_start, count)
        VALUES (?, ?, ?, 1)
-       ON CONFLICT(scope, budget_key) DO UPDATE SET
-         window_start = excluded.window_start,
-         count = CASE
-           WHEN generation_budgets.window_start = excluded.window_start
-             THEN generation_budgets.count + 1
-           ELSE 1
-         END
-       WHERE generation_budgets.window_start != excluded.window_start
+       ${COUNT_IN_TODAYS_WINDOW}
           OR generation_budgets.count < ?
        RETURNING count`,
     )
@@ -84,14 +99,7 @@ function reserveGlobalBudget(
          WHERE scope = ?3 AND budget_key = ?4
            AND window_start = ?2 AND count >= ?5
        )
-       ON CONFLICT(scope, budget_key) DO UPDATE SET
-         window_start = excluded.window_start,
-         count = CASE
-           WHEN generation_budgets.window_start = excluded.window_start
-             THEN generation_budgets.count + 1
-           ELSE 1
-         END
-       WHERE generation_budgets.window_start != excluded.window_start
+       ${COUNT_IN_TODAYS_WINDOW}
           OR generation_budgets.count < ?6
        RETURNING count`,
     )

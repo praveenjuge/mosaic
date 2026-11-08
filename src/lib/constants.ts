@@ -1,3 +1,5 @@
+import { DAY_MS } from "@/lib/utils";
+
 export const author_name = "Praveen Juge";
 export const support_email = "hello@praveenjuge.com";
 export const author_x_url = "https://x.com/PraveenJuge";
@@ -13,22 +15,4 @@ export const OG_IMAGE_SIZE_LABEL = `${OG_IMAGE_SIZE.width}×${OG_IMAGE_SIZE.heig
 
 /** Shared images are regenerated after this many days. */
 export const GLOBAL_IMAGE_TTL_DAYS = 30;
-export const GLOBAL_IMAGE_TTL_MS = GLOBAL_IMAGE_TTL_DAYS * 24 * 60 * 60 * 1000;
-
-/**
- * Maximum fresh screenshots per UTC day, across the service (`global`) and
- * for one client IP (`client`). Demo covers the anonymous home page demo.
- */
-export const DAILY_GENERATION_LIMITS = {
-  production: { global: 500, client: 50 },
-  demo: { global: 100, client: 10 },
-} as const;
-
-/**
- * Browser Run engine for every OG screenshot (production and demo). Kitesurf
- * is cheaper and free while in beta, but it is not pixel-perfect and has no
- * WebGL or video; set this to "chromium" to go back to full Chrome rendering.
- *
- * @see https://developers.cloudflare.com/browser-run/kitesurf/
- */
-export const SCREENSHOT_ENGINE: "chromium" | "kitesurf" = "kitesurf";
+export const GLOBAL_IMAGE_TTL_MS = GLOBAL_IMAGE_TTL_DAYS * DAY_MS;

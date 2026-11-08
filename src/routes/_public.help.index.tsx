@@ -8,13 +8,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ChevronRight, Mail } from "vadivam-react";
 
+const helpTitle = "Help & Support";
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";
 
 export const Route = createFileRoute("/_public/help/")({
   head: () =>
     buildSeoMeta({
-      title: "Help & Support",
+      title: helpTitle,
       description: helpDescription,
       path: "/help",
     }),
@@ -103,7 +104,7 @@ function HelpPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
       <header className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-          Help &amp; Support
+          {helpTitle}
         </h1>
         <p className="text-muted-foreground text-base md:text-lg">
           {helpDescription}

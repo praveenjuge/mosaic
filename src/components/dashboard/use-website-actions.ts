@@ -11,26 +11,25 @@ import { useRouter } from "@tanstack/react-router";
 type SaveWebsiteArgs = { siteId?: number; url: string };
 
 /** What an action tells the user once the server has answered. */
-type Outcome = { ok: boolean; message: string; tone?: "info" };
+type Outcome = { kind: "success" | "error" | "info"; message: string };
 
 const regenerateOutcomes = {
-  ready: { ok: true, message: "New screenshot saved." },
+  ready: { kind: "success", message: "New screenshot saved." },
   budget_exhausted: {
-    ok: false,
+    kind: "error",
     message:
       "Daily screenshot limit reached. The old image keeps serving until the page's next visit refreshes it.",
   },
   rate_limited: {
-    ok: false,
+    kind: "error",
     message: "Too many screenshots in a minute. Try again shortly.",
   },
   locked: {
-    ok: false,
+    kind: "info",
     message: "This page is already being captured. Check back soon.",
-    tone: "info",
   },
   failed: {
-    ok: false,
+    kind: "error",
     message:
       "The screenshot failed. The old image stays until the page's next visit.",
   },
@@ -45,12 +44,10 @@ export function useWebsiteActions() {
    */
   async function run(action: () => Promise<Outcome>): Promise<boolean> {
     try {
-      const { ok, message, tone } = await action();
+      const { kind, message } = await action();
       void router.invalidate();
-      (ok ? toast.success : tone === "info" ? toast.info : toast.error)(
-        message,
-      );
-      return ok;
+      toast[kind](message);
+      return kind === "success";
     } catch (error) {
       toast.error(
         error instanceof Error
@@ -68,23 +65,26 @@ export function useWebsiteActions() {
         if (!url_base) throw new Error("Please enter a valid website URL.");
         if (siteId) {
           await editSite({ data: { siteId, url_base } });
-          return { ok: true, message: "Website updated and ready to use." };
+          return {
+            kind: "success",
+            message: "Website updated and ready to use.",
+          };
         }
         await addSite({ data: { url_base } });
-        return { ok: true, message: "Website added and ready to use." };
+        return { kind: "success", message: "Website added and ready to use." };
       }),
 
     removeWebsite: (siteId: number) =>
       run(async () => {
         await deleteSite({ data: { siteId } });
-        return { ok: true, message: "Website deleted successfully" };
+        return { kind: "success", message: "Website deleted successfully" };
       }),
 
     regenerateWebsite: (siteId: number) =>
       run(async () => {
         const { deleted } = await regenerateSiteImages({ data: { siteId } });
         return {
-          ok: true,
+          kind: "success",
           message: `Deleted ${deleted} ${deleted === 1 ? "image" : "images"}. Each page gets a new screenshot on its next visit.`,
         };
       }),

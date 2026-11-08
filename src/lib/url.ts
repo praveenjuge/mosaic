@@ -4,20 +4,16 @@ export function stripTrailingSlashes(value: string) {
   return value.replace(/\/+$/, "");
 }
 
-/** Parse user input as an HTTP(S) URL, adding `https://` to bare hostnames. */
-export function parseWebsiteUrl(value: string): URL {
+/**
+ * Parse user input as an HTTP(S) URL, adding `https://` to bare hostnames.
+ * `null` when it isn't a URL.
+ */
+export function parseWebsiteUrl(value: string): URL | null {
   const trimmed = value.trim();
-  if (!trimmed) {
-    throw new Error("Please enter a valid website URL.");
-  }
-
-  const parsed = new URL(
+  if (!trimmed) return null;
+  return URL.parse(
     /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`,
   );
-  if (!["http:", "https:"].includes(parsed.protocol)) {
-    throw new Error("Only HTTP and HTTPS URLs are supported.");
-  }
-  return parsed;
 }
 
 const PRIVATE_IPV4_RANGES: Array<[number, number]> = [
@@ -154,7 +150,7 @@ export function cleanDisplayUrl(value: string) {
 }
 
 /** The `/use` URL that gives a page its OG image. */
-export function useEndpointUrl(targetUrl: string) {
+export function imageEndpointUrl(targetUrl: string) {
   const endpoint = new URL("use", publicEnv.siteUrl);
   endpoint.searchParams.set("url", targetUrl);
   return endpoint.toString();
@@ -171,7 +167,7 @@ export function publicImageUrl(key: string, origin = publicEnv.siteUrl) {
 
 /** The `/use` URL that screenshots one of Mosaic's own pages. */
 export function getOgImageUrl(slug: string) {
-  return useEndpointUrl(
+  return imageEndpointUrl(
     new URL(slug.replace(/^\//, ""), publicEnv.siteUrl).toString(),
   );
 }

@@ -1,3 +1,4 @@
+import { inlineLinkClass } from "@/components/inline-link";
 import type { BudgetUsage, DashboardBudget } from "@/lib/types";
 import { cn, formatNumber } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
@@ -74,7 +75,7 @@ export function DashboardUsage({ budget }: { budget: DashboardBudget }) {
           <Link
             to="/help/$slug"
             params={{ slug: "understanding-usage-limits" }}
-            className="text-foreground underline underline-offset-4"
+            className={inlineLinkClass}
           >
             How limits work
           </Link>

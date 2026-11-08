@@ -107,7 +107,6 @@ export default function DashboardPage({
   const websites = websitesKey(dashboardStats);
   const analytics = retained?.key === websites ? retained.analytics : null;
 
-  // Only the dashboard shows toasts, so other pages don't download sonner.
   // The Toaster stays mounted when the first website replaces the welcome.
   return (
     <>
