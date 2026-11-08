@@ -1,4 +1,4 @@
-import type { RouteAuth } from "@/lib/browser-route-auth";
+import { isAuthPage, type RouteAuth } from "@/lib/clerk-auth";
 import { preloadableLazy } from "@/lib/preloadable-lazy";
 
 // Clerk's React code lives in these chunks, so signed-out pages download
@@ -11,15 +11,6 @@ export const headerSignedIn = preloadableLazy(
   () => import("@/components/header/header-signed-in"),
   "src/components/header/header-signed-in.tsx",
 );
-
-const authPaths = ["/sign-in", "/sign-up"];
-
-/** The sign-in and sign-up pages, which are Clerk's forms. */
-export function isAuthPage(pathname: string) {
-  return authPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`),
-  );
-}
 
 /** Clerk runs for signed-in users and on the sign-in and sign-up pages. */
 export function needsClerk(auth: RouteAuth, pathname: string) {

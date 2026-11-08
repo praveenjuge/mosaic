@@ -1,18 +1,13 @@
 /// <reference types="vite/client" />
 
-import { getRouteAuth } from "@/lib/clerk-auth";
 import {
   clerkShell,
-  isAuthPage,
   needsClerk,
   preloadClerkChunks,
-} from "@/lib/clerk-chunks";
-import {
-  website_description,
-  website_name,
-  website_subtitle,
-} from "@/lib/constants";
-import { buildOrganizationJsonLd } from "@/lib/seo";
+} from "@/components/auth/clerk-chunks";
+import { getRouteAuth, isAuthPage } from "@/lib/clerk-auth";
+import { website_description, website_name } from "@/lib/constants";
+import { buildOrganizationJsonLd, pageTitle } from "@/lib/seo";
 import { themeScript } from "@/lib/theme";
 import { getOgImageUrl } from "@/lib/url";
 import { cn } from "@/lib/utils";
@@ -30,6 +25,8 @@ import { DefaultCatchBoundary } from "../components/default-catch-boundary";
 import { NotFound } from "../components/not-found";
 import appCss from "../styles/app.css?url";
 
+const homeOgImage = getOgImageUrl("");
+
 // The root router context is intentionally empty; child routes augment it via
 // `beforeLoad` (see `auth`). `{}` is required here for that augmentation to work.
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
@@ -37,7 +34,7 @@ export const Route = createRootRouteWithContext<{}>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { title: `${website_name} - ${website_subtitle}` },
+      { title: pageTitle() },
       {
         name: "viewport",
         content: "width=device-width, initial-scale=1",
@@ -64,7 +61,7 @@ export const Route = createRootRouteWithContext<{}>()({
       },
       {
         property: "og:image",
-        content: getOgImageUrl(""),
+        content: homeOgImage,
       },
       {
         name: "twitter:card",
@@ -72,7 +69,7 @@ export const Route = createRootRouteWithContext<{}>()({
       },
       {
         name: "twitter:image",
-        content: getOgImageUrl(""),
+        content: homeOgImage,
       },
     ],
     links: [

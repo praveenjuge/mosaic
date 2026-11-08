@@ -9,19 +9,7 @@
  * through the normal pipeline.
  */
 
-/** Composes a Markdown document headed by the page title. */
-export function toMarkdownDocument(title: string, content: string): string {
-  const trimmed = content.trim();
-  const heading = trimmed.match(/^# ([^\n]+?)\s*\n/);
-
-  // Drop the source heading only when it repeats the page title.
-  const body =
-    heading && heading[1].trim().toLowerCase() === title.trim().toLowerCase()
-      ? trimmed.slice(heading[0].length)
-      : trimmed;
-
-  return `# ${title}\n\n${body}\n`;
-}
+import { signInPath, signUpPath } from "@/lib/clerk-auth";
 
 // ── Accept header ───────────────────────────────────────────────────
 
@@ -82,18 +70,11 @@ export function acceptsHtml(acceptHeader: string | null): boolean {
 // ── Paths ───────────────────────────────────────────────────────────
 
 /**
- * Routes rendered per request (auth pages), answered by server handlers (OG
- * endpoints, server functions), or served elsewhere. None has a Markdown
- * mirror.
+ * Routes rendered per request (auth pages), answered by server handlers
+ * (server functions), or served elsewhere. None has a Markdown mirror.
+ * `/use` and `/i/*` answer in `src/server.ts` and never get here.
  */
-const appRoutePrefixes = [
-  "/sign-in",
-  "/sign-up",
-  "/use",
-  "/i",
-  "/_serverFn",
-  "/.well-known",
-];
+const appRoutePrefixes = [signInPath, signUpPath, "/_serverFn", "/.well-known"];
 
 function normalizePathname(pathname: string): string {
   let decoded = pathname;

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { addAcceptToVary } from "./vary";
+import { addAcceptToVary } from "./security-headers";
 
 function headers(contentType: string, vary?: string) {
   return new Headers({

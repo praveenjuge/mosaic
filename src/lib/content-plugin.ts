@@ -28,7 +28,6 @@ import type {
   LegalDocument,
 } from "./content-types";
 import { readImageSize } from "./image-size";
-import { toMarkdownDocument } from "./markdown-negotiation";
 
 const VIRTUAL_PREFIX = "virtual:mosaic-content/";
 
@@ -100,6 +99,20 @@ const processor = unified()
   .use(rehypeLinksAndImages)
   .use(rehypeImageSizes)
   .use(rehypeStringify);
+
+/** Composes a Markdown document headed by the page title. */
+export function toMarkdownDocument(title: string, content: string): string {
+  const trimmed = content.trim();
+  const heading = trimmed.match(/^# ([^\n]+?)\s*\n/);
+
+  // Drop the source heading only when it repeats the page title.
+  const body =
+    heading && heading[1].trim().toLowerCase() === title.trim().toLowerCase()
+      ? trimmed.slice(heading[0].length)
+      : trimmed;
+
+  return `# ${title}\n\n${body}\n`;
+}
 
 export async function renderMarkdown(markdown: string): Promise<string> {
   return String(await processor.process(markdown));

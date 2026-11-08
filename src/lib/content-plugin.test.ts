@@ -5,6 +5,7 @@ import {
   loadContent,
   parseFrontmatter,
   renderMarkdown,
+  toMarkdownDocument,
 } from "./content-plugin";
 
 describe("parseFrontmatter", () => {
@@ -102,5 +103,37 @@ describe("loadContent", () => {
         `broken internal link: ${target}`,
       ).toBe(true);
     }
+  });
+});
+
+describe("toMarkdownDocument", () => {
+  test("prepends the title as the heading", () => {
+    expect(toMarkdownDocument("Hello World!", "Welcome to Mosaic.")).toBe(
+      "# Hello World!\n\nWelcome to Mosaic.\n",
+    );
+  });
+
+  test("removes a source heading that repeats the title", () => {
+    expect(
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Managing Your Subscription\n\nBody.",
+      ),
+    ).toBe("# Managing Your Subscription\n\nBody.\n");
+  });
+
+  test("keeps an opening section heading that is not the title", () => {
+    expect(
+      toMarkdownDocument("React", "## In React 19+, render meta tags\n\nBody."),
+    ).toBe("# React\n\n## In React 19+, render meta tags\n\nBody.\n");
+  });
+
+  test("keeps a source heading that differs from the title", () => {
+    expect(
+      toMarkdownDocument(
+        "Managing Your Subscription",
+        "# Subscription\n\nBody.",
+      ),
+    ).toBe("# Managing Your Subscription\n\n# Subscription\n\nBody.\n");
   });
 });

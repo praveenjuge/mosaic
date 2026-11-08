@@ -1,8 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import {
-  routeAuthFromBrowserClerk,
-  routeAuthFromCookies,
-} from "./browser-route-auth";
+import { routeAuthFromBrowserClerk, routeAuthFromCookies } from "./clerk-auth";
 
 const user = { id: "user_1" };
 
