@@ -74,7 +74,7 @@ export function useWebsiteActions() {
       const result = await regeneratePageImage({ data: { pageUrl } });
       router.invalidate();
       switch (result.status) {
-        case "regenerated":
+        case "ready":
           toast.success("New screenshot saved.");
           return true;
         case "budget_exhausted":

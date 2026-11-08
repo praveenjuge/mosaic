@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-dialog";
 import { useWebsiteActions } from "@/components/websites/use-website-actions";
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
-import { buildPublicImageUrl, cleanDisplayUrl } from "@/lib/url";
+import { cleanDisplayUrl, publicImageUrl } from "@/lib/url";
 import { formatBytes } from "@/lib/utils";
 import { useState, useTransition } from "react";
 import { Code, ImageOff, RefreshCcw } from "vadivam-react";
@@ -19,7 +19,7 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
   const [codeOpen, setCodeOpen] = useState(false);
   const [isRegenerating, startRegenerating] = useTransition();
   const { regeneratePage } = useWebsiteActions();
-  const screenshotUrl = buildPublicImageUrl(item.key);
+  const screenshotUrl = publicImageUrl(item.key);
 
   return (
     <li className="group flex min-w-0 flex-col overflow-hidden rounded-lg border">

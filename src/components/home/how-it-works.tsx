@@ -1,5 +1,4 @@
-import { publicEnv } from "@/lib/env";
-import { buildUseEndpointUrl } from "@/lib/url";
+import { useEndpointUrl } from "@/lib/url";
 import { SectionHeading } from "./section-heading";
 
 const steps = [
@@ -20,7 +19,7 @@ const steps = [
   },
 ];
 
-const useUrl = buildUseEndpointUrl(publicEnv.siteUrl, "https://example.com");
+const useUrl = useEndpointUrl("https://example.com");
 
 function MetaTagSnippet() {
   return (

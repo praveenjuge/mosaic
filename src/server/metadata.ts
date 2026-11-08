@@ -3,8 +3,8 @@
  * Twitter Card metadata (title, description, image) for the demo UI.
  */
 
-import { publicEnv } from "./env";
-import { validateOutboundUrl } from "./url";
+import { publicEnv } from "@/lib/env";
+import { validateOutboundUrl } from "@/lib/url";
 
 // ── Metadata ────────────────────────────────────────────────────────
 

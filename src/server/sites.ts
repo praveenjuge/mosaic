@@ -1,54 +1,31 @@
-import { getDb } from "@/lib/db";
-import {
-  forgetPageAnswers,
-  forgetUnregisteredHostname,
-  regeneratePageImage as takePageImage,
-  warmSiteImage,
-  type PageRegeneration,
-} from "@/lib/og-generation";
 import type { Site } from "@/lib/types";
-import { canonicalPage, parseWebsiteUrl, validateOutboundUrl } from "@/lib/url";
+import { getDb } from "@/server/db";
+import {
+  regeneratePage,
+  resetSiteImages,
+  resolveTarget,
+  siteSaved,
+  type GenerationResult,
+} from "@/server/generation";
+import { authMiddleware } from "@/server/middleware";
 import { createServerFn } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
-import { env, waitUntil } from "cloudflare:workers";
 import { z } from "zod";
-import { authMiddleware } from "./middleware";
-import {
-  deleteSiteImages,
-  deleteStoredImages,
-  expirePageImage,
-} from "./site-images";
 
-function normalizePublicHostname(value: string): string {
-  const websiteUrl = parseWebsiteUrl(value);
-  const error = validateOutboundUrl(websiteUrl);
-  if (error) throw new Error(error);
-  return websiteUrl.hostname;
+const siteId = z.number().int().positive();
+const urlInput = z.string().trim().min(1).max(2048);
+const DUPLICATE_SITE = "This website already exists in your list.";
+
+/** The hostname to store for a website the user typed. */
+function publicHostname(value: string): string {
+  const target = resolveTarget(value, getRequest().url);
+  if ("error" in target) throw new Error(target.error);
+  return target.hostname;
 }
-
-/**
- * Screenshot a newly saved website's home page after the response, so the
- * first social crawler finds an image ready. Runs behind the same rate limit,
- * lock, and daily budget as `/use`, counted against the user. Also clears
- * this colo's cached "not registered" answer for the hostname.
- */
-function warmAfterResponse(hostname: string, userId: string) {
-  const requestUrl = getRequest().url;
-  waitUntil(
-    forgetUnregisteredHostname(requestUrl, hostname).catch((error) => {
-      console.error("[SITES] Failed to clear cached /use answer:", error);
-    }),
-  );
-  waitUntil(warmSiteImage(hostname, requestUrl, `user:${userId}`));
-}
-
-const addSiteSchema = z.object({
-  url_base: z.string().trim().min(1).max(2048),
-});
 
 export const addSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator(addSiteSchema)
+  .validator(z.object({ url_base: urlInput }))
   .handler(async ({ context, data }): Promise<Site> => {
     // The unique (user_id, url_base) index turns a duplicate into no row.
     const site = await getDb()
@@ -57,21 +34,16 @@ export const addSite = createServerFn({ method: "POST" })
          ON CONFLICT DO NOTHING
          RETURNING *`,
       )
-      .bind(context.userId, normalizePublicHostname(data.url_base))
+      .bind(context.userId, publicHostname(data.url_base))
       .first<Site>();
-    if (!site) throw new Error("This website already exists in your list.");
-    warmAfterResponse(site.url_base, context.userId);
+    if (!site) throw new Error(DUPLICATE_SITE);
+    siteSaved(site.url_base, getRequest().url, context.userId);
     return site;
   });
 
-const editSiteSchema = z.object({
-  siteId: z.number().int().positive(),
-  url_base: z.string().trim().min(1).max(2048),
-});
-
 export const editSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator(editSiteSchema)
+  .validator(z.object({ siteId, url_base: urlInput }))
   .handler(async ({ context, data }): Promise<Site> => {
     const db = getDb();
     const site = await db
@@ -80,10 +52,10 @@ export const editSite = createServerFn({ method: "POST" })
          WHERE id = ? AND user_id = ?
          RETURNING *`,
       )
-      .bind(normalizePublicHostname(data.url_base), data.siteId, context.userId)
+      .bind(publicHostname(data.url_base), data.siteId, context.userId)
       .first<Site>();
     if (site) {
-      warmAfterResponse(site.url_base, context.userId);
+      siteSaved(site.url_base, getRequest().url, context.userId);
       return site;
     }
 
@@ -94,17 +66,13 @@ export const editSite = createServerFn({ method: "POST" })
       .bind(data.siteId, context.userId)
       .first();
     throw new Error(
-      owned
-        ? "This website already exists in your list."
-        : "Website not found or access denied.",
+      owned ? DUPLICATE_SITE : "Website not found or access denied.",
     );
   });
 
-const deleteSiteSchema = z.object({ siteId: z.number().int().positive() });
-
 export const deleteSite = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator(deleteSiteSchema)
+  .validator(z.object({ siteId }))
   .handler(async ({ context, data }): Promise<void> => {
     const result = await getDb()
       .prepare("DELETE FROM sites WHERE id = ? AND user_id = ?")
@@ -113,67 +81,24 @@ export const deleteSite = createServerFn({ method: "POST" })
     if (result.meta.changes === 0) throw new Error("Website not found.");
   });
 
-const regenerateSiteImagesSchema = z.object({
-  siteId: z.number().int().positive(),
-});
-
-/**
- * Delete every image of the website, so each page is screenshotted again on
- * its next `/use` request, through the usual rate limit, lock, and budget.
- */
+/** Delete every image of the website; see `resetSiteImages`. */
 export const regenerateSiteImages = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator(regenerateSiteImagesSchema)
+  .validator(z.object({ siteId }))
   .handler(async ({ context, data }): Promise<{ deleted: number }> => {
-    const images = await deleteSiteImages(getDb(), data.siteId, context.userId);
-    if (!images) throw new Error("Website not found.");
-    if (images.length === 0) return { deleted: 0 };
-
-    // The rows are gone, so `/i/*` answers 404 for these keys until a `/use`
-    // request for the page stores a new screenshot, which the old key then
-    // redirects to. A failed delete only leaves orphaned objects.
-    await deleteStoredImages(
-      env.OG_BUCKET,
-      images.map(({ key }) => key),
-    ).catch((error) => {
-      console.error("[SITES] Failed to delete regenerated images:", error);
-    });
-    waitUntil(
-      forgetPageAnswers(
-        getRequest().url,
-        images.map(({ page_url }) => page_url),
-      ).catch((error) => {
-        console.error("[SITES] Failed to clear cached /use answers:", error);
-      }),
+    const deleted = await resetSiteImages(
+      data.siteId,
+      context.userId,
+      getRequest().url,
     );
-    return { deleted: images.length };
+    if (deleted === null) throw new Error("Website not found.");
+    return { deleted };
   });
 
-const regeneratePageImageSchema = z.object({
-  pageUrl: z.string().trim().min(1).max(2048),
-});
-
-/**
- * Take a new screenshot of one page of the user's websites now. The old
- * image keeps serving until the new one is stored, and stays if the
- * screenshot is skipped (the next `/use` request then refreshes it). Counts
- * against the user's daily budget, like warming a new site.
- */
+/** Screenshot one page of the user's websites now; see `regeneratePage`. */
 export const regeneratePageImage = createServerFn({ method: "POST" })
   .middleware([authMiddleware])
-  .validator(regeneratePageImageSchema)
-  .handler(async ({ context, data }): Promise<PageRegeneration> => {
-    const url = parseWebsiteUrl(data.pageUrl);
-    const error = validateOutboundUrl(url);
-    if (error) throw new Error(error);
-    const { pageUrl, hostname } = canonicalPage(url);
-
-    const expired = await expirePageImage(
-      getDb(),
-      pageUrl,
-      hostname,
-      context.userId,
-    );
-    if (!expired) throw new Error("Image not found.");
-    return takePageImage(pageUrl, getRequest().url, `user:${context.userId}`);
-  });
+  .validator(z.object({ pageUrl: urlInput }))
+  .handler(({ context, data }): Promise<GenerationResult> =>
+    regeneratePage(data.pageUrl, getRequest().url, context.userId),
+  );

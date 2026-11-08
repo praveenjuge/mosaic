@@ -8,7 +8,7 @@
  * in the production Worker.
  */
 
-import { isBlockedRequest } from "@/lib/blocked-requests";
+import { isBlockedRequest } from "@/server/blocked-requests";
 import puppeteer, { type BrowserWorker } from "@cloudflare/puppeteer";
 
 /** Egress proxy for local Chrome, injected by `vite.config.ts` in dev. */

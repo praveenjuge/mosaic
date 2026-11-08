@@ -1,11 +1,4 @@
-import { ensureTrailingSlash, publicEnv } from "./env";
-
-// OG images are served by the Worker itself at `/i/<r2key>` (no separate
-// R2 custom domain). R2 keys contain slashes, so this is a splat route.
-export const DEFAULT_PUBLIC_IMAGE_BASE_URL = new URL(
-  "i/",
-  publicEnv.siteUrl,
-).toString();
+import { publicEnv } from "./env";
 
 // ── Parsing ─────────────────────────────────────────────────────────
 
@@ -168,21 +161,25 @@ export function cleanDisplayUrl(value: string) {
 
 // ── URL builders ────────────────────────────────────────────────────
 
-export function buildUseEndpointUrl(baseUrl: string, targetUrl: string) {
-  const endpoint = new URL("use", ensureTrailingSlash(baseUrl));
+/** The `/use` URL that gives a page its OG image. */
+export function useEndpointUrl(targetUrl: string) {
+  const endpoint = new URL("use", publicEnv.siteUrl);
   endpoint.searchParams.set("url", targetUrl);
   return endpoint.toString();
 }
 
-export function buildPublicImageUrl(
-  key: string,
-  baseUrl = DEFAULT_PUBLIC_IMAGE_BASE_URL,
-) {
-  return new URL(key, ensureTrailingSlash(baseUrl)).toString();
+/**
+ * The `/i/<key>` URL of a stored image. The Worker serves images itself, and
+ * R2 keys contain slashes. Server code passes the origin that served the
+ * request, so Worker Previews read from their own R2 bucket.
+ */
+export function publicImageUrl(key: string, origin = publicEnv.siteUrl) {
+  return new URL(`/i/${key}`, origin).toString();
 }
 
 /** The `/use` URL that screenshots one of Mosaic's own pages. */
 export function getOgImageUrl(slug: string) {
-  const targetUrl = new URL(slug.replace(/^\//, ""), publicEnv.siteUrl);
-  return buildUseEndpointUrl(publicEnv.siteUrl, targetUrl.toString());
+  return useEndpointUrl(
+    new URL(slug.replace(/^\//, ""), publicEnv.siteUrl).toString(),
+  );
 }

@@ -1,5 +1,4 @@
-import { publicEnv } from "@/lib/env";
-import { buildUseEndpointUrl } from "@/lib/url";
+import { useEndpointUrl } from "@/lib/url";
 
 export type PageProtocol = "http:" | "https:";
 
@@ -33,7 +32,7 @@ export function pageUrlFor(
 
 /** The `<head>` tags that point a page's link previews at its Mosaic image. */
 export function buildMetaTags(pageUrl: string): string {
-  const imageUrl = buildUseEndpointUrl(publicEnv.siteUrl, pageUrl);
+  const imageUrl = useEndpointUrl(pageUrl);
   return [
     `<meta property="og:image" content="${imageUrl}" />`,
     `<meta property="og:image:width" content="1560" />`,

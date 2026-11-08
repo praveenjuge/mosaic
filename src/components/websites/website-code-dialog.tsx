@@ -10,9 +10,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { guideLinks } from "@/lib/content";
-import { publicEnv } from "@/lib/env";
 import { buildMetaTags, pageUrlFor, type PageProtocol } from "@/lib/meta-tags";
-import { buildUseEndpointUrl } from "@/lib/url";
+import { useEndpointUrl } from "@/lib/url";
 import { Link } from "@tanstack/react-router";
 import { useId, useState } from "react";
 import { Check, Copy, TriangleAlert } from "vadivam-react";
@@ -87,7 +86,7 @@ export function WebsiteCodeDialog({
   const [path, setPath] = useState(initialPath);
   const pageUrl = pageUrlFor(hostname, path, protocol);
   const tags = buildMetaTags(pageUrl);
-  const imageUrl = buildUseEndpointUrl(publicEnv.siteUrl, pageUrl);
+  const imageUrl = useEndpointUrl(pageUrl);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

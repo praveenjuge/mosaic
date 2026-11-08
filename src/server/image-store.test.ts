@@ -1,49 +1,22 @@
-import type { D1Queryable } from "@/lib/db";
-import { Database, type SQLQueryBindings } from "bun:sqlite";
+import type { D1Queryable } from "@/server/db";
+import { createTestD1 } from "@/testing/d1";
+import type { Database } from "bun:sqlite";
 import { beforeEach, describe, expect, test } from "bun:test";
-import { join } from "node:path";
 import {
+  buildImageKey,
   deleteSiteImages,
   deleteStoredImages,
   expirePageImage,
+  imageKeyRange,
   latestSiteImages,
-} from "./site-images";
-
-/** Just enough of D1 over bun:sqlite to run these helpers' SQL. */
-function createD1(sqlite: Database): D1Queryable {
-  const statement = (sql: string, params: SQLQueryBindings[] = []) => ({
-    sql,
-    params,
-    bind: (...values: SQLQueryBindings[]) => statement(sql, values),
-    all: async () => ({ results: sqlite.query(sql).all(...params) }),
-    first: async () => sqlite.query(sql).get(...params),
-    run: async () => ({ meta: { changes: sqlite.run(sql, params).changes } }),
-  });
-  return {
-    prepare: (sql: string) => statement(sql),
-    batch: async (statements: ReturnType<typeof statement>[]) =>
-      sqlite.transaction(() =>
-        statements.map(({ sql, params }) => ({
-          results: sqlite.query(sql).all(...params),
-        })),
-      )(),
-  } as unknown as D1Queryable;
-}
+  parseImageKey,
+} from "./image-store";
 
 let sqlite: Database;
 let db: D1Queryable;
 
-const migrationsDir = join(import.meta.dir, "../../migrations");
-const migrationFiles = [
-  ...new Bun.Glob("*.sql").scanSync({ cwd: migrationsDir }),
-].sort();
-
 beforeEach(async () => {
-  sqlite = new Database(":memory:");
-  for (const file of migrationFiles) {
-    sqlite.exec(await Bun.file(join(migrationsDir, file)).text());
-  }
-  db = createD1(sqlite);
+  ({ db, sqlite } = await createTestD1());
 });
 
 function addSite(userId: string, hostname: string): number {
@@ -56,12 +29,17 @@ function addSite(userId: string, hostname: string): number {
   return site.id;
 }
 
-function addImage(hostname: string, path: string) {
+function addImage(hostname: string, path: string, expiresAt = 0) {
   sqlite.run(
     `INSERT INTO global_images
        (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
-     VALUES (?, ?, ?, 3, 0, 0)`,
-    [`https://${hostname}${path}`, hostname, `global/${hostname}${path}`],
+     VALUES (?, ?, ?, 3, 0, ?)`,
+    [
+      `https://${hostname}${path}`,
+      hostname,
+      `global/${hostname}${path}`,
+      expiresAt,
+    ],
   );
 }
 
@@ -118,14 +96,9 @@ function expiresAt(pageUrl: string): number | undefined {
 }
 
 describe("expirePageImage", () => {
-  function addFreshImage(hostname: string, path: string) {
-    sqlite.run(
-      `INSERT INTO global_images
-         (page_url, hostname, key, size_in_bytes, generated_at, expires_at)
-       VALUES (?, ?, ?, 3, 0, 9999999999999)`,
-      [`https://${hostname}${path}`, hostname, `global/${hostname}${path}`],
-    );
-  }
+  const addFreshImage = (hostname: string, path: string) =>
+    addImage(hostname, path, 9999999999999);
+  const page = (pageUrl: string, hostname: string) => ({ pageUrl, hostname });
 
   test("expires one page on the user's website and nothing else", async () => {
     addSite("user_a", "example.com");
@@ -135,8 +108,7 @@ describe("expirePageImage", () => {
     expect(
       await expirePageImage(
         db,
-        "https://example.com/pricing",
-        "example.com",
+        page("https://example.com/pricing", "example.com"),
         "user_a",
       ),
     ).toBe(true);
@@ -149,7 +121,11 @@ describe("expirePageImage", () => {
     addFreshImage("other.com", "/");
 
     expect(
-      await expirePageImage(db, "https://other.com/", "other.com", "user_a"),
+      await expirePageImage(
+        db,
+        page("https://other.com/", "other.com"),
+        "user_a",
+      ),
     ).toBe(false);
     expect(expiresAt("https://other.com/")).toBe(9999999999999);
   });
@@ -159,7 +135,11 @@ describe("expirePageImage", () => {
     addFreshImage("other.com", "/");
 
     expect(
-      await expirePageImage(db, "https://other.com/", "example.com", "user_a"),
+      await expirePageImage(
+        db,
+        page("https://other.com/", "example.com"),
+        "user_a",
+      ),
     ).toBe(false);
     expect(expiresAt("https://other.com/")).toBe(9999999999999);
   });
@@ -169,8 +149,7 @@ describe("expirePageImage", () => {
     expect(
       await expirePageImage(
         db,
-        "https://example.com/",
-        "example.com",
+        page("https://example.com/", "example.com"),
         "user_a",
       ),
     ).toBe(false);
@@ -237,5 +216,60 @@ describe("latestSiteImages", () => {
       expect.objectContaining({ page_url: "https://example.com/p%3Fq" }),
       expect.objectContaining({ page_url: "https://example.com/docs" }),
     ]);
+  });
+});
+
+const hash = "a".repeat(64);
+
+describe("image keys", () => {
+  test("versioned keys round-trip and are immutable", () => {
+    const key = buildImageKey(hash, 1_760_000_000_000);
+    expect(key).toMatch(/^global\/a{64}-[0-9a-z]+\.jpeg$/);
+    expect(parseImageKey(key)).toEqual({ pageHash: hash, immutable: true });
+  });
+
+  test("legacy keys parse as mutable", () => {
+    expect(parseImageKey(`global/${hash}.jpeg`)).toEqual({
+      pageHash: hash,
+      immutable: false,
+    });
+  });
+
+  test("keys under an old per-site prefix parse as mutable", () => {
+    for (const key of [
+      `msk7vkfb-u4ks6195/${hash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${hash}.jpeg`,
+      `j57cqpbz24vagv88w6kq1c62zd7xvxzx/${hash}.png`,
+    ]) {
+      expect(parseImageKey(key)).toEqual({ pageHash: hash, immutable: false });
+    }
+  });
+
+  test("rejects keys Mosaic does not create", () => {
+    for (const key of [
+      "global/test.jpeg",
+      `global/${hash}-.jpeg`,
+      `global/${hash}-ABC.jpeg`,
+      `global/${hash}.jpeg/extra`,
+      `${hash}.jpeg`,
+      `a/b/${hash}.jpeg`,
+      `MSK7-U4KS/${hash}.jpeg`,
+      `../${hash}.jpeg`,
+      `msk7vkfb-u4ks6195/${hash}.webp`,
+      `msk7vkfb-u4ks6195/${hash}-abc.jpeg`,
+      `${"a".repeat(33)}/${hash}.jpeg`,
+    ]) {
+      expect(parseImageKey(key)).toBeNull();
+    }
+  });
+
+  test("the key range covers versioned and legacy keys of one page only", () => {
+    const [low, high] = imageKeyRange(hash);
+    const inRange = (key: string) => key >= low && key <= high;
+    expect(inRange(buildImageKey(hash, 0))).toBe(true);
+    expect(inRange(buildImageKey(hash, Number.MAX_SAFE_INTEGER))).toBe(true);
+    expect(inRange(`global/${hash}.jpeg`)).toBe(true);
+    expect(inRange(buildImageKey("b".repeat(64), 1))).toBe(false);
+    expect(inRange(`global/${"a".repeat(63)}b.jpeg`)).toBe(false);
   });
 });

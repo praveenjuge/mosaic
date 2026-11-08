@@ -1,12 +1,29 @@
-import { blockedRequestPatterns } from "@/lib/blocked-requests";
-import { CONSENT_BANNER_CSS } from "@/lib/consent-banners";
-import { SCREENSHOT_ENGINE } from "@/lib/constants";
-import { MOSAIC_RENDERER_USER_AGENT } from "@/lib/request";
+import { OG_IMAGE_SIZE, SCREENSHOT_ENGINE } from "@/lib/constants";
+import { blockedRequestPatterns } from "@/server/blocked-requests";
+import { CONSENT_BANNER_CSS } from "@/server/consent-banners";
 import {
   BrowserRunHttpError,
   screenshotWithEngineFallback,
-} from "@/lib/screenshot-retry";
+} from "@/server/screenshot-retry";
 import { env } from "cloudflare:workers";
+
+/**
+ * Deny marker in the user agent of Mosaic's own Browser Run sessions. If a
+ * captured page redirects back to `/use`, Chromium keeps this user agent and
+ * the request is stopped before another screenshot can start. It only ever
+ * denies, so spoofing it cannot grant access.
+ */
+export const MOSAIC_RENDERER_MARKER = "MosaicBrowserRun/1.0";
+export const MOSAIC_RENDERER_USER_AGENT =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) " +
+  "AppleWebKit/537.36 (KHTML, like Gecko) " +
+  `Chrome/152.0.0.0 Safari/537.36 ${MOSAIC_RENDERER_MARKER}`;
+
+export function isMosaicRendererRequest(request: Request): boolean {
+  return (
+    request.headers.get("User-Agent")?.includes(MOSAIC_RENDERER_MARKER) ?? false
+  );
+}
 
 /**
  * Take a JPEG screenshot of the given URL via the Cloudflare Browser Run
@@ -43,7 +60,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     url,
     ...(SCREENSHOT_ENGINE === "kitesurf" ? { browser: "kitesurf" } : {}),
     userAgent: MOSAIC_RENDERER_USER_AGENT,
-    viewport: { width: 1560, height: 819 },
+    viewport: { ...OG_IMAGE_SIZE },
     gotoOptions: { waitUntil: "networkidle2", timeout: 10_000 },
     bestAttempt: true,
     rejectRequestPattern: blockedRequestPatterns(url),
@@ -65,7 +82,7 @@ export async function takeScreenshot(url: string): Promise<ArrayBuffer> {
     // unavailable; a real HTTP answer from Browser Run must not be masked by
     // a different local result.
     if (import.meta.env.DEV && !(error instanceof BrowserRunHttpError)) {
-      const { takeLocalScreenshot } = await import("@/lib/local-screenshot");
+      const { takeLocalScreenshot } = await import("@/server/local-screenshot");
       return takeLocalScreenshot(env.BROWSER, options);
     }
     throw error;

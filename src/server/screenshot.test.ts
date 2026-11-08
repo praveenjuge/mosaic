@@ -1,11 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
   isMosaicRendererRequest,
-  MOSAIC_RENDERER_MARKER,
   MOSAIC_RENDERER_USER_AGENT,
-} from "./request";
+} from "./screenshot";
 
-describe("request intent", () => {
+describe("renderer marker", () => {
   test("recognizes Mosaic's Browser Run deny marker", () => {
     const request = new Request("https://mosaic.example/use", {
       headers: {
@@ -29,7 +28,6 @@ describe("request intent", () => {
   test("keeps a browser-compatible desktop Chromium identity", () => {
     expect(MOSAIC_RENDERER_USER_AGENT).toContain("Mozilla/5.0");
     expect(MOSAIC_RENDERER_USER_AGENT).toContain("Chrome/");
-    expect(MOSAIC_RENDERER_USER_AGENT).toContain(MOSAIC_RENDERER_MARKER);
   });
 
   test("keeps ordinary and metadata-free public requests usable", () => {
