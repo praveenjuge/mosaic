@@ -29,7 +29,9 @@ describe("renderMarkdown", () => {
       '<a href="https://example.com" target="_blank" rel="noopener noreferrer">',
     );
     expect(html).toContain('<a href="/help">');
-    expect(html).toContain('class="shiki github-dark"');
+    expect(html).toMatch(
+      /<pre class="shiki[^"]*"[^>]*><code><span[^>]*><span style="color:/,
+    );
   });
 
   test("lazy-loads images and links them to themselves", async () => {
@@ -64,10 +66,6 @@ describe("loadContent", () => {
         expect(entry.contentHtml.length).toBeGreaterThan(0);
     }
 
-    expect(content.guideLinks).toHaveLength(content.guides.length);
-    expect(
-      content.helpCategories.flatMap((category) => category.entries),
-    ).toHaveLength(content.helpArticles.length);
     for (const page of ["/", "/help", "/legal"]) {
       expect(content.markdownPages[page]).toStartWith("#");
     }

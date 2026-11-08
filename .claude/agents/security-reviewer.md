@@ -1,6 +1,6 @@
 ---
 name: security-reviewer
-description: Reviews a Mosaic diff against REVIEW.md's security and correctness rules (SSRF, Clerk auth scoping, D1 binding, public endpoint headers, generation guards). Use before opening a PR that touches src/server, src/lib/url.ts, src/lib/og-generation.ts, routes under /use or /i, migrations, or wrangler.jsonc.
+description: Reviews a Mosaic diff against REVIEW.md's security and correctness rules (SSRF, Clerk auth scoping, D1 binding, public endpoint headers, generation guards). Use before opening a PR that touches src/server, src/lib/url.ts, routes under /use or /i, migrations, or wrangler.jsonc.
 tools: Read, Grep, Glob, Bash
 ---
 
@@ -13,7 +13,7 @@ Check every changed path for:
 
 1. **SSRF** — every URL that is fetched or screenshotted passes
    `validateOutboundUrl()` in `src/lib/url.ts` first, and pages are fetched
-   through `fetchPublicPage()` in `src/lib/metadata.ts` so every redirect is
+   through `fetchPublicPage()` in `src/server/metadata.ts` so every redirect is
    validated, including URLs built from user input.
 2. **Auth** — server functions that read or change user data call Clerk
    `auth()` and scope every D1 query to `userId`.

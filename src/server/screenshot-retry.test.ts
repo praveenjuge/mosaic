@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, spyOn, test } from "bun:test";
+import { afterEach, beforeEach, describe, expect, spyOn, test } from "bun:test";
 
 import {
   BrowserRunHttpError,
@@ -34,14 +34,14 @@ describe("screenshotWithRetry", () => {
   test("returns the image on the first attempt when Browser Run answers", async () => {
     state.outcomes = [okImage(9)];
     const image = await screenshotWithRetry(quickAction, options);
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([9]));
     expect(state.calls).toBe(1);
   });
 
   test("retries a transient binding failure once and returns the image", async () => {
     state.outcomes = [new Error(""), okImage(9)];
     const image = await screenshotWithRetry(quickAction, options);
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([9]));
     expect(state.calls).toBe(2);
   });
 
@@ -54,7 +54,7 @@ describe("screenshotWithRetry", () => {
   test("retries a 429 answer from Browser Run", async () => {
     state.outcomes = [new Response("slow down", { status: 429 }), okImage(7)];
     const image = await screenshotWithRetry(quickAction, options);
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([7]));
     expect(state.calls).toBe(2);
   });
 
@@ -87,28 +87,30 @@ describe("BrowserRunHttpError", () => {
 });
 
 describe("recovered failure logging", () => {
+  let warn: ReturnType<typeof spyOn>;
+  beforeEach(() => {
+    warn = spyOn(console, "warn").mockImplementation(() => {});
+  });
+  afterEach(() => {
+    warn.mockRestore();
+  });
+
   test("warns once when the first attempt fails and the retry recovers", async () => {
-    const warn = spyOn(console, "warn").mockImplementation(() => {});
     state.outcomes = [new Error(""), okImage(9)];
     await screenshotWithRetry(quickAction, options);
     expect(warn).toHaveBeenCalledTimes(1);
-    warn.mockRestore();
   });
 
   test("warns once when a retryable answer precedes the image", async () => {
-    const warn = spyOn(console, "warn").mockImplementation(() => {});
     state.outcomes = [new Response("slow down", { status: 429 }), okImage(7)];
     await screenshotWithRetry(quickAction, options);
     expect(warn).toHaveBeenCalledTimes(1);
-    warn.mockRestore();
   });
 
   test("does not warn when a 4xx fails without a retry", async () => {
-    const warn = spyOn(console, "warn").mockImplementation(() => {});
     state.outcomes = [new Response("bad options", { status: 400 })];
     await expect(screenshotWithRetry(quickAction, options)).rejects.toThrow();
     expect(warn).not.toHaveBeenCalled();
-    warn.mockRestore();
   });
 });
 
@@ -138,7 +140,7 @@ describe("screenshotWithEngineFallback", () => {
       recordingQuickAction,
       kitesurfOptions,
     );
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([5]));
     expect(calls).toHaveLength(3);
     expect(calls[0]).toHaveProperty("browser", "kitesurf");
     expect(calls[2]).not.toHaveProperty("browser");
@@ -150,7 +152,7 @@ describe("screenshotWithEngineFallback", () => {
       recordingQuickAction,
       kitesurfOptions,
     );
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([5]));
     expect(calls).toHaveLength(2);
     expect(calls[1]).toHaveProperty("browser", "kitesurf");
   });
@@ -161,7 +163,7 @@ describe("screenshotWithEngineFallback", () => {
       recordingQuickAction,
       kitesurfOptions,
     );
-    expect(image.byteLength).toBe(1);
+    expect(new Uint8Array(image)).toEqual(new Uint8Array([5]));
     expect(calls).toHaveLength(2);
     expect(calls[1]).not.toHaveProperty("browser");
   });

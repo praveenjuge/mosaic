@@ -13,6 +13,17 @@ describe("isBlockedRequest", () => {
     );
   });
 
+  test("blocks hosted consent platforms, whose banners cover the hero", () => {
+    const page = "https://example.com/";
+    for (const url of [
+      "https://cdn.cookielaw.org/scripttemplates/x.js",
+      "https://consent.cookiebot.com/uc.js?cbid=1",
+      "https://app.usercentrics.eu/browser-ui/x.js",
+    ]) {
+      expect(isBlockedRequest(page, url)).toBe(true);
+    }
+  });
+
   test("leaves the page's own resources and look-alike hosts alone", () => {
     const page = "https://example.com/";
     expect(isBlockedRequest(page, "https://example.com/app.js")).toBe(false);
@@ -40,19 +51,38 @@ describe("isBlockedRequest", () => {
 });
 
 describe("blockedRequestPatterns", () => {
-  test("anchors each host to the URL's authority", () => {
-    const patterns = blockedRequestPatterns("https://example.com/");
-    expect(patterns).toContain(
-      String.raw`^https?://([^/?#]+\.)?posthog\.com(:\d+)?[/?#]`,
+  const page = "https://example.com/";
+  const urls = [
+    "https://us.i.posthog.com/e",
+    "http://posthog.com:8080/",
+    "https://posthog.com?x",
+    "https://connect.facebook.net/en_US/fbevents.js",
+    "https://cdn.cookielaw.org/scripttemplates/x.js",
+    "https://notposthog.com/",
+    "https://posthog.com.example.net/x",
+    "https://example.com/?r=posthog.com/",
+    "https://cdn.example.com/hero.png",
+  ];
+
+  test("block exactly the requests isBlockedRequest blocks", () => {
+    const patterns = blockedRequestPatterns(page).map(
+      (pattern) => new RegExp(pattern),
     );
-    expect(patterns).toContain(
-      String.raw`^https?://([^/?#]+\.)?connect\.facebook\.net(:\d+)?[/?#]`,
-    );
+    for (const url of urls) {
+      expect(
+        patterns.some((pattern) => pattern.test(url)),
+        url,
+      ).toBe(isBlockedRequest(page, url));
+    }
   });
 
-  test("leaves out the page's own host", () => {
-    const patterns = blockedRequestPatterns("https://www.posthog.com/");
-    expect(patterns.some((pattern) => pattern.includes("posthog"))).toBe(false);
+  test("leave out the page's own host", () => {
+    const patterns = blockedRequestPatterns("https://www.posthog.com/").map(
+      (pattern) => new RegExp(pattern),
+    );
     expect(patterns.length).toBeGreaterThan(0);
+    expect(
+      patterns.some((pattern) => pattern.test("https://us.i.posthog.com/e")),
+    ).toBe(false);
   });
 });
