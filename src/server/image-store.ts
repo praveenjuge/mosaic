@@ -15,8 +15,6 @@
 import { GLOBAL_IMAGE_TTL_MS } from "@/lib/constants";
 import type { D1Queryable } from "@/server/db";
 
-// ── Keys ────────────────────────────────────────────────────────────
-
 const VERSIONED_KEY = /^global\/([0-9a-f]{64})-[0-9a-z]+\.jpeg$/;
 const LEGACY_KEY =
   /^[0-9a-z]{1,32}(?:-[0-9a-z]{1,32})?\/([0-9a-f]{64})\.(?:jpeg|png)$/;
@@ -46,8 +44,6 @@ export function parseImageKey(
 export function imageKeyRange(pageHash: string): [string, string] {
   return [`global/${pageHash}-`, `global/${pageHash}.jpeg`];
 }
-
-// ── Images ──────────────────────────────────────────────────────────
 
 export type GlobalImage = {
   key: string;
@@ -98,8 +94,6 @@ export async function findImageKeyInRange(
     .first<{ key: string }>();
   return row?.key ?? null;
 }
-
-// ── Generation locks ────────────────────────────────────────────────
 
 /**
  * How long a generation lock holds without being released: the backstop if
@@ -224,8 +218,6 @@ export async function recordGlobalImageAndRelease(
     releaseLockStatement(db, page.pageUrl, leaseToken),
   ]);
 }
-
-// ── A user's websites ───────────────────────────────────────────────
 
 /**
  * Delete every image row of one of the user's websites. Returns the deleted

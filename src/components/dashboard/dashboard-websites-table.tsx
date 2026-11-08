@@ -22,7 +22,6 @@ import { formatNumber } from "@/lib/utils";
 import { Code } from "vadivam-react";
 import { DashboardPanel } from "./dashboard-panel";
 
-/** Each website's counts by hostname, once the analytics have loaded. */
 type SiteCounts = Map<string, TrafficCounts> | "loading" | "unavailable";
 
 function siteCounts(analytics: DashboardAnalytics | null): SiteCounts {

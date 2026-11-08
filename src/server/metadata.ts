@@ -6,8 +6,6 @@
 import { publicEnv } from "@/lib/env";
 import { validateOutboundUrl } from "@/lib/url";
 
-// ── Metadata ────────────────────────────────────────────────────────
-
 const normalizeText = (value: string) => value.replace(/\s+/g, " ").trim();
 
 /**
@@ -76,8 +74,6 @@ export async function extractMetadata(response: Response, baseUrl: URL) {
 
   return { title, description, image };
 }
-
-// ── Fetching ────────────────────────────────────────────────────────
 
 function getUserMessageForStatus(status: number): string {
   if (status === 403) {

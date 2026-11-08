@@ -31,8 +31,6 @@ import { readImageSize } from "./image-size";
 
 const VIRTUAL_PREFIX = "virtual:mosaic-content/";
 
-// ── Markdown rendering ──────────────────────────────────────────────
-
 /** External links open in a new tab; images load lazily and link to themselves. */
 function rehypeLinksAndImages() {
   return (tree: Root) => {
@@ -117,8 +115,6 @@ export function toMarkdownDocument(title: string, content: string): string {
 export async function renderMarkdown(markdown: string): Promise<string> {
   return String(await processor.process(markdown));
 }
-
-// ── Loading ─────────────────────────────────────────────────────────
 
 export function parseFrontmatter(raw: string): {
   data: Record<string, unknown>;
@@ -274,8 +270,6 @@ export async function loadContent(
     markdownPages,
   };
 }
-
-// ── Plugin ──────────────────────────────────────────────────────────
 
 export function mosaicContent(
   contentDir = path.resolve("src/content"),

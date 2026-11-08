@@ -16,14 +16,14 @@ import { preconnect, preload } from "react-dom";
 // separate connections.
 const clerkOrigin = clerkFrontendApiOrigin(publicEnv.clerkPublishableKey);
 
+const clerkUI = { ClerkUI: LazyClerkUI };
+
 /**
  * Clerk's provider, loaded only where Clerk is needed: for signed-in users
  * and on the sign-in and sign-up pages. Signed-out pages skip Clerk's
  * scripts, UI bundle, and API calls entirely, and signed-in pages skip the UI
  * bundle until a Clerk component opens (see `LazyClerkUI`).
  */
-const clerkUI = { ClerkUI: LazyClerkUI };
-
 export default function ClerkShell({
   authPage,
   children,

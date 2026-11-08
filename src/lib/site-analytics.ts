@@ -91,7 +91,6 @@ const emptyCounts = (): TrafficCounts => ({
   fallback: 0,
 });
 
-/** Every image request in `counts`, whatever answered it. */
 export function totalRequests(counts: TrafficCounts): number {
   return counts.cached + counts.generated + counts.fallback;
 }
@@ -100,7 +99,6 @@ function utcDay(timestamp: number): string {
   return new Date(timestamp).toISOString().slice(0, 10);
 }
 
-/** Fold dataset rows into per-day, per-site, and overall counts. */
 export function summarizeAnalytics(
   rows: AnalyticsRow[],
   topPages: TopPageRow[],

@@ -215,8 +215,6 @@ export async function generateImage(
   }
 }
 
-// ── Dashboard actions ───────────────────────────────────────────────
-
 const logError = (message: string) => (error: unknown) => {
   console.error(message, error);
 };

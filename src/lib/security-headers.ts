@@ -26,7 +26,6 @@ export function setSecurityHeaders(headers: Headers): void {
   addAcceptToVary(headers);
 }
 
-/** A copy of `response` with the security headers set. */
 export function withSecurityHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   setSecurityHeaders(headers);

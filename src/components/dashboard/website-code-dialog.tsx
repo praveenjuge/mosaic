@@ -25,7 +25,6 @@ function CopyTextButton({ text, label }: { text: string; label: string }) {
 
   const show = (next: CopyState) => {
     setState(next);
-    // A second click restarts the wait instead of being cut short by the first.
     clearTimeout(resetTimer.current);
     resetTimer.current = setTimeout(
       () => {

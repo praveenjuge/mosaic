@@ -76,8 +76,6 @@ function toJpegDataUrl(buffer: ArrayBuffer): string {
   return `data:image/jpeg;base64,${btoa(binary)}`;
 }
 
-// ── Demo mode ───────────────────────────────────────────────────────
-
 /**
  * Fetch the page once, then read its metadata and screenshot it. A per-client
  * limiter and a global daily budget protect the shared Browser Run
@@ -127,7 +125,6 @@ async function handleDemoRequest(
     );
   }
 
-  // The screenshot starts once the page's headers arrive.
   const [metadata, screenshot] = await Promise.allSettled([
     page.then(({ response, finalUrl }) => extractMetadata(response, finalUrl)),
     page.then(({ finalUrl }) => takeScreenshot(finalUrl.toString())),
@@ -158,8 +155,6 @@ async function handleDemoRequest(
     noStore,
   );
 }
-
-// ── Production mode ─────────────────────────────────────────────────
 
 /** How long a request waits for a first image another request is taking. */
 const LOCKED_WAIT_MS = 10_000;
@@ -276,8 +271,6 @@ async function handleProductionRequest(
   }
   return redirect(fallbackImageUrl(request));
 }
-
-// ── Entry point ─────────────────────────────────────────────────────
 
 export async function handleUseRequest(request: Request): Promise<Response> {
   try {

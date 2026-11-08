@@ -11,8 +11,6 @@
 
 import { signInPath, signUpPath } from "@/lib/clerk-auth";
 
-// ── Accept header ───────────────────────────────────────────────────
-
 function acceptQualities(header: string): Map<string, number> {
   const qualities = new Map<string, number>();
 
@@ -67,8 +65,6 @@ export function acceptsHtml(acceptHeader: string | null): boolean {
   return (q.get("*/*") ?? 0) > 0;
 }
 
-// ── Paths ───────────────────────────────────────────────────────────
-
 /**
  * Routes rendered per request (auth pages), answered by server handlers
  * (server functions), or served elsewhere. None has a Markdown mirror.
@@ -94,8 +90,6 @@ function isAppRoute(path: string): boolean {
     ) || /\.[a-z0-9]+$/i.test(path)
   );
 }
-
-// ── Responses ───────────────────────────────────────────────────────
 
 function respond(
   request: Request,

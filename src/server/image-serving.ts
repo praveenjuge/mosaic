@@ -27,7 +27,6 @@ function imageCacheKey(url: URL): Request {
   return new Request(new URL(url.pathname, url.origin));
 }
 
-/** Headers for an image response, on top of any stored HTTP metadata. */
 function imageHeaders(
   etag: string,
   immutable: boolean,

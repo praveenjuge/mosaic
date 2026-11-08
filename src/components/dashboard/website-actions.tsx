@@ -103,7 +103,6 @@ export function WebsiteActions({
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {/* Edit Dialog */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
@@ -121,7 +120,6 @@ export function WebsiteActions({
         </DialogContent>
       </Dialog>
 
-      {/* Regenerate Alert Dialog */}
       <AlertDialog open={regenerateOpen} onOpenChange={setRegenerateOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -156,7 +154,6 @@ export function WebsiteActions({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Alert Dialog */}
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

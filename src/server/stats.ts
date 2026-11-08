@@ -13,7 +13,6 @@ import { createServerFn } from "@tanstack/react-start";
 
 type WebsiteRow = DashboardStats["websites"][number];
 
-/** Fetch dashboard stats for the signed-in user. */
 export const getDashboardStats = createServerFn()
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<DashboardStats> => {

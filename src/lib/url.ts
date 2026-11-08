@@ -1,7 +1,5 @@
 import { publicEnv } from "./env";
 
-// ── Parsing ─────────────────────────────────────────────────────────
-
 export function stripTrailingSlashes(value: string) {
   return value.replace(/\/+$/, "");
 }
@@ -21,8 +19,6 @@ export function parseWebsiteUrl(value: string): URL {
   }
   return parsed;
 }
-
-// ── Outbound URL security ──────────────────────────────────────────
 
 const PRIVATE_IPV4_RANGES: Array<[number, number]> = [
   [0x00000000, 0x00ffffff],
@@ -139,8 +135,6 @@ export function validateOutboundUrl(
   return null;
 }
 
-// ── Canonical page identity ─────────────────────────────────────────
-
 /**
  * A page's identity in the shared cache: the URL without its fragment or
  * trailing slashes. `global_images` rows are keyed by `pageUrl`, so changing
@@ -158,8 +152,6 @@ export function canonicalPage(url: URL): { pageUrl: string; hostname: string } {
 export function cleanDisplayUrl(value: string) {
   return stripTrailingSlashes(value).replace(/^https?:\/\//, "");
 }
-
-// ── URL builders ────────────────────────────────────────────────────
 
 /** The `/use` URL that gives a page its OG image. */
 export function useEndpointUrl(targetUrl: string) {

@@ -27,7 +27,6 @@ const publicCorsHeaders = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-/** A copy of `response` with the CORS and security headers set. */
 function withPublicHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   for (const [name, value] of Object.entries(publicCorsHeaders)) {

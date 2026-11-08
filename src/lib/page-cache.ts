@@ -19,7 +19,6 @@ const CACHEABLE_PATH = /^\/(?:legal|help(?:\/guides)?(?:\/[a-z0-9-]+)?)?$/;
 const TRACKING_PARAM =
   /^(?:utm_\w+|fbclid|gclid|gbraid|wbraid|msclkid|twclid|li_fat_id|igshid|mc_cid|mc_eid|ref|ref_src|_ga|_gl|si)$/;
 
-/** Whether every query parameter is a tracking one (or there are none). */
 function hasOnlyTrackingParams(url: URL): boolean {
   for (const name of url.searchParams.keys()) {
     if (!TRACKING_PARAM.test(name)) return false;
