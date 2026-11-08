@@ -96,6 +96,22 @@ describe("loadContent", () => {
       (match) => match[1],
     );
     expect(targets.length).toBeGreaterThan(0);
+
+    // Help pages that components link to by path or by `/help/$slug` params.
+    const srcDir = path.resolve(import.meta.dir, "..");
+    for (const file of new Bun.Glob("{components,routes}/**/*.tsx").scanSync(
+      srcDir,
+    )) {
+      const source = await Bun.file(path.join(srcDir, file)).text();
+      for (const [, target] of source.matchAll(/"(\/help\/[a-z0-9-/]+)"/g)) {
+        targets.push(target);
+      }
+      for (const [, slug] of source.matchAll(
+        /to="\/help\/\$slug"\s+params=\{\{ slug: "([a-z0-9-]+)" \}\}/g,
+      )) {
+        targets.push(`/help/${slug}`);
+      }
+    }
     for (const target of new Set(targets)) {
       expect(
         Object.hasOwn(content.markdownPages, target) ||

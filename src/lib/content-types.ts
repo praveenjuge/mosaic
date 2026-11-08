@@ -14,6 +14,7 @@ export interface Guide {
   order: number;
   svgLight?: string;
   svgDark?: string;
+  wordmark?: boolean;
   contentHtml: string;
 }
 

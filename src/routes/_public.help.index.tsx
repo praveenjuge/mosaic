@@ -1,5 +1,6 @@
 import Guides from "@/components/help/guides";
 import { buttonVariants } from "@/components/ui/button";
+import { author_x_url, support_email } from "@/lib/constants";
 import { guideLinks, helpCategories, type HelpCategory } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -78,14 +79,14 @@ function ContactSection() {
       </div>
       <div className="flex gap-2">
         <a
-          href="mailto:hello@praveenjuge.com"
+          href={`mailto:${support_email}`}
           className={cn(buttonVariants({ variant: "default" }))}
         >
           <Mail />
           Email support
         </a>
         <a
-          href="https://x.com/PraveenJuge"
+          href={author_x_url}
           target="_blank"
           rel="noopener noreferrer"
           className={cn(buttonVariants({ variant: "outline" }))}

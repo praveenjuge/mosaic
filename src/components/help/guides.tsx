@@ -4,8 +4,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
 
 function GuideIcon({ guide }: { guide: GuideLinkItem }) {
-  // Hugo's logo is a wordmark, so it keeps the row height and grows wide.
-  const size = guide.slug === "hugo" ? "h-4 w-auto" : "size-4";
+  const size = guide.wordmark ? "h-4 w-auto" : "size-4";
   return (
     <>
       <img
@@ -28,7 +27,6 @@ function GuideIcon({ guide }: { guide: GuideLinkItem }) {
   );
 }
 
-/** A compact link to one framework guide. */
 export function GuideLink({ guide }: { guide: GuideLinkItem }) {
   return (
     <Link

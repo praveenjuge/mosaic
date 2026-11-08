@@ -1,3 +1,4 @@
+import { GLOBAL_IMAGE_TTL_DAYS, OG_IMAGE_SIZE_LABEL } from "@/lib/constants";
 import { ChevronDownIcon, ChevronUpIcon } from "vadivam-react";
 
 interface FAQ {
@@ -33,13 +34,11 @@ const FAQS: FAQ[] = [
   },
   {
     question: "How often are OG images refreshed?",
-    answer:
-      "Images are cached by canonical page URL and refresh automatically after 30 days. To update one sooner, choose Regenerate next to its image on the dashboard, or Regenerate images in a website's menu to reset every page.",
+    answer: `Images are cached by canonical page URL and refresh automatically after ${GLOBAL_IMAGE_TTL_DAYS} days. To update one sooner, choose Regenerate next to its image on the dashboard, or Regenerate images in a website's menu to reset every page.`,
   },
   {
     question: "What image format is used?",
-    answer:
-      "OG images are JPEG screenshots taken at 1560×819 pixels, the 1.91:1 shape social networks use for link previews.",
+    answer: `OG images are JPEG screenshots taken at ${OG_IMAGE_SIZE_LABEL} pixels, the 1.91:1 shape social networks use for link previews.`,
   },
 ];
 

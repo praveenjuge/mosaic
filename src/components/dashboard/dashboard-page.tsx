@@ -1,4 +1,4 @@
-import WelcomeEmptyState from "@/components/home/WelcomeEmptyState";
+import WelcomeEmptyState from "@/components/dashboard/welcome-empty-state";
 import type { DashboardAnalytics } from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { Await } from "@tanstack/react-router";

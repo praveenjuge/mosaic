@@ -1,13 +1,14 @@
 import { SignUpLink } from "@/components/auth/auth-links";
-import FAQ from "@/components/faq";
 import CTA from "@/components/home/cta";
+import FAQ from "@/components/home/faq";
 import { Button } from "@/components/ui/button";
+import { support_email } from "@/lib/constants";
 import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "vadivam-react";
 import FeaturesBenefits from "./features-benefits";
 import HowItWorks from "./how-it-works";
-import LandingPricing from "./landing-pricing";
 import OGImageDemo from "./og-image-demo";
+import Pricing from "./pricing";
 import { SectionHeading } from "./section-heading";
 
 function HeroSection() {
@@ -64,7 +65,7 @@ function FAQSection() {
             </Link>{" "}
             or{" "}
             <a
-              href="mailto:hello@praveenjuge.com"
+              href={`mailto:${support_email}`}
               className="text-foreground underline underline-offset-4"
             >
               email us
@@ -87,7 +88,7 @@ export default function HomeSignedOut() {
       </div>
       <FeaturesBenefits />
       <HowItWorks />
-      <LandingPricing />
+      <Pricing />
       <FAQSection />
       <CTA />
     </div>

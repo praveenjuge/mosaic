@@ -3,6 +3,7 @@ title: "Hugo"
 slug: "hugo"
 description: "Give every page an image from your Hugo template."
 order: 60
+wordmark: true
 ---
 
 In the `<head>` of your base template or head partial:

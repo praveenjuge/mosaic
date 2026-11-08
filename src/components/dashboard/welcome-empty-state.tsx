@@ -1,5 +1,5 @@
-import { useWebsiteActions } from "@/components/websites/use-website-actions";
-import { WebsiteUrlForm } from "@/components/websites/website-url-form";
+import { useWebsiteActions } from "@/components/dashboard/use-website-actions";
+import { WebsiteUrlForm } from "@/components/dashboard/website-url-form";
 import { useState } from "react";
 
 const steps = [

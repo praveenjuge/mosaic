@@ -144,6 +144,8 @@ const guideSchema = z.object({
   order: z.number(),
   svgLight: z.string().optional(),
   svgDark: z.string().optional(),
+  /** The logo is a wordmark: it keeps the row height and grows wide. */
+  wordmark: z.boolean().optional(),
 });
 
 const legalSchema = z.object({
@@ -259,12 +261,13 @@ export async function loadContent(
     helpCategories,
     guides,
     guideLinks: guides.map(
-      ({ slug, title, description, svgLight, svgDark }) => ({
+      ({ slug, title, description, svgLight, svgDark, wordmark }) => ({
         slug,
         title,
         description,
         svgLight,
         svgDark,
+        wordmark,
       }),
     ),
     legalDocuments: legal.map(({ entry }) => entry),

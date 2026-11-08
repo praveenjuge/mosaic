@@ -52,18 +52,11 @@ function Meter({
   );
 }
 
-export function DashboardUsage({
-  budget,
-  className,
-}: {
-  budget: DashboardBudget;
-  className?: string;
-}) {
+export function DashboardUsage({ budget }: { budget: DashboardBudget }) {
   return (
     <DashboardPanel
       title="Today's usage"
       description="New screenshots since midnight UTC"
-      className={className}
     >
       <div className="flex flex-1 flex-col gap-6 px-5 pt-1 pb-5">
         <Meter

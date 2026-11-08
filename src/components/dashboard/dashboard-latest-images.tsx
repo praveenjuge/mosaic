@@ -1,22 +1,15 @@
+import { GetCodeButton } from "@/components/dashboard/get-code-button";
+import { useWebsiteActions } from "@/components/dashboard/use-website-actions";
 import { RelativeTime } from "@/components/relative-time";
 import { Button } from "@/components/ui/button";
-import { LazyWebsiteCodeDialog } from "@/components/websites/lazy-website-code-dialog";
-import { useWebsiteActions } from "@/components/websites/use-website-actions";
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
 import { cleanDisplayUrl, publicImageUrl } from "@/lib/url";
 import { formatBytes } from "@/lib/utils";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { Code, ImageOff, RefreshCcw } from "vadivam-react";
 import { DashboardPanel } from "./dashboard-panel";
 
-/** The page's path and query, which the code dialog shows after the host. */
-function pagePath(pageUrl: string): string {
-  const { pathname, search } = new URL(pageUrl);
-  return `${pathname}${search}`.replace(/^\/+/, "");
-}
-
 function ImageCard({ item }: { item: DashboardImageSummary }) {
-  const [codeOpen, setCodeOpen] = useState(false);
   const [isRegenerating, startRegenerating] = useTransition();
   const { regeneratePage } = useWebsiteActions();
   const screenshotUrl = publicImageUrl(item.key);
@@ -54,17 +47,16 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
           </p>
         </div>
         <div className="flex shrink-0 items-center">
-          <Button
+          <GetCodeButton
+            hostname={item.url_base}
+            pageUrl={item.page_url}
             variant="ghost"
             size="icon-sm"
-            onClick={() => {
-              setCodeOpen(true);
-            }}
             aria-label={`Get code for ${cleanDisplayUrl(item.page_url)}`}
             title="Get code"
           >
             <Code />
-          </Button>
+          </GetCodeButton>
           <Button
             variant="ghost"
             size="icon-sm"
@@ -81,15 +73,6 @@ function ImageCard({ item }: { item: DashboardImageSummary }) {
           </Button>
         </div>
       </div>
-      <LazyWebsiteCodeDialog
-        hostname={item.url_base}
-        initialPath={pagePath(item.page_url)}
-        protocol={
-          new URL(item.page_url).protocol === "http:" ? "http:" : "https:"
-        }
-        open={codeOpen}
-        onOpenChange={setCodeOpen}
-      />
     </li>
   );
 }

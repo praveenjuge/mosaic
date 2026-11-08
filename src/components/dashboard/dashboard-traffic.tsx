@@ -1,9 +1,13 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
+import {
+  ANALYTICS_DAYS,
+  totalRequests,
+  type DashboardAnalytics,
+  type TrafficCounts,
+} from "@/lib/site-analytics";
 import { cleanDisplayUrl } from "@/lib/url";
 import { cn, formatNumber } from "@/lib/utils";
 import { Link } from "@tanstack/react-router";
-import { totalRequests } from "./dashboard-overview";
 import { DashboardPanel } from "./dashboard-panel";
 
 /** Stacked bottom to top, in the validated chart order. */
@@ -11,25 +15,21 @@ const SERIES: Array<{
   key: keyof TrafficCounts;
   label: string;
   color: string;
-  count: (counts: TrafficCounts) => number;
 }> = [
   {
     key: "cached",
     label: "From cache",
     color: "bg-chart-1",
-    count: (counts) => counts.cached,
   },
   {
     key: "generated",
     label: "New screenshots",
     color: "bg-chart-2",
-    count: (counts) => counts.generated,
   },
   {
     key: "fallback",
     label: "Fallbacks",
     color: "bg-chart-3",
-    count: (counts) => counts.fallback,
   },
 ];
 
@@ -45,7 +45,7 @@ function dayLabel(day: string, style: "short" | "long") {
 function Legend({ totals }: { totals: TrafficCounts }) {
   return (
     <ul className="flex flex-wrap gap-x-5 gap-y-1.5 px-5 text-xs">
-      {SERIES.map(({ key, label, color, count }) => (
+      {SERIES.map(({ key, label, color }) => (
         <li key={key} className="flex items-center gap-1.5">
           <span
             className={cn("size-2 rounded-[2px]", color)}
@@ -53,7 +53,7 @@ function Legend({ totals }: { totals: TrafficCounts }) {
           />
           <span className="text-muted-foreground">{label}</span>
           <span className="font-medium tabular-nums">
-            {formatNumber(count(totals))}
+            {formatNumber(totals[key])}
           </span>
         </li>
       ))}
@@ -65,7 +65,7 @@ type Day = Extract<DashboardAnalytics, { available: true }>["days"][number];
 
 function Bar({ day, max }: { day: Day; max: number }) {
   const total = totalRequests(day);
-  const segments = SERIES.filter(({ count }) => count(day) > 0);
+  const segments = SERIES.filter(({ key }) => day[key] > 0);
 
   return (
     <li className="group relative flex h-full flex-1 flex-col items-center justify-end">
@@ -82,7 +82,7 @@ function Bar({ day, max }: { day: Day; max: number }) {
             className="flex w-full max-w-10 flex-col-reverse gap-0.5"
             style={{ height: `${Math.max((total / max) * 100, 2)}%` }}
           >
-            {segments.map(({ key, color, count }, index) => (
+            {segments.map(({ key, color }, index) => (
               <span
                 key={key}
                 className={cn(
@@ -90,7 +90,7 @@ function Bar({ day, max }: { day: Day; max: number }) {
                   color,
                   index === segments.length - 1 && "rounded-t-[4px]",
                 )}
-                style={{ flexGrow: count(day) }}
+                style={{ flexGrow: day[key] }}
               />
             ))}
           </span>
@@ -101,14 +101,14 @@ function Bar({ day, max }: { day: Day; max: number }) {
         className="bg-popover text-popover-foreground pointer-events-none absolute bottom-full z-10 mb-2 hidden w-44 rounded-lg border p-2.5 text-xs shadow-md group-focus-within:block group-hover:block"
       >
         <p className="mb-1.5 font-medium">{dayLabel(day.day, "long")}</p>
-        {SERIES.map(({ key, label, color, count }) => (
+        {SERIES.map(({ key, label, color }) => (
           <p key={key} className="flex items-center gap-1.5 py-0.5">
             <span
               className={cn("size-2 rounded-[2px]", color)}
               aria-hidden="true"
             />
             <span className="text-muted-foreground flex-1">{label}</span>
-            <span className="tabular-nums">{formatNumber(count(day))}</span>
+            <span className="tabular-nums">{formatNumber(day[key])}</span>
           </p>
         ))}
       </div>
@@ -173,8 +173,8 @@ function TrafficChart({
             {analytics.days.map((day) => (
               <tr key={day.day}>
                 <th scope="row">{dayLabel(day.day, "long")}</th>
-                {SERIES.map(({ key, count }) => (
-                  <td key={key}>{count(day)}</td>
+                {SERIES.map(({ key }) => (
+                  <td key={key}>{day[key]}</td>
                 ))}
               </tr>
             ))}
@@ -203,7 +203,7 @@ export function DashboardTraffic({
   return (
     <DashboardPanel
       title="Traffic"
-      description="Image requests for your websites, last 7 days"
+      description={`Image requests for your websites, last ${ANALYTICS_DAYS} days`}
       className={className}
     >
       {!analytics ? (
@@ -221,10 +221,8 @@ export function DashboardTraffic({
 
 export function DashboardTopPages({
   analytics,
-  className,
 }: {
   analytics: DashboardAnalytics | null;
-  className?: string;
 }) {
   const pages = analytics?.available ? analytics.top_pages : [];
   const max = Math.max(1, ...pages.map((page) => page.requests));
@@ -232,8 +230,7 @@ export function DashboardTopPages({
   return (
     <DashboardPanel
       title="Top pages"
-      description="Most requested images, last 7 days"
-      className={className}
+      description={`Most requested images, last ${ANALYTICS_DAYS} days`}
     >
       {!analytics ? (
         <div className="flex flex-col gap-2 px-5 pb-4">

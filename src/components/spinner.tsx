@@ -1,15 +1,14 @@
 import { cn } from "@/lib/utils";
 
-export interface ISVGProps extends React.SVGProps<SVGSVGElement> {
+interface SpinnerProps extends React.SVGProps<SVGSVGElement> {
   size?: number;
-  className?: string;
 }
 
 export const LoadingSpinner = ({
   size = 24,
   className,
   ...props
-}: ISVGProps) => {
+}: SpinnerProps) => {
   return (
     <div className="grid size-full place-items-center">
       <svg

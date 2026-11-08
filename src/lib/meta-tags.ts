@@ -1,3 +1,4 @@
+import { OG_IMAGE_SIZE } from "@/lib/constants";
 import { useEndpointUrl } from "@/lib/url";
 
 export type PageProtocol = "http:" | "https:";
@@ -30,13 +31,25 @@ export function pageUrlFor(
   return path ? `${origin}/${path}` : origin;
 }
 
+/** What `pageUrlFor` needs to give back `pageUrl`: its path and protocol. */
+export function splitPageUrl(pageUrl: string): {
+  path: string;
+  protocol: PageProtocol;
+} {
+  const url = new URL(pageUrl);
+  return {
+    path: `${url.pathname}${url.search}`.replace(/^\/+/, ""),
+    protocol: url.protocol === "http:" ? "http:" : "https:",
+  };
+}
+
 /** The `<head>` tags that point a page's link previews at its Mosaic image. */
 export function buildMetaTags(pageUrl: string): string {
   const imageUrl = useEndpointUrl(pageUrl);
   return [
     `<meta property="og:image" content="${imageUrl}" />`,
-    `<meta property="og:image:width" content="1560" />`,
-    `<meta property="og:image:height" content="819" />`,
+    `<meta property="og:image:width" content="${OG_IMAGE_SIZE.width}" />`,
+    `<meta property="og:image:height" content="${OG_IMAGE_SIZE.height}" />`,
     `<meta name="twitter:card" content="summary_large_image" />`,
     `<meta name="twitter:image" content="${imageUrl}" />`,
   ].join("\n");

@@ -10,20 +10,24 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { guideLinks } from "@/lib/content";
-import { buildMetaTags, pageUrlFor, type PageProtocol } from "@/lib/meta-tags";
+import { buildMetaTags, pageUrlFor, splitPageUrl } from "@/lib/meta-tags";
 import { useEndpointUrl } from "@/lib/url";
 import { Link } from "@tanstack/react-router";
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Check, Copy, TriangleAlert } from "vadivam-react";
 
 type CopyState = "idle" | "copied" | "failed";
 
 function CopyTextButton({ text, label }: { text: string; label: string }) {
   const [state, setState] = useState<CopyState>("idle");
+  const resetTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => () => clearTimeout(resetTimer.current), []);
 
   const show = (next: CopyState) => {
     setState(next);
-    setTimeout(
+    // A second click restarts the wait instead of being cut short by the first.
+    clearTimeout(resetTimer.current);
+    resetTimer.current = setTimeout(
       () => {
         setState("idle");
       },
@@ -64,26 +68,27 @@ function CopyTextButton({ text, label }: { text: string; label: string }) {
 }
 
 /**
- * Ready-to-paste meta tags for any page of a website. Controlled, so a
- * website row and an image card can open it for a given page. Load it
- * through `LazyWebsiteCodeDialog`.
+ * Ready-to-paste meta tags for any page of a website, starting at `pageUrl`
+ * (an `http:` page keeps its protocol, since it has its own image) or the
+ * home page. Opened through `GetCodeButton`.
  */
 export function WebsiteCodeDialog({
   hostname,
-  initialPath = "",
-  protocol = "https:",
+  pageUrl: initialPageUrl,
   open,
   onOpenChange,
 }: {
   hostname: string;
-  initialPath?: string;
-  /** An image card's page can be `http:`, which has its own image. */
-  protocol?: PageProtocol;
+  pageUrl?: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const pathId = useId();
-  const [path, setPath] = useState(initialPath);
+  const initial = initialPageUrl
+    ? splitPageUrl(initialPageUrl)
+    : { path: "", protocol: "https:" as const };
+  const { protocol } = initial;
+  const [path, setPath] = useState(initial.path);
   const pageUrl = pageUrlFor(hostname, path, protocol);
   const tags = buildMetaTags(pageUrl);
   const imageUrl = useEndpointUrl(pageUrl);

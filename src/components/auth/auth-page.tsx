@@ -1,10 +1,13 @@
+import { useClerkAppearance } from "@/components/auth/use-clerk-appearance";
 import Logo from "@/components/logo";
+import { sanitizeRedirectPath, signInPath, signUpPath } from "@/lib/clerk-auth";
 import { loadClerkUI } from "@/lib/clerk-ui";
+import { SignIn, SignUp } from "@clerk/tanstack-react-start";
 import { Link } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { ArrowLeft } from "vadivam-react";
 
-export function AuthPageShell({ children }: { children: ReactNode }) {
+function AuthPageShell({ children }: { children: ReactNode }) {
   // The page's Clerk form needs Clerk's UI bundle. Fetching it now, while
   // clerk-js loads, saves waiting for one after the other.
   useEffect(() => {
@@ -33,5 +36,32 @@ export function AuthPageShell({ children }: { children: ReactNode }) {
         {children}
       </main>
     </div>
+  );
+}
+
+/** Clerk's sign-in or sign-up form, which returns to `redirectUrl` after. */
+export function AuthPage({
+  form,
+  redirectUrl,
+}: {
+  form: "sign-in" | "sign-up";
+  redirectUrl?: string;
+}) {
+  const appearance = useClerkAppearance();
+  const target = sanitizeRedirectPath(redirectUrl);
+  const props = {
+    appearance,
+    routing: "path" as const,
+    fallbackRedirectUrl: target,
+    forceRedirectUrl: target,
+  };
+  return (
+    <AuthPageShell>
+      {form === "sign-in" ? (
+        <SignIn {...props} path={signInPath} signUpUrl={signUpPath} />
+      ) : (
+        <SignUp {...props} path={signUpPath} signInUrl={signInPath} />
+      )}
+    </AuthPageShell>
   );
 }

@@ -1,4 +1,4 @@
-import HomeSignedOut from "@/components/home/homesignedout";
+import HomeSignedOut from "@/components/home/home-signed-out";
 import { preloadableLazy } from "@/lib/preloadable-lazy";
 import { buildSeoMeta } from "@/lib/seo";
 import type { DashboardAnalytics } from "@/lib/site-analytics";

@@ -1,4 +1,4 @@
-import { website_name } from "@/lib/constants";
+import { support_email, website_name } from "@/lib/constants";
 import { useTheme, type Theme } from "@/lib/theme";
 import { Link } from "@tanstack/react-router";
 import { Computer, Moon, Sun, type VadivamIcon } from "vadivam-react";
@@ -18,7 +18,7 @@ const footerSections = [
     links: [
       { href: "/help", label: "Help center" },
       { href: "/help/test-your-social-previews", label: "Test your previews" },
-      { href: "mailto:hello@praveenjuge.com", label: "Contact support" },
+      { href: `mailto:${support_email}`, label: "Contact support" },
     ],
   },
   {

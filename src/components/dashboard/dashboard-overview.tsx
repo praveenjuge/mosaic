@@ -1,12 +1,12 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import type { DashboardAnalytics, TrafficCounts } from "@/lib/site-analytics";
+import {
+  ANALYTICS_DAYS,
+  totalRequests,
+  type DashboardAnalytics,
+} from "@/lib/site-analytics";
 import type { DashboardStats } from "@/lib/types";
 import { formatNumber } from "@/lib/utils";
 import type { ReactNode } from "react";
-
-export function totalRequests(counts: TrafficCounts): number {
-  return counts.cached + counts.generated + counts.fallback;
-}
 
 function StatCard({
   label,
@@ -39,7 +39,7 @@ function TrafficStats({ analytics }: { analytics: DashboardAnalytics | null }) {
             key={label}
             label={label}
             value={<Skeleton className="h-8 w-20" />}
-            detail="Last 7 days"
+            detail={`Last ${ANALYTICS_DAYS} days`}
           />
         ))}
       </>
@@ -62,7 +62,7 @@ function TrafficStats({ analytics }: { analytics: DashboardAnalytics | null }) {
       <StatCard
         label="Image requests"
         value={formatNumber(requests)}
-        detail="Last 7 days"
+        detail={`Last ${ANALYTICS_DAYS} days`}
       />
       <StatCard
         label="Served from cache"
