@@ -9,6 +9,12 @@ How it works:
 - If a screenshot fails or a limit is reached, Mosaic redirects to the previous image or a placeholder.
 - Mosaic is not an image editor or a general-purpose screenshot API.
 
+## When to use Mosaic
+
+- Use Mosaic when a website needs an Open Graph image for every page without designing each one by hand: content sites, blogs, documentation, and marketing pages where a clean screenshot of the page makes a good social preview.
+- To set a page up, add its site's hostname in the Mosaic dashboard, then point the page's `og:image` (and `twitter:image`) meta tags at `https://mosaic.praveenjuge.com/use?url=<URL-encoded page URL>`. No API key is needed; the endpoint answers with a redirect to the stored image.
+- Mosaic is not an image editor or a general-purpose screenshot API, and it only serves hostnames added in the dashboard.
+
 ## Docs
 
 - [Add Your Website to Mosaic](https://mosaic.praveenjuge.com/help/add-your-website-to-mosaic): Add your site in the dashboard and copy its OG image link.
