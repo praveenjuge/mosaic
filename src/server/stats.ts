@@ -1,28 +1,18 @@
-import {
-  buildDashboardBudget,
-  buildDashboardStats,
-  type BudgetRow,
-  type DashboardWebsiteRow,
-} from "@/lib/dashboard";
-import { getDb } from "@/lib/db";
-import { queryLocalEvents } from "@/lib/local-analytics";
-import {
-  analyticsQueries,
-  analyticsWindowStart,
-  summarizeAnalytics,
-  TOP_PAGES_LIMIT,
-  type AnalyticsRow,
-  type DashboardAnalytics,
-  type TopPageRow,
-} from "@/lib/site-analytics";
+import type { DashboardAnalytics } from "@/lib/site-analytics";
 import type { DashboardImageSummary, DashboardStats } from "@/lib/types";
+import { stripTrailingSlashes } from "@/lib/url";
+import { querySiteAnalytics } from "@/server/analytics";
+import { getDb } from "@/server/db";
+import {
+  dashboardBudget,
+  dashboardBudgetStatement,
+} from "@/server/generation-usage";
+import { latestSiteImages } from "@/server/image-store";
+import { authMiddleware } from "@/server/middleware";
 import { createServerFn } from "@tanstack/react-start";
-import { env } from "cloudflare:workers";
-import { utcDayStart } from "./generation-usage";
-import { authMiddleware } from "./middleware";
-import { latestSiteImages } from "./site-images";
 
-/** Fetch dashboard stats for the signed-in user. */
+type WebsiteRow = DashboardStats["websites"][number];
+
 export const getDashboardStats = createServerFn()
   .middleware([authMiddleware])
   .handler(async ({ context }): Promise<DashboardStats> => {
@@ -36,12 +26,10 @@ export const getDashboardStats = createServerFn()
     // Counting `g.hostname` (never NULL for a joined row) lets the first use
     // it as a covering index; `latestSiteImages` still sorts the user's
     // images.
-    const dayStart = utcDayStart();
-    const [websitesResult, latestImagesResult, budgetResult] =
-      await session.batch([
-        session
-          .prepare(
-            `SELECT s.id,
+    const [websites, latestImages, budget] = await session.batch([
+      session
+        .prepare(
+          `SELECT s.id,
                   s.url_base,
                   s.created_at,
                   COUNT(g.hostname) AS image_count,
@@ -51,80 +39,31 @@ export const getDashboardStats = createServerFn()
            WHERE s.user_id = ?
            GROUP BY s.id
            ORDER BY s.created_at DESC`,
-          )
-          .bind(context.userId),
-        latestSiteImages(session, context.userId),
-        // Today's screenshots across the service and those the user started
-        // (adding sites, regenerating pages). Older windows count as zero.
-        session
-          .prepare(
-            `SELECT scope, count FROM generation_budgets
-           WHERE window_start = ?
-             AND ((scope = 'production-global' AND budget_key = 'service')
-               OR (scope = 'production-client' AND budget_key = ?))`,
-          )
-          .bind(dayStart, `user:${context.userId}`),
-      ]);
+        )
+        .bind(context.userId),
+      latestSiteImages(session, context.userId),
+      dashboardBudgetStatement(session, context.userId),
+    ]);
 
-    return buildDashboardStats(
-      (websitesResult as D1Result<DashboardWebsiteRow>).results,
-      (latestImagesResult as D1Result<DashboardImageSummary>).results,
-      buildDashboardBudget(
-        (budgetResult as D1Result<BudgetRow>).results,
-        dayStart,
+    const websiteRows = (websites as D1Result<WebsiteRow>).results;
+    return {
+      total_websites: websiteRows.length,
+      total_images: websiteRows.reduce(
+        (total, website) => total + website.image_count,
+        0,
       ),
-    );
+      websites: websiteRows,
+      latest_screenshots: (
+        latestImages as D1Result<DashboardImageSummary>
+      ).results.map((image) => ({
+        ...image,
+        page_url: stripTrailingSlashes(image.page_url),
+      })),
+      budget: dashboardBudget(
+        (budget as D1Result<{ scope: string; count: number }>).results,
+      ),
+    };
   });
-
-/** Traffic for the given hostnames over the chart's days. */
-/** Hostname batches (two queries each) queried at once. */
-const BATCH_CONCURRENCY = 5;
-
-async function querySiteAnalytics(
-  hostnames: string[],
-): Promise<DashboardAnalytics> {
-  if (import.meta.env.DEV) {
-    // Local writes never reach the deployed dataset, so dev reads its own.
-    const { rows, topPages } = queryLocalEvents(
-      hostnames,
-      analyticsWindowStart(),
-      TOP_PAGES_LIMIT,
-    );
-    return summarizeAnalytics(rows, topPages);
-  }
-
-  const batches = analyticsQueries(
-    env.OG_ANALYTICS_DATASET,
-    hostnames,
-    analyticsWindowStart(),
-  );
-  if (!batches) return summarizeAnalytics([], []);
-  try {
-    // A few batches at a time stays inside the SQL API's concurrency limit.
-    const results = [];
-    for (let start = 0; start < batches.length; start += BATCH_CONCURRENCY) {
-      results.push(
-        ...(await Promise.all(
-          batches
-            .slice(start, start + BATCH_CONCURRENCY)
-            .map(({ breakdown, topPages }) =>
-              Promise.all([
-                env.ANALYTICS_SQL.query<AnalyticsRow>(breakdown),
-                env.ANALYTICS_SQL.query<TopPageRow>(topPages),
-              ]),
-            ),
-        )),
-      );
-    }
-    return summarizeAnalytics(
-      results.flatMap(([breakdown]) => breakdown.data),
-      results.flatMap(([, topPages]) => topPages.data),
-    );
-  } catch (error) {
-    console.error("[ANALYTICS] Failed to query site analytics:", error);
-    return { available: false };
-  }
-}
 
 /**
  * Traffic for the signed-in user's websites over the last week. Loaded after

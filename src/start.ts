@@ -8,6 +8,7 @@ import {
   pageCacheKey,
 } from "@/lib/page-cache";
 import { withSecurityHeaders } from "@/lib/security-headers";
+import { cacheAfterResponse } from "@/server/cache";
 import { clerkMiddleware } from "@clerk/tanstack-react-start/server";
 import geistLatin from "@fontsource-variable/geist/files/geist-latin-wght-normal.woff2?url";
 import {
@@ -15,7 +16,6 @@ import {
   createMiddleware,
   createStart,
 } from "@tanstack/react-start";
-import { waitUntil } from "cloudflare:workers";
 import appCss from "./styles/app.css?url";
 
 /** Set per build by `vite.config.ts`; keys the page cache to one deploy. */
@@ -95,12 +95,10 @@ const pageCacheMiddleware = createMiddleware({ type: "request" }).server(
       const [body, copy] = result.response.body?.tee() ?? [null, null];
       const stored = new Headers(result.response.headers);
       stored.set("Cache-Control", PAGE_CACHE_CONTROL);
-      waitUntil(
-        cache
-          .put(key, new Response(copy, { status: 200, headers: stored }))
-          .catch((error: unknown) => {
-            console.error("[PAGES] Failed to cache page:", error);
-          }),
+      cacheAfterResponse(
+        PAGE_CACHE_NAME,
+        key,
+        new Response(copy, { status: 200, headers: stored }),
       );
       const headers = new Headers(result.response.headers);
       headers.set("X-Mosaic-Cache", "MISS");

@@ -1,4 +1,4 @@
-import { headerSignedIn } from "@/lib/clerk-chunks";
+import { headerSignedIn } from "@/components/auth/clerk-chunks";
 import { useRouteContext } from "@tanstack/react-router";
 import { Suspense } from "react";
 import { AuthLoadingSkeleton, SignedOutButtons } from "./header-auth-buttons";

@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-/** A titled dashboard section on a card surface. */
 export function DashboardPanel({
   title,
   description,

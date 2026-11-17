@@ -2,12 +2,15 @@ import { legalDocuments } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { createFileRoute } from "@tanstack/react-router";
 
+const legalTitle = "Legal Information";
+const legalDescription = "We take your privacy and data seriously.";
+
 export const Route = createFileRoute("/_public/legal")({
   component: LegalPage,
   head: () =>
     buildSeoMeta({
-      title: "Legal Information",
-      description: "We take your privacy and data seriously.",
+      title: legalTitle,
+      description: legalDescription,
       path: "/legal",
     }),
 });
@@ -26,10 +29,10 @@ function LegalPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-10">
       <header className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-          Legal Information
+          {legalTitle}
         </h1>
         <p className="text-muted-foreground text-base md:text-lg">
-          We take your privacy and data seriously.
+          {legalDescription}
         </p>
         <nav aria-label="Documents" className="mt-2 flex flex-wrap gap-2">
           {legalDocuments.map((document) => (

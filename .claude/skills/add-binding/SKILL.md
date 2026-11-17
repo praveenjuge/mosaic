@@ -22,7 +22,7 @@ Then work through every place a binding has to appear:
    `bun run cf-typegen:check` must pass. Secrets go in `secrets.required`.
 5. **Local dev** — confirm the binding works under `bun run dev` without
    credentials. If it is remote-only (like `BROWSER`), add a dev fallback
-   behind `import.meta.env.DEV` (see `src/lib/local-screenshot.ts`) and
+   behind `import.meta.env.DEV` (see `src/server/local-screenshot.ts`) and
    decide how `tests/integration/worker.test.ts` handles it offline.
 6. **Code** — read bindings with `import { env } from "cloudflare:workers"`.
 7. **Docs** — mention the binding in `AGENTS.md` (Core Technologies) and, if

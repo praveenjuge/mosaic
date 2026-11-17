@@ -1,5 +1,5 @@
+import { useTheme } from "@/lib/theme";
 import { dark } from "@clerk/ui/themes";
-import { useTheme } from "next-themes";
 
 /** Clerk's components in Mosaic's colors, following the app's theme. */
 export function useClerkAppearance() {

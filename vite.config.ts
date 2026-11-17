@@ -3,8 +3,10 @@ import babel from "@rolldown/plugin-babel";
 import tailwindcss from "@tailwindcss/vite";
 import { tanstackStart } from "@tanstack/react-start/plugin/vite";
 import react, { reactCompilerPreset } from "@vitejs/plugin-react";
-import { defineConfig, loadEnv } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 import { mosaicContent } from "./src/lib/content-plugin";
+import { lazyChunks } from "./src/lib/lazy-chunks-plugin";
 
 function validateSiteUrl(siteUrl: string | undefined) {
   if (!siteUrl) {
@@ -43,6 +45,29 @@ function shouldUseRemoteBindings() {
   return Boolean(process.env.CLOUDFLARE_API_TOKEN);
 }
 
+/**
+ * Points each Vadivam icon module at `src/lib/vadivam-icon.ts`, which renders
+ * the same `<svg>` without the package's runtime sanitizer. Icons are still
+ * imported from `vadivam-react` as usual.
+ */
+function vadivamLite(): Plugin {
+  const lite = fileURLToPath(
+    new URL("./src/lib/vadivam-icon.ts", import.meta.url),
+  );
+  return {
+    name: "mosaic:vadivam-lite",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (
+        source === "../createIcon.js" &&
+        importer?.replaceAll("\\", "/").includes("/vadivam-react/dist/icons/")
+      ) {
+        return lite;
+      }
+    },
+  };
+}
+
 export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   validateSiteUrl(env.VITE_SITE_URL);
@@ -63,6 +88,8 @@ export default defineConfig(({ command, mode }) => {
     },
     envPrefix: ["VITE_"],
     plugins: [
+      vadivamLite(),
+      lazyChunks(),
       mosaicContent(),
       cloudflare({
         viteEnvironment: { name: "ssr" },

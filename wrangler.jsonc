@@ -43,7 +43,7 @@
       "dataset": "mosaic_og_generations",
     },
   ],
-  // Reads OG_ANALYTICS back for the dashboard (src/server/stats.ts). The
+  // Reads OG_ANALYTICS back for the dashboard (src/server/analytics.ts). The
   // binding is scoped to this Worker's account, so it needs no API token. It
   // only exists remotely; dev reads its own events instead (local-analytics).
   "analytics": {

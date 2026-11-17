@@ -1,3 +1,4 @@
+import { GLOBAL_IMAGE_TTL_DAYS, OG_IMAGE_SIZE_LABEL } from "@/lib/constants";
 import {
   type VadivamIcon,
   ChartNoAxesColumn,
@@ -8,6 +9,7 @@ import {
   ShieldCheck,
 } from "vadivam-react";
 import { SectionHeading } from "./section-heading";
+import { landingSections } from "./sections";
 
 interface Feature {
   icon: VadivamIcon;
@@ -19,8 +21,7 @@ const FEATURES: Feature[] = [
   {
     icon: ScanEye,
     title: "Automatic screenshots",
-    description:
-      "The first request for a page captures it at 1560×819. No templates to design or keep in sync.",
+    description: `The first request for a page captures it at ${OG_IMAGE_SIZE_LABEL}. No templates to design or keep in sync.`,
   },
   {
     icon: Code,
@@ -31,8 +32,7 @@ const FEATURES: Feature[] = [
   {
     icon: RefreshCcw,
     title: "Always current",
-    description:
-      "Images refresh every 30 days on their own, or regenerate any page from the dashboard.",
+    description: `Images refresh every ${GLOBAL_IMAGE_TTL_DAYS} days on their own, or regenerate any page from the dashboard.`,
   },
   {
     icon: ShieldCheck,
@@ -56,7 +56,7 @@ const FEATURES: Feature[] = [
 
 export default function FeaturesBenefits() {
   return (
-    <section id="features" className="flex flex-col gap-12">
+    <section id={landingSections.features} className="flex flex-col gap-12">
       <SectionHeading
         eyebrow="Features"
         title="Everything a link preview needs"

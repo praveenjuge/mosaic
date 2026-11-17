@@ -14,7 +14,7 @@ type SeoConfig = {
   type?: "article" | "website";
 };
 
-export function absoluteUrl(path = "") {
+function absoluteUrl(path = "") {
   return new URL(path.replace(/^\//, ""), publicEnv.siteUrl).toString();
 }
 

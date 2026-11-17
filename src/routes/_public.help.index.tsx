@@ -1,5 +1,6 @@
 import Guides from "@/components/help/guides";
 import { buttonVariants } from "@/components/ui/button";
+import { author_x_url, support_email } from "@/lib/constants";
 import { guideLinks, helpCategories, type HelpCategory } from "@/lib/content";
 import { buildSeoMeta } from "@/lib/seo";
 import { cn } from "@/lib/utils";
@@ -7,13 +8,14 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { ChevronRight, Mail } from "vadivam-react";
 
+const helpTitle = "Help & Support";
 const helpDescription =
   "Find solutions to common issues and get help with troubleshooting.";
 
 export const Route = createFileRoute("/_public/help/")({
   head: () =>
     buildSeoMeta({
-      title: "Help & Support",
+      title: helpTitle,
       description: helpDescription,
       path: "/help",
     }),
@@ -78,14 +80,14 @@ function ContactSection() {
       </div>
       <div className="flex gap-2">
         <a
-          href="mailto:hello@praveenjuge.com"
+          href={`mailto:${support_email}`}
           className={cn(buttonVariants({ variant: "default" }))}
         >
           <Mail />
           Email support
         </a>
         <a
-          href="https://x.com/PraveenJuge"
+          href={author_x_url}
           target="_blank"
           rel="noopener noreferrer"
           className={cn(buttonVariants({ variant: "outline" }))}
@@ -102,7 +104,7 @@ function HelpPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-12">
       <header className="flex flex-col gap-3">
         <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-          Help &amp; Support
+          {helpTitle}
         </h1>
         <p className="text-muted-foreground text-base md:text-lg">
           {helpDescription}

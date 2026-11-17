@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-/** A landing page section's eyebrow, title, and lede. */
 export function SectionHeading({
   eyebrow,
   title,

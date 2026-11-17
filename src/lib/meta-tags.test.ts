@@ -1,5 +1,18 @@
 import { describe, expect, test } from "bun:test";
-import { buildMetaTags, pageUrlFor } from "./meta-tags";
+import { buildMetaTags, pageUrlFor, splitPageUrl } from "./meta-tags";
+
+describe("splitPageUrl", () => {
+  test("gives back the same page through pageUrlFor", () => {
+    for (const pageUrl of [
+      "https://example.com",
+      "https://example.com/docs?tab=api",
+      "http://example.com/blog/post",
+    ]) {
+      const { path, protocol } = splitPageUrl(pageUrl);
+      expect(pageUrlFor("example.com", path, protocol)).toBe(pageUrl);
+    }
+  });
+});
 
 describe("pageUrlFor", () => {
   test("joins a typed path to the hostname", () => {

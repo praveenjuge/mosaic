@@ -1,5 +1,5 @@
 import { authenticatedHomePath } from "@/lib/clerk-auth";
-import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth")({
   beforeLoad: ({ context }) => {
@@ -7,5 +7,4 @@ export const Route = createFileRoute("/_auth")({
       throw redirect({ to: authenticatedHomePath, statusCode: 302 });
     }
   },
-  component: Outlet,
 });

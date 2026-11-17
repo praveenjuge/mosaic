@@ -1,5 +1,3 @@
-import { addAcceptToVary } from "@/lib/vary";
-
 const cspHeader = [
   // data: lets the home page demo show its inline screenshot.
   "img-src 'self' data: https://img.clerk.com https://avatars.githubusercontent.com *;",
@@ -28,7 +26,6 @@ export function setSecurityHeaders(headers: Headers): void {
   addAcceptToVary(headers);
 }
 
-/** A copy of `response` with the security headers set. */
 export function withSecurityHeaders(response: Response): Response {
   const headers = new Headers(response.headers);
   setSecurityHeaders(headers);
@@ -37,4 +34,32 @@ export function withSecurityHeaders(response: Response): Response {
     status: response.status,
     statusText: response.statusText,
   });
+}
+
+const negotiableContentTypes = [
+  "text/html",
+  "text/markdown",
+  "application/json",
+];
+
+/** Pages answer HTML, Markdown, or JSON by `Accept`, so caches must vary on it. */
+export function addAcceptToVary(headers: Headers): void {
+  const mediaType =
+    headers.get("Content-Type")?.split(";", 1)[0]?.trim().toLowerCase() ?? "";
+
+  if (!negotiableContentTypes.includes(mediaType)) {
+    return;
+  }
+
+  const vary = (headers.get("Vary") ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  const normalizedVary = new Set(vary.map((value) => value.toLowerCase()));
+
+  if (!normalizedVary.has("*") && !normalizedVary.has("accept")) {
+    vary.push("Accept");
+  }
+
+  headers.set("Vary", vary.join(", "));
 }

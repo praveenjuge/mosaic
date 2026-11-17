@@ -1,4 +1,4 @@
-@import "tailwindcss" source("../../");
+@import "tailwindcss" source("../");
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
@@ -154,5 +154,10 @@
     @apply font-sans;
     /* Anchor links land below the sticky header. */
     scroll-padding-top: 5rem;
+  }
+
+  /* The page behind an open modal `<dialog>` doesn't scroll. */
+  html:has(dialog:modal) {
+    overflow: hidden;
   }
 }

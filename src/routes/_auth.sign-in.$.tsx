@@ -1,13 +1,6 @@
-import { AuthPageShell } from "@/components/auth/auth-page-shell";
-import { useClerkAppearance } from "@/components/auth/use-clerk-appearance";
-import {
-  sanitizeRedirectPath,
-  signInPath,
-  signUpPath,
-  validateRedirectSearch,
-} from "@/lib/clerk-auth";
+import { AuthPage } from "@/components/auth/auth-page";
+import { validateRedirectSearch } from "@/lib/clerk-auth";
 import { pageTitle } from "@/lib/seo";
-import { SignIn } from "@clerk/tanstack-react-start";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/sign-in/$")({
@@ -23,19 +16,5 @@ export const Route = createFileRoute("/_auth/sign-in/$")({
 
 function SignInPage() {
   const { redirect_url } = Route.useSearch();
-  const redirectUrl = sanitizeRedirectPath(redirect_url);
-  const appearance = useClerkAppearance();
-
-  return (
-    <AuthPageShell>
-      <SignIn
-        appearance={appearance}
-        path={signInPath}
-        routing="path"
-        signUpUrl={signUpPath}
-        fallbackRedirectUrl={redirectUrl}
-        forceRedirectUrl={redirectUrl}
-      />
-    </AuthPageShell>
-  );
+  return <AuthPage form="sign-in" redirectUrl={redirect_url} />;
 }

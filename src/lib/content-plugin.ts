@@ -28,11 +28,8 @@ import type {
   LegalDocument,
 } from "./content-types";
 import { readImageSize } from "./image-size";
-import { toMarkdownDocument } from "./markdown-negotiation";
 
 const VIRTUAL_PREFIX = "virtual:mosaic-content/";
-
-// ── Markdown rendering ──────────────────────────────────────────────
 
 /** External links open in a new tab; images load lazily and link to themselves. */
 function rehypeLinksAndImages() {
@@ -101,11 +98,23 @@ const processor = unified()
   .use(rehypeImageSizes)
   .use(rehypeStringify);
 
+/** Composes a Markdown document headed by the page title. */
+export function toMarkdownDocument(title: string, content: string): string {
+  const trimmed = content.trim();
+  const heading = trimmed.match(/^# ([^\n]+?)\s*\n/);
+
+  // Drop the source heading only when it repeats the page title.
+  const body =
+    heading && heading[1].trim().toLowerCase() === title.trim().toLowerCase()
+      ? trimmed.slice(heading[0].length)
+      : trimmed;
+
+  return `# ${title}\n\n${body}\n`;
+}
+
 export async function renderMarkdown(markdown: string): Promise<string> {
   return String(await processor.process(markdown));
 }
-
-// ── Loading ─────────────────────────────────────────────────────────
 
 export function parseFrontmatter(raw: string): {
   data: Record<string, unknown>;
@@ -131,6 +140,8 @@ const guideSchema = z.object({
   order: z.number(),
   svgLight: z.string().optional(),
   svgDark: z.string().optional(),
+  /** The logo is a wordmark: it keeps the row height and grows wide. */
+  wordmark: z.boolean().optional(),
 });
 
 const legalSchema = z.object({
@@ -246,20 +257,19 @@ export async function loadContent(
     helpCategories,
     guides,
     guideLinks: guides.map(
-      ({ slug, title, description, svgLight, svgDark }) => ({
+      ({ slug, title, description, svgLight, svgDark, wordmark }) => ({
         slug,
         title,
         description,
         svgLight,
         svgDark,
+        wordmark,
       }),
     ),
     legalDocuments: legal.map(({ entry }) => entry),
     markdownPages,
   };
 }
-
-// ── Plugin ──────────────────────────────────────────────────────────
 
 export function mosaicContent(
   contentDir = path.resolve("src/content"),
